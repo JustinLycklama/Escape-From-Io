@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+using System.Diagnostics;
+
 public class PathFinding : MonoBehaviour {
     public Transform seeker, target;
 
@@ -12,34 +14,33 @@ public class PathFinding : MonoBehaviour {
     }
 
     private void Update() {
-        FindPath(seeker.position, target.position);
+        if (Input.GetButtonDown("Jump")) {
+            FindPath(seeker.position, target.position);
+        }
     }
 
     void FindPath(Vector3 startPos, Vector3 targetPos){
+
+        Stopwatch sw = new Stopwatch();
+        sw.Start();
+
         Node startNode = grid.nodeFromWorldPoint(startPos);
         Node targetNode = grid.nodeFromWorldPoint(targetPos);
 
-        List<Node> openSet = new List<Node>();
+        Heap<Node> openSet = new Heap<Node>(grid.maxSize);
         HashSet<Node> closedSet = new HashSet<Node>();
 
         openSet.Add(startNode);
 
         while(openSet.Count > 0) {
-            Node currentNode = openSet[0];
-            
-            for (int i = 1; i < openSet.Count; i++) {
-                // Get node with lowest fcost, or if fCosts equal, lowest hCost
-                if(openSet[i].fCost < currentNode.fCost || 
-                (openSet[i].fCost == currentNode.fCost && openSet[i].hCost < currentNode.hCost)) {
-                    currentNode = openSet[i];                    
-                }
-            }
-
-
-            openSet.Remove(currentNode);
+            // Get node with lowest fcost, or if fCosts equal, lowest hCost
+            Node currentNode = openSet.PopFirstItem();
             closedSet.Add(currentNode);
             
             if (currentNode == targetNode) {
+                sw.Stop();
+                print("Path Took " + sw.ElapsedMilliseconds);
+
                 RetracePath(targetNode);
                 return;
             }
