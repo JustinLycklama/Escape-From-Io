@@ -1,11 +1,12 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 using System.Diagnostics;
 
 public class PathFinding : MonoBehaviour {
-    public Transform seeker, target;
+    //public Transform seeker, target;
 
     Grid grid;
 
@@ -13,13 +14,19 @@ public class PathFinding : MonoBehaviour {
         grid = GetComponent<Grid>();
     }
 
-    private void Update() {
-        if (Input.GetButtonDown("Jump")) {
-            FindPath(seeker.position, target.position);
-        }
+    //private void Update() {
+    //    if (Input.GetButtonDown("Jump")) {
+    //        FindPath(seeker.position, target.position);
+    //    }
+    //}
+
+    public void FindSimplifiedPath(Vector3 startPos, Vector3 targetPos, Action<Vector3[], bool> callback) {
+        StartCoroutine(FindPath(startPos, targetPos, (path, success) => {
+            callback(SimplifyPath(path), success);
+        }));
     }
 
-    void FindPath(Vector3 startPos, Vector3 targetPos){
+    IEnumerator FindPath(Vector3 startPos, Vector3 targetPos, Action<Node[], bool> callback){
 
         Stopwatch sw = new Stopwatch();
         sw.Start();
@@ -29,6 +36,9 @@ public class PathFinding : MonoBehaviour {
 
         Heap<Node> openSet = new Heap<Node>(grid.maxSize);
         HashSet<Node> closedSet = new HashSet<Node>();
+
+        Node[] finalPath = new Node[0];
+        bool success = false;
 
         openSet.Add(startNode);
 
@@ -41,8 +51,9 @@ public class PathFinding : MonoBehaviour {
                 sw.Stop();
                 print("Path Took " + sw.ElapsedMilliseconds);
 
-                RetracePath(targetNode);
-                return;
+                finalPath = RetracePath(targetNode).ToArray();
+                success = true;
+                break;
             }
             
             foreach(Node neighbour in grid.GetNeighbours(currentNode)) {
@@ -62,9 +73,12 @@ public class PathFinding : MonoBehaviour {
                 }
             }
         }
+
+        callback(finalPath, success);
+        yield return null;
     }
-    
-    void RetracePath(Node fromNode) {
+
+    List<Node> RetracePath(Node fromNode) {
         List<Node> path = new List<Node>();
         Node currentNode = fromNode;
         
@@ -75,7 +89,22 @@ public class PathFinding : MonoBehaviour {
 
         path.Reverse();
 
-        grid.path = path;
+        return path;
+    }
+
+    Vector3[] SimplifyPath(Node[] path) {
+        List<Vector3> waypoints = new List<Vector3>();
+        Vector2 oldDirection = Vector2.zero;
+
+        for (int i = 1; i < path.Length; i++) {
+            Vector2 newDirection = new Vector2(path[i - 1].gridX - path[i].gridX, path[i - 1].gridY - path[i].gridY);
+            if (newDirection != oldDirection) {
+                waypoints.Add(path[i].worldPosition);
+                oldDirection = newDirection;
+            }
+        }
+
+        return waypoints.ToArray();
     }
 
     int getDistance(Node nodeA, Node nodeB) {
