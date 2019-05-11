@@ -104,6 +104,8 @@ public class PathFinding : MonoBehaviour {
             }
         }
 
+        waypoints.Add(path[path.Length - 1].worldPosition);
+
         return waypoints.ToArray();
     }
 
