@@ -12,7 +12,9 @@ public class Node : HeapItem<Node> {
     
     public int gCost;
     public int hCost;
-    
+
+    public int movementPenalty;
+
     public int fCost {
         get {
             return gCost + hCost;
@@ -22,12 +24,14 @@ public class Node : HeapItem<Node> {
     public int heapIndex;
     int HeapItem<Node>.heapIndex { get => this.heapIndex; set => this.heapIndex = value; }
 
-    public Node(bool _walkable, Vector3 _worldPos, int _gridX, int _gridY) {
+    public Node(bool _walkable, Vector3 _worldPos, int _gridX, int _gridY, int _penalty) {
         walkable = _walkable;
         worldPosition = _worldPos;
 
         gridX = _gridX;
         gridY = _gridY;
+
+        movementPenalty = _penalty;
     }
 
     // HeapItem Interface
