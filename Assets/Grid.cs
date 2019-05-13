@@ -36,7 +36,7 @@ public class Grid : MonoBehaviour {
         }
 
         createGrid();
-        BlurPenaltyMap(1);
+        BlurPenaltyMap(4);
     }
 
     public int maxSize {
@@ -115,7 +115,7 @@ public class Grid : MonoBehaviour {
             for(int y = -kernelExtents; y <= kernelExtents; y++) {
                 // clamp the x value for when the extents take the sample outside of our grid
                 int sampleY = Mathf.Clamp(y, 0, kernelExtents);
-                verticalPass[x, 0] += verticalPass[x, sampleY];
+                verticalPass[x, 0] += horizontalPass[x, sampleY];
             }
 
             int blurredPenalty = Mathf.RoundToInt(verticalPass[x, 0] / ((blurSize * 2 + 1) * (blurSize * 2 + 1)));
@@ -195,7 +195,7 @@ public class Grid : MonoBehaviour {
 
                 Gizmos.DrawCube(n.worldPosition, Vector3.one * nodeDiameter);
 
-                //Handles.Label(n.worldPosition, "G: "+ n.gCost + " H: " + n.hCost + "\n   F: " + n.fCost);
+                //Handles.Label(n.worldPosition, "G: " + n.gCost + " H: " + n.hCost + "\n   F: " + n.fCost);
             }
         }
     }
