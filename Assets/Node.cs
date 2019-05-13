@@ -43,4 +43,10 @@ public class Node : HeapItem<Node> {
 
         return -compare;
     }
+
+    public string description {
+        get {
+            return fCost + "";
+        }
+    }
 }

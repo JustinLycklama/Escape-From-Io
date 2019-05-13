@@ -42,7 +42,10 @@ public class PathFinding : MonoBehaviour {
 
         openSet.Add(startNode);
 
+        int iterations = 0;
+
         while(openSet.Count > 0) {
+
             // Get node with lowest fcost, or if fCosts equal, lowest hCost
             Node currentNode = openSet.PopFirstItem();
             closedSet.Add(currentNode);
@@ -66,12 +69,12 @@ public class PathFinding : MonoBehaviour {
                     neighbour.gCost = newMovementCostToNeighbour;
                     neighbour.hCost = getDistance(neighbour, targetNode);
                     neighbour.parent = currentNode;
-                }
-                
-                if (!openSet.Contains(neighbour)) {
-                    openSet.Add(neighbour);
-                } else {
-                    openSet.UpdateItem(neighbour);
+
+                    if(!openSet.Contains(neighbour)) {
+                        openSet.Add(neighbour);
+                    } else {
+                        openSet.UpdateItem(neighbour);
+                    }
                 }
             }
         }

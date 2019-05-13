@@ -2,7 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+using UnityEditor; // handles
+
 public class Grid : MonoBehaviour {
+
+    public bool displayGridGizmos;
+
     public LayerMask unwalkableMask;
 
     public Vector2 gridWorldSize;
@@ -16,6 +21,9 @@ public class Grid : MonoBehaviour {
     float nodeDiameter;
     int gridSizeX, gridSizeY;
 
+    int penaltyMin = int.MaxValue;
+    int penaltyMax = int.MinValue;
+
     void Awake() {
         nodeDiameter = nodeRaduis * 2;
 
@@ -28,6 +36,7 @@ public class Grid : MonoBehaviour {
         }
 
         createGrid();
+        BlurPenaltyMap(1);
     }
 
     public int maxSize {
@@ -62,12 +71,84 @@ public class Grid : MonoBehaviour {
                         walkableRegionsDictionary.TryGetValue(hit.collider.gameObject.layer, out movementPenalty);
                     }
               
+                } else {
+                    movementPenalty = 100;
                 }
 
                 grid[x, y] = new Node(walkable, worldPoint, x, y, movementPenalty);
             }
         }
     }   
+
+    void BlurPenaltyMap(int blurSize) {
+        int kernelExtents = blurSize;
+
+        int[,] horizontalPass = new int[gridSizeX, gridSizeY];
+        int[,] verticalPass = new int[gridSizeX, gridSizeY];
+
+        // Horizontal Pass
+        for (int y = 0; y < gridSizeY; y++) {
+
+            // First node we have sum everything
+            for (int x = -kernelExtents; x<= kernelExtents; x++) {
+                // clamp the x value for when the extents take the sample outside of our grid
+                int sampleX = Mathf.Clamp(x, 0, kernelExtents);
+                horizontalPass[0, y] += grid[sampleX, y].movementPenalty;
+            }
+
+            // continue with the rest of the columns by remoing the far left item and adding the far right item to our previous value
+            // There by imitating summing all of the values together
+            for (int x = 1; x < gridSizeX; x++) {
+                int removeIndex = Mathf.Clamp(x - kernelExtents, 0, gridSizeX - 1);
+                int addIndex = Mathf.Clamp(x + kernelExtents, 0, gridSizeX - 1);
+
+                horizontalPass[x, y] = horizontalPass[x - 1, y] - grid[removeIndex, y].movementPenalty + grid[addIndex, y].movementPenalty;
+            }
+        }
+
+        // Vertical Pass
+        for(int x = 0; x < gridSizeX; x++) {
+
+            //print("Penalties: \n");
+
+            // First node we have sum everything
+            for(int y = -kernelExtents; y <= kernelExtents; y++) {
+                // clamp the x value for when the extents take the sample outside of our grid
+                int sampleY = Mathf.Clamp(y, 0, kernelExtents);
+                verticalPass[x, 0] += verticalPass[x, sampleY];
+            }
+
+            int blurredPenalty = Mathf.RoundToInt(verticalPass[x, 0] / ((blurSize * 2 + 1) * (blurSize * 2 + 1)));
+            grid[x, 0].movementPenalty = blurredPenalty;
+
+            //string weights = "";
+
+            // continue with the rest of the columns by remoing the far left item and adding the far right item to our previous value
+            // There by imitating summing all of the values together
+            for(int y = 1; y < gridSizeY; y++) {
+                int removeIndex = Mathf.Clamp(y - kernelExtents, 0, gridSizeY - 1);
+                int addIndex = Mathf.Clamp(y + kernelExtents, 0, gridSizeY - 1);
+
+                verticalPass[x, y] = verticalPass[x, y-1] - horizontalPass[x, removeIndex] + horizontalPass[x, addIndex];
+
+                blurredPenalty =  Mathf.RoundToInt(verticalPass[x, y] / ((blurSize * 2 + 1) * (blurSize * 2 + 1)));
+                grid[x, y].movementPenalty = blurredPenalty;
+
+                if (blurredPenalty > penaltyMax) {
+                    penaltyMax = blurredPenalty;
+                }
+
+                if (blurredPenalty < penaltyMin) {
+                    penaltyMin = blurredPenalty;
+                }
+
+                //weights += blurredPenalty + " ";
+            }
+
+            //print(weights);
+
+        }
+    }
 
     public Node nodeFromWorldPoint(Vector3 worldPos) {
         float percentX = (worldPos.x + gridWorldSize.x / 2) / gridWorldSize.x;
@@ -104,25 +185,18 @@ public class Grid : MonoBehaviour {
         return neighbours;
     }
 
-    //public List<Node> path;
-
     void OnDrawGizmos() {
         Gizmos.DrawWireCube(transform.position, new Vector3(gridWorldSize.x, 1, gridWorldSize.y));
 
-        if(grid != null) {
-
+        if(grid != null && displayGridGizmos) {
             foreach(Node n in grid) {
-                Gizmos.color = n.walkable ? Color.white : Color.red;
+                Gizmos.color = Color.Lerp(Color.white, Color.black, Mathf.InverseLerp(penaltyMin, penaltyMax, n.movementPenalty));
+                Gizmos.color = n.walkable ? Gizmos.color : Color.red;
 
-                //if(path != null) {
-                //    if(path.Contains(n)) {
-                //        Gizmos.color = Color.black;
-                //    }
-                //}
+                Gizmos.DrawCube(n.worldPosition, Vector3.one * nodeDiameter);
 
-                Gizmos.DrawCube(n.worldPosition, Vector3.one * (nodeDiameter - 0.1f));
+                //Handles.Label(n.worldPosition, "G: "+ n.gCost + " H: " + n.hCost + "\n   F: " + n.fCost);
             }
-
         }
     }
 

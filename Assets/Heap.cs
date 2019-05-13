@@ -8,9 +8,13 @@ public interface HeapItem<T> : IComparable<T> {
         get;
         set;
     }
+
+    string description {
+        get;
+    }
 }
 
-public class Heap<T> where T: class, HeapItem<T>
+public class Heap<T> : MonoBehaviour where T: class, HeapItem<T>
 {
     T[] items;
     int currentItemCount;
@@ -107,6 +111,36 @@ public class Heap<T> where T: class, HeapItem<T>
         itemB.heapIndex = tempIndex;
     }
 
+    public void description() {
+        recurseDescription( new[] { items[0] } );
+    }
+
+    private void recurseDescription(T[] parents) {
+
+        string currentParentDescriptions = "";
+        List<T> newChildren = new List<T>();
+
+        foreach (T item in parents) {
+            currentParentDescriptions += item.description + " | ";
+
+            T left = GetLeftChild(item);
+            T right = GetRightChild(item);
+
+            if (left != null) {
+                newChildren.Add(left);
+            }
+
+            if (right != null) {
+                newChildren.Add(right);
+            }
+        }
+        
+        print(currentParentDescriptions);
+
+        if(newChildren.Count > 0) {
+            recurseDescription(newChildren.ToArray());
+        }
+    }
 
     // Convenience item methods
     T GetParent(T item) {
