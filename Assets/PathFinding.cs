@@ -42,8 +42,6 @@ public class PathFinding : MonoBehaviour {
 
         openSet.Add(startNode);
 
-        int iterations = 0;
-
         while(openSet.Count > 0) {
 
             // Get node with lowest fcost, or if fCosts equal, lowest hCost

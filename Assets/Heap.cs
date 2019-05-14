@@ -14,7 +14,7 @@ public interface HeapItem<T> : IComparable<T> {
     }
 }
 
-public class Heap<T> : MonoBehaviour where T: class, HeapItem<T>
+public class Heap<T> where T: class, HeapItem<T>
 {
     T[] items;
     int currentItemCount;
@@ -135,7 +135,7 @@ public class Heap<T> : MonoBehaviour where T: class, HeapItem<T>
             }
         }
         
-        print(currentParentDescriptions);
+        MonoBehaviour.print(currentParentDescriptions);
 
         if(newChildren.Count > 0) {
             recurseDescription(newChildren.ToArray());
