@@ -39,10 +39,10 @@ public class MapDisplay : MonoBehaviour
     public void DrawMeshes(MeshData layoutMeshData, Texture2D layoutMeshTexture,
         MeshData fraturesMeshData, Texture2D featuresMeshTexture) {
 
-        meshFilter.sharedMesh = layoutMeshData.CreateMesh();
-        meshRenderer.sharedMaterial.mainTexture = layoutMeshTexture;
+        layoutMeshFilter.sharedMesh = layoutMeshData.CreateMesh();
+        layoutMeshRenderer.sharedMaterial.mainTexture = layoutMeshTexture;
 
-        meshFilter.sharedMesh = fraturesMeshData.CreateMesh();
-        meshRenderer.sharedMaterial.mainTexture = featuresMeshTexture;
+        featuresMeshFilter.sharedMesh = fraturesMeshData.CreateMesh();
+        featuresMeshRenderer.sharedMaterial.mainTexture = featuresMeshTexture;
     }
 }

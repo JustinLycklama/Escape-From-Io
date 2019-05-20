@@ -14,7 +14,7 @@ public class MapGenerator : MonoBehaviour {
     public NoiseData layoutMapNoiseData;
     public NoiseData featuresMapNoiseData;
 
-    [Range(0, 1)]
+    [Range(0, 2)]
     public float featuresImpactOnLayout;
     public int featuresPerLayoutPerAxis = 10;    
 
@@ -33,7 +33,7 @@ public class MapGenerator : MonoBehaviour {
         // Then generate a larger scale noise map, and overlay it on the small one
         float[,] featuresNoiseMap = NoiseGenerator.GenerateNoiseMap(noiseMapWidth, noiseMapHeight, featuresMapNoiseData);
 
-        PlateauMap(layoutNoiseMap);
+        TerrainType[,] terrainMap = PlateauMap(layoutNoiseMap);
         float[,] noiseMap = CreateMapWithFeatures(layoutNoiseMap, featuresNoiseMap);
 
         NormalizeMap(noiseMap);
@@ -53,10 +53,11 @@ public class MapGenerator : MonoBehaviour {
 
                 break;
             case DrawMode.Mesh:
-                display.DrawMesh(MeshGenerator.GenerateTerrainMesh(noiseMap), TextureGenerator.TextureFromColorMap(CreateColorMap(noiseMap), noiseMapWidth, noiseMapHeight));
-                //display.DrawMeshes(MeshGenerator.GenerateTerrainMesh(layoutNoiseMap), TextureGenerator.TextureFromColorMap(CreateColorMap(layoutNoiseMap), layoutNoiseMap.GetLength(0), layoutNoiseMap.GetLength(1)),
-                //    MeshGenerator.GenerateTerrainMesh(featuresNoiseMap), TextureGenerator.TextureFromColorMap(CreateColorMap(featuresNoiseMap), featuresNoiseMap.GetLength(0), featuresNoiseMap.GetLength(1))
-                //    );
+                display.DrawMesh(MeshGenerator.GenerateTerrainMesh(noiseMap, featuresPerLayoutPerAxis), TextureGenerator.TextureFromColorMap(CreateColorMapWithTerrain(noiseMap, terrainMap), noiseMapWidth, noiseMapHeight));
+
+                display.DrawMeshes(MeshGenerator.GenerateTerrainMesh(layoutNoiseMap, 1), TextureGenerator.TextureFromColorMap(CreateColorMap(layoutNoiseMap), layoutNoiseMap.GetLength(0), layoutNoiseMap.GetLength(1)),
+                MeshGenerator.GenerateTerrainMesh(featuresNoiseMap, 1), TextureGenerator.TextureFromColorMap(CreateColorMap(featuresNoiseMap), featuresNoiseMap.GetLength(0), featuresNoiseMap.GetLength(1))
+                    );
 
                 break;
         }
@@ -66,6 +67,8 @@ public class MapGenerator : MonoBehaviour {
 
         int noiseMapWidth = noiseMap.GetLength(0);
         int noiseMapHeight = noiseMap.GetLength(1);
+
+
 
         Color[] colorMap = new Color[noiseMapWidth * noiseMapHeight];
         for(int y = 0; y < noiseMapHeight; y++) {
@@ -84,9 +87,44 @@ public class MapGenerator : MonoBehaviour {
         return colorMap;
     }
 
-    private void PlateauMap(float[,] map) {
+
+    // Test Variables, To remove
+    private int testXSelection = 1;
+    private int testYSelection = 1;
+
+    private Color[] CreateColorMapWithTerrain(float[,] noiseMap, TerrainType[,] terrainTypeMap) {
+
+        int noiseMapWidth = noiseMap.GetLength(0);
+        int noiseMapHeight = noiseMap.GetLength(1);
+
+        int terrainMapWidth = terrainTypeMap.GetLength(0);
+        int terrainMapHeight = terrainTypeMap.GetLength(1);
+
+        Color[] colorMap = new Color[noiseMapWidth * noiseMapHeight];
+        for(int y = 0; y < noiseMapHeight; y++) {
+            for(int x = 0; x < noiseMapWidth; x++) {
+
+                int sampleX = x / (noiseMapWidth / terrainMapWidth);
+                int sampleY = y / (noiseMapHeight / terrainMapHeight);
+
+                colorMap[y * noiseMapWidth + x] = terrainTypeMap[sampleX, sampleY].color;
+
+                if(x / featuresPerLayoutPerAxis >= testXSelection && x / featuresPerLayoutPerAxis < testXSelection + 1 &&
+                    y / featuresPerLayoutPerAxis >= testYSelection && y / featuresPerLayoutPerAxis < testYSelection + 1) {
+                    colorMap[y * noiseMapWidth + x] = colorMap[y * noiseMapWidth + x] + Color.cyan;
+                }
+            }
+        }
+
+        return colorMap;
+    }
+
+    // Returns a Map of terrainTypes
+    private TerrainType[,] PlateauMap(float[,] map) {
         int mapWidth = map.GetLength(0);
         int mapHeight = map.GetLength(1);
+
+        TerrainType[,] terrainMap = new TerrainType[map.GetLength(0), map.GetLength(1)];
 
         for(int y = 0; y < mapHeight; y++) {
             for(int x = 0; x < mapWidth; x++) {
@@ -95,11 +133,14 @@ public class MapGenerator : MonoBehaviour {
                     if(regions[i].plateau && regions[i].ValueIsMember(map[x, y])) {
 
                         map[x, y] = (regions[i].plateauAtBase ? regions[i].noiseBaseline + 0.001f : regions[i].noiseMax - 0.001f);
+                        terrainMap[x, y] = regions[i];
                         break;
                     }
                 }
             }
         }
+
+        return terrainMap;
     }
 
     private float[,] CreateMapWithFeatures(float[,] layoutMap, float[,] featuresMap) {

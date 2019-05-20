@@ -4,19 +4,51 @@ using UnityEngine;
 
 public static class MeshGenerator
 {
-    public static MeshData GenerateTerrainMesh(float[,] heightMap) {
+    public static MeshData GenerateTerrainMesh(float[,] heightMap, int featuresPerLayoutPerAxis) {
         int width = heightMap.GetLength(0);
         int height = heightMap.GetLength(1);
 
         float topLeftX = (width - 1) / -2f;
         float topLeftZ = (height - 1) / 2f;
 
-        MeshData meshData = new MeshData(width, height);
+        MeshData meshData = new MeshData(width, height, featuresPerLayoutPerAxis);
 
         for (int y = 0; y < height; y++) {
-            for (int x = 0; x < width; x++) {
-                // There are no triangles associated with the right and bottom edge of the map, since there is no corresponding verticies next 
+
+            // If we are on a y-row that needs duplicates, do the set of non-triangle verticies first
+            if((y + 1) % featuresPerLayoutPerAxis == 0) {
+                for(int x = 0; x < width; x++) {
+                    meshData.addVertex(new Vector3(topLeftX + x, heightMap[x, y], topLeftZ - y),
+                        new Vector2(x / (float)width, y / (float)height),
+                        false);
+
+                    // We are on tile edge
+                    if((x + 1) % featuresPerLayoutPerAxis == 0) {
+                        // On the tile edge, create two sets of verticies in the same spot
+
+                        // Add a closing set of verticies to finish off the tile. 
+                        meshData.addVertex(new Vector3(topLeftX + x, heightMap[x, y], topLeftZ - y),
+                            new Vector2(x / (float)width, y / (float)height),
+                            false);
+                    }
+                }
+            }
+
+            for(int x = 0; x < width; x++) {
+                // There are no triangles associated with the right and bottom edge of the map as a whole, since there is no corresponding verticies next 
                 bool hasTriangleAssociatedToVertex = x < width - 1 && y < height - 1;
+
+                // We are on tile edge
+                if((x + 1) % featuresPerLayoutPerAxis == 0) {
+                    // On the tile edge, create two sets of verticies in the same spot
+
+                    // Add a closing set of verticies to finish off the tile. 
+                    meshData.addVertex(new Vector3(topLeftX + x, heightMap[x, y], topLeftZ - y),
+                        new Vector2(x / (float)width, y / (float)height),
+                        false);
+                }
+
+                // Create an opening set of verticies with triangles to start the next tile, or continue our tile progress
                 meshData.addVertex(new Vector3(topLeftX + x, heightMap[x, y], topLeftZ - y),                                        
                     new Vector2(x/(float)width, y/(float)height),
                     hasTriangleAssociatedToVertex);
@@ -40,13 +72,15 @@ public class MeshData {
     int vertexIndex = 0;
     int triangleIndex = 0;
 
-    public MeshData(int meshWidth, int meshHeight) {
-        this.meshWidth = meshWidth;
-        this.meshHeight = meshHeight;
+    public MeshData(int inputDataWidth, int inputDataHeight, int featuresPerLayoutPerAxis) {
+
+        //RIGHT IN THE MIDDLE OF THIS
+        this.meshWidth = inputDataWidth + inputDataWidth / featuresPerLayoutPerAxis;
+        this.meshHeight = inputDataHeight + inputDataHeight / featuresPerLayoutPerAxis;
 
         verticies = new Vector3[meshWidth * meshHeight];
         uvs = new Vector2[meshWidth * meshHeight];
-        triangles = new int[(meshWidth - 1) * (meshHeight - 1) * 6];
+        triangles = new int[(inputDataWidth - 1) * (inputDataHeight - 1) * 6];
     }
 
     public void addVertex(Vector3 vertex, Vector2 uv, bool hasTriangles) {
