@@ -16,11 +16,58 @@ public class MapGenerator : MonoBehaviour {
 
     [Range(0, 2)]
     public float featuresImpactOnLayout;
-    public int featuresPerLayoutPerAxis = 10;    
+    public static int featuresPerLayoutPerAxis = 10;    
 
     public bool autoUpdate;
 
     public TerrainType[] regions;
+
+    struct MapPoint {
+        public int virtualX;
+        public int virtualY;
+
+        public float worldX;
+        public float worldY;
+
+        public MapPoint(float worldX, float worldY) {
+            this.worldX = worldX;
+            this.worldY = worldY;
+
+            virtualX = (int)worldX / featuresPerLayoutPerAxis;
+            virtualY = (int)worldY / featuresPerLayoutPerAxis;
+        }
+    }
+
+    private MapPoint selectedPoint = new MapPoint(0,0);
+
+    public void Awake() {
+        GenerateMap();
+    }
+
+    public void Update() {
+        if(Input.GetMouseButtonDown(0)) {
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            RaycastHit hit;
+            if(Physics.Raycast(ray, out hit)) {
+
+
+
+
+                MapDisplay display = FindObjectOfType<MapDisplay>();
+
+                Transform mapMeshSpace = display.meshRenderer.transform;
+                Vector3 selectionPoint = hit.point;
+
+                Vector3 selectedPointOnMap = mapMeshSpace.InverseTransformPoint(selectionPoint);
+
+                Debug.Log("Mouse Down Hit the following object: " + selectedPointOnMap);
+
+                selectedPoint = new MapPoint(selectedPointOnMap.x + (layoutMapWidth * featuresPerLayoutPerAxis / 2f), (-selectedPointOnMap.z) + (layoutMapHeight * featuresPerLayoutPerAxis / 2f));
+                GenerateMap();
+            }
+
+        }
+    }
 
     public void GenerateMap() {
         // First generate a small noise map, use for the general layout (eg. which area is a path, which is a rock, ...)
@@ -89,8 +136,8 @@ public class MapGenerator : MonoBehaviour {
 
 
     // Test Variables, To remove
-    private int testXSelection = 1;
-    private int testYSelection = 1;
+    //private int testXSelection = 1;
+    //private int testYSelection = 1;
 
     private Color[] CreateColorMapWithTerrain(float[,] noiseMap, TerrainType[,] terrainTypeMap) {
 
@@ -104,13 +151,18 @@ public class MapGenerator : MonoBehaviour {
         for(int y = 0; y < noiseMapHeight; y++) {
             for(int x = 0; x < noiseMapWidth; x++) {
 
+                if((x + 1) % featuresPerLayoutPerAxis == 0 || (y + 1) % featuresPerLayoutPerAxis == 0) {
+                    colorMap[y * noiseMapWidth + x] = Color.black;
+                    continue;
+                }
+
                 int sampleX = x / (noiseMapWidth / terrainMapWidth);
                 int sampleY = y / (noiseMapHeight / terrainMapHeight);
 
                 colorMap[y * noiseMapWidth + x] = terrainTypeMap[sampleX, sampleY].color;
 
-                if(x / featuresPerLayoutPerAxis >= testXSelection && x / featuresPerLayoutPerAxis < testXSelection + 1 &&
-                    y / featuresPerLayoutPerAxis >= testYSelection && y / featuresPerLayoutPerAxis < testYSelection + 1) {
+                if(x / featuresPerLayoutPerAxis >= selectedPoint.virtualX && x / featuresPerLayoutPerAxis < selectedPoint.virtualX + 1 &&
+                    y / featuresPerLayoutPerAxis >= selectedPoint.virtualY && y / featuresPerLayoutPerAxis < selectedPoint.virtualY + 1) {
                     colorMap[y * noiseMapWidth + x] = colorMap[y * noiseMapWidth + x] + Color.cyan;
                 }
             }
