@@ -2,14 +2,20 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
+//namespace GridIdentifiers {
+//    using GridAxis = System.Int16;
+//    using WorldAxis = System.Int16;
+//}
+
 public class MapGenerator : MonoBehaviour {
 
 
     public enum DrawMode {NoiseMap, ColorMap, Mesh}
     public DrawMode drawMode;
 
-    public int layoutMapWidth;
-    public int layoutMapHeight;
+    public static int layoutMapWidth = 15;
+    public static int layoutMapHeight = 15;
 
     public NoiseData layoutMapNoiseData;
     public NoiseData featuresMapNoiseData;
@@ -22,52 +28,6 @@ public class MapGenerator : MonoBehaviour {
 
     public TerrainType[] regions;
 
-    struct MapPoint {
-        public int virtualX;
-        public int virtualY;
-
-        public float worldX;
-        public float worldY;
-
-        public MapPoint(float worldX, float worldY) {
-            this.worldX = worldX;
-            this.worldY = worldY;
-
-            virtualX = (int)worldX / featuresPerLayoutPerAxis;
-            virtualY = (int)worldY / featuresPerLayoutPerAxis;
-        }
-    }
-
-    private MapPoint selectedPoint = new MapPoint(0,0);
-
-    public void Awake() {
-        GenerateMap();
-    }
-
-    public void Update() {
-        if(Input.GetMouseButtonDown(0)) {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-            if(Physics.Raycast(ray, out hit)) {
-
-
-
-
-                MapDisplay display = FindObjectOfType<MapDisplay>();
-
-                Transform mapMeshSpace = display.meshRenderer.transform;
-                Vector3 selectionPoint = hit.point;
-
-                Vector3 selectedPointOnMap = mapMeshSpace.InverseTransformPoint(selectionPoint);
-
-                Debug.Log("Mouse Down Hit the following object: " + selectedPointOnMap);
-
-                selectedPoint = new MapPoint(selectedPointOnMap.x + (layoutMapWidth * featuresPerLayoutPerAxis / 2f), (-selectedPointOnMap.z) + (layoutMapHeight * featuresPerLayoutPerAxis / 2f));
-                GenerateMap();
-            }
-
-        }
-    }
 
     public void GenerateMap() {
         // First generate a small noise map, use for the general layout (eg. which area is a path, which is a rock, ...)
@@ -134,11 +94,6 @@ public class MapGenerator : MonoBehaviour {
         return colorMap;
     }
 
-
-    // Test Variables, To remove
-    //private int testXSelection = 1;
-    //private int testYSelection = 1;
-
     private Color[] CreateColorMapWithTerrain(float[,] noiseMap, TerrainType[,] terrainTypeMap) {
 
         int noiseMapWidth = noiseMap.GetLength(0);
@@ -147,12 +102,16 @@ public class MapGenerator : MonoBehaviour {
         int terrainMapWidth = terrainTypeMap.GetLength(0);
         int terrainMapHeight = terrainTypeMap.GetLength(1);
 
+        PlayerBehaviour beh = GetComponent<PlayerBehaviour>();
+
         Color[] colorMap = new Color[noiseMapWidth * noiseMapHeight];
         for(int y = 0; y < noiseMapHeight; y++) {
             for(int x = 0; x < noiseMapWidth; x++) {
 
+                WorldCoordinate coordinate = new WorldCoordinate(x, y);
+
                 if((x + 1) % featuresPerLayoutPerAxis == 0 || (y + 1) % featuresPerLayoutPerAxis == 0) {
-                    colorMap[y * noiseMapWidth + x] = Color.black;
+                    colorMap[y * noiseMapWidth + x] = Color.white;
                     continue;
                 }
 
@@ -161,8 +120,9 @@ public class MapGenerator : MonoBehaviour {
 
                 colorMap[y * noiseMapWidth + x] = terrainTypeMap[sampleX, sampleY].color;
 
-                if(x / featuresPerLayoutPerAxis >= selectedPoint.virtualX && x / featuresPerLayoutPerAxis < selectedPoint.virtualX + 1 &&
-                    y / featuresPerLayoutPerAxis >= selectedPoint.virtualY && y / featuresPerLayoutPerAxis < selectedPoint.virtualY + 1) {
+
+
+                if(coordinate == beh.selectedPoint) {
                     colorMap[y * noiseMapWidth + x] = colorMap[y * noiseMapWidth + x] + Color.cyan;
                 }
             }
@@ -252,14 +212,6 @@ public class MapGenerator : MonoBehaviour {
         if(layoutMapHeight < 1) {
             layoutMapHeight = 1;
         }
-
-        //if (lacunarity < 1) {
-        //    lacunarity = 1;
-        //}
-
-        //if (octaves < 0) {
-        //    octaves = 0;
-        //}
     }
 }
 
