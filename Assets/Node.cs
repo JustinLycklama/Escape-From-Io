@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Node : HeapItem<Node> {
     public bool walkable;
-    public Vector3 worldPosition;
+    public WorldPosition worldPosition;
 
     public Node parent;
     
@@ -24,7 +24,7 @@ public class Node : HeapItem<Node> {
     public int heapIndex;
     int HeapItem<Node>.heapIndex { get => this.heapIndex; set => this.heapIndex = value; }
 
-    public Node(bool _walkable, Vector3 _worldPos, int _gridX, int _gridY, int _penalty) {
+    public Node(bool _walkable, WorldPosition _worldPos, int _gridX, int _gridY, int _penalty) {
         walkable = _walkable;
         worldPosition = _worldPos;
 

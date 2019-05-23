@@ -55,23 +55,32 @@ public class Grid : MonoBehaviour {
                 Vector3.right * ((x * nodeDiameter) + nodeRaduis) +
                 Vector3.forward * ((y * nodeDiameter) + nodeRaduis);
 
-                bool walkable = !(Physics.CheckSphere(worldPoint, nodeRaduis, unwalkableMask));
-
+                bool walkable = false;
                 int movementPenalty = 0;
 
-                // Raycast to find layer to get penalty
-                if (walkable) {
-                    Ray ray = new Ray(worldPoint + Vector3.up * 50, Vector3.down);
-                    RaycastHit hit;
-                    if (Physics.Raycast(ray, out hit, 100, walkableMask)) {
-                        walkableRegionsDictionary.TryGetValue(hit.collider.gameObject.layer, out movementPenalty);
+                if (map == null) {
+                    walkable = !(Physics.CheckSphere(worldPoint, nodeRaduis, unwalkableMask));
+
+                    // Raycast to find layer to get penalty
+                    if(walkable) {
+                        Ray ray = new Ray(worldPoint + Vector3.up * 50, Vector3.down);
+                        RaycastHit hit;
+                        if(Physics.Raycast(ray, out hit, 100, walkableMask)) {
+                            walkableRegionsDictionary.TryGetValue(hit.collider.gameObject.layer, out movementPenalty);
+                        }
+
+                    } else {
+                        movementPenalty = 100;
                     }
-              
                 } else {
-                    movementPenalty = 100;
+
+
+
                 }
 
-                grid[x, y] = new Node(walkable, worldPoint, x, y, movementPenalty);
+                
+
+                grid[x, y] = new Node(walkable, new WorldPosition(worldPoint), x, y, movementPenalty);
             }
         }
     }   
@@ -146,7 +155,7 @@ public class Grid : MonoBehaviour {
         }
     }
 
-    public Node nodeFromWorldPoint(Vector3 worldPos) {
+    public Node nodeFromWorldPoint(WorldPosition worldPos) {
         float percentX = (worldPos.x + gridWorldSize.x / 2) / gridWorldSize.x;
         float percentY = (worldPos.z + gridWorldSize.y / 2) / gridWorldSize.y;
 
@@ -189,7 +198,12 @@ public class Grid : MonoBehaviour {
                 Gizmos.color = Color.Lerp(Color.white, Color.black, Mathf.InverseLerp(penaltyMin, penaltyMax, n.movementPenalty));
                 Gizmos.color = n.walkable ? Gizmos.color : Color.red;
 
-                Gizmos.DrawCube(n.worldPosition, Vector3.one * nodeDiameter);
+                Color col = Gizmos.color;
+                col.a = 0.5f;
+
+                Gizmos.color = col;
+
+                Gizmos.DrawCube(n.worldPosition.vector3, Vector3.one * nodeDiameter);
 
                 //Handles.Label(n.worldPosition, "G: " + n.gCost + " H: " + n.hCost + "\n   F: " + n.fCost);
             }

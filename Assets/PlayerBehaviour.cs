@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PlayerBehaviour : MonoBehaviour
 {
-    public MapPoint selectedPoint = new MapPoint(0, 0);
+    public LayoutCoordinate selectedLayoutTile = new LayoutCoordinate(0, 0);
 
     float cameraMovementSpeed = 200;
     float cameraRotateSpeed = 100;
@@ -13,7 +13,7 @@ public class PlayerBehaviour : MonoBehaviour
 
     // Start is called before the first frame update
     void Start() {
-        mapMaterial = Tag.Map.GetGameObject().GetComponent<Material>();
+        mapMaterial = Tag.Map.GetGameObject().GetComponent<MeshRenderer>().material;
     }
 
     // Update is called once per frame
@@ -60,24 +60,21 @@ public class PlayerBehaviour : MonoBehaviour
             RaycastHit hit;
             if(Physics.Raycast(ray, out hit)) {
 
-                GameObject map = Tag.Map.GetGameObject();
-                Transform mapObjectSpace = map.transform; //  display.meshRenderer.transform;
+                MapCoordinate selectedCoordinate = new WorldPosition(hit.point).mapCoordinate;
+                selectedLayoutTile = new LayoutCoordinate(selectedCoordinate);
 
-                Vector3 selectionPoint = hit.point;
-                Vector3 selectedPointOnMap = mapObjectSpace.InverseTransformPoint(selectionPoint);
+                Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();
 
-                //Debug.Log("Mouse Down Hit the following object: " + selectedPointOnMap);
+                //selectedLayoutTile = new LayoutCoordinate(selectedCoordinate.x + (MapGenerator.layoutMapWidth * MapGenerator.featuresPerLayoutPerAxis / 2f),
+                //    (-selectedCoordinate.y) + (MapGenerator.layoutMapHeight * MapGenerator.featuresPerLayoutPerAxis / 2f));
 
-                selectedPoint = new MapPoint(selectedPointOnMap.x + (MapGenerator.layoutMapWidth * MapGenerator.featuresPerLayoutPerAxis / 2f),
-                    (-selectedPointOnMap.z) + (MapGenerator.layoutMapHeight * MapGenerator.featuresPerLayoutPerAxis / 2f));
+                //Tag.MapGenerator.GetGameObject().GetComponent<MapGenerator>().GenerateMap();              
 
-                //mapGenerator.GenerateMap();
+                mapMaterial.SetFloat("selectedXOffsetLow", selectedLayoutTile.x * constants.featuresPerLayoutPerAxis - (constants.layoutMapWidth * constants.featuresPerLayoutPerAxis / 2f));
+                mapMaterial.SetFloat("selectedXOffsetHigh", (selectedLayoutTile.x + 1) * constants.featuresPerLayoutPerAxis - (constants.layoutMapWidth * constants.featuresPerLayoutPerAxis / 2f));
 
-                mapMaterial.SetFloat("selectedXOffsetLow", selectedPoint.virtualX * MapGenerator.featuresPerLayoutPerAxis - (MapGenerator.layoutMapWidth * MapGenerator.featuresPerLayoutPerAxis / 2f));
-                mapMaterial.SetFloat("selectedXOffsetHigh", (selectedPoint.virtualX + 1) * MapGenerator.featuresPerLayoutPerAxis - (MapGenerator.layoutMapWidth * MapGenerator.featuresPerLayoutPerAxis / 2f));
-
-                mapMaterial.SetFloat("selectedYOffsetLow", selectedPoint.virtualY * MapGenerator.featuresPerLayoutPerAxis - (MapGenerator.layoutMapHeight * MapGenerator.featuresPerLayoutPerAxis / 2f));
-                mapMaterial.SetFloat("selectedYOffsetHigh", (selectedPoint.virtualY + 1) * MapGenerator.featuresPerLayoutPerAxis - (MapGenerator.layoutMapHeight * MapGenerator.featuresPerLayoutPerAxis / 2f));
+                mapMaterial.SetFloat("selectedYOffsetLow", selectedLayoutTile.y * constants.featuresPerLayoutPerAxis - (constants.layoutMapHeight * constants.featuresPerLayoutPerAxis / 2f));
+                mapMaterial.SetFloat("selectedYOffsetHigh", (selectedLayoutTile.y + 1) * constants.featuresPerLayoutPerAxis - (constants.layoutMapHeight * constants.featuresPerLayoutPerAxis / 2f));
             }
 
         }

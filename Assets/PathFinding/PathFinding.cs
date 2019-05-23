@@ -20,7 +20,7 @@ public class PathFinding : MonoBehaviour {
     //    }
     //}
 
-    public void FindSimplifiedPath(Vector3 startPos, Vector3 targetPos, Action<Vector3[], bool> callback) {
+    public void FindSimplifiedPath(Vector3 startPos, Vector3 targetPos, Action<WorldPosition[], bool> callback) {
         StartCoroutine(FindPath(startPos, targetPos, (path, success) => {
             callback(SimplifyPath(path), success);
         }));
@@ -31,8 +31,8 @@ public class PathFinding : MonoBehaviour {
         Stopwatch sw = new Stopwatch();
         sw.Start();
 
-        Node startNode = grid.nodeFromWorldPoint(startPos);
-        Node targetNode = grid.nodeFromWorldPoint(targetPos);
+        Node startNode = grid.nodeFromWorldPoint(new WorldPosition(startPos));
+        Node targetNode = grid.nodeFromWorldPoint(new WorldPosition(targetPos));
 
         Heap<Node> openSet = new Heap<Node>(grid.maxSize);
         HashSet<Node> closedSet = new HashSet<Node>();
@@ -95,19 +95,36 @@ public class PathFinding : MonoBehaviour {
         return path;
     }
 
-    Vector3[] SimplifyPath(Node[] path) {
-        List<Vector3> waypoints = new List<Vector3>();
+    WorldPosition[] SimplifyPath(Node[] path) {
+        List<WorldPosition> waypoints = new List<WorldPosition>();
         Vector2 oldDirection = Vector2.zero;
+
+        GameObject mapMesh = Tag.Map.GetGameObject();
+        Map map = mapMesh.GetComponent<MapContainer>().getMap();        
 
         for (int i = 1; i < path.Length; i++) {
             Vector2 newDirection = new Vector2(path[i - 1].gridX - path[i].gridX, path[i - 1].gridY - path[i].gridY);
             if (newDirection != oldDirection) {
-                waypoints.Add(path[i].worldPosition);
+
+                // Use the X, Z coordinate from pathfinding, and the Y Coordinate from our map
+                WorldPosition pathPosition = path[i].worldPosition;
+                //float mapHeight = map.getHeightAt(path[i].gridX, path[i].gridY);
+                //pathPosition.y = mapHeight * mapMesh.transform.localScale.y;
+
+                pathPosition.recalculateHeight();
+
+                waypoints.Add(pathPosition);
                 oldDirection = newDirection;
             }
         }
 
-        waypoints.Add(path[path.Length - 1].worldPosition);
+        WorldPosition finalPathPosition = path[path.Length - 1].worldPosition;
+        //float finalMapHeight = map.getHeightAt(path[path.Length - 1].gridX, path[path.Length - 1].gridY);
+        //finalPathPosition.y = finalMapHeight * mapMesh.transform.localScale.y;
+
+        finalPathPosition.recalculateHeight();
+
+        waypoints.Add(finalPathPosition);
 
         return waypoints.ToArray();
     }

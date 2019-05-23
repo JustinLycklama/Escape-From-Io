@@ -10,19 +10,19 @@ public static class Extensions {
 
 public class Path
 {
-    public readonly Vector3[] lookPoints;
+    public readonly WorldPosition[] lookPoints;
     public readonly Line[] turnBoundaries;
     public readonly int finishLineIndex;
     public readonly int slowDownIndex;
 
-    public Path(Vector3[] waypoints, Vector3 startPos, float turnDistance, float stoppingDistance) {
+    public Path(WorldPosition[] waypoints, Vector3 startPos, float turnDistance, float stoppingDistance) {
         lookPoints = waypoints;
         turnBoundaries = new Line[lookPoints.Length];
         finishLineIndex = turnBoundaries.Length - 1;
 
         Vector2 previousPoint = startPos.ToVector2();
         for (int i = 0; i < lookPoints.Length; i++) {
-            Vector2 currentPoint = lookPoints[i].ToVector2();
+            Vector2 currentPoint = lookPoints[i].vector3.ToVector2();
             Vector2 dirToCurrentPoint = (currentPoint - previousPoint).normalized;
             Vector2 turnBoundaryPoint = currentPoint - dirToCurrentPoint * turnDistance;
 
@@ -38,7 +38,7 @@ public class Path
         float distanceFromEndpoint = 0;
 
         for(int i = lookPoints.Length - 1; i > 0; i--) {
-            distanceFromEndpoint += Vector3.Distance(lookPoints[i], lookPoints[i - 1]);
+            distanceFromEndpoint += Vector3.Distance(lookPoints[i].vector3, lookPoints[i - 1].vector3);
 
             if (distanceFromEndpoint > stoppingDistance) {
                 slowDownIndex = i;
@@ -48,8 +48,8 @@ public class Path
     }
     
     public void DrawWithGizmos() {
-        foreach (Vector3 p in lookPoints) {
-            Gizmos.DrawCube(p + Vector3.up * 100, Vector3.one);        
+        foreach (WorldPosition p in lookPoints) {
+            Gizmos.DrawCube(p.vector3 + Vector3.up * 100, Vector3.one);        
         }
 
         Gizmos.color = Color.white;

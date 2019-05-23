@@ -10,9 +10,6 @@ public class Unit : MonoBehaviour
     public float turnDistance = 5;
     public float stoppingDistance = 10;
 
-    //Vector3[] path;
-    //int targetIndex;
-
     Path path;
 
     public void beginPathFinding() {
@@ -30,7 +27,7 @@ public class Unit : MonoBehaviour
         bool followingPath = true;
         int pathIndex = 0;
 
-        transform.LookAt(path.lookPoints[0]);
+        transform.LookAt(path.lookPoints[0].vector3);
 
         float speedPercent = 1;
 
@@ -50,7 +47,7 @@ public class Unit : MonoBehaviour
                     speedPercent = Mathf.Clamp(path.turnBoundaries[path.finishLineIndex].DistanceFromPoint(position2D) / stoppingDistance, 0.15f, 1);
                 }                
 
-                Quaternion targetRotation = Quaternion.LookRotation(path.lookPoints[pathIndex] - transform.position);
+                Quaternion targetRotation = Quaternion.LookRotation(path.lookPoints[pathIndex].vector3 - transform.position);
                 transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * turnSpeed);
                 transform.Translate(Vector3.forward * Time.deltaTime * speed * speedPercent, Space.Self);
             }

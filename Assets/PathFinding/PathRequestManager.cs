@@ -6,9 +6,9 @@ using UnityEngine;
 struct PathRequest {
     public Vector3 pathStart;
     public Vector3 pathEnd;
-    public Action<Vector3[], bool> callback;
+    public Action<WorldPosition[], bool> callback;
 
-    public PathRequest(Vector3 _start, Vector3 _end, Action<Vector3[], bool> _callback) {
+    public PathRequest(Vector3 _start, Vector3 _end, Action<WorldPosition[], bool> _callback) {
         pathStart = _start;
         pathEnd = _end;
         callback = _callback;
@@ -30,7 +30,7 @@ public class PathRequestManager : MonoBehaviour {
         pathFinding = GetComponent<PathFinding>();
     }
 
-    public static void RequestPath(Vector3 pathStart, Vector3 pathEnd, Action<Vector3[], bool> callback) {
+    public static void RequestPath(Vector3 pathStart, Vector3 pathEnd, Action<WorldPosition[], bool> callback) {
         PathRequest newRequest = new PathRequest(pathStart, pathEnd, callback);
         instance.pathRequestQueue.Enqueue(newRequest);
 

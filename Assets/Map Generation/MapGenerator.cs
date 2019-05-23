@@ -7,15 +7,15 @@ public class MapGenerator : MonoBehaviour {
     public enum DrawMode {NoiseMap, ColorMap, Mesh}
     public DrawMode drawMode;
 
-    public static int layoutMapWidth = 15;
-    public static int layoutMapHeight = 15;
+    private int layoutMapWidth;
+    private int layoutMapHeight;
 
     public NoiseData layoutMapNoiseData;
     public NoiseData featuresMapNoiseData;
 
     [Range(0, 2)]
     public float featuresImpactOnLayout;
-    public static int featuresPerLayoutPerAxis = 10;    
+    private int featuresPerLayoutPerAxis;    
 
     public bool autoUpdate;
 
@@ -24,6 +24,13 @@ public class MapGenerator : MonoBehaviour {
     public GameObject mapObject;
 
     public Map GenerateMap() {
+
+        Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();
+
+        this.layoutMapWidth = constants.layoutMapWidth;
+        this.layoutMapHeight = constants.layoutMapHeight;
+        this.featuresPerLayoutPerAxis = constants.featuresPerLayoutPerAxis;
+
         // First generate a small noise map, use for the general layout (eg. which area is a path, which is a rock, ...)
         // This is the noise map the grid and selectons will use
         float[,] layoutNoiseMap = NoiseGenerator.GenerateNoiseMap(layoutMapWidth, layoutMapHeight, layoutMapNoiseData);
@@ -39,7 +46,7 @@ public class MapGenerator : MonoBehaviour {
 
         NormalizeMap(noiseMap);
 
-        Map map = new Map(layoutMapWidth, layoutMapHeight,
+        Map map = new Map(noiseMap,
             featuresPerLayoutPerAxis,
             MeshGenerator.GenerateTerrainMesh(noiseMap, featuresPerLayoutPerAxis),
             TextureGenerator.TextureFromColorMap(CreateColorMapWithTerrain(noiseMap, terrainMap), noiseMapWidth, noiseMapHeight),
@@ -117,7 +124,7 @@ public class MapGenerator : MonoBehaviour {
         for(int y = 0; y < noiseMapHeight; y++) {
             for(int x = 0; x < noiseMapWidth; x++) {
 
-                WorldCoordinate coordinate = new WorldCoordinate(x, y);
+                MapCoordinate coordinate = new MapCoordinate(x, y);
 
                 if((x + 1) % featuresPerLayoutPerAxis == 0 || (y + 1) % featuresPerLayoutPerAxis == 0) {
                     colorMap[y * noiseMapWidth + x] = Color.white;
@@ -129,7 +136,8 @@ public class MapGenerator : MonoBehaviour {
 
                 colorMap[y * noiseMapWidth + x] = terrainTypeMap[sampleX, sampleY].color;
 
-                //if(coordinate == beh.selectedPoint) {
+                //PlayerBehaviour beh = Tag.Narrator.GetGameObject().GetComponent<PlayerBehaviour>();
+                //if(coordinate == beh.selectedLayoutTile) {
                 //    colorMap[y * noiseMapWidth + x] = colorMap[y * noiseMapWidth + x] + Color.cyan;
                 //}
             }

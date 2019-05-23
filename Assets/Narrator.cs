@@ -8,6 +8,8 @@ public class Narrator : MonoBehaviour
     MapGenerator mapGenerator;
     MapContainer mapContainer;
 
+    Constants constants;
+
     public GameObject unit;
 
     // Start is called before the first frame update
@@ -15,13 +17,14 @@ public class Narrator : MonoBehaviour
         grid = Tag.AStar.GetGameObject().GetComponent<Grid>();
         mapGenerator = Tag.MapGenerator.GetGameObject().GetComponent<MapGenerator>();
         mapContainer = Tag.Map.GetGameObject().GetComponent<MapContainer>();
-        
+        constants = GetComponent<Constants>();
+
         // Setup world
         Map map = mapGenerator.GenerateMap();
         mapContainer.setMap(map);
 
         grid.gameObject.transform.position = mapContainer.transform.position;
-        grid.gridWorldSize = new Vector2(map.mapSize.x * mapContainer.gameObject.transform.localScale.x, map.mapSize.y * mapContainer.gameObject.transform.localScale.z);
+        grid.gridWorldSize = new Vector2(map.mapWidth * mapContainer.gameObject.transform.localScale.x, map.mapHeight * mapContainer.gameObject.transform.localScale.z);
 
         grid.createGrid();
         grid.BlurPenaltyMap(4);
