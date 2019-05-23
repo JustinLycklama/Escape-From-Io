@@ -184,9 +184,6 @@ public struct WorldPosition {
     }
 
     public void recalculateHeight() {
-        GameObject mapObject = Tag.Map.GetGameObject();
-        Map map = mapObject.GetComponent<MapContainer>().getMap();
-
-        y = map.getHeightAt(new MapCoordinate(this));
+        this = new WorldPosition(new MapCoordinate(this));
     }
 }

@@ -280,7 +280,7 @@ public class PathfindingGrid : MonoBehaviour {
 
                 Gizmos.DrawCube(n.worldPosition.vector3, Vector3.one *cubeDiameter);
 
-                Handles.Label(n.worldPosition.vector3, "G: " + n.gCost + " H: " + n.hCost + "\n   F: " + n.fCost);
+                //Handles.Label(n.worldPosition.vector3, "G: " + n.gCost + " H: " + n.hCost + "\n   F: " + n.fCost);
             }
         }
     }

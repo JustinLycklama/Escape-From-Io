@@ -100,28 +100,32 @@ public class PathFinding : MonoBehaviour {
         Vector2 oldDirection = Vector2.zero;
 
         GameObject mapMesh = Tag.Map.GetGameObject();
-        Map map = mapMesh.GetComponent<MapContainer>().getMap();        
+        Map map = mapMesh.GetComponent<MapContainer>().getMap();
+
+        int lastAddedIndex = 0;
 
         for (int i = 1; i < path.Length; i++) {
             Vector2 newDirection = new Vector2(path[i - 1].gridX - path[i].gridX, path[i - 1].gridY - path[i].gridY);
-            if (newDirection != oldDirection) {
+            if(newDirection != oldDirection) {
 
-                // Use the X, Z coordinate from pathfinding, and the Y Coordinate from our map
+                if (lastAddedIndex != i - 1) {
+                    WorldPosition oldPathPosition = path[i - 1].worldPosition;
+                    oldPathPosition.recalculateHeight();
+
+                    waypoints.Add(oldPathPosition);
+                }                
+
                 WorldPosition pathPosition = path[i].worldPosition;
-                //float mapHeight = map.getHeightAt(path[i].gridX, path[i].gridY);
-                //pathPosition.y = mapHeight * mapMesh.transform.localScale.y;
-
                 pathPosition.recalculateHeight();
 
                 waypoints.Add(pathPosition);
+
+                lastAddedIndex = i;
                 oldDirection = newDirection;
             }
         }
 
         WorldPosition finalPathPosition = path[path.Length - 1].worldPosition;
-        //float finalMapHeight = map.getHeightAt(path[path.Length - 1].gridX, path[path.Length - 1].gridY);
-        //finalPathPosition.y = finalMapHeight * mapMesh.transform.localScale.y;
-
         finalPathPosition.recalculateHeight();
 
         waypoints.Add(finalPathPosition);

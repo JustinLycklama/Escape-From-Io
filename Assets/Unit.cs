@@ -45,9 +45,11 @@ public class Unit : MonoBehaviour
             if (followingPath) {
                 if (pathIndex >= path.slowDownIndex && stoppingDistance > 0) {
                     speedPercent = Mathf.Clamp(path.turnBoundaries[path.finishLineIndex].DistanceFromPoint(position2D) / stoppingDistance, 0.15f, 1);
-                }                
+                }
 
-                Quaternion targetRotation = Quaternion.LookRotation(path.lookPoints[pathIndex].vector3 - transform.position);
+                Vector3 lookPoint = path.lookPoints[pathIndex].vector3;
+                lookPoint.y = transform.position.y;
+                Quaternion targetRotation = Quaternion.LookRotation(lookPoint - transform.position);
                 transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * turnSpeed);
                 transform.Translate(Vector3.forward * Time.deltaTime * speed * speedPercent, Space.Self);
             }
