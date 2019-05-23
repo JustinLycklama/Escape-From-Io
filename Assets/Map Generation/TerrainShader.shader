@@ -52,7 +52,7 @@
             o.Alpha = c.a;
 
 			if (IN.isSelected) {
-				o.Albedo *= 0.1 * float3(0, 1, 1);
+				o.Albedo *= float3(0, 1, 1);
 			}
         }
         ENDCG

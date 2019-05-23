@@ -27,16 +27,10 @@ public class Grid : MonoBehaviour {
     void Awake() {
         nodeDiameter = nodeRaduis * 2;
 
-        gridSizeX = Mathf.RoundToInt(gridWorldSize.x / nodeDiameter);
-        gridSizeY = Mathf.RoundToInt(gridWorldSize.y / nodeDiameter);
-
         foreach (TerrainType region in walkableRegions) {
             walkableMask.value += region.terrainMask.value;            
             walkableRegionsDictionary.Add(Mathf.FloorToInt(Mathf.Log(region.terrainMask.value, 2)), region.terrainPenalty);
-        }
-
-        createGrid();
-        BlurPenaltyMap(4);
+        }       
     }
 
     public int maxSize {
@@ -45,11 +39,13 @@ public class Grid : MonoBehaviour {
         }
     }
 
-    void createGrid() {
+    public void createGrid(Map map = null) {
+        gridSizeX = Mathf.RoundToInt(gridWorldSize.x / nodeDiameter);
+        gridSizeY = Mathf.RoundToInt(gridWorldSize.y / nodeDiameter);
+
         grid = new Node[gridSizeX, gridSizeY];
 
         Vector3 worldBottomLeft = transform.position - (Vector3.right * gridWorldSize.x / 2) - (Vector3.forward * gridWorldSize.y / 2);
-
 
         for (int x = 0; x < gridSizeX; x++)
         {
@@ -80,7 +76,7 @@ public class Grid : MonoBehaviour {
         }
     }   
 
-    void BlurPenaltyMap(int blurSize) {
+    public void BlurPenaltyMap(int blurSize) {
         int kernelExtents = blurSize;
 
         int[,] horizontalPass = new int[gridSizeX, gridSizeY];

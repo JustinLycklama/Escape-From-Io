@@ -74,7 +74,7 @@ public struct Line
         Vector3 lineDir = new Vector3(1, 0, gradient).normalized;
 
         // 3d version of point on line1
-        Vector3 lineCenter = new Vector3(pointOnLine_1.x, 0, pointOnLine_1.y) + Vector3.up * 10;
+        Vector3 lineCenter = new Vector3(pointOnLine_1.x, 0, pointOnLine_1.y) + Vector3.up * 100;
 
 
         Gizmos.DrawLine(lineCenter - lineDir * length / 2f, lineCenter + lineDir * length / 2f);

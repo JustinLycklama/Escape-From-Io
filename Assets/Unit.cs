@@ -15,9 +15,9 @@ public class Unit : MonoBehaviour
 
     Path path;
 
-    private void Start() {
+    public void beginPathFinding() {
         PathRequestManager.RequestPath(transform.position, target.position, (waypoints, success) => {
-            if (success) {
+            if(success) {
                 path = new Path(waypoints, transform.position, turnDistance, stoppingDistance);
                 StopCoroutine(FollowPath());
                 StartCoroutine(FollowPath());
@@ -81,7 +81,6 @@ public class Unit : MonoBehaviour
     public void OnDrawGizmos() {
         if (path != null) {
             path.DrawWithGizmos();
-            print("DrawPath");
         }
     }
 }

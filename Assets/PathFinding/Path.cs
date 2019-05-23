@@ -48,15 +48,13 @@ public class Path
     }
     
     public void DrawWithGizmos() {
-
-        MonoBehaviour.print("Count: " + lookPoints.Length);
         foreach (Vector3 p in lookPoints) {
-            Gizmos.DrawCube(p + Vector3.up * 10, Vector3.one);        
+            Gizmos.DrawCube(p + Vector3.up * 100, Vector3.one);        
         }
 
         Gizmos.color = Color.white;
         foreach (Line l in turnBoundaries) {
-            l.DrawWithGizmos(10);
+            l.DrawWithGizmos(100);
         }
     }
 

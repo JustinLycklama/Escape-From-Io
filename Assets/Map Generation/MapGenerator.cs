@@ -2,14 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-
-//namespace GridIdentifiers {
-//    using GridAxis = System.Int16;
-//    using WorldAxis = System.Int16;
-//}
-
 public class MapGenerator : MonoBehaviour {
-
 
     public enum DrawMode {NoiseMap, ColorMap, Mesh}
     public DrawMode drawMode;
@@ -28,8 +21,9 @@ public class MapGenerator : MonoBehaviour {
 
     public TerrainType[] regions;
 
+    public GameObject mapObject;
 
-    public void GenerateMap() {
+    public Map GenerateMap() {
         // First generate a small noise map, use for the general layout (eg. which area is a path, which is a rock, ...)
         // This is the noise map the grid and selectons will use
         float[,] layoutNoiseMap = NoiseGenerator.GenerateNoiseMap(layoutMapWidth, layoutMapHeight, layoutMapNoiseData);
@@ -45,29 +39,44 @@ public class MapGenerator : MonoBehaviour {
 
         NormalizeMap(noiseMap);
 
+        Map map = new Map(layoutMapWidth, layoutMapHeight,
+            featuresPerLayoutPerAxis,
+            MeshGenerator.GenerateTerrainMesh(noiseMap, featuresPerLayoutPerAxis),
+            TextureGenerator.TextureFromColorMap(CreateColorMapWithTerrain(noiseMap, terrainMap), noiseMapWidth, noiseMapHeight),
+            terrainMap
+            );
 
-        MapDisplay display = FindObjectOfType<MapDisplay>();
+        MapDebugDisplay debugDisplay = FindObjectOfType<MapDebugDisplay>();
         switch (drawMode) {
             case DrawMode.NoiseMap:
-                display.DrawTexture(TextureGenerator.TextureFromNoiseMap(noiseMap));
-                display.DrawTextures(TextureGenerator.TextureFromNoiseMap(layoutNoiseMap), TextureGenerator.TextureFromNoiseMap(featuresNoiseMap));
+                if (debugDisplay != null) {
+                    debugDisplay.DrawTexture(TextureGenerator.TextureFromNoiseMap(noiseMap));
+                    debugDisplay.DrawTextures(TextureGenerator.TextureFromNoiseMap(layoutNoiseMap), TextureGenerator.TextureFromNoiseMap(featuresNoiseMap));
+                }                
                 break;
             case DrawMode.ColorMap:
-                display.DrawTexture(TextureGenerator.TextureFromColorMap(CreateColorMap(noiseMap), noiseMap.GetLength(0), noiseMap.GetLength(1)));
-                display.DrawTextures(TextureGenerator.TextureFromColorMap(CreateColorMap(layoutNoiseMap), layoutNoiseMap.GetLength(0), layoutNoiseMap.GetLength(1)),
-                    TextureGenerator.TextureFromColorMap(CreateColorMap(featuresNoiseMap), featuresNoiseMap.GetLength(0), featuresNoiseMap.GetLength(1))
-                    );
+                if(debugDisplay != null) {
 
+                    debugDisplay.DrawTexture(TextureGenerator.TextureFromColorMap(CreateColorMap(noiseMap), noiseMap.GetLength(0), noiseMap.GetLength(1)));
+                    debugDisplay.DrawTextures(TextureGenerator.TextureFromColorMap(CreateColorMap(layoutNoiseMap), layoutNoiseMap.GetLength(0), layoutNoiseMap.GetLength(1)),
+                        TextureGenerator.TextureFromColorMap(CreateColorMap(featuresNoiseMap), featuresNoiseMap.GetLength(0), featuresNoiseMap.GetLength(1))
+                        );
+                }
                 break;
             case DrawMode.Mesh:
-                display.DrawMesh(MeshGenerator.GenerateTerrainMesh(noiseMap, featuresPerLayoutPerAxis), TextureGenerator.TextureFromColorMap(CreateColorMapWithTerrain(noiseMap, terrainMap), noiseMapWidth, noiseMapHeight));
 
-                display.DrawMeshes(MeshGenerator.GenerateTerrainMesh(layoutNoiseMap, 1), TextureGenerator.TextureFromColorMap(CreateColorMap(layoutNoiseMap), layoutNoiseMap.GetLength(0), layoutNoiseMap.GetLength(1)),
-                MeshGenerator.GenerateTerrainMesh(featuresNoiseMap, 1), TextureGenerator.TextureFromColorMap(CreateColorMap(featuresNoiseMap), featuresNoiseMap.GetLength(0), featuresNoiseMap.GetLength(1))
-                    );
+                MapContainer mapContainer = Tag.Map.GetGameObject().GetComponent<MapContainer>();
+                mapContainer.setMap(map);
 
+                if(debugDisplay != null) {
+                        debugDisplay.DrawMeshes(MeshGenerator.GenerateTerrainMesh(layoutNoiseMap, 1), TextureGenerator.TextureFromColorMap(CreateColorMap(layoutNoiseMap), layoutNoiseMap.GetLength(0), layoutNoiseMap.GetLength(1)),
+                        MeshGenerator.GenerateTerrainMesh(featuresNoiseMap, 1), TextureGenerator.TextureFromColorMap(CreateColorMap(featuresNoiseMap), featuresNoiseMap.GetLength(0), featuresNoiseMap.GetLength(1))
+                        );
+                }
                 break;
         }
+       
+        return map;
     }
 
     private Color[] CreateColorMap(float[,] noiseMap) {
@@ -102,7 +111,7 @@ public class MapGenerator : MonoBehaviour {
         int terrainMapWidth = terrainTypeMap.GetLength(0);
         int terrainMapHeight = terrainTypeMap.GetLength(1);
 
-        PlayerBehaviour beh = GetComponent<PlayerBehaviour>();
+        //PlayerBehaviour beh = GetComponent<PlayerBehaviour>();
 
         Color[] colorMap = new Color[noiseMapWidth * noiseMapHeight];
         for(int y = 0; y < noiseMapHeight; y++) {
@@ -120,11 +129,9 @@ public class MapGenerator : MonoBehaviour {
 
                 colorMap[y * noiseMapWidth + x] = terrainTypeMap[sampleX, sampleY].color;
 
-
-
-                if(coordinate == beh.selectedPoint) {
-                    colorMap[y * noiseMapWidth + x] = colorMap[y * noiseMapWidth + x] + Color.cyan;
-                }
+                //if(coordinate == beh.selectedPoint) {
+                //    colorMap[y * noiseMapWidth + x] = colorMap[y * noiseMapWidth + x] + Color.cyan;
+                //}
             }
         }
 
