@@ -133,17 +133,22 @@ public struct WorldPosition {
     public WorldPosition(MapCoordinate mapCoordinate) {
         GameObject mapObject = Tag.Map.GetGameObject();
         Map map = mapObject.GetComponent<MapContainer>().getMap();
+        Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();
 
         Transform mapObjectSpace = mapObject.transform;
 
         Vector3 currentPointObjectSpace = new Vector3(mapCoordinate.x, map.getHeightAt(mapCoordinate), mapCoordinate.y);
+
+        currentPointObjectSpace.x -= (constants.mapWidth / 2f);
+        currentPointObjectSpace.z *= -1;
+        currentPointObjectSpace.z += (constants.mapHeight / 2f);
+
         Vector3 positionWorldSpace = mapObjectSpace.TransformPoint(currentPointObjectSpace);
 
         x = positionWorldSpace.x;
         y = positionWorldSpace.y;
         z = positionWorldSpace.z;
     }
-
 
     public void recalculateHeight() {
         GameObject mapObject = Tag.Map.GetGameObject();

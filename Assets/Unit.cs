@@ -5,10 +5,10 @@ using UnityEngine;
 public class Unit : MonoBehaviour
 {
     public Transform target;
-    public float speed = 20;
-    public float turnSpeed = 3;
-    public float turnDistance = 5;
-    public float stoppingDistance = 10;
+    public float speed;
+    public float turnSpeed;
+    public float turnDistance;
+    public float stoppingDistance;
 
     Path path;
 

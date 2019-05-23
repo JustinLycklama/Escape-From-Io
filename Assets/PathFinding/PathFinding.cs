@@ -8,10 +8,10 @@ using System.Diagnostics;
 public class PathFinding : MonoBehaviour {
     //public Transform seeker, target;
 
-    Grid grid;
+    PathfindingGrid grid;
 
     private void Awake() {
-        grid = GetComponent<Grid>();
+        grid = GetComponent<PathfindingGrid>();
     }
 
     //private void Update() {

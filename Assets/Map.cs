@@ -10,7 +10,7 @@ public class Map {
     public MeshData meshData;
     public Texture2D meshTexture;
 
-    public TerrainType[,] terrainData;
+    private TerrainType[,] terrainData;
     float[,] heightMap;
 
     public Map(float[,] heightMap, int featuresPerLayoutPerAxis, MeshData meshData, Texture2D meshTexture, TerrainType[,] terrainData) {
@@ -27,6 +27,10 @@ public class Map {
         this.terrainData = terrainData;
     }
 
+    public TerrainType GetTerrainAt(LayoutCoordinate layoutCoordinate) {
+        return terrainData[layoutCoordinate.x, layoutCoordinate.y];
+    }
+
     public float getHeightAt(MapCoordinate coordinate) {
         int mapWidth = heightMap.GetLength(0);
         int mapHeight = heightMap.GetLength(1);
@@ -38,7 +42,7 @@ public class Map {
 
         // TODO: Triangle Calculations        
        
-        return heightMap[coordinate.xLowSample, coordinate.yLowSample]; ;
+        return heightMap[coordinate.xLowSample, coordinate.yLowSample];
     }
 
     //// Start is called before the first frame update

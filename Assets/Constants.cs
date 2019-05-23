@@ -7,7 +7,11 @@ public class Constants : MonoBehaviour {
     public int layoutMapWidth;
     public int layoutMapHeight;
 
+    [Range(1, 10)]
     public int featuresPerLayoutPerAxis;
+
+    //[Range(1, 5)]
+    //public int nodesPerLayoutPerAxis;
 
     public int mapWidth { get { return layoutMapWidth * featuresPerLayoutPerAxis; } }
     public int mapHeight { get { return layoutMapHeight * featuresPerLayoutPerAxis; } }

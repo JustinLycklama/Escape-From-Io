@@ -238,6 +238,8 @@ public struct TerrainType {
     public float noiseBaseline;
     public float noiseMax;
 
+    public bool walkable;
+
     public Color color;
     public bool plateau;
     public bool plateauAtBase;
