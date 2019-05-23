@@ -15,7 +15,7 @@ public class Map {
 
     public Map(float[,] heightMap, int featuresPerLayoutPerAxis, MeshData meshData, Texture2D meshTexture, TerrainType[,] terrainData) {
         mapWidth = heightMap.GetLength(0);
-       mapHeight = heightMap.GetLength(1);
+        mapHeight = heightMap.GetLength(1);
 
         this.textureMapSize = new Vector2(mapWidth, mapHeight);
         

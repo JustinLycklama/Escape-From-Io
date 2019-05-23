@@ -20,13 +20,13 @@ public class PathfindingGrid : MonoBehaviour {
 
     int gridSizeX {
         get {
-            return constants.layoutMapWidth * constants.featuresPerLayoutPerAxis;
+            return constants.layoutMapWidth * constants.nodesPerLayoutPerAxis;
         }
     }
         
     int gridSizeY {
         get {
-            return constants.layoutMapHeight * constants.featuresPerLayoutPerAxis;
+            return constants.layoutMapHeight * constants.nodesPerLayoutPerAxis;
         }
     }
 
@@ -45,7 +45,7 @@ public class PathfindingGrid : MonoBehaviour {
 
     public int maxSize {
         get {
-            return constants.mapWidth * constants.mapHeight;
+            return gridSizeX * gridSizeY;
         }
     }
 
@@ -53,12 +53,14 @@ public class PathfindingGrid : MonoBehaviour {
         //gridSizeX = Mathf.RoundToInt(gridWorldSize.x / nodeDiameter);
         //gridSizeY = Mathf.RoundToInt(gridWorldSize.y / nodeDiameter);
 
-        grid = new Node[constants.mapWidth, constants.mapHeight];
+        grid = new Node[gridSizeX, gridSizeY];
 
         for(int x = 0; x < gridSizeX; x++) {
             for(int y = 0; y < gridSizeY; y++) {
 
-                MapCoordinate mapCoordinate = new MapCoordinate(x, y);
+                PathGridCoordinate pathGridCoordinate = new PathGridCoordinate(x + 0.5f, y + 0.5f);
+                MapCoordinate mapCoordinate = new MapCoordinate(pathGridCoordinate);
+
                 WorldPosition worldPosition = new WorldPosition(mapCoordinate);
 
                 LayoutCoordinate layoutCoordinate = new LayoutCoordinate(mapCoordinate);
@@ -69,10 +71,10 @@ public class PathfindingGrid : MonoBehaviour {
         }
 
         //Vector3 mapScale = Tag.Map.GetGameObject().transform.localScale;
-        //Vector3 worldBottomLeft = transform.position - (Vector3.right * constants.mapWidth * mapScale.x / 2) - (Vector3.forward * constants.mapHeight * mapScale.y / 2);
+        //Vector3 worldBottomLeft = transform.position - (Vector3.right * gridSizeX * mapScale.x / 2) - (Vector3.forward * gridSizeY * mapScale.y / 2);
 
-        //for (int x = 0; x < constants.mapWidth; x++) {
-        //    for (int y = 0; y < constants.mapHeight; y++)
+        //for (int x = 0; x < gridSizeX; x++) {
+        //    for (int y = 0; y < gridSizeY; y++)
         //    {
         //        Vector3 worldPoint = worldBottomLeft +
         //        Vector3.right * ((x * constants.nodesPerLayoutPerAxis) + constants.nodesPerLayoutPerAxis / 2f) +
@@ -111,11 +113,11 @@ public class PathfindingGrid : MonoBehaviour {
     public void BlurPenaltyMap(int blurSize) {
         int kernelExtents = blurSize;
 
-        int[,] horizontalPass = new int[constants.mapWidth, constants.mapHeight];
-        int[,] verticalPass = new int[constants.mapWidth, constants.mapHeight];
+        int[,] horizontalPass = new int[gridSizeX, gridSizeY];
+        int[,] verticalPass = new int[gridSizeX, gridSizeY];
 
         // Horizontal Pass
-        for (int y = 0; y < constants.mapHeight; y++) {
+        for (int y = 0; y < gridSizeY; y++) {
 
             // First node we have sum everything
             for (int x = -kernelExtents; x<= kernelExtents; x++) {
@@ -126,16 +128,16 @@ public class PathfindingGrid : MonoBehaviour {
 
             // continue with the rest of the columns by remoing the far left item and adding the far right item to our previous value
             // There by imitating summing all of the values together
-            for (int x = 1; x < constants.mapWidth; x++) {
-                int removeIndex = Mathf.Clamp(x - kernelExtents, 0, constants.mapWidth - 1);
-                int addIndex = Mathf.Clamp(x + kernelExtents, 0, constants.mapWidth - 1);
+            for (int x = 1; x < gridSizeX; x++) {
+                int removeIndex = Mathf.Clamp(x - kernelExtents, 0, gridSizeX - 1);
+                int addIndex = Mathf.Clamp(x + kernelExtents, 0, gridSizeX - 1);
 
                 horizontalPass[x, y] = horizontalPass[x - 1, y] - grid[removeIndex, y].movementPenalty + grid[addIndex, y].movementPenalty;
             }
         }
 
         // Vertical Pass
-        for(int x = 0; x < constants.mapWidth; x++) {
+        for(int x = 0; x < gridSizeX; x++) {
 
             //print("Penalties: \n");
 
@@ -153,9 +155,9 @@ public class PathfindingGrid : MonoBehaviour {
 
             // continue with the rest of the columns by remoing the far left item and adding the far right item to our previous value
             // There by imitating summing all of the values together
-            for(int y = 1; y < constants.mapHeight; y++) {
-                int removeIndex = Mathf.Clamp(y - kernelExtents, 0, constants.mapHeight - 1);
-                int addIndex = Mathf.Clamp(y + kernelExtents, 0, constants.mapHeight - 1);
+            for(int y = 1; y < gridSizeY; y++) {
+                int removeIndex = Mathf.Clamp(y - kernelExtents, 0, gridSizeY - 1);
+                int addIndex = Mathf.Clamp(y + kernelExtents, 0, gridSizeY - 1);
 
                 verticalPass[x, y] = verticalPass[x, y-1] - horizontalPass[x, removeIndex] + horizontalPass[x, addIndex];
 
@@ -180,6 +182,7 @@ public class PathfindingGrid : MonoBehaviour {
 
     public Node nodeFromWorldPoint(WorldPosition worldPos) {
         MapCoordinate mapCoordinate = new MapCoordinate(worldPos);
+        PathGridCoordinate pathGridCoordinate = new PathGridCoordinate(mapCoordinate);
 
         //float percentX = (worldPos.x + gridWorldSize.x / 2) / gridWorldSize.x;
         //float percentY = (worldPos.z + gridWorldSize.y / 2) / gridWorldSize.y;
@@ -190,7 +193,7 @@ public class PathfindingGrid : MonoBehaviour {
         //int x = Mathf.RoundToInt((gridSizeX - 1) * percentX);
         //int y = Mathf.RoundToInt((gridSizeY - 1) * percentY);
 
-        return grid[mapCoordinate.xLowSample, mapCoordinate.yLowSample];
+        return grid[pathGridCoordinate.xLowSample, pathGridCoordinate.yLowSample];
     }
 
     public List<Node> GetNeighbours(Node node) {
@@ -205,7 +208,7 @@ public class PathfindingGrid : MonoBehaviour {
                 int checkX = node.gridX + x;
                 int checkY = node.gridY + y;
                 
-                if (checkX >= 0 && checkX < constants.mapWidth && checkY >= 0 && checkY < constants.mapHeight) {
+                if (checkX >= 0 && checkX < gridSizeX && checkY >= 0 && checkY < gridSizeY) {
                 
                     neighbours.Add(grid[checkX, checkY]);
                 }
@@ -219,11 +222,11 @@ public class PathfindingGrid : MonoBehaviour {
         Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();
         Vector3 mapScale = Tag.Map.GetGameObject().transform.localScale;
 
-        Gizmos.DrawWireCube(transform.position, new Vector3(constants.mapWidth * mapScale.x, 1 * mapScale.y, constants.mapHeight * mapScale.z));
-
-        //float cubeDiameter = constants.mapWidth * mapScale.x / constants.featuresPerLayoutPerAxis / constants.nodesPerLayoutPerAxis;
-
+        float cubeDiameter = constants.layoutMapWidth / constants.nodesPerLayoutPerAxis;
         if(grid != null && displayGridGizmos) {
+
+            Gizmos.DrawWireCube(transform.position, new Vector3(gridSizeX * mapScale.x, 1 * mapScale.y, gridSizeY * mapScale.z));
+
             foreach(Node n in grid) {
                 Gizmos.color = Color.Lerp(Color.white, Color.black, Mathf.InverseLerp(penaltyMin, penaltyMax, n.movementPenalty));
                 Gizmos.color = n.walkable ? Gizmos.color : Color.red;
@@ -235,7 +238,7 @@ public class PathfindingGrid : MonoBehaviour {
 
                  
 
-                Gizmos.DrawCube(n.worldPosition.vector3, Vector3.one * mapScale.x);
+                Gizmos.DrawCube(n.worldPosition.vector3, Vector3.one *cubeDiameter);
 
                 //Handles.Label(n.worldPosition.vector3, "G: " + n.gCost + " H: " + n.hCost + "\n   F: " + n.fCost);
             }

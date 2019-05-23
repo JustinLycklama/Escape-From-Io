@@ -43,6 +43,35 @@ public struct LayoutCoordinate {
     }
 }
 
+public struct PathGridCoordinate {
+    public float x;
+    public float y;
+
+    public int xLowSample { get { return Mathf.FloorToInt(x); } }
+    public int xHighSample { get {
+            Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();
+            return Mathf.Clamp(xLowSample, 0, constants.layoutMapWidth * constants.nodesPerLayoutPerAxis - 1);
+        } }
+
+    public int yLowSample { get { return Mathf.FloorToInt(y); } }
+    public int yHighSample { get {
+            Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();
+            return Mathf.Clamp(yLowSample, 0, constants.layoutMapHeight * constants.nodesPerLayoutPerAxis - 1);
+        } }
+
+    public PathGridCoordinate(MapCoordinate mapCoordinate) {
+        Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();
+
+        x = mapCoordinate.x / constants.featuresPerLayoutPerAxis * constants.nodesPerLayoutPerAxis;
+        y = mapCoordinate.y / constants.featuresPerLayoutPerAxis * constants.nodesPerLayoutPerAxis;
+    }
+
+    public PathGridCoordinate(float x, float y) {
+        this.x = x;
+        this.y = y;
+    }
+}
+
 public struct MapCoordinate {
     public float x;
     public float y;
@@ -52,6 +81,13 @@ public struct MapCoordinate {
 
     public int yLowSample { get { return Mathf.FloorToInt(y); } }
     public int yHighSample { get { return Mathf.Clamp(yLowSample, 0, Tag.Narrator.GetGameObject().GetComponent<Constants>().mapHeight); } }
+
+    public MapCoordinate(PathGridCoordinate pathGridCoordinate) {
+        Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();
+
+        x = pathGridCoordinate.x / constants.nodesPerLayoutPerAxis * constants.featuresPerLayoutPerAxis;
+        y = pathGridCoordinate.y / constants.nodesPerLayoutPerAxis * constants.featuresPerLayoutPerAxis;
+    }
 
     public MapCoordinate(WorldPosition worldPosition) {
 
@@ -66,9 +102,6 @@ public struct MapCoordinate {
     }
     
     public MapCoordinate(float x, float y) {
-
-        GameObject map = Tag.Map.GetGameObject();
-
         this.x = x;
         this.y = y;
     }
