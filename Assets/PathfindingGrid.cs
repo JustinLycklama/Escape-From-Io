@@ -70,6 +70,36 @@ public class PathfindingGrid : MonoBehaviour {
             }
         }
 
+        // Second pass
+        // Terrain where two of its four orthagonal neibours is unwalkable, is also unwalkable, to avoid walking over diagonals
+        //bool[,] secondaryWalkable = new bool[gridSizeX, gridSizeY];
+        //for(int x = 0; x < gridSizeX; x++) {
+        //    for(int y = 0; y < gridSizeY; y++) {
+        //        bool walkable = grid[x, y].walkable;
+
+        //        if(walkable) {
+        //            int otherUnwalkable = 0;
+
+        //            for(int subX = -1; subX <= 1; subX += 2) {
+        //                for(int subY = -1; subY <= 1; subY += 2) {
+        //                    int sampleX = Mathf.Clamp(x + subX, 0, gridSizeX - 1);
+        //                    int sampleY = Mathf.Clamp(y + subY, 0, gridSizeY - 1);
+
+        //                    otherUnwalkable += grid[sampleX, sampleY].walkable ? 0 : 1;
+        //                }
+        //            }
+
+        //            secondaryWalkable[x, y] = otherUnwalkable >= 2;
+        //        }
+        //    }
+        //}
+
+        //for(int x = 0; x < gridSizeX; x++) {
+        //    for(int y = 0; y < gridSizeY; y++) {
+        //        grid[x, y].walkable = grid[x, y].walkable && !secondaryWalkable[x, y];
+        //    }
+        //}
+
         //Vector3 mapScale = Tag.Map.GetGameObject().transform.localScale;
         //Vector3 worldBottomLeft = transform.position - (Vector3.right * gridSizeX * mapScale.x / 2) - (Vector3.forward * gridSizeY * mapScale.y / 2);
 
@@ -203,14 +233,24 @@ public class PathfindingGrid : MonoBehaviour {
             for (int y = -1; y <= 1; y++) {
                 if (x == 0 && y == 0) {
                     continue;
+                }               
+
+                int sampleX = node.gridX + x;
+                int sampleY = node.gridY + y;
+
+                // We are at the corner of our neibours
+                if(x != 0 && y != 0) {
+
+                    // Do not add this corner neibour if either of the neibours beside it are unwalkable from here
+                    // In other words, only allow diagonal travel if we are not passing through the corner of an unwalkable tile
+                    if(!grid[sampleX, node.gridY].walkable || !grid[node.gridX, sampleY].walkable) {
+                        continue;
+                    }
                 }
 
-                int checkX = node.gridX + x;
-                int checkY = node.gridY + y;
+                if (sampleX >= 0 && sampleX < gridSizeX && sampleY >= 0 && sampleY < gridSizeY) {
                 
-                if (checkX >= 0 && checkX < gridSizeX && checkY >= 0 && checkY < gridSizeY) {
-                
-                    neighbours.Add(grid[checkX, checkY]);
+                    neighbours.Add(grid[sampleX, sampleY]);
                 }
             }
         }
@@ -240,7 +280,7 @@ public class PathfindingGrid : MonoBehaviour {
 
                 Gizmos.DrawCube(n.worldPosition.vector3, Vector3.one *cubeDiameter);
 
-                //Handles.Label(n.worldPosition.vector3, "G: " + n.gCost + " H: " + n.hCost + "\n   F: " + n.fCost);
+                Handles.Label(n.worldPosition.vector3, "G: " + n.gCost + " H: " + n.hCost + "\n   F: " + n.fCost);
             }
         }
     }
