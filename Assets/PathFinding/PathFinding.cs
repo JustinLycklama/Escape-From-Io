@@ -40,7 +40,13 @@ public class PathFinding : MonoBehaviour {
         Node[] finalPath = new Node[0];
         bool success = false;
 
+        // We need to reset the gCost and hCost, as well as the parent for this node to be fresh
+        startNode.ResetPathfindingReferences();
+        targetNode.ResetPathfindingReferences();
+
         openSet.Add(startNode);
+
+        //Dictionary<(int, int), Node> nodeDictionary = new Dictionary<(int, int), Node>();
 
         while(openSet.Count > 0) {
 
@@ -70,6 +76,14 @@ public class PathFinding : MonoBehaviour {
 
                     if(!openSet.Contains(neighbour)) {
                         openSet.Add(neighbour);
+
+                        //(int, int) key = (neighbour.gridX, neighbour.gridY);
+                        //if (nodeDictionary.ContainsKey(key)) {
+                        //    print("What the fuck");
+                        //} else {
+                        //    nodeDictionary.Add(key, neighbour);
+                        //}
+
                     } else {
                         openSet.UpdateItem(neighbour);
                     }

@@ -4,16 +4,17 @@ using UnityEngine;
 
 public class Node : HeapItem<Node> {
     public bool walkable;
-    public WorldPosition worldPosition;
+    public int movementPenalty;
 
+    public readonly int gridX, gridY;
+    public readonly WorldPosition worldPosition;
+
+    // Pathfinding Pass References
+    // Should not be populated outside of a path finding run.
     public Node parent;
-    
-    public int gridX, gridY;
     
     public int gCost;
     public int hCost;
-
-    public int movementPenalty;
 
     public int fCost {
         get {
@@ -42,6 +43,14 @@ public class Node : HeapItem<Node> {
         }
 
         return -compare;
+    }
+
+    public void ResetPathfindingReferences() {
+        parent = null;
+        gCost = int.MaxValue;
+        hCost = int.MaxValue;
+
+        heapIndex = 0;
     }
 
     public string description {

@@ -12,6 +12,8 @@ public interface HeapItem<T> : IComparable<T> {
     string description {
         get;
     }
+
+    void ResetPathfindingReferences();
 }
 
 public class Heap<T> where T: class, HeapItem<T>

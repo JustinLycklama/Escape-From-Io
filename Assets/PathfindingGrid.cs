@@ -243,13 +243,13 @@ public class PathfindingGrid : MonoBehaviour {
 
                     // Do not add this corner neibour if either of the neibours beside it are unwalkable from here
                     // In other words, only allow diagonal travel if we are not passing through the corner of an unwalkable tile
-                    if(!grid[sampleX, node.gridY].walkable || !grid[node.gridX, sampleY].walkable) {
+                    if ((sampleX >= 0 && sampleX < gridSizeX && sampleY >= 0 && sampleY < gridSizeY) &&
+                        (!grid[sampleX, node.gridY].walkable || !grid[node.gridX, sampleY].walkable)) {
                         continue;
                     }
                 }
 
-                if (sampleX >= 0 && sampleX < gridSizeX && sampleY >= 0 && sampleY < gridSizeY) {
-                
+                if (sampleX >= 0 && sampleX < gridSizeX && sampleY >= 0 && sampleY < gridSizeY) {                
                     neighbours.Add(grid[sampleX, sampleY]);
                 }
             }

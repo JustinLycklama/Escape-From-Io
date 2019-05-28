@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class Unit : MonoBehaviour
 {
-    public Transform target;
+    //public Transform target;
+
     public float speed;
     public float turnSpeed;
     public float turnDistance;
@@ -12,14 +13,52 @@ public class Unit : MonoBehaviour
 
     Path path;
 
-    public void beginPathFinding() {
-        PathRequestManager.RequestPath(transform.position, target.position, (waypoints, success) => {
+    Task task;
+    //TaskQueue taskQueue;
+
+    private void Start() {
+        //taskQueue = Script.Get<TaskQueue>();
+    }
+
+
+    public void BeginQueueing() {
+        StartCoroutine(SearchForTask(Script.Get<TaskQueue>()));
+
+
+    }
+
+    public void DoTask() {
+        StopCoroutine(SearchForTask(Script.Get<TaskQueue>()));
+
+        PathRequestManager.RequestPath(transform.position, task.target.vector3, (waypoints, success) => {
             if(success) {
                 path = new Path(waypoints, transform.position, turnDistance, stoppingDistance);
                 StopCoroutine(FollowPath());
                 StartCoroutine(FollowPath());
             }
         });
+    }
+
+    //public void beginPathFinding() {
+    //    PathRequestManager.RequestPath(transform.position, target.position, (waypoints, success) => {
+    //        if(success) {
+    //            path = new Path(waypoints, transform.position, turnDistance, stoppingDistance);
+    //            StopCoroutine(FollowPath());
+    //            StartCoroutine(FollowPath());
+    //        }
+    //    });
+    //}
+
+    IEnumerator SearchForTask(TaskQueue taskQueue) {
+        while (true) {
+            if(taskQueue.Count() > 0) {
+                task = taskQueue.Pop();
+                DoTask();
+            }
+
+            // If nothing to queue
+            yield return new WaitForSeconds(0.5f);
+        }        
     }
 
     IEnumerator FollowPath() {
@@ -36,6 +75,7 @@ public class Unit : MonoBehaviour
             while(path.turnBoundaries[pathIndex].HasCrossedLine(position2D)) {
                 if (pathIndex == path.finishLineIndex) {
                     followingPath = false;
+                    BeginQueueing();
                     break;
                 } else {
                     pathIndex++;
@@ -52,6 +92,8 @@ public class Unit : MonoBehaviour
                 Quaternion targetRotation = Quaternion.LookRotation(lookPoint - transform.position);
                 transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * turnSpeed);
                 transform.Translate(Vector3.forward * Time.deltaTime * speed * speedPercent, Space.Self);
+
+                print("Following Path");
             }
 
             yield return null;

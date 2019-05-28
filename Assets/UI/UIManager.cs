@@ -32,16 +32,23 @@ public class UIManager : MonoBehaviour
         //Building building = new Building();
         LayoutCoordinate coordinate = Script.Get<PlayerBehaviour>().selection.coordinate;
         MapCoordinate mapCoordinate = new MapCoordinate(coordinate);
-       
+        WorldPosition worldPosition = new WorldPosition(mapCoordinate);
+
+        worldPosition.y += 25 / 2f;
+
         GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        cube.transform.localPosition = new WorldPosition(mapCoordinate).vector3;
+        cube.transform.position = worldPosition.vector3;
+
+        Material newMat = Resources.Load("BuildingMaterial", typeof(Material)) as Material;
+        cube.GetComponent<MeshRenderer>().material = newMat;
 
         cube.AddComponent<Building>();
+
+
         cube.transform.localScale = new Vector3(25, 25, 25);
 
         TaskQueue queue = Script.Get<TaskQueue>();
-        queue.QueueBuilding();
-
+        queue.QueueTask(new Task(worldPosition));
 
 
     }
