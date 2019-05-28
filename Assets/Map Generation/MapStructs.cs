@@ -89,6 +89,13 @@ public struct MapCoordinate {
         y = pathGridCoordinate.y / constants.nodesPerLayoutPerAxis * constants.featuresPerLayoutPerAxis;
     }
 
+    public MapCoordinate(LayoutCoordinate layoutCoordinate) {
+        Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();
+
+        x = layoutCoordinate.x * constants.featuresPerLayoutPerAxis + (constants.featuresPerLayoutPerAxis / 2f);
+        y = layoutCoordinate.y * constants.featuresPerLayoutPerAxis + (constants.featuresPerLayoutPerAxis / 2f);
+    }
+
     public MapCoordinate(WorldPosition worldPosition) {
 
         GameObject map = Tag.Map.GetGameObject();

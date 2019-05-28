@@ -11,6 +11,7 @@ public class Map {
     public Texture2D meshTexture;
 
     private TerrainType[,] terrainData;
+    private Building[,] buildingData;
     float[,] heightMap;
 
     public Map(float[,] heightMap, int featuresPerLayoutPerAxis, MeshData meshData, Texture2D meshTexture, TerrainType[,] terrainData) {
@@ -25,10 +26,16 @@ public class Map {
         this.meshData = meshData;
         this.meshTexture = meshTexture;
         this.terrainData = terrainData;
+
+        buildingData = new Building[terrainData.GetLength(0), terrainData.GetLength(1)];
     }
 
     public TerrainType GetTerrainAt(LayoutCoordinate layoutCoordinate) {
         return terrainData[layoutCoordinate.x, layoutCoordinate.y];
+    }
+
+    public Building GetBuildingAt(LayoutCoordinate layoutCoordinate) {
+        return buildingData[layoutCoordinate.x, layoutCoordinate.y];
     }
 
     public float getHeightAt(MapCoordinate coordinate) {
@@ -45,6 +52,25 @@ public class Map {
         return heightMap[coordinate.xLowSample, coordinate.yLowSample];
     }
 
+    public void UpdateTerrain(TerrainType terrain, LayoutCoordinate coordinate) {
+
+    }
+
+    public void UpdateBuilding(Building building, LayoutCoordinate coordinate) {
+
+        // Get prefab for building of choise
+
+        // Remove building at this index
+
+        // Place new building
+
+
+
+        GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        cube.transform.position = new Vector3(0, 0.5f, 0);
+
+    }
+
     //// Start is called before the first frame update
     //void Start() {
 
@@ -55,6 +81,6 @@ public class Map {
     //// Update is called once per frame
     //void Update()
     //{
-        
+
     //}
 }

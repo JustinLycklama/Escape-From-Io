@@ -12,12 +12,20 @@ public class Narrator : MonoBehaviour
 
     public GameObject unit;
 
+    Material mapMaterial;
+
     // Start is called before the first frame update
     void Start() {
         grid = Tag.AStar.GetGameObject().GetComponent<PathfindingGrid>();
         mapGenerator = Tag.MapGenerator.GetGameObject().GetComponent<MapGenerator>();
         mapContainer = Tag.Map.GetGameObject().GetComponent<MapContainer>();
         constants = GetComponent<Constants>();
+
+        mapMaterial = Tag.Map.GetGameObject().GetComponent<MeshRenderer>().material;
+
+        // Pass in "towers"
+        //mapMaterial.SetVectorArray
+
 
         // Setup world
         Map map = mapGenerator.GenerateMap();

@@ -77,6 +77,12 @@ public class Unit : MonoBehaviour
             //}
         }
 
+    public void SetSelected(bool selected) {
+
+        Color tintColor = selected ? Color.cyan : Color.white;
+        gameObject.GetComponent<MeshRenderer>().material.color = tintColor;
+    }
+
     public void OnDrawGizmos() {
         if (path != null) {
             path.DrawWithGizmos();
