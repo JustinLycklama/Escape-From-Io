@@ -37,7 +37,7 @@ public class Narrator : MonoBehaviour
         grid.createGrid(map);
         grid.BlurPenaltyMap(4);
 
-        unit.GetComponent<Unit>().BeginQueueing();
+        //unit.GetComponent<Unit>().BeginQueueing();
     }
 
     // Update is called once per frame

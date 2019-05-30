@@ -44,13 +44,10 @@ public class UIManager : MonoBehaviour
 
         cube.AddComponent<Building>();
 
-
         cube.transform.localScale = new Vector3(25, 25, 25);
 
         TaskQueue queue = Script.Get<TaskQueue>();
-        queue.QueueTask(new Task(worldPosition));
-
-
+        queue.QueueTask(new GameTask(worldPosition, GameAction.Build, cube.GetComponent<Building>()));
     }
 
    /* public void textCreation() {

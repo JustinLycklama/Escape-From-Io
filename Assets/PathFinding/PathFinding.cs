@@ -22,7 +22,7 @@ public class PathFinding : MonoBehaviour {
 
     public void FindSimplifiedPath(Vector3 startPos, Vector3 targetPos, Action<WorldPosition[], bool> callback) {
         StartCoroutine(FindPath(startPos, targetPos, (path, success) => {
-            callback(SimplifyPath(path), success);
+                callback((success && path.Length > 0) ? SimplifyPath(path) : null, success);          
         }));
     }
 
@@ -56,7 +56,7 @@ public class PathFinding : MonoBehaviour {
             
             if (currentNode == targetNode) {
                 sw.Stop();
-                print("Path Took " + sw.ElapsedMilliseconds);
+                print("Path Took " + sw.ElapsedMilliseconds + " Miliseconds");
 
                 finalPath = RetracePath(targetNode).ToArray();
                 success = true;

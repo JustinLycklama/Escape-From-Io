@@ -2,29 +2,41 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Task {
+public class GameTask {
+    static int gameTaskCounter = 0;
+
+    public int taskNumber;
 
     public WorldPosition target;
+    public GameAction action;
+    public ActionableItem actionItem;
 
-    public Task(WorldPosition target) {
+    public GameTask(WorldPosition target, GameAction action, ActionableItem actionItem) {
         this.target = target;
+        this.action = action;
+        this.actionItem = actionItem;
+
+        taskNumber = gameTaskCounter;
+        gameTaskCounter++;
     }
 }
 
+public enum GameAction { Build, Destroy, Mine };
+
 public class TaskQueue : MonoBehaviour
 {
-    Queue<Task> taskQueue;
+    Queue<GameTask> taskQueue;
 
     void Awake()
     {
-        taskQueue = new Queue<Task>();
+        taskQueue = new Queue<GameTask>();
     }
 
     public void QueueBuilding() {
 
     }
 
-    public void QueueTask(Task task) {
+    public void QueueTask(GameTask task) {
         taskQueue.Enqueue(task);
     }
 
@@ -32,7 +44,7 @@ public class TaskQueue : MonoBehaviour
         return taskQueue.Count;
     }
 
-    public Task Pop() {
+    public GameTask Pop() {
         return taskQueue.Dequeue();
     }
 }
