@@ -49,6 +49,14 @@ public class PathfindingGrid : MonoBehaviour {
         }
     }
 
+    public void UpdateGrid(Map map, LayoutCoordinate layoutCoordinate) {
+        PathGridCoordinate[] updatedPathGridCoordinates = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(layoutCoordinate);
+
+        foreach (PathGridCoordinate updatedCoordinate in updatedPathGridCoordinates) {
+            grid[updatedCoordinate.xLowSample, updatedCoordinate.yLowSample].walkable = map.GetTerrainAt(layoutCoordinate).walkable;
+        }
+    }
+
     public void createGrid(Map map = null) {
         //gridSizeX = Mathf.RoundToInt(gridWorldSize.x / nodeDiameter);
         //gridSizeY = Mathf.RoundToInt(gridWorldSize.y / nodeDiameter);

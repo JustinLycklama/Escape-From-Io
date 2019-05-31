@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Unit : MonoBehaviour, Selectable
+public class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
 {
     //public Transform target;
 
@@ -14,9 +14,9 @@ public class Unit : MonoBehaviour, Selectable
     Path path;
 
     GameTask task;
+    bool navigatingToTask;
     TaskQueue taskQueue;
 
-    bool performingTask = false;
 
 
     public static int unitCount = 0;
@@ -30,10 +30,46 @@ public class Unit : MonoBehaviour, Selectable
     private void Awake() {
         title = "Unit #" + unitCount;
         unitCount++;
+
+        // PATH FLOW INIT
+
+        // DO PATH FLOW
+
+        completedTaskAction = (pathComplete) => {
+            print("Complpete Task" + task.taskNumber);
+
+            task = null;
+        };
+
+        completedPath = (pathComplete) => {
+            print("Do Action for Task" + task.taskNumber);
+            navigatingToTask = false;
+            StartCoroutine(PerformTaskAction(completedTaskAction));
+        };
+
+        foundWaypoints = (waypoints, success) => {
+            StopAllCoroutines();
+
+            if(success) {
+                print("Follow Path for Task" + task.taskNumber);
+
+                path = new Path(waypoints, transform.position, turnDistance, stoppingDistance);
+
+                StartCoroutine(FollowPath(completedPath));
+            } else {
+                // There is no path to task, we cannot do this.
+                print("Give up Task" + task.taskNumber);
+                navigatingToTask = false;
+                task = null;
+            }
+        };
+
+
     }
 
     private void Start() {
         taskQueue = Script.Get<TaskQueue>();
+        Script.Get<MapContainer>().getMap().AddTerrainUpdateDelegate(this);
     }
 
     private void Update() {
@@ -68,7 +104,17 @@ public class Unit : MonoBehaviour, Selectable
 
     string currentAction = "idle";
 
+    private void OnDestroy() {
+        Script.Get<MapContainer>().getMap().RemoveTerrainUpdateDelegate(this);
+    }
 
+    // DO PATH FLOW
+
+    System.Action<bool> completedTaskAction;
+
+    System.Action<bool> completedPath;
+
+    System.Action<WorldPosition[], bool> foundWaypoints;
 
     private void DoTask() {
 
@@ -76,101 +122,9 @@ public class Unit : MonoBehaviour, Selectable
             statusDelegate.InformCurrentTask(task);
         }
 
-        System.Action<bool> completedTaskAction = (pathComplete) => {
-            print("Complpete Task" + task.taskNumber);
-
-            performingTask = false;
-            task = null;
-        };
-
-        System.Action<bool> completedPath = (pathComplete) => {
-            print("Do Action for Task" + task.taskNumber);
-            StartCoroutine(PerformTaskAction(completedTaskAction));
-        };
-
-        System.Action<WorldPosition[], bool> foundWaypoints = (waypoints, success) => {
-            if(success) {
-                print("Follow Path for Task" + task.taskNumber);
-
-
-                path = new Path(waypoints, transform.position, turnDistance, stoppingDistance);
-
-
-
-                StartCoroutine(FollowPath(completedPath));
-            } else {
-                // There is no path to task, we cannot do this.
-                print("Give up Task" + task.taskNumber);
-
-                performingTask = false;
-                task = null;
-            }
-        };
-
+        navigatingToTask = true;
         PathRequestManager.RequestPath(transform.position, task.target.vector3, foundWaypoints);
     }
-
-    private void WaypointsFound(Vector3[] waypoints, bool success) { }
-
-    //public void beginPathFinding() {
-    //    PathRequestManager.RequestPath(transform.position, target.position, (waypoints, success) => {
-    //        if(success) {
-    //            path = new Path(waypoints, transform.position, turnDistance, stoppingDistance);
-    //            StopCoroutine(FollowPath());
-    //            StartCoroutine(FollowPath());
-    //        }
-    //    });
-    //}
-
-    //IEnumerator SearchForTask(TaskQueue taskQueue) {
-    //    while (true) {
-    //        if(taskQueue.Count() > 0) {
-    //            task = taskQueue.Pop();
-    //            DoTask();
-    //        }
-
-    //        // If nothing to queue
-    //        yield return new WaitForSeconds(0.5f);
-    //    }        
-    //}
-
-    //int pathIndex = 0;
-    /*private void FollowPath() {
-
-        //bool followingPath = true;
-
-        //transform.LookAt(path.lookPoints[0].vector3);
-
-
-        //while(followingPath) {
-            Vector2 position2D = transform.position.ToVector2();
-            while(path.turnBoundaries[pathIndex].HasCrossedLine(position2D)) {
-                if(pathIndex == path.finishLineIndex) {
-                    //followingPath = false;
-                    //BeginQueueing();
-                    return;
-                } else {
-                    pathIndex++;
-                }
-            }
-
-        //if(followingPath) {
-        float speedPercent = 1;
-
-        if(pathIndex >= path.slowDownIndex && stoppingDistance > 0) {
-            speedPercent = Mathf.Clamp(path.turnBoundaries[path.finishLineIndex].DistanceFromPoint(position2D) / stoppingDistance, 0.15f, 1);
-        }
-
-        Vector3 lookPoint = path.lookPoints[pathIndex].vector3;
-        lookPoint.y = transform.position.y;
-        Quaternion targetRotation = Quaternion.LookRotation(lookPoint - transform.position);
-        transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * turnSpeed);
-        transform.Translate(Vector3.forward * Time.deltaTime * speed * speedPercent, Space.Self);
-            //}
-
-            //yield return null;
-        //}
-    }*/
 
     IEnumerator PerformTaskAction(System.Action<bool> callBack) {
 
@@ -249,5 +203,12 @@ public class Unit : MonoBehaviour, Selectable
         }
     }
 
- 
+    // Terrain Update Delegate Interface
+
+    public void NotifyTerrainUpdate() {
+        if (task != null && navigatingToTask == true && task.target.vector3 != this.transform.position) {
+            // Request a new path if the world has updated and we are already on the move
+            PathRequestManager.RequestPath(transform.position, task.target.vector3, foundWaypoints);
+        }
+    }
 }

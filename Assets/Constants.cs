@@ -55,8 +55,10 @@ public class Script {
     public static Script MapContainer { get { return new Script(Tag.Map, typeof(MapContainer)); } }
     public static Script UIManager { get { return new Script(Tag.UIManager, typeof(UIManager)); } }
     public static Script TaskQueue { get { return new Script(Tag.Narrator, typeof(TaskQueue)); } }
+    public static Script MapGenerator { get { return new Script(Tag.MapGenerator, typeof(MapGenerator)); } }
+    public static Script PathfindingGrid { get { return new Script(Tag.AStar, typeof(PathfindingGrid)); } }
 
-    public static Script[] allScripts = new Script[] { Constants, PlayerBehaviour, MapContainer, UIManager, TaskQueue }; 
+    public static Script[] allScripts = new Script[] { Constants, PlayerBehaviour, MapContainer, UIManager, TaskQueue, MapGenerator, PathfindingGrid }; 
 
     public static T Get<T> () where T : Component {
 

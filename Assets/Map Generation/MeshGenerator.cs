@@ -57,6 +57,11 @@ public static class MeshGenerator
 
         return meshData;
     }
+
+    public static MeshData UpdateTerrainMesh(MeshData meshData, float[,] heightMap, int featuresPerLayoutPerAxis, LayoutCoordinate layoutCoordinate) {
+        // TODO: Optimize Terraform
+        return GenerateTerrainMesh(heightMap, featuresPerLayoutPerAxis);
+    }
 }
 
 public class MeshData {
@@ -74,7 +79,6 @@ public class MeshData {
 
     public MeshData(int inputDataWidth, int inputDataHeight, int featuresPerLayoutPerAxis) {
 
-        //RIGHT IN THE MIDDLE OF THIS
         this.meshWidth = inputDataWidth + inputDataWidth / featuresPerLayoutPerAxis;
         this.meshHeight = inputDataHeight + inputDataHeight / featuresPerLayoutPerAxis;
 

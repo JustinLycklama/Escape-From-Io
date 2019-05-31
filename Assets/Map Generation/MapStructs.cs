@@ -66,6 +66,20 @@ public struct PathGridCoordinate {
         y = mapCoordinate.y / constants.featuresPerLayoutPerAxis * constants.nodesPerLayoutPerAxis;
     }
 
+    public static PathGridCoordinate[] pathCoordiatesFromLayoutCoordinate (LayoutCoordinate layoutCoordinate) {
+        Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();
+
+        List<PathGridCoordinate> pathCoordinates = new List<PathGridCoordinate>();
+
+        for(int x = layoutCoordinate.x * constants.nodesPerLayoutPerAxis; x < (layoutCoordinate.x + 1) * constants.nodesPerLayoutPerAxis; x++) {
+            for(int y = layoutCoordinate.y * constants.nodesPerLayoutPerAxis; y < (layoutCoordinate.y + 1) * constants.nodesPerLayoutPerAxis; y++) {
+                pathCoordinates.Add(new PathGridCoordinate(x, y));
+            }
+        }
+
+        return pathCoordinates.ToArray();
+    }
+
     public PathGridCoordinate(float x, float y) {
         this.x = x;
         this.y = y;

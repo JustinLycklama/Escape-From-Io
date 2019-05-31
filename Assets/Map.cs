@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public interface TerrainUpdateDelegate {
+    void NotifyTerrainUpdate();
+}
+
 public class Map {
     public int mapWidth;
     public int mapHeight;
@@ -12,22 +16,37 @@ public class Map {
 
     private TerrainType[,] terrainData;
     private Building[,] buildingData;
-    float[,] heightMap;
 
-    public Map(float[,] heightMap, int featuresPerLayoutPerAxis, MeshData meshData, Texture2D meshTexture, TerrainType[,] terrainData) {
-        mapWidth = heightMap.GetLength(0);
-        mapHeight = heightMap.GetLength(1);
+    int featuresPerLayoutPerAxis;
+
+    float[,] layoutNoiseMap;
+    float[,] featuresNoiseMap;
+
+    float[,] finalHeightMap;
+
+    List<TerrainUpdateDelegate> terrainUpdateDelegates;
+
+    public Map(float[,] finalHeightMap, float[,] layoutNoiseMap, float[,] featuresNoiseMap,
+        int featuresPerLayoutPerAxis, MeshData meshData, Texture2D meshTexture, TerrainType[,] terrainData) {
+
+        mapWidth = finalHeightMap.GetLength(0);
+        mapHeight = finalHeightMap.GetLength(1);
 
         this.textureMapSize = new Vector2(mapWidth, mapHeight);
-        
-        //this.mapSize = new Vector2(mapWidth * featuresPerLayoutPerAxis, mapHeight * featuresPerLayoutPerAxis);
 
-        this.heightMap = heightMap;
+        this.featuresPerLayoutPerAxis = featuresPerLayoutPerAxis;
+
+        this.finalHeightMap = finalHeightMap;
+
+        this.layoutNoiseMap = layoutNoiseMap;
+        this.featuresNoiseMap = featuresNoiseMap;
+
         this.meshData = meshData;
         this.meshTexture = meshTexture;
         this.terrainData = terrainData;
 
         buildingData = new Building[terrainData.GetLength(0), terrainData.GetLength(1)];
+        terrainUpdateDelegates = new List<TerrainUpdateDelegate>();
     }
 
     public TerrainType GetTerrainAt(LayoutCoordinate layoutCoordinate) {
@@ -39,8 +58,8 @@ public class Map {
     }
 
     public float getHeightAt(MapCoordinate coordinate) {
-        int mapWidth = heightMap.GetLength(0);
-        int mapHeight = heightMap.GetLength(1);
+        int mapWidth = finalHeightMap.GetLength(0);
+        int mapHeight = finalHeightMap.GetLength(1);
 
         // If I have a map coordinate, should it be guarenteed to be on the map?
         //if (coordinate.x < 0 || coordinate.y < 0 || coordinate.x >= mapWidth || coordinate.y >= mapHeight) {
@@ -49,38 +68,82 @@ public class Map {
 
         // TODO: Triangle Calculations        
        
-        return heightMap[coordinate.xLowSample, coordinate.yLowSample];
+        return finalHeightMap[coordinate.xLowSample, coordinate.yLowSample];
+    }
+
+    public void AddTerrainUpdateDelegate(TerrainUpdateDelegate updateDelegate) {
+        terrainUpdateDelegates.Add(updateDelegate);
+    }
+
+    public void RemoveTerrainUpdateDelegate(TerrainUpdateDelegate updateDelegate) {
+        terrainUpdateDelegates.Remove(updateDelegate);
+    }
+
+    public UserAction[] ActionsAvailableAt(LayoutCoordinate coordinate) {
+        // Can I...
+
+        List<UserAction> actionList = new List<UserAction>();
+
+        // Build?
+        if (GetTerrainAt(coordinate).regionType == RegionType.Land) {
+            UserAction action = new UserAction();
+
+            action.description = "Build This building";
+            action.performAction = () => {
+                //Building building = new Building();
+                MapCoordinate mapCoordinate = new MapCoordinate(coordinate);
+                WorldPosition worldPosition = new WorldPosition(mapCoordinate);
+
+                worldPosition.y += 25 / 2f;
+
+                GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                cube.transform.position = worldPosition.vector3;
+
+                Material newMat = Resources.Load("BuildingMaterial", typeof(Material)) as Material;
+                cube.GetComponent<MeshRenderer>().material = newMat;
+
+                cube.AddComponent<Building>();
+
+                cube.transform.localScale = new Vector3(25, 25, 25);
+
+                TaskQueue queue = Script.Get<TaskQueue>();
+                queue.QueueTask(new GameTask(worldPosition, GameAction.Build, cube.GetComponent<Building>()));
+            };
+
+            actionList.Add(action);
+        }
+
+        // Mine?
+        if(GetTerrainAt(coordinate).regionType == RegionType.Mountain) {
+            UserAction action = new UserAction();
+
+            TerrainType landTerrain = Script.Get<MapGenerator>().TerrainForRegion(RegionType.Land);
+
+            action.description = "Mine Wall";
+            action.performAction = () => {
+                UpdateTerrain(landTerrain, coordinate);
+            };
+
+            actionList.Add(action);
+        }
+
+        return actionList.ToArray();
     }
 
     public void UpdateTerrain(TerrainType terrain, LayoutCoordinate coordinate) {
+        MapGenerator mapGenerator = Script.Get<MapGenerator>();
 
-    }
+        finalHeightMap = mapGenerator.TerraformHeightMap(layoutNoiseMap, featuresNoiseMap, coordinate, terrain);
 
-    public void UpdateBuilding(Building building, LayoutCoordinate coordinate) {
+        meshData = MeshGenerator.UpdateTerrainMesh(meshData, finalHeightMap, featuresPerLayoutPerAxis, coordinate);
 
-        // Get prefab for building of choise
+        Script.Get<MapContainer>().DrawMesh();
+        terrainData[coordinate.x, coordinate.y] = terrain;
 
-        // Remove building at this index
+        Script.Get<PathfindingGrid>().UpdateGrid(this, coordinate);
 
-        // Place new building
-
-
-
-        GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        cube.transform.position = new Vector3(0, 0.5f, 0);
-
-    }
-
-    //// Start is called before the first frame update
-    //void Start() {
-
-    //    meshFilter.sharedMesh = meshData.CreateMesh();
-    //    meshRenderer.sharedMaterial.mainTexture = meshTexture;
-    //}
-
-    //// Update is called once per frame
-    //void Update()
-    //{
-
-    //}
+        foreach (TerrainUpdateDelegate updateDelegate in terrainUpdateDelegates) {
+            updateDelegate.NotifyTerrainUpdate();
+        }
+    }   
 }

@@ -2,6 +2,27 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public enum RegionType { Water, Land, Mountain }
+
+[System.Serializable]
+public struct TerrainType {
+    public string name;
+
+    public float noiseBaseline;
+    public float noiseMax;
+
+    public bool walkable;
+    public RegionType regionType;
+
+    public Color color;
+    public bool plateau;
+    public bool plateauAtBase;
+
+    public bool ValueIsMember(float value) {
+        return value <= noiseMax && value >= noiseBaseline;
+    }
+}
+
 public class MapGenerator : MonoBehaviour {
 
     public enum DrawMode {NoiseMap, ColorMap, Mesh}
@@ -21,7 +42,27 @@ public class MapGenerator : MonoBehaviour {
 
     public TerrainType[] regions;
 
+    public TerrainType TerrainForRegion(RegionType regionType) {
+        foreach (TerrainType type in regions) {
+            if (type.regionType == regionType) {
+                return type;
+            }
+        }
+
+        return regions[0];
+    }
+
     public GameObject mapObject;
+
+    private void OnValidate() {
+        if(layoutMapWidth < 1) {
+            layoutMapWidth = 1;
+        }
+
+        if(layoutMapHeight < 1) {
+            layoutMapHeight = 1;
+        }
+    }
 
     public Map GenerateMap() {
 
@@ -46,7 +87,7 @@ public class MapGenerator : MonoBehaviour {
 
         NormalizeMap(noiseMap);
 
-        Map map = new Map(noiseMap,
+        Map map = new Map(noiseMap, layoutNoiseMap, featuresNoiseMap,
             featuresPerLayoutPerAxis,
             MeshGenerator.GenerateTerrainMesh(noiseMap, featuresPerLayoutPerAxis),
             TextureGenerator.TextureFromColorMap(CreateColorMapWithTerrain(noiseMap, terrainMap), noiseMapWidth, noiseMapHeight),
@@ -85,6 +126,37 @@ public class MapGenerator : MonoBehaviour {
        
         return map;
     }
+
+    public float[,] TerraformHeightMap(float[,] layoutNoiseMap, float[,] featuresNoiseMap, LayoutCoordinate coordinate, TerrainType terrainType) {
+
+        layoutNoiseMap[coordinate.x, coordinate.y] = terrainType.plateauAtBase ? terrainType.noiseBaseline : terrainType.noiseMax;
+
+        float[,] noiseMap = CreateMapWithFeatures(layoutNoiseMap, featuresNoiseMap);
+        NormalizeMap(noiseMap);
+
+        return noiseMap;
+    }
+
+    // PRIVATE
+
+    private float[,] CreateMapWithFeatures(float[,] layoutMap, float[,] featuresMap) {
+        int featuresWidth = featuresMap.GetLength(0);
+        int featuresHeight = featuresMap.GetLength(1);
+
+        float[,] fullMap = new float[featuresWidth, featuresHeight];
+        for(int y = 0; y < featuresWidth; y++) {
+            for(int x = 0; x < featuresHeight; x++) {
+                int sampleX = x / featuresPerLayoutPerAxis;
+                int sampleY = y / featuresPerLayoutPerAxis;
+
+                fullMap[x, y] = layoutMap[sampleX, sampleY] + (featuresMap[x, y] * featuresImpactOnLayout);
+            }
+        }
+
+        return fullMap;
+    }
+
+    // TEXTURES
 
     private Color[] CreateColorMap(float[,] noiseMap) {
 
@@ -170,23 +242,6 @@ public class MapGenerator : MonoBehaviour {
         return terrainMap;
     }
 
-    private float[,] CreateMapWithFeatures(float[,] layoutMap, float[,] featuresMap) {
-        int featuresWidth = featuresMap.GetLength(0);
-        int featuresHeight = featuresMap.GetLength(1);
-
-        float[,] fullMap = new float[featuresWidth, featuresHeight];
-        for(int y = 0; y < featuresWidth; y++) {
-            for(int x = 0; x < featuresHeight; x++) {
-                int sampleX = x / featuresPerLayoutPerAxis;
-                int sampleY = y / featuresPerLayoutPerAxis;
-
-                fullMap[x, y] = layoutMap[sampleX, sampleY] + (featuresMap[x, y] * featuresImpactOnLayout);                
-            }
-        }
-
-        return fullMap;
-    }
-
     private void NormalizeMap(float[,] noiseMap) {
         int mapWidth = noiseMap.GetLength(0);
         int mapHeight = noiseMap.GetLength(1);
@@ -217,34 +272,5 @@ public class MapGenerator : MonoBehaviour {
                 noiseMap[x, y] = Mathf.InverseLerp(minNoiseHeight, maxNoiseHeight, noiseMap[x, y]);
             }
         }
-    }
-
-    private void OnValidate() {
-        if(layoutMapWidth < 1) {
-            layoutMapWidth = 1;
-        }
-
-        if(layoutMapHeight < 1) {
-            layoutMapHeight = 1;
-        }
-    }
-}
-
-// System.Serializable shows up in inspector
-[System.Serializable]
-public struct TerrainType {
-    public string name;
-
-    public float noiseBaseline;
-    public float noiseMax;
-
-    public bool walkable;
-
-    public Color color;
-    public bool plateau;
-    public bool plateauAtBase;
-
-    public bool ValueIsMember(float value) {
-        return value <= noiseMax && value >= noiseBaseline;
     }
 }

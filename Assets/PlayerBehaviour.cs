@@ -95,32 +95,9 @@ public class Selection {
     public UserAction[] UserActions() {
         switch(selectionType) {
             case SelectionType.Terrain:
-                UserAction action = new UserAction();
-
-                action.description = "Build This building";
-                action.performAction = () => {
-                    //Building building = new Building();
-                    MapCoordinate mapCoordinate = new MapCoordinate(coordinate);
-                    WorldPosition worldPosition = new WorldPosition(mapCoordinate);
-
-                    worldPosition.y += 25 / 2f;
-
-                    GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                    cube.transform.position = worldPosition.vector3;
-
-                    Material newMat = Resources.Load("BuildingMaterial", typeof(Material)) as Material;
-                    cube.GetComponent<MeshRenderer>().material = newMat;
-
-                    cube.AddComponent<Building>();
-
-                    cube.transform.localScale = new Vector3(25, 25, 25);
-
-                    TaskQueue queue = Script.Get<TaskQueue>();
-                    queue.QueueTask(new GameTask(worldPosition, GameAction.Build, cube.GetComponent<Building>()));
-                };
-
-
-                return new[] { action };
+                Map map = Script.MapContainer.GetFromObject<MapContainer>().getMap();
+           
+                return map.ActionsAvailableAt(coordinate);
             case SelectionType.Selectable:
                 return new UserAction[0];
             default:
