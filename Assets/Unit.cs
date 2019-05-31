@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Unit : MonoBehaviour
+public class Unit : MonoBehaviour, Selectable
 {
     //public Transform target;
 
@@ -18,6 +18,20 @@ public class Unit : MonoBehaviour
 
     bool performingTask = false;
 
+
+    public static int unitCount = 0;
+
+    string title;
+
+    // Selectable Interface
+    public string description => title;
+    public StatusDelegate statusDelegate;
+
+    private void Awake() {
+        title = "Unit #" + unitCount;
+        unitCount++;
+    }
+
     private void Start() {
         taskQueue = Script.Get<TaskQueue>();
     }
@@ -26,7 +40,7 @@ public class Unit : MonoBehaviour
 
         if (task == null) {
             if (taskQueue.Count() == 0) {
-                return;
+                // Idle
             } else {
                 task = taskQueue.Pop();
                 print("Start Task " + task.taskNumber);
@@ -54,9 +68,13 @@ public class Unit : MonoBehaviour
 
     string currentAction = "idle";
 
+
+
     private void DoTask() {
-        //StopCoroutine(SearchForTask(Script.Get<TaskQueue>()));
-        //StopCoroutine(FollowPath());
+
+        if(statusDelegate != null) {
+            statusDelegate.InformCurrentTask(task);
+        }
 
         System.Action<bool> completedTaskAction = (pathComplete) => {
             print("Complpete Task" + task.taskNumber);
@@ -210,10 +228,19 @@ public class Unit : MonoBehaviour
         }
     }
 
+    // Selectable Interface
     public void SetSelected(bool selected) {
 
         Color tintColor = selected ? Color.cyan : Color.white;
         gameObject.GetComponent<MeshRenderer>().material.color = tintColor;
+    }
+
+    public void SetStatusDelegate(StatusDelegate statusDelegate) {
+        this.statusDelegate = statusDelegate;
+
+        if (statusDelegate != null) {
+            statusDelegate.InformCurrentTask(task);
+        }
     }
 
     public void OnDrawGizmos() {
@@ -221,4 +248,6 @@ public class Unit : MonoBehaviour
             path.DrawWithGizmos();
         }
     }
+
+ 
 }

@@ -4,13 +4,22 @@ using UnityEngine;
 
 public abstract class ActionableItem : MonoBehaviour {
     public abstract float performAction(GameAction action, float rate);
+    public abstract string description { get; }
 }
 
-public class Building : ActionableItem {
+public class Building : ActionableItem, Selectable {
     float percentComplete = 0;
-    Color materialColor;
+    Color materialColor = Color.red;
+    Color baseColor = Color.red;
 
     MeshRenderer renderer;
+
+    StatusDelegate statusDelegate;
+
+    private void Awake() {
+        title = "Building #" + buildingCount;
+        buildingCount++;
+    }
 
     // Start is called before the first frame update
     void Start()
@@ -18,8 +27,29 @@ public class Building : ActionableItem {
         renderer = GetComponent<MeshRenderer>();
         renderer.material.shader = Shader.Find("Transparent/Diffuse");
 
-        materialColor = renderer.material.color;
+        materialColor = baseColor;
+
+        transform.localScale = new Vector3(transform.localScale.x, transform.localScale.y * 3, transform.localScale.z);
     }
+
+    // Update is called once per frame
+    void Update() {
+        materialColor.a = Mathf.Clamp(percentComplete, 0.10f, 1f);
+        renderer.material.color = materialColor;
+    }
+
+
+    // MARK: Selectable Interface
+    public void SetSelected(bool selected) {
+        Color tintColor = selected ? Color.cyan : baseColor;
+        materialColor = tintColor;
+    }
+
+    public void SetStatusDelegate(StatusDelegate statusDelegate) {
+        this.statusDelegate = statusDelegate;
+    }
+
+    // Actionable Item
 
     // Returns the percent to completion the action is
     public override float performAction(GameAction action, float rate) {
@@ -32,8 +62,6 @@ public class Building : ActionableItem {
                 }
 
                 return percentComplete;
-            case GameAction.Destroy:
-                break;
             case GameAction.Mine:
                 break;
             default:
@@ -43,11 +71,11 @@ public class Building : ActionableItem {
         return 100;
     }
 
+    public static int buildingCount = 0;
 
-    // Update is called once per frame
-    void Update()
-    {
-        materialColor.a = Mathf.Clamp(percentComplete, 0.10f, 1f);
-        renderer.material.color = materialColor;
-    }
+    string title;
+    public override string description => title;
+
+
+
 }

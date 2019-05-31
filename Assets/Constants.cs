@@ -19,8 +19,9 @@ public class Constants : MonoBehaviour {
 
 public class Tag {
     private Tag(string value) { Value = value; }
-
     public string Value { get; set; }
+
+    private static Dictionary<Tag, GameObject> objectCache = new Dictionary<Tag, GameObject>();    
 
     public static Tag Narrator { get { return new Tag("Narrator"); } }
     public static Tag Map { get { return new Tag("Map"); } }
@@ -29,15 +30,25 @@ public class Tag {
     public static Tag UIManager { get { return new Tag("UIManager"); } }
 
     public GameObject GetGameObject() {
-        return GameObject.FindGameObjectWithTag(this.Value);
+        GameObject cachedObject;
+        if (objectCache.ContainsKey(this)) {
+            cachedObject = objectCache[this];
+        } else { 
+            cachedObject = GameObject.FindGameObjectWithTag(this.Value);
+            objectCache[this] = cachedObject;
+        }
+
+        return cachedObject;
     }
 }
 
-public struct Script {
+public class Script {
     private Script(Tag tag, Type type) { this.tag = tag; this.type = type; }
 
     private Tag tag { get; set; }
     private Type type { get; set; }
+
+    private static Dictionary<Script, Component> objectCache = new Dictionary<Script, Component>();
 
     public static Script Constants { get { return new Script(Tag.Narrator, typeof(Constants)); } }
     public static Script PlayerBehaviour { get { return new Script(Tag.Narrator, typeof(PlayerBehaviour)); } }
@@ -47,7 +58,7 @@ public struct Script {
 
     public static Script[] allScripts = new Script[] { Constants, PlayerBehaviour, MapContainer, UIManager, TaskQueue }; 
 
-    public static T Get<T> () where T : class {
+    public static T Get<T> () where T : Component {
 
         foreach (Script script in allScripts) {
             if (script.type == typeof(T)) {
@@ -58,8 +69,17 @@ public struct Script {
         return null;
     }
 
-    public T GetFromObject<T>() {
+    public T GetFromObject<T>() where T : Component {
         GameObject gameObject = tag.GetGameObject();
-        return gameObject.GetComponent<T>();
+
+        Component component;
+        if (objectCache.ContainsKey(this)) {
+            component = objectCache[this];
+        } else {  
+            component = gameObject.GetComponent<T>();
+            objectCache[this] = component;
+        }
+
+        return (T)component;
     }
 }

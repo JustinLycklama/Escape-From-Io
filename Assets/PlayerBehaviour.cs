@@ -2,16 +2,26 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public interface StatusDelegate {
+    void InformCurrentTask(GameTask task);
+}
+
+public interface Selectable {
+    void SetSelected(bool selected);
+    void SetStatusDelegate(StatusDelegate statusDelegate);
+
+    string description { get; }
+}
+
 public class Selection {
 
-    public enum SelectionType {Terrain, Building, Unit}
+    public enum SelectionType {Terrain, Selectable}
     public SelectionType selectionType;
 
     // Terrain Properties
     public LayoutCoordinate coordinate;
 
-    // Unit Properties
-    Unit unit;
+    Selectable selection;
 
     private Selection() {}
 
@@ -28,7 +38,7 @@ public class Selection {
         this.coordinate = coordinate;
 
         // Select
-        Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();              
+        Constants constants = Script.Get<Constants>();          
         Material mapMaterial = Tag.Map.GetGameObject().GetComponent<MeshRenderer>().material;
 
         mapMaterial.SetFloat("selectedXOffsetLow", coordinate.x * constants.featuresPerLayoutPerAxis - (constants.layoutMapWidth * constants.featuresPerLayoutPerAxis / 2f));
@@ -42,51 +52,84 @@ public class Selection {
         // Set info
     }
 
-    public static Selection createUnitSelection(Unit unit) {
+    public static Selection createSelectableSelection(Selectable selectable) {
         Selection selection = new Selection();
-        selection.setUnit(unit);
+        selection.selectionType = SelectionType.Selectable;
+        selection.selection = selectable;
+
+        selectable.SetSelected(true);
+        selectable.SetStatusDelegate(Script.Get<UIManager>());
 
         return selection;
     }
 
-    public void setUnit(Unit unit) {
-        selectionType = SelectionType.Unit;
-        this.unit = unit;
-
-        // Select
-        unit.SetSelected(true);
-
-        // Set info
-    }
 
     // Mutators
+
+
     public void deselectCurrent() {
         if(selectionType == SelectionType.Terrain) {
             Material mapMaterial = Tag.Map.GetGameObject().GetComponent<MeshRenderer>().material;
             mapMaterial.SetFloat("hasSelection", 0);
 
-        } else if(selectionType == SelectionType.Unit) {
-            unit.SetSelected(false);
+        } else if(selectionType == SelectionType.Selectable) {
+            selection.SetSelected(false);
+            selection.SetStatusDelegate(null);
         }
     }
 
-        // Properties
-        public string Title() {
-        if (selectionType == SelectionType.Terrain) {
-            Map map = Script.MapContainer.GetFromObject<MapContainer>().getMap();
+    // Properties
+    public string Title() {
+        switch(selectionType) {
+            case SelectionType.Terrain:
+                Map map = Script.MapContainer.GetFromObject<MapContainer>().getMap();
 
-            return map.GetTerrainAt(coordinate).name;
+                return map.GetTerrainAt(coordinate).name;
+            case SelectionType.Selectable:
+                return selection.description;             
+            default:
+                return "";
         }
-        else if (selectionType == SelectionType.Unit) {
-            return "Unit";
-        }
-
-        return "";
     }
 
+    public UserAction[] UserActions() {
+        switch(selectionType) {
+            case SelectionType.Terrain:
+                UserAction action = new UserAction();
+
+                action.description = "Build This building";
+                action.performAction = () => {
+                    //Building building = new Building();
+                    MapCoordinate mapCoordinate = new MapCoordinate(coordinate);
+                    WorldPosition worldPosition = new WorldPosition(mapCoordinate);
+
+                    worldPosition.y += 25 / 2f;
+
+                    GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    cube.transform.position = worldPosition.vector3;
+
+                    Material newMat = Resources.Load("BuildingMaterial", typeof(Material)) as Material;
+                    cube.GetComponent<MeshRenderer>().material = newMat;
+
+                    cube.AddComponent<Building>();
+
+                    cube.transform.localScale = new Vector3(25, 25, 25);
+
+                    TaskQueue queue = Script.Get<TaskQueue>();
+                    queue.QueueTask(new GameTask(worldPosition, GameAction.Build, cube.GetComponent<Building>()));
+                };
+
+
+                return new[] { action };
+            case SelectionType.Selectable:
+                return new UserAction[0];
+            default:
+                return new UserAction[0];
+        }
+    }
 }
 
-public class PlayerBehaviour : MonoBehaviour
+    public class PlayerBehaviour : MonoBehaviour
 {
     //public LayoutCoordinate selectedLayoutTile = new LayoutCoordinate(0, 0);
 
@@ -162,9 +205,15 @@ public class PlayerBehaviour : MonoBehaviour
                 // Select a unit
                 Unit unit = objectHit.GetComponent<Unit>();
                 if (unit != null) {
-                    selection = Selection.createUnitSelection(unit);
+                    selection = Selection.createSelectableSelection(unit);
                 }
-               
+
+                // Select a Building
+                Building building = objectHit.GetComponent<Building>();
+                if(building != null) {
+                    selection = Selection.createSelectableSelection(building);
+                }
+
                 Script.UIManager.GetFromObject<UIManager>().SetSelection(selection);
 
             }
