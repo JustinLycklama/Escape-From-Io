@@ -6,13 +6,16 @@ public class GameTask {
     static int gameTaskCounter = 0;
 
     public int taskNumber;
-
+    
     public WorldPosition target;
+    public PathRequestTargetType targetType;
+
     public GameAction action;
     public ActionableItem actionItem;
 
-    public GameTask(WorldPosition target, GameAction action, ActionableItem actionItem) {
+    public GameTask(WorldPosition target, GameAction action, ActionableItem actionItem, PathRequestTargetType targetType = PathRequestTargetType.World) {
         this.target = target;
+        this.targetType = targetType;
         this.action = action;
         this.actionItem = actionItem;
 
@@ -25,7 +28,8 @@ public class GameTask {
             switch(action) {
                 case GameAction.Build:
                     return "Build " + actionItem.description;
-                case GameAction.Mine:                    
+                case GameAction.Mine:
+                    return "Mine Mountain at " + target.ToString();
                 default:
                     return "";
             }

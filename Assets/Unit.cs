@@ -123,7 +123,8 @@ public class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
         }
 
         navigatingToTask = true;
-        PathRequestManager.RequestPath(transform.position, task.target.vector3, foundWaypoints);
+
+        PathRequestManager.RequestPathForTask(transform.position, task, foundWaypoints);        
     }
 
     IEnumerator PerformTaskAction(System.Action<bool> callBack) {
@@ -132,7 +133,7 @@ public class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
         ////bool performingAction = true;
 
         while (true) {
-            float completion = task.actionItem.performAction(task.action, Time.deltaTime * speed);
+            float completion = task.actionItem.performAction(task, Time.deltaTime * speed);
 
             if (completion >= 1) {
                 callBack(true);
@@ -208,7 +209,7 @@ public class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
     public void NotifyTerrainUpdate() {
         if (task != null && navigatingToTask == true && task.target.vector3 != this.transform.position) {
             // Request a new path if the world has updated and we are already on the move
-            PathRequestManager.RequestPath(transform.position, task.target.vector3, foundWaypoints);
+            PathRequestManager.RequestPathForTask(transform.position, task, foundWaypoints);
         }
     }
 }

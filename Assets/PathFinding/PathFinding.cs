@@ -14,11 +14,61 @@ public class PathFinding : MonoBehaviour {
         grid = GetComponent<PathfindingGrid>();
     }
 
-    //private void Update() {
-    //    if (Input.GetButtonDown("Jump")) {
-    //        FindPath(seeker.position, target.position);
-    //    }
-    //}
+    public void FindSimplifiedPathToAnySurrounding(Vector3 startPos, LayoutCoordinate layoutCoordinate, Action<WorldPosition[], bool> callback) {
+        Constants constants = Script.Get<Constants>();
+
+        PathGridCoordinate[][] pathGridCoordinatesOfLayout = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(layoutCoordinate);
+        List<PathGridCoordinate> gridCoordinatesSurroundingLayoutCoordinate = new List<PathGridCoordinate>();
+
+        // Left Side
+        if (layoutCoordinate.x > 0) {
+            PathGridCoordinate sample = pathGridCoordinatesOfLayout[0][Mathf.FloorToInt((constants.nodesPerLayoutPerAxis) / 2f)];               
+            gridCoordinatesSurroundingLayoutCoordinate.Add(new PathGridCoordinate(sample.xLowSample - 1, sample.yLowSample)); 
+        }
+
+        // Top Side
+        if(layoutCoordinate.y > 0) {
+            PathGridCoordinate sample = pathGridCoordinatesOfLayout[Mathf.FloorToInt((constants.nodesPerLayoutPerAxis) / 2f)][0];
+            gridCoordinatesSurroundingLayoutCoordinate.Add(new PathGridCoordinate(sample.xLowSample, sample.yLowSample - 1));
+            
+        }
+
+        // Right Side
+        if(layoutCoordinate.x < constants.layoutMapWidth - 1) {
+            PathGridCoordinate sample = pathGridCoordinatesOfLayout[constants.nodesPerLayoutPerAxis - 1][Mathf.FloorToInt((constants.nodesPerLayoutPerAxis) / 2f)];                
+            gridCoordinatesSurroundingLayoutCoordinate.Add(new PathGridCoordinate(sample.xLowSample + 1, sample.yLowSample));           
+        }
+
+        // Bottom Side
+        if(layoutCoordinate.y < constants.layoutMapHeight - 1) {
+            PathGridCoordinate sample = pathGridCoordinatesOfLayout[Mathf.FloorToInt((constants.nodesPerLayoutPerAxis) / 2f)][constants.nodesPerLayoutPerAxis - 1];
+            gridCoordinatesSurroundingLayoutCoordinate.Add(new PathGridCoordinate(sample.xLowSample, sample.yLowSample + 1));
+        }
+
+        int lowestLength = int.MaxValue;
+        Node[] foundPath = null;
+
+        int completedCalls = 0;
+
+        foreach (PathGridCoordinate gridCoordinate in gridCoordinatesSurroundingLayoutCoordinate) {
+            MapCoordinate mapCoordinate = new MapCoordinate(gridCoordinate);
+            WorldPosition worldPos = new WorldPosition(mapCoordinate);
+
+            StartCoroutine(FindPath(startPos, worldPos.vector3, (path, success) => {
+                completedCalls++;
+
+                if (success && path.Length < lowestLength) {
+                    foundPath = path;
+                    lowestLength = path.Length;
+                }
+
+                if (completedCalls == gridCoordinatesSurroundingLayoutCoordinate.Count) {
+                    bool anyPathSuccess = (foundPath != null && foundPath.Length > 0);
+                    callback(anyPathSuccess ? SimplifyPath(foundPath) : null, anyPathSuccess);
+                }
+            }));            
+        }
+    }
 
     public void FindSimplifiedPath(Vector3 startPos, Vector3 targetPos, Action<WorldPosition[], bool> callback) {
         StartCoroutine(FindPath(startPos, targetPos, (path, success) => {

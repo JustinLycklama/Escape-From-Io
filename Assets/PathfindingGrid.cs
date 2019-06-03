@@ -50,10 +50,12 @@ public class PathfindingGrid : MonoBehaviour {
     }
 
     public void UpdateGrid(Map map, LayoutCoordinate layoutCoordinate) {
-        PathGridCoordinate[] updatedPathGridCoordinates = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(layoutCoordinate);
+        PathGridCoordinate[][] updatedPathGridCoordinates = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(layoutCoordinate);
 
-        foreach (PathGridCoordinate updatedCoordinate in updatedPathGridCoordinates) {
-            grid[updatedCoordinate.xLowSample, updatedCoordinate.yLowSample].walkable = map.GetTerrainAt(layoutCoordinate).walkable;
+        foreach (PathGridCoordinate[] updatedCoordinateColumn in updatedPathGridCoordinates) {
+            foreach(PathGridCoordinate updatedCoordinate in updatedCoordinateColumn) {
+                grid[updatedCoordinate.xLowSample, updatedCoordinate.yLowSample].walkable = map.GetTerrainAt(layoutCoordinate).walkable;
+            }
         }
     }
 

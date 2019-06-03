@@ -21,6 +21,14 @@ public struct TerrainType {
     public bool ValueIsMember(float value) {
         return value <= noiseMax && value >= noiseBaseline;
     }
+
+    public static bool operator ==(TerrainType obj1, TerrainType obj2) {
+        return obj1.regionType == obj2.regionType;
+    }
+
+    public static bool operator !=(TerrainType obj1, TerrainType obj2) {
+        return !(obj1 == obj2);
+    }
 }
 
 public class MapGenerator : MonoBehaviour {
@@ -127,9 +135,10 @@ public class MapGenerator : MonoBehaviour {
         return map;
     }
 
-    public float[,] TerraformHeightMap(float[,] layoutNoiseMap, float[,] featuresNoiseMap, LayoutCoordinate coordinate, TerrainType terrainType) {
+    public float[,] TerraformHeightMap(float[,] layoutNoiseMap, float[,] featuresNoiseMap, float currentLayoutHeight, LayoutCoordinate coordinate) {
+        // TODO More interesting interpolations to mimic mining
 
-        layoutNoiseMap[coordinate.x, coordinate.y] = terrainType.plateauAtBase ? terrainType.noiseBaseline : terrainType.noiseMax;
+        layoutNoiseMap[coordinate.x, coordinate.y] = currentLayoutHeight;
 
         float[,] noiseMap = CreateMapWithFeatures(layoutNoiseMap, featuresNoiseMap);
         NormalizeMap(noiseMap);

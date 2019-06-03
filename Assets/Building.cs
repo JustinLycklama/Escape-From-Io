@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public abstract class ActionableItem : MonoBehaviour {
-    public abstract float performAction(GameAction action, float rate);
+    public abstract float performAction(GameTask task, float rate);
     public abstract string description { get; }
 }
 
@@ -52,8 +52,8 @@ public class Building : ActionableItem, Selectable {
     // Actionable Item
 
     // Returns the percent to completion the action is
-    public override float performAction(GameAction action, float rate) {
-        switch(action) {
+    public override float performAction(GameTask task, float rate) {
+        switch(task.action) {
             case GameAction.Build:
                 percentComplete += rate;
 
@@ -65,7 +65,7 @@ public class Building : ActionableItem, Selectable {
             case GameAction.Mine:
                 break;
             default:
-                throw new System.ArgumentException("Action is not handled", action.ToString());
+                throw new System.ArgumentException("Action is not handled", task.action.ToString());
         }
 
         return 100;

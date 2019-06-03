@@ -6,7 +6,7 @@ public interface TerrainUpdateDelegate {
     void NotifyTerrainUpdate();
 }
 
-public class Map {
+public class Map : ActionableItem {
     public int mapWidth;
     public int mapHeight;
     public Vector2 textureMapSize;
@@ -25,6 +25,9 @@ public class Map {
     float[,] finalHeightMap;
 
     List<TerrainUpdateDelegate> terrainUpdateDelegates;
+    Dictionary<GameTask, TerraformTarget> terraformTargetDictionary;
+
+    public override string description => "The World? What should go here";
 
     public Map(float[,] finalHeightMap, float[,] layoutNoiseMap, float[,] featuresNoiseMap,
         int featuresPerLayoutPerAxis, MeshData meshData, Texture2D meshTexture, TerrainType[,] terrainData) {
@@ -47,6 +50,7 @@ public class Map {
 
         buildingData = new Building[terrainData.GetLength(0), terrainData.GetLength(1)];
         terrainUpdateDelegates = new List<TerrainUpdateDelegate>();
+        terraformTargetDictionary = new Dictionary<GameTask, TerraformTarget>();
     }
 
     public TerrainType GetTerrainAt(LayoutCoordinate layoutCoordinate) {
@@ -121,7 +125,14 @@ public class Map {
 
             action.description = "Mine Wall";
             action.performAction = () => {
-                UpdateTerrain(landTerrain, coordinate);
+                TaskQueue queue = Script.Get<TaskQueue>();
+
+                MapCoordinate mapCoordinate = new MapCoordinate(coordinate);
+                WorldPosition worldPosition = new WorldPosition(mapCoordinate);
+
+                queue.QueueTask(new GameTask(worldPosition, GameAction.Mine, this, PathRequestTargetType.Layout));
+
+                //UpdateTerrain(landTerrain, coordinate);
             };
 
             actionList.Add(action);
@@ -133,7 +144,7 @@ public class Map {
     public void UpdateTerrain(TerrainType terrain, LayoutCoordinate coordinate) {
         MapGenerator mapGenerator = Script.Get<MapGenerator>();
 
-        finalHeightMap = mapGenerator.TerraformHeightMap(layoutNoiseMap, featuresNoiseMap, coordinate, terrain);
+        finalHeightMap = mapGenerator.TerraformHeightMap(layoutNoiseMap, featuresNoiseMap, 0.4f, coordinate);
 
         meshData = MeshGenerator.UpdateTerrainMesh(meshData, finalHeightMap, featuresPerLayoutPerAxis, coordinate);
 
@@ -145,5 +156,77 @@ public class Map {
         foreach (TerrainUpdateDelegate updateDelegate in terrainUpdateDelegates) {
             updateDelegate.NotifyTerrainUpdate();
         }
-    }   
+    }
+
+    // Actionable Item Interface
+
+    class TerraformTarget {
+        public LayoutCoordinate coordinate;
+        public TerrainType terrainTypeTarget;
+
+        public float heightTarget;
+        public float initialHeight;
+
+        public float percentage;
+
+
+        public TerraformTarget(LayoutCoordinate coordinate, TerrainType terrainTypeTarget, float heightTarget, float initialHeight) {
+            this.coordinate = coordinate;
+            this.terrainTypeTarget = terrainTypeTarget;
+            this.heightTarget = heightTarget;
+            this.initialHeight = initialHeight;
+
+            this.percentage = 0;
+        }
+
+    }
+
+    public override float performAction(GameTask task, float rate) {
+
+        TerraformTarget terraformTarget;
+
+        if (terraformTargetDictionary.ContainsKey(task)) {
+            terraformTarget = terraformTargetDictionary[task];
+        } else {
+            MapCoordinate mapCoordinate = new MapCoordinate(task.target);
+            LayoutCoordinate coordinate = new LayoutCoordinate(mapCoordinate);
+
+            TerrainType targetTerrain = Script.Get<MapGenerator>().TerrainForRegion(RegionType.Land);
+
+            if (GetTerrainAt(coordinate) == targetTerrain) {
+                // Do not attempt to terraform a target point into the same terrain type
+                return 1;
+            }
+
+            float targetTerrainHeight = targetTerrain.plateauAtBase ? targetTerrain.noiseBaseline : targetTerrain.noiseMax;
+
+            terraformTarget = new TerraformTarget(coordinate, targetTerrain, targetTerrainHeight, layoutNoiseMap[coordinate.x, coordinate.y]);
+            terraformTargetDictionary[task] = terraformTarget;
+        }
+
+        terraformTarget.percentage += rate;
+        if (terraformTarget.percentage >= 1) {
+            terraformTarget.percentage = 1;
+
+            terrainData[terraformTarget.coordinate.x, terraformTarget.coordinate.y] = terraformTarget.terrainTypeTarget;
+
+            Script.Get<PathfindingGrid>().UpdateGrid(this, terraformTarget.coordinate);
+
+            foreach(TerrainUpdateDelegate updateDelegate in terrainUpdateDelegates) {
+                updateDelegate.NotifyTerrainUpdate();
+            }
+
+            terraformTargetDictionary.Remove(task);
+        }
+
+        float currentHeightAtCoordinate = Mathf.Lerp(terraformTarget.initialHeight, terraformTarget.heightTarget, terraformTarget.percentage);
+
+        MapGenerator mapGenerator = Script.Get<MapGenerator>();
+        finalHeightMap = mapGenerator.TerraformHeightMap(layoutNoiseMap, featuresNoiseMap, currentHeightAtCoordinate, terraformTarget.coordinate);
+
+        meshData = MeshGenerator.UpdateTerrainMesh(meshData, finalHeightMap, featuresPerLayoutPerAxis, terraformTarget.coordinate);
+        Script.Get<MapContainer>().DrawMesh();
+
+        return terraformTarget.percentage;
+    }
 }
