@@ -2,17 +2,17 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class ActionableItem : MonoBehaviour {
-    public abstract float performAction(GameTask task, float rate);
-    public abstract string description { get; }
+public interface ActionableItem {
+    float performAction(GameTask task, float rate);
+    string description { get; }
 }
 
-public class Building : ActionableItem, Selectable {
+public class Building : MonoBehaviour, ActionableItem, Selectable {
     float percentComplete = 0;
     Color materialColor = Color.red;
     Color baseColor = Color.red;
 
-    MeshRenderer renderer;
+    MeshRenderer buildingRenderer;
 
     StatusDelegate statusDelegate;
 
@@ -24,8 +24,8 @@ public class Building : ActionableItem, Selectable {
     // Start is called before the first frame update
     void Start()
     {
-        renderer = GetComponent<MeshRenderer>();
-        renderer.material.shader = Shader.Find("Transparent/Diffuse");
+        buildingRenderer = GetComponent<MeshRenderer>();
+        buildingRenderer.material.shader = Shader.Find("Transparent/Diffuse");
 
         materialColor = baseColor;
 
@@ -35,7 +35,7 @@ public class Building : ActionableItem, Selectable {
     // Update is called once per frame
     void Update() {
         materialColor.a = Mathf.Clamp(percentComplete, 0.10f, 1f);
-        renderer.material.color = materialColor;
+        buildingRenderer.material.color = materialColor;
     }
 
 
@@ -52,7 +52,7 @@ public class Building : ActionableItem, Selectable {
     // Actionable Item
 
     // Returns the percent to completion the action is
-    public override float performAction(GameTask task, float rate) {
+    public float performAction(GameTask task, float rate) {
         switch(task.action) {
             case GameAction.Build:
                 percentComplete += rate;
@@ -74,7 +74,7 @@ public class Building : ActionableItem, Selectable {
     public static int buildingCount = 0;
 
     string title;
-    public override string description => title;
+    public string description => title;
 
 
 

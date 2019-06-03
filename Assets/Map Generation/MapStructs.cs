@@ -6,6 +6,10 @@ public struct LayoutCoordinate {
     public int x;
     public int y;
 
+    public string Description() {
+        return "x: " + x + " y: " + y;
+    }
+
     public LayoutCoordinate(MapCoordinate coodrinate) {
         Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();
 

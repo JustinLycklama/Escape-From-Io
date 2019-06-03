@@ -8,19 +8,24 @@ public class GameTask {
     public int taskNumber;
     
     public WorldPosition target;
+    private string targetDescription;
     public PathRequestTargetType targetType;
 
     public GameAction action;
     public ActionableItem actionItem;
 
     public GameTask(WorldPosition target, GameAction action, ActionableItem actionItem, PathRequestTargetType targetType = PathRequestTargetType.World) {
-        this.target = target;
+        this.target = target;       
         this.targetType = targetType;
         this.action = action;
         this.actionItem = actionItem;
 
         taskNumber = gameTaskCounter;
         gameTaskCounter++;
+
+        MapCoordinate mapCoordinate = new MapCoordinate(target);
+        LayoutCoordinate layoutCoordinate = new LayoutCoordinate(mapCoordinate);
+        targetDescription = layoutCoordinate.Description();
     }
 
     public string description {
@@ -29,9 +34,9 @@ public class GameTask {
                 case GameAction.Build:
                     return "Build " + actionItem.description;
                 case GameAction.Mine:
-                    return "Mine Mountain at " + target.ToString();
+                    return "Mine Mountain at " + targetDescription;
                 default:
-                    return "";
+                    return "Undefined Action";
             }
         }
     }

@@ -18,6 +18,18 @@ public struct TerrainType {
     public bool plateau;
     public bool plateauAtBase;
 
+    public override bool Equals(object obj) {
+        return base.Equals(obj);
+    }
+
+    public override int GetHashCode() {
+        return base.GetHashCode();
+    }
+
+    public override string ToString() {
+        return regionType.ToString();
+    }
+
     public bool ValueIsMember(float value) {
         return value <= noiseMax && value >= noiseBaseline;
     }

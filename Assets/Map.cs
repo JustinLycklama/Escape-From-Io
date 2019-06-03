@@ -27,7 +27,7 @@ public class Map : ActionableItem {
     List<TerrainUpdateDelegate> terrainUpdateDelegates;
     Dictionary<GameTask, TerraformTarget> terraformTargetDictionary;
 
-    public override string description => "The World? What should go here";
+    public string description => "The World? What should go here";
 
     public Map(float[,] finalHeightMap, float[,] layoutNoiseMap, float[,] featuresNoiseMap,
         int featuresPerLayoutPerAxis, MeshData meshData, Texture2D meshTexture, TerrainType[,] terrainData) {
@@ -181,7 +181,7 @@ public class Map : ActionableItem {
 
     }
 
-    public override float performAction(GameTask task, float rate) {
+    public float performAction(GameTask task, float rate) {
 
         TerraformTarget terraformTarget;
 

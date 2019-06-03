@@ -102,8 +102,6 @@ public class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
 
     //}
 
-    string currentAction = "idle";
-
     private void OnDestroy() {
         Script.Get<MapContainer>().getMap().RemoveTerrainUpdateDelegate(this);
     }
