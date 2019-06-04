@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class GameResourceManager {
@@ -12,21 +13,22 @@ public class GameResourceManager {
     }
 
     List<Ore> globalOreList;
+
     Dictionary<Refinery, Ore[]> refineryOreDistribution;
     Dictionary<Unit, List<Ore>> unitOreDistribution;
-
 
     public enum GatherType { Ore }
 
     private GameResourceManager() {
 
         globalOreList = new List<Ore>();
+
         refineryOreDistribution = new Dictionary<Refinery, Ore[]>();
         unitOreDistribution = new Dictionary<Unit, List<Ore>>();
     }
 
     public bool AnyOreAvailable() {
-        return globalOreList.Count > 0;
+        return GetAllAvailableOfType(GatherType.Ore).Count() > 0;
     }
 
     public Ore CreateOre() {
@@ -37,8 +39,8 @@ public class GameResourceManager {
         return ore;
     }
 
-    public Ore[] GetAllOfType(GatherType gatherType) {
-        return globalOreList.ToArray();
+    public Ore[] GetAllAvailableOfType(GatherType gatherType) {
+        return globalOreList.Where(ore => ore.associatedTask == null).ToArray();
     }
 
     //public void AddOreToStorage(Ore ore, Refinery refinery) {
@@ -56,6 +58,7 @@ public class GameResourceManager {
         }
 
         Ore anyOre = unitOreDistribution[oreHolder][0];
+
         unitOreDistribution[oreHolder].Remove(anyOre);
 
         GameObject.DestroyImmediate(anyOre.gameObject);
@@ -78,9 +81,14 @@ public class Ore : MonoBehaviour, ActionableItem {
     public string description => throw new NotImplementedException();
 
 
-
+    public Unit currentCarrier;
 
     float pickingUpPercent = 0;
+
+    public GameTask associatedTask;
+    public void AssociateTask(GameTask task) {
+        associatedTask = task;
+    }
 
     public float performAction(GameTask task, float rate, Unit unit) {
         switch(task.action) {
@@ -90,6 +98,9 @@ public class Ore : MonoBehaviour, ActionableItem {
 
                 if (pickingUpPercent >= 1) {
                     pickingUpPercent = 1;
+
+                    // The associatedTask is over
+                    associatedTask = null;
 
                     GameResourceManager.sharedInstance.GiveToUnit(this, unit);
                     this.transform.SetParent(unit.transform, true);

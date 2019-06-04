@@ -3,6 +3,7 @@ using UnityEngine;
 
 public interface ActionableItem {
     float performAction(GameTask task, float rate, Unit unit);
+    void AssociateTask(GameTask task);
     string description { get; }
 }
 
@@ -81,6 +82,8 @@ public class Building : MonoBehaviour, ActionableItem, Selectable {
     }
 
     // Actionable Item
+
+    public void AssociateTask(GameTask task) { }
 
     // Returns the percent to completion the action is
     public float performAction(GameTask task, float rate, Unit unit) {

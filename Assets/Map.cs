@@ -243,4 +243,6 @@ public class Map : ActionableItem {
 
         return terraformTarget.percentage;
     }
+
+    public void AssociateTask(GameTask task) {}
 }

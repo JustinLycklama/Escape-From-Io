@@ -15,7 +15,7 @@ public class PathFinding : MonoBehaviour {
     }
 
     public void FindSimplifiedPathToClosestGoal(Vector3 startPos, GameResourceManager.GatherType gatherGoal, Action<WorldPosition[], ActionableItem, bool> callback) {
-        Ore[] allOreInGame = GameResourceManager.sharedInstance.GetAllOfType(gatherGoal);
+        Ore[] allOreInGame = GameResourceManager.sharedInstance.GetAllAvailableOfType(gatherGoal);
 
         int lowestLength = int.MaxValue;
         Node[] foundPath = null;
