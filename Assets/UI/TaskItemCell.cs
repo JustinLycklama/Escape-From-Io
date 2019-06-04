@@ -7,7 +7,7 @@ public class TaskItemCell : MonoBehaviour
 {
     public Text taskDescription;
 
-    GameTask task;
+    MasterGameTask task;
 
     private string defaultText = "No Current Task"; 
 
@@ -15,7 +15,7 @@ public class TaskItemCell : MonoBehaviour
         taskDescription.text = defaultText;
     }
 
-    public void SetTask(GameTask task) {
+    public void SetTask(MasterGameTask task) {
         this.task = task;
 
         if (task != null) {

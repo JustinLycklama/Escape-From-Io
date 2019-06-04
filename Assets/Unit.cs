@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
 {
-    //public Transform target;
-
     public float speed;
     public float turnSpeed;
     public float turnDistance;
@@ -13,11 +11,12 @@ public class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
 
     Path path;
 
-    GameTask task;
+    MasterGameTask masterTask;
     bool navigatingToTask;
-    TaskQueue taskQueue;
+    TaskQueueManager taskQueueManager;
 
-
+    GameTask currentGameTask;
+    Queue<GameTask> gameTasksQueue;
 
     public static int unitCount = 0;
 
@@ -31,36 +30,41 @@ public class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
         title = "Unit #" + unitCount;
         unitCount++;
 
+        gameTasksQueue = new Queue<GameTask>();
+
         // PATH FLOW INIT
 
         // DO PATH FLOW
 
         completedTaskAction = (pathComplete) => {
-            print("Complpete Task" + task.taskNumber);
-
-            task = null;
+            ContinueGameTaskQueue();
         };
 
         completedPath = (pathComplete) => {
-            print("Do Action for Task" + task.taskNumber);
+            print("Do Action for Task" + masterTask.taskNumber);
             navigatingToTask = false;
             StartCoroutine(PerformTaskAction(completedTaskAction));
         };
 
-        foundWaypoints = (waypoints, success) => {
+        foundWaypoints = (waypoints, actionableItem, success) => {
             StopAllCoroutines();
 
             if(success) {
-                print("Follow Path for Task" + task.taskNumber);
+                print("Follow Path for Task" + masterTask.taskNumber);
 
                 path = new Path(waypoints, transform.position, turnDistance, stoppingDistance);
+
+                // When requesting a path for an unknown resource (like ore) we will get the closest resource back as an actionable item
+                if (actionableItem != null) {
+                    currentGameTask.actionItem = actionableItem;
+                }                
 
                 StartCoroutine(FollowPath(completedPath));
             } else {
                 // There is no path to task, we cannot do this.
-                print("Give up Task" + task.taskNumber);
+                print("Give up Task" + masterTask.taskNumber);
                 navigatingToTask = false;
-                task = null;
+                masterTask = null;
             }
         };
 
@@ -68,19 +72,18 @@ public class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
     }
 
     private void Start() {
-        taskQueue = Script.Get<TaskQueue>();
+        taskQueueManager = Script.Get<TaskQueueManager>();
         Script.Get<MapContainer>().getMap().AddTerrainUpdateDelegate(this);
     }
 
     private void Update() {
 
-        if (task == null) {
-            if (taskQueue.Count() == 0) {
+        if (masterTask == null) {
+            if(taskQueueManager.Count() == 0) {
                 // Idle
             } else {
-                task = taskQueue.Pop();
-                print("Start Task " + task.taskNumber);
-                //pathIndex = 0;
+                masterTask = taskQueueManager.GetNextDoableTask();
+                print("Start Task " + masterTask.taskNumber);
 
                 DoTask();
             }
@@ -112,17 +115,36 @@ public class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
 
     System.Action<bool> completedPath;
 
-    System.Action<WorldPosition[], bool> foundWaypoints;
+    System.Action<WorldPosition[], ActionableItem, bool> foundWaypoints;
 
     private void DoTask() {
 
+        // Let the UI Know our status is changing
         if(statusDelegate != null) {
-            statusDelegate.InformCurrentTask(task);
+            statusDelegate.InformCurrentTask(masterTask);
         }
 
-        navigatingToTask = true;
+        gameTasksQueue.Clear();
 
-        PathRequestManager.RequestPathForTask(transform.position, task, foundWaypoints);        
+        //navigatingToTask = true;
+        foreach (GameTask task in masterTask.childTasks) {
+            gameTasksQueue.Enqueue(task);
+        }
+
+        ContinueGameTaskQueue();
+    }
+
+    private void ContinueGameTaskQueue() {
+
+        if (gameTasksQueue.Count > 0) {
+            currentGameTask = gameTasksQueue.Dequeue();
+
+            PathRequestManager.RequestPathForTask(transform.position, currentGameTask, foundWaypoints);
+        } else {
+            print("Complpete Task" + masterTask.taskNumber);
+            masterTask = null;
+            currentGameTask = null;
+        }        
     }
 
     IEnumerator PerformTaskAction(System.Action<bool> callBack) {
@@ -131,7 +153,7 @@ public class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
         ////bool performingAction = true;
 
         while (true) {
-            float completion = task.actionItem.performAction(task, Time.deltaTime * speed);
+            float completion = currentGameTask.actionItem.performAction(currentGameTask, Time.deltaTime * speed);
 
             if (completion >= 1) {
                 callBack(true);
@@ -158,8 +180,7 @@ public class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
                     followingPath = false;
 
                     callBack(true);
-                    //BeginQueueing();
-                    yield break; // Breaking alone does not stop a coroutine
+                    yield break; // Stop Coroutine
                 } else {
                     pathIndex++;
                 }
@@ -192,7 +213,7 @@ public class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
         this.statusDelegate = statusDelegate;
 
         if (statusDelegate != null) {
-            statusDelegate.InformCurrentTask(task);
+            statusDelegate.InformCurrentTask(masterTask);
         }
     }
 
@@ -205,9 +226,9 @@ public class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
     // Terrain Update Delegate Interface
 
     public void NotifyTerrainUpdate() {
-        if (task != null && navigatingToTask == true && task.target.vector3 != this.transform.position) {
+        if (masterTask != null && navigatingToTask == true && currentGameTask.target.vector3 != this.transform.position) {
             // Request a new path if the world has updated and we are already on the move
-            PathRequestManager.RequestPathForTask(transform.position, task, foundWaypoints);
+            PathRequestManager.RequestPathForTask(transform.position, currentGameTask, foundWaypoints);
         }
     }
 }

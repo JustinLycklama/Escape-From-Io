@@ -6,8 +6,10 @@ public struct LayoutCoordinate {
     public int x;
     public int y;
 
-    public string Description() {
-        return "x: " + x + " y: " + y;
+    public string description {
+        get {
+            return "x: " + x + " y: " + y;
+        }
     }
 
     public LayoutCoordinate(MapCoordinate coodrinate) {

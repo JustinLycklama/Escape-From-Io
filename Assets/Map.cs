@@ -95,21 +95,7 @@ public class Map : ActionableItem {
         // Build?
         if (GetTerrainAt(coordinate).regionType == RegionType.Land) {
             foreach (Building.Blueprint blueprint in Building.Blueprints()) {
-                UserAction action = new UserAction();
-
-                action.description = "Build " + blueprint.description;
-                action.performAction = () => {
-
-                    worldPosition.y += 25 / 2f;
-
-                    Building building = Object.Instantiate(blueprint.resource) as Building;
-                    building.transform.position = worldPosition.vector3;
-
-                    TaskQueue queue = Script.Get<TaskQueue>();
-                    queue.QueueTask(new GameTask(worldPosition, GameAction.Build, building));
-                };
-
-                actionList.Add(action);
+                actionList.Add(blueprint.ConstructionAction(worldPosition));
             }
         }
 
@@ -121,33 +107,55 @@ public class Map : ActionableItem {
 
             action.description = "Mine Wall";
             action.performAction = () => {
-                TaskQueue queue = Script.Get<TaskQueue>();
+                TaskQueueManager queue = Script.Get<TaskQueueManager>();
 
-                queue.QueueTask(new GameTask(worldPosition, GameAction.Mine, this, PathRequestTargetType.Layout));                
+                GameTask miningTask = new GameTask(worldPosition, GameTask.ActionType.Mine, this, PathRequestTargetType.Layout);
+                MasterGameTask masterMiningTask = new MasterGameTask("Mine at location " + coordinate.description, new GameTask[] { miningTask });
+
+                queue.QueueTask(masterMiningTask);                
             };
 
             actionList.Add(action);
         }
 
+
+        // TEST ACTIONS
+        UserAction testAction1 = new UserAction();
+
+        testAction1.description = "Find Any Ore";
+        testAction1.performAction = () => {
+            TaskQueueManager queue = Script.Get<TaskQueueManager>();
+
+            GameTask oreTask = new GameTask(GameResourceManager.GatherType.Ore, GameTask.ActionType.PickUp, null);
+
+            MasterGameTask masterOreTask = new MasterGameTask("Gather Ore Somwhere ", new GameTask[] { oreTask });
+
+            queue.QueueTask(masterOreTask);
+        };
+
+        actionList.Add(testAction1);
+
+
+
         return actionList.ToArray();
     }
 
-    public void UpdateTerrain(TerrainType terrain, LayoutCoordinate coordinate) {
-        MapGenerator mapGenerator = Script.Get<MapGenerator>();
+    //public void UpdateTerrain(TerrainType terrain, LayoutCoordinate coordinate) {
+    //    MapGenerator mapGenerator = Script.Get<MapGenerator>();
 
-        finalHeightMap = mapGenerator.TerraformHeightMap(layoutNoiseMap, featuresNoiseMap, 0.4f, coordinate);
+    //    finalHeightMap = mapGenerator.TerraformHeightMap(layoutNoiseMap, featuresNoiseMap, 0.4f, coordinate);
 
-        meshData = MeshGenerator.UpdateTerrainMesh(meshData, finalHeightMap, featuresPerLayoutPerAxis, coordinate);
+    //    meshData = MeshGenerator.UpdateTerrainMesh(meshData, finalHeightMap, featuresPerLayoutPerAxis, coordinate);
 
-        Script.Get<MapContainer>().DrawMesh();
-        terrainData[coordinate.x, coordinate.y] = terrain;
+    //    Script.Get<MapContainer>().DrawMesh();
+    //    terrainData[coordinate.x, coordinate.y] = terrain;
 
-        Script.Get<PathfindingGrid>().UpdateGrid(this, coordinate);
+    //    Script.Get<PathfindingGrid>().UpdateGrid(this, coordinate);
 
-        foreach (TerrainUpdateDelegate updateDelegate in terrainUpdateDelegates) {
-            updateDelegate.NotifyTerrainUpdate();
-        }
-    }
+    //    foreach (TerrainUpdateDelegate updateDelegate in terrainUpdateDelegates) {
+    //        updateDelegate.NotifyTerrainUpdate();
+    //    }
+    //}
 
     // Actionable Item Interface
 
@@ -214,7 +222,8 @@ public class Map : ActionableItem {
 
             // Create Ore at location
 
-            Ore ore = Ore.Blueprint.Basic.Instantiate() as Ore;
+            //Ore ore = OreManager.Blueprint.Basic.Instantiate() as Ore;
+            Ore ore = GameResourceManager.sharedInstance.CreateOre();
 
             Vector3 position = task.target.vector3;
 

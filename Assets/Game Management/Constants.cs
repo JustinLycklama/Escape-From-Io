@@ -54,7 +54,7 @@ public class Script {
     public static Script PlayerBehaviour { get { return new Script(Tag.Narrator, typeof(PlayerBehaviour)); } }
     public static Script MapContainer { get { return new Script(Tag.Map, typeof(MapContainer)); } }
     public static Script UIManager { get { return new Script(Tag.UIManager, typeof(UIManager)); } }
-    public static Script TaskQueue { get { return new Script(Tag.Narrator, typeof(TaskQueue)); } }
+    public static Script TaskQueue { get { return new Script(Tag.Narrator, typeof(TaskQueueManager)); } }
     public static Script MapGenerator { get { return new Script(Tag.MapGenerator, typeof(MapGenerator)); } }
     public static Script PathfindingGrid { get { return new Script(Tag.AStar, typeof(PathfindingGrid)); } }
 
@@ -86,7 +86,7 @@ public class Script {
     }
 }
 
-public class PrefabBlueprint {
+public abstract class PrefabBlueprint {
     public PrefabBlueprint(string fileName, string description, Type type) {
         this.fileName = fileName;
         this.description = description;

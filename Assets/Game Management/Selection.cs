@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 public interface StatusDelegate {
-    void InformCurrentTask(GameTask task);
+    void InformCurrentTask(MasterGameTask task);
 }
 
 public interface Selectable {
@@ -97,6 +97,7 @@ public class Selection {
 
                 return map.ActionsAvailableAt(coordinate);
             case SelectionType.Selectable:
+
                 return new UserAction[0];
             default:
                 return new UserAction[0];

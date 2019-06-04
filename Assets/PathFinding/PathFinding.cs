@@ -14,6 +14,33 @@ public class PathFinding : MonoBehaviour {
         grid = GetComponent<PathfindingGrid>();
     }
 
+    public void FindSimplifiedPathToClosestGoal(Vector3 startPos, GameResourceManager.GatherType gatherGoal, Action<WorldPosition[], ActionableItem, bool> callback) {
+        Ore[] allOreInGame = GameResourceManager.sharedInstance.GetAllOfType(gatherGoal);
+
+        int lowestLength = int.MaxValue;
+        Node[] foundPath = null;
+        ActionableItem foundObject = null;
+
+        int completedCalls = 0;
+
+        foreach(Ore ore in allOreInGame) {
+            StartCoroutine(FindPath(startPos, ore.transform.position, (path, success) => {
+                completedCalls++;
+
+                if(success && path.Length < lowestLength) {
+                    foundPath = path;
+                    foundObject = ore;
+                    lowestLength = path.Length;
+                }
+
+                if(completedCalls == allOreInGame.Length) {
+                    bool anyPathSuccess = (foundPath != null && foundPath.Length > 0);
+                    callback(anyPathSuccess ? SimplifyPath(foundPath) : null, foundObject, anyPathSuccess);
+                }
+            }));
+        }
+    }
+
     public void FindSimplifiedPathToAnySurrounding(Vector3 startPos, LayoutCoordinate layoutCoordinate, Action<WorldPosition[], bool> callback) {
         Constants constants = Script.Get<Constants>();
 

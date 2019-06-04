@@ -45,25 +45,25 @@ public class UIManager : MonoBehaviour, TableViewDelegate, StatusDelegate
     private void buttonPress() {
 
 
-        //Building building = new Building();
-        LayoutCoordinate coordinate = Script.Get<PlayerBehaviour>().selection.coordinate;
-        MapCoordinate mapCoordinate = new MapCoordinate(coordinate);
-        WorldPosition worldPosition = new WorldPosition(mapCoordinate);
+        ////Building building = new Building();
+        //LayoutCoordinate coordinate = Script.Get<PlayerBehaviour>().selection.coordinate;
+        //MapCoordinate mapCoordinate = new MapCoordinate(coordinate);
+        //WorldPosition worldPosition = new WorldPosition(mapCoordinate);
 
-        worldPosition.y += 25 / 2f;
+        //worldPosition.y += 25 / 2f;
 
-        GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-        cube.transform.position = worldPosition.vector3;
+        //GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+        //cube.transform.position = worldPosition.vector3;
 
-        Material newMat = Resources.Load("BuildingMaterial", typeof(Material)) as Material;
-        cube.GetComponent<MeshRenderer>().material = newMat;
+        //Material newMat = Resources.Load("BuildingMaterial", typeof(Material)) as Material;
+        //cube.GetComponent<MeshRenderer>().material = newMat;
 
-        cube.AddComponent<Building>();
+        //cube.AddComponent<Building>();
 
-        cube.transform.localScale = new Vector3(25, 25, 25);
+        //cube.transform.localScale = new Vector3(25, 25, 25);
 
-        TaskQueue queue = Script.Get<TaskQueue>();
-        queue.QueueTask(new GameTask(worldPosition, GameAction.Build, cube.GetComponent<Building>()));
+        //TaskQueueManager queue = Script.Get<TaskQueueManager>();
+        //queue.QueueTask(new MasterGameTask(worldPosition, MasterGameTask.ActionType.Build, cube.GetComponent<Building>()));
     }
 
 
@@ -88,9 +88,9 @@ public class UIManager : MonoBehaviour, TableViewDelegate, StatusDelegate
     }
 
 
-    GameTask[] taskList;
+    MasterGameTask[] taskList;
 
-    public void UpdateTaskList(GameTask[] taskList) {
+    public void UpdateTaskList(MasterGameTask[] taskList) {
         this.taskList = taskList;
         queueTable.ReloadData(this);
 
@@ -135,7 +135,7 @@ public class UIManager : MonoBehaviour, TableViewDelegate, StatusDelegate
 
     // MARK Status Delegate
 
-    public void InformCurrentTask(GameTask task) {
+    public void InformCurrentTask(MasterGameTask task) {
         selectionCurrentTaskCell.SetTask(task);
     }
 

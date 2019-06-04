@@ -85,7 +85,7 @@ public class Building : MonoBehaviour, ActionableItem, Selectable {
     // Returns the percent to completion the action is
     public float performAction(GameTask task, float rate) {
         switch(task.action) {
-            case GameAction.Build:
+            case GameTask.ActionType.Build:
                 percentComplete += rate;
 
                 if (percentComplete > 1) {
@@ -93,13 +93,13 @@ public class Building : MonoBehaviour, ActionableItem, Selectable {
                 }
 
                 return percentComplete;
-            case GameAction.Mine:
+            case GameTask.ActionType.Mine:
                 break;
             default:
                 throw new System.ArgumentException("Action is not handled", task.action.ToString());
         }
 
-        return 100;
+        return 1;
     }
 
     public static int buildingCount = 0;
@@ -108,6 +108,8 @@ public class Building : MonoBehaviour, ActionableItem, Selectable {
     public string description => title;
 
 
+    
+
     // STATIC
 
     public class Blueprint : PrefabBlueprint {
@@ -115,6 +117,29 @@ public class Building : MonoBehaviour, ActionableItem, Selectable {
         public static Blueprint Refinery = new Blueprint("Refinery", "Refinery", typeof(Refinery));
 
         public Blueprint(string fileName, string description, Type type) : base(fileName, description, type) {}
+
+        public UserAction ConstructionAction(WorldPosition worldPosition) {
+            UserAction action = new UserAction {
+                description = "Build " + description,
+                performAction = () => {
+
+                    worldPosition.y += 25 / 2f;
+
+                    Building building = UnityEngine.Object.Instantiate(resource) as Building;
+                    building.transform.position = worldPosition.vector3;
+
+                    TaskQueueManager queue = Script.Get<TaskQueueManager>();
+
+                    GameTask buildTask = new GameTask(worldPosition, GameTask.ActionType.Build, building);
+                    MasterGameTask masterBuildTask = new MasterGameTask("Build Building " + building.description, new GameTask[] { buildTask });
+
+                    queue.QueueTask(masterBuildTask);
+                }
+            };
+
+            return action;
+        }
+
     }
 
     public static Blueprint[] Blueprints() {

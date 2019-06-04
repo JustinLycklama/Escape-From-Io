@@ -3,20 +3,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum PathRequestTargetType { World, Layout }
+public enum PathRequestTargetType { Unknown, World, Layout }
 
 struct PathRequest {
     public PathRequestTargetType targetType;
     
     public Vector3? pathEndWorld;
+
     public PathGridCoordinate? pathEndGrid;
     public LayoutCoordinate? pathEndLayout;
+    public GameResourceManager.GatherType? pathEndGoal;
 
     public Vector3 pathStart;
 
-    public Action<WorldPosition[], bool> callback;
+    public Action<WorldPosition[], ActionableItem, bool> callback;
 
-    public PathRequest(Vector3 _start, Vector3 _end, Action<WorldPosition[], bool> _callback) {
+    public PathRequest(Vector3 _start, Vector3 _end, Action<WorldPosition[], ActionableItem, bool> _callback) {
         pathStart = _start;
         pathEndWorld = _end;
         callback = _callback;
@@ -24,6 +26,7 @@ struct PathRequest {
         targetType = PathRequestTargetType.World;
         pathEndGrid = null;
         pathEndLayout = null;
+        pathEndGoal = null;
     }
 
     //public PathRequest(Vector3 _start, PathGridCoordinate _end, Action<WorldPosition[], bool> _callback) {
@@ -36,7 +39,7 @@ struct PathRequest {
     //    pathEndLayout = null;
     //}
 
-    public PathRequest(Vector3 _start, LayoutCoordinate _end, Action<WorldPosition[], bool> _callback) {
+    public PathRequest(Vector3 _start, LayoutCoordinate _end, Action<WorldPosition[], ActionableItem, bool> _callback) {
         pathStart = _start;
         pathEndLayout = _end;
         callback = _callback;
@@ -44,6 +47,18 @@ struct PathRequest {
         targetType = PathRequestTargetType.Layout;
         pathEndWorld = null;
         pathEndGrid = null;
+        pathEndGoal = null;
+    }
+
+    public PathRequest(Vector3 _start, GameResourceManager.GatherType goalGatherType, Action<WorldPosition[], ActionableItem, bool> _callback) {
+        pathStart = _start;
+        pathEndGoal = goalGatherType;
+        callback = _callback;
+
+        targetType = PathRequestTargetType.Unknown;
+        pathEndWorld = null;
+        pathEndGrid = null;
+        pathEndLayout = null;
     }
 }
 
@@ -69,11 +84,11 @@ public class PathRequestManager : MonoBehaviour {
     //    instance.TryProcessNext();
     //}
 
-    public static void RequestPathForTask(Vector3 position, GameTask task, System.Action<WorldPosition[], bool> callback) {
+    public static void RequestPathForTask(Vector3 position, GameTask task, System.Action<WorldPosition[], ActionableItem, bool> callback) {
 
         PathRequest? request = null;
 
-        switch(task.targetType) {
+        switch(task.pathRequestTargetType) {
             case PathRequestTargetType.World:
                 request = new PathRequest(position, task.target.vector3, callback);
                 break;
@@ -81,7 +96,10 @@ public class PathRequestManager : MonoBehaviour {
                 MapCoordinate mapCoordinate = new MapCoordinate(task.target);
                 LayoutCoordinate layoutCoordinate = new LayoutCoordinate(mapCoordinate);
                 request = new PathRequest(position, layoutCoordinate, callback);
-                break;            
+                break;
+            case PathRequestTargetType.Unknown:
+                request = new PathRequest(position, task.gatherType, callback);
+                break;
         }
 
         if (request.HasValue) {
@@ -100,22 +118,34 @@ public class PathRequestManager : MonoBehaviour {
             currentPathRequest = pathRequestQueue.Dequeue();
             isProcessingPath = true;
 
-            if (currentPathRequest.targetType == PathRequestTargetType.World) {
-                pathFinding.FindSimplifiedPath(currentPathRequest.pathStart, currentPathRequest.pathEndWorld.Value, (path, success) => {
-                    currentPathRequest.callback(path, success);
-                    isProcessingPath = false;
+            switch(currentPathRequest.targetType) {
+                case PathRequestTargetType.Unknown:
+                    pathFinding.FindSimplifiedPathToClosestGoal(currentPathRequest.pathStart, currentPathRequest.pathEndGoal.Value, (path, actionableItem, success) => {
+                        currentPathRequest.callback(path, actionableItem, success);
+                        isProcessingPath = false;
 
-                    TryProcessNext();
-                });
-            } else if(currentPathRequest.targetType == PathRequestTargetType.Layout) {
+                        TryProcessNext();
+                    });
+                    break;
+                case PathRequestTargetType.World:
+                    pathFinding.FindSimplifiedPath(currentPathRequest.pathStart, currentPathRequest.pathEndWorld.Value, (path, success) => {
+                        currentPathRequest.callback(path, null, success);
+                        isProcessingPath = false;
 
-                pathFinding.FindSimplifiedPathToAnySurrounding(currentPathRequest.pathStart, currentPathRequest.pathEndLayout.Value, (path, success) => {
-                    currentPathRequest.callback(path, success);
-                    isProcessingPath = false;
+                        TryProcessNext();
+                    });
 
-                    TryProcessNext();
-                });
-            }           
+
+                    break;
+                case PathRequestTargetType.Layout:
+                    pathFinding.FindSimplifiedPathToAnySurrounding(currentPathRequest.pathStart, currentPathRequest.pathEndLayout.Value, (path, success) => {
+                        currentPathRequest.callback(path, null, success);
+                        isProcessingPath = false;
+
+                        TryProcessNext();
+                    });
+                    break;
+            }
         }
     }
 }
