@@ -84,37 +84,33 @@ public class Map : ActionableItem {
     }
 
     public UserAction[] ActionsAvailableAt(LayoutCoordinate coordinate) {
+
+        MapCoordinate mapCoordinate = new MapCoordinate(coordinate);
+        WorldPosition worldPosition = new WorldPosition(mapCoordinate);
+
         // Can I...
 
         List<UserAction> actionList = new List<UserAction>();
 
         // Build?
         if (GetTerrainAt(coordinate).regionType == RegionType.Land) {
-            UserAction action = new UserAction();
+            foreach (Building.Blueprint blueprint in Building.Blueprints()) {
+                UserAction action = new UserAction();
 
-            action.description = "Build This building";
-            action.performAction = () => {
-                //Building building = new Building();
-                MapCoordinate mapCoordinate = new MapCoordinate(coordinate);
-                WorldPosition worldPosition = new WorldPosition(mapCoordinate);
+                action.description = "Build " + blueprint.description;
+                action.performAction = () => {
 
-                worldPosition.y += 25 / 2f;
+                    worldPosition.y += 25 / 2f;
 
-                GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                cube.transform.position = worldPosition.vector3;
+                    Building building = Object.Instantiate(blueprint.resource) as Building;
+                    building.transform.position = worldPosition.vector3;
 
-                Material newMat = Resources.Load("BuildingMaterial", typeof(Material)) as Material;
-                cube.GetComponent<MeshRenderer>().material = newMat;
+                    TaskQueue queue = Script.Get<TaskQueue>();
+                    queue.QueueTask(new GameTask(worldPosition, GameAction.Build, building));
+                };
 
-                cube.AddComponent<Building>();
-
-                cube.transform.localScale = new Vector3(25, 25, 25);
-
-                TaskQueue queue = Script.Get<TaskQueue>();
-                queue.QueueTask(new GameTask(worldPosition, GameAction.Build, cube.GetComponent<Building>()));
-            };
-
-            actionList.Add(action);
+                actionList.Add(action);
+            }
         }
 
         // Mine?
@@ -127,12 +123,7 @@ public class Map : ActionableItem {
             action.performAction = () => {
                 TaskQueue queue = Script.Get<TaskQueue>();
 
-                MapCoordinate mapCoordinate = new MapCoordinate(coordinate);
-                WorldPosition worldPosition = new WorldPosition(mapCoordinate);
-
-                queue.QueueTask(new GameTask(worldPosition, GameAction.Mine, this, PathRequestTargetType.Layout));
-
-                //UpdateTerrain(landTerrain, coordinate);
+                queue.QueueTask(new GameTask(worldPosition, GameAction.Mine, this, PathRequestTargetType.Layout));                
             };
 
             actionList.Add(action);
@@ -208,13 +199,27 @@ public class Map : ActionableItem {
         if (terraformTarget.percentage >= 1) {
             terraformTarget.percentage = 1;
 
+            // Terraform complete
+
+            // Update the terrain type at this location
             terrainData[terraformTarget.coordinate.x, terraformTarget.coordinate.y] = terraformTarget.terrainTypeTarget;
 
+            // Update pathfinding grid
             Script.Get<PathfindingGrid>().UpdateGrid(this, terraformTarget.coordinate);
 
+            // Notify all users of path finding grid about ubdate
             foreach(TerrainUpdateDelegate updateDelegate in terrainUpdateDelegates) {
                 updateDelegate.NotifyTerrainUpdate();
             }
+
+            // Create Ore at location
+
+            Ore ore = Ore.Blueprint.Basic.Instantiate() as Ore;
+
+            Vector3 position = task.target.vector3;
+
+            ore.transform.position = position;
+
 
             terraformTargetDictionary.Remove(task);
         }

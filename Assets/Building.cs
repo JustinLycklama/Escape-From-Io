@@ -1,5 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using UnityEngine;
 
 public interface ActionableItem {
@@ -7,12 +6,45 @@ public interface ActionableItem {
     string description { get; }
 }
 
+//public class BuildingManager {
+
+//    public static BuildingManager sharedInstance = new BuildingManager();
+
+//    public class Blueprint {
+
+//        public Blueprint(string fileName, string description, Type type) {
+//            this.fileName = fileName;
+//            this.description = description;
+//            this.type = type;
+
+//            this.resource = Resources.Load(fileName, type);
+//        }
+
+//        public string fileName { get; set; }
+//        public string description { get; set; }
+//        public Type type { get; set; }
+
+//        public UnityEngine.Object resource;
+
+//        public static Blueprint Tower = new Blueprint("Tower", "Light Tower", typeof(Tower));
+//        public static Blueprint Refinery = new Blueprint("Refinery", "Refinery", typeof(Refinery));
+
+//    }
+
+//    public Blueprint[] AvailableBuildings() {
+//        return new Blueprint[] { Blueprint.Tower, Blueprint.Tower };
+//    }
+//}
+
+
 public class Building : MonoBehaviour, ActionableItem, Selectable {
     float percentComplete = 0;
-    Color materialColor = Color.red;
-    Color baseColor = Color.red;
+    Color materialColor;
+    Color baseColor;
 
-    MeshRenderer buildingRenderer;
+    Renderer buildingRenderer;
+
+    public Material material;
 
     StatusDelegate statusDelegate;
 
@@ -24,12 +56,11 @@ public class Building : MonoBehaviour, ActionableItem, Selectable {
     // Start is called before the first frame update
     void Start()
     {
-        buildingRenderer = GetComponent<MeshRenderer>();
-        buildingRenderer.material.shader = Shader.Find("Transparent/Diffuse");
+        buildingRenderer = GetComponent<Renderer>();
+        //buildingRenderer.material.shader = Shader.Find("Transparent/Diffuse");
 
-        materialColor = baseColor;
-
-        transform.localScale = new Vector3(transform.localScale.x, transform.localScale.y * 3, transform.localScale.z);
+        baseColor = buildingRenderer.material.color;
+        materialColor = baseColor;      
     }
 
     // Update is called once per frame
@@ -77,5 +108,16 @@ public class Building : MonoBehaviour, ActionableItem, Selectable {
     public string description => title;
 
 
+    // STATIC
 
+    public class Blueprint : PrefabBlueprint {
+        public static Blueprint Tower = new Blueprint("Tower", "Light Tower", typeof(Tower));
+        public static Blueprint Refinery = new Blueprint("Refinery", "Refinery", typeof(Refinery));
+
+        public Blueprint(string fileName, string description, Type type) : base(fileName, description, type) {}
+    }
+
+    public static Blueprint[] Blueprints() {
+        return new Blueprint[] { Blueprint.Tower, Blueprint.Refinery };
+    }
 }

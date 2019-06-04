@@ -85,3 +85,23 @@ public class Script {
         return (T)component;
     }
 }
+
+public class PrefabBlueprint {
+    public PrefabBlueprint(string fileName, string description, Type type) {
+        this.fileName = fileName;
+        this.description = description;
+        this.type = type;
+
+        this.resource = Resources.Load(fileName, type);
+    }
+
+    public string fileName { get; set; }
+    public string description { get; set; }
+    public Type type { get; set; }
+
+    public UnityEngine.Object resource;
+
+    public UnityEngine.Object Instantiate() {
+        return UnityEngine.Object.Instantiate(resource);
+    }
+}
