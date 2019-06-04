@@ -13,6 +13,8 @@ public class GameResourceManager {
 
     List<Ore> globalOreList;
     Dictionary<Refinery, Ore[]> refineryOreDistribution;
+    Dictionary<Unit, List<Ore>> unitOreDistribution;
+
 
     public enum GatherType { Ore }
 
@@ -20,6 +22,11 @@ public class GameResourceManager {
 
         globalOreList = new List<Ore>();
         refineryOreDistribution = new Dictionary<Refinery, Ore[]>();
+        unitOreDistribution = new Dictionary<Unit, List<Ore>>();
+    }
+
+    public bool AnyOreAvailable() {
+        return globalOreList.Count > 0;
     }
 
     public Ore CreateOre() {
@@ -42,16 +49,62 @@ public class GameResourceManager {
 
     //}
 
-    public void ConsumeOreInBuilding(Ore ore, Building building) {
-        globalOreList.Remove(ore);
+    public bool ConsumeInBuilding(Unit oreHolder, Building building) {
+        
+        if (!unitOreDistribution.ContainsKey(oreHolder) || unitOreDistribution[oreHolder].Count == 0) {
+            return false;
+        }
 
+        Ore anyOre = unitOreDistribution[oreHolder][0];
+        unitOreDistribution[oreHolder].Remove(anyOre);
+
+        GameObject.DestroyImmediate(anyOre.gameObject);
+
+        return true;
+    }
+
+    public void GiveToUnit(Ore ore, Unit unit) {
+        if (!unitOreDistribution.ContainsKey(unit)) {
+            unitOreDistribution.Add(unit, new List<Ore>());
+        }
+
+        List<Ore> oreList = unitOreDistribution[unit];
+        globalOreList.Remove(ore);
+        oreList.Add(ore);
     }
 }
 
 public class Ore : MonoBehaviour, ActionableItem {
     public string description => throw new NotImplementedException();
 
-    public float performAction(GameTask task, float rate) {
-        return 1;
+
+
+
+    float pickingUpPercent = 0;
+
+    public float performAction(GameTask task, float rate, Unit unit) {
+        switch(task.action) {
+
+            case GameTask.ActionType.PickUp:
+                pickingUpPercent += rate;
+
+                if (pickingUpPercent >= 1) {
+                    pickingUpPercent = 1;
+
+                    GameResourceManager.sharedInstance.GiveToUnit(this, unit);
+                    this.transform.SetParent(unit.transform, true);
+                }
+
+                break;
+            case GameTask.ActionType.DropOff:
+                break;
+
+            case GameTask.ActionType.Build:
+            case GameTask.ActionType.Mine:
+            default:
+                throw new NotImplementedException();
+        }
+
+        return pickingUpPercent;
     }
 }

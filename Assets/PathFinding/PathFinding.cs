@@ -23,6 +23,10 @@ public class PathFinding : MonoBehaviour {
 
         int completedCalls = 0;
 
+        if (allOreInGame.Length == 0) {
+            callback(null, null, false);
+        }
+
         foreach(Ore ore in allOreInGame) {
             StartCoroutine(FindPath(startPos, ore.transform.position, (path, success) => {
                 completedCalls++;

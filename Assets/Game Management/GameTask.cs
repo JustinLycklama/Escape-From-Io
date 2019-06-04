@@ -16,7 +16,7 @@ public class ResourceTarget<T> {
 
 public class GameTask {
 
-    public enum ActionType { Build, Mine, PickUp, Return };
+    public enum ActionType { Build, Mine, PickUp, DropOff };
 
     public WorldPosition target;
     private string targetDescription;
@@ -30,6 +30,8 @@ public class GameTask {
     public ActionableItem actionItem;
 
     public MasterGameTask parentTask;
+
+    public System.Func<bool> SatisfiesStartRequirements;
 
     public GameTask(WorldPosition target, ActionType action, ActionableItem actionItem, PathRequestTargetType targetType = PathRequestTargetType.World) {
         this.target = target;
@@ -85,6 +87,19 @@ public class MasterGameTask {
         }
     }
 
+    public bool SatisfiesStartRequirements() {
+        foreach (GameTask task in childTasks) {
+            if (task.SatisfiesStartRequirements == null) {
+                continue;
+            }
+
+            if (!task.SatisfiesStartRequirements()) {
+                return false;
+            }
+        }
+
+        return true;
+    }
         
     //    {
     //    get {

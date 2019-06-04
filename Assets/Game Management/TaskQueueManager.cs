@@ -4,32 +4,35 @@ using UnityEngine;
 
 public class TaskQueueManager : MonoBehaviour
 {
-    Queue<MasterGameTask> taskQueue;
+    List<MasterGameTask> taskList;
     UIManager uiManager;
 
     void Awake()
     {
-        taskQueue = new Queue<MasterGameTask>();
+        taskList = new List<MasterGameTask>();
         uiManager = Script.Get<UIManager>();
     }
 
     public int Count() {
-        return taskQueue.Count;
+        return taskList.Count;
     }
 
     public void QueueTask(MasterGameTask task) {
-        taskQueue.Enqueue(task);
-        uiManager.UpdateTaskList(taskQueue.ToArray());
+        taskList.Add(task);
+        uiManager.UpdateTaskList(taskList.ToArray());
     }
 
     public MasterGameTask GetNextDoableTask() {
-        if (taskQueue.Count == 0) {
-            return null ;
+        foreach(MasterGameTask masterTask in taskList) {
+            if (masterTask.SatisfiesStartRequirements()) {
+
+                taskList.Remove(masterTask);
+                uiManager.UpdateTaskList(taskList.ToArray());
+
+                return masterTask;
+            }
         }
 
-        MasterGameTask task = taskQueue.Dequeue();
-        uiManager.UpdateTaskList(taskQueue.ToArray());
-
-        return task;
+        return null;
     }
 }

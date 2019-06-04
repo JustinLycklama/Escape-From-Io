@@ -63,12 +63,18 @@ public class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
             } else {
                 // There is no path to task, we cannot do this.
                 print("Give up Task" + masterTask.taskNumber);
+                print("Put task back in Queue");
+
+                taskQueueManager.QueueTask(masterTask);
+                timeBeforeNextTaskCheck = 1;
+
                 navigatingToTask = false;
+
+                gameTasksQueue.Clear();
+                currentGameTask = null;
                 masterTask = null;
             }
         };
-
-
     }
 
     private void Start() {
@@ -76,34 +82,27 @@ public class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
         Script.Get<MapContainer>().getMap().AddTerrainUpdateDelegate(this);
     }
 
+    float timeBeforeNextTaskCheck = 0;
     private void Update() {
 
-        if (masterTask == null) {
-            if(taskQueueManager.Count() == 0) {
-                // Idle
-            } else {
-                masterTask = taskQueueManager.GetNextDoableTask();
-                print("Start Task " + masterTask.taskNumber);
+        if (timeBeforeNextTaskCheck <= 0) {
+            timeBeforeNextTaskCheck = 0.10f;
 
-                DoTask();
+            if(masterTask == null) {
+                masterTask = taskQueueManager.GetNextDoableTask();
+
+                // if we still have to task to do, we are IDLE
+                if (masterTask == null) {
+                    return;
+                }
+
+                print("Start Task " + masterTask.taskNumber);
+                DoTask();                
             }
         }
 
-        //// Walk to Target
-        //if (transform.position != task.target.vector3) {
-        //    FollowPath();
-        //} else {
-        //    // Do Task action
-
-        //    task = null;
-        //}
+        timeBeforeNextTaskCheck -= Time.deltaTime;
     }
-
-    //public void BeginQueueing() {
-    //    StartCoroutine(SearchForTask(Script.Get<TaskQueue>()));
-
-
-    //}
 
     private void OnDestroy() {
         Script.Get<MapContainer>().getMap().RemoveTerrainUpdateDelegate(this);
@@ -153,7 +152,7 @@ public class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
         ////bool performingAction = true;
 
         while (true) {
-            float completion = currentGameTask.actionItem.performAction(currentGameTask, Time.deltaTime * speed);
+            float completion = currentGameTask.actionItem.performAction(currentGameTask, Time.deltaTime * speed, this);
 
             if (completion >= 1) {
                 callBack(true);

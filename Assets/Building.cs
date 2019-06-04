@@ -2,7 +2,7 @@
 using UnityEngine;
 
 public interface ActionableItem {
-    float performAction(GameTask task, float rate);
+    float performAction(GameTask task, float rate, Unit unit);
     string description { get; }
 }
 
@@ -83,32 +83,32 @@ public class Building : MonoBehaviour, ActionableItem, Selectable {
     // Actionable Item
 
     // Returns the percent to completion the action is
-    public float performAction(GameTask task, float rate) {
+    public float performAction(GameTask task, float rate, Unit unit) {
         switch(task.action) {
             case GameTask.ActionType.Build:
                 percentComplete += rate;
 
-                if (percentComplete > 1) {
+                if(percentComplete > 1) {
                     percentComplete = 1;
                 }
 
-                return percentComplete;
+                return percentComplete;                       
+            case GameTask.ActionType.DropOff:
+
+                GameResourceManager.sharedInstance.ConsumeInBuilding(unit, this);
+
+                return 1;
             case GameTask.ActionType.Mine:
-                break;
+            case GameTask.ActionType.PickUp:
             default:
                 throw new System.ArgumentException("Action is not handled", task.action.ToString());
         }
-
-        return 1;
     }
 
     public static int buildingCount = 0;
 
     string title;
     public string description => title;
-
-
-    
 
     // STATIC
 
@@ -130,8 +130,15 @@ public class Building : MonoBehaviour, ActionableItem, Selectable {
 
                     TaskQueueManager queue = Script.Get<TaskQueueManager>();
 
+                    GameTask oreTask = new GameTask(GameResourceManager.GatherType.Ore, GameTask.ActionType.PickUp, null);
+                    oreTask.SatisfiesStartRequirements = () => {
+                        return GameResourceManager.sharedInstance.AnyOreAvailable();
+                    };
+
+                    GameTask dropTask = new GameTask(worldPosition, GameTask.ActionType.DropOff, building);
+
                     GameTask buildTask = new GameTask(worldPosition, GameTask.ActionType.Build, building);
-                    MasterGameTask masterBuildTask = new MasterGameTask("Build Building " + building.description, new GameTask[] { buildTask });
+                    MasterGameTask masterBuildTask = new MasterGameTask("Build Building " + building.description, new GameTask[] { oreTask, dropTask, buildTask });
 
                     queue.QueueTask(masterBuildTask);
                 }
