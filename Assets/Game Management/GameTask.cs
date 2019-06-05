@@ -2,18 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-
-//public class GatherGameTask : GameTask {
-//    public GatherGameTask(WorldPosition target, ActionType action, ActionableItem actionItem, PathRequestTargetType targetType = PathRequestTargetType.World) : base(target, action, actionItem, targetType) {}
-
-
-
-//}
-
-public class ResourceTarget<T> {
-
-}
-
 public class GameTask {
 
     public enum ActionType { Build, Mine, PickUp, DropOff };
@@ -24,7 +12,6 @@ public class GameTask {
 
     // Target for Gather Action
     public GameResourceManager.GatherType gatherType = GameResourceManager.GatherType.Ore;
-
 
     public ActionType action;
     public ActionableItem actionItem;
@@ -59,13 +46,13 @@ public class MasterGameTask {
     private static int gameTaskCounter = 0;
 
     // Don't know if we need a type on the master...
-    public enum ActionType { Mine, Build, Gather};
-    public ActionType action;
+    public enum ActionType { Mine, Build, Move};
+    public ActionType actionType;
 
     public int taskNumber;
 
-    // TODO: SUB TASK
     public MasterGameTask blockerTask;
+    public MasterGameTask taskBlockedByThis;
 
     // We will create a child for each time this parent task needs to repeat
     public int repeatCount = 0;
@@ -73,11 +60,12 @@ public class MasterGameTask {
 
     public string description;
 
-    public MasterGameTask(string description, GameTask[] childTasks) {
+    public MasterGameTask(ActionType actionType, string description, GameTask[] childTasks, MasterGameTask blocker = null) {
 
         taskNumber = gameTaskCounter;
         gameTaskCounter++;
 
+        this.actionType = actionType;
         this.description = description;
         this.childTasks = new List<GameTask>();
 
@@ -85,9 +73,31 @@ public class MasterGameTask {
             this.childTasks.Add(task);
             task.parentTask = this;
         }
+
+        if (blocker != null) {
+            blockerTask = blocker;
+            blockerTask.taskBlockedByThis = this;
+        }
+    }
+
+    public void MarkTaskFinished() {
+        if (taskBlockedByThis != null) {
+            taskBlockedByThis.UnblockTask(this);
+            taskBlockedByThis = null;
+        }
+    }
+
+    public void UnblockTask(MasterGameTask blockerTask) {
+        if (this.blockerTask == blockerTask) {
+            this.blockerTask = null;
+        }        
     }
 
     public bool SatisfiesStartRequirements() {
+        if (blockerTask != null) {
+            return false;
+        }
+
         foreach (GameTask task in childTasks) {
             if (task.SatisfiesStartRequirements == null) {
                 continue;

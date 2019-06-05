@@ -110,7 +110,7 @@ public class Map : ActionableItem {
                 TaskQueueManager queue = Script.Get<TaskQueueManager>();
 
                 GameTask miningTask = new GameTask(worldPosition, GameTask.ActionType.Mine, this, PathRequestTargetType.Layout);
-                MasterGameTask masterMiningTask = new MasterGameTask("Mine at location " + coordinate.description, new GameTask[] { miningTask });
+                MasterGameTask masterMiningTask = new MasterGameTask(MasterGameTask.ActionType.Mine, "Mine at location " + coordinate.description, new GameTask[] { miningTask });
 
                 queue.QueueTask(masterMiningTask);                
             };
@@ -120,20 +120,20 @@ public class Map : ActionableItem {
 
 
         // TEST ACTIONS
-        UserAction testAction1 = new UserAction();
+        //UserAction testAction1 = new UserAction();
 
-        testAction1.description = "Find Any Ore";
-        testAction1.performAction = () => {
-            TaskQueueManager queue = Script.Get<TaskQueueManager>();
+        //testAction1.description = "Find Any Ore";
+        //testAction1.performAction = () => {
+        //    TaskQueueManager queue = Script.Get<TaskQueueManager>();
 
-            GameTask oreTask = new GameTask(GameResourceManager.GatherType.Ore, GameTask.ActionType.PickUp, null);
+        //    GameTask oreTask = new GameTask(GameResourceManager.GatherType.Ore, GameTask.ActionType.PickUp, null);
 
-            MasterGameTask masterOreTask = new MasterGameTask("Gather Ore Somwhere ", new GameTask[] { oreTask });
+        //    MasterGameTask masterOreTask = new MasterGameTask("Gather Ore Somwhere ", new GameTask[] { oreTask });
 
-            queue.QueueTask(masterOreTask);
-        };
+        //    queue.QueueTask(masterOreTask);
+        //};
 
-        actionList.Add(testAction1);
+        //actionList.Add(testAction1);
 
 
 

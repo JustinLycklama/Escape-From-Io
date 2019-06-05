@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
+public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
 {
     public float speed;
     public float turnSpeed;
@@ -21,6 +21,8 @@ public class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
     public static int unitCount = 0;
 
     string title;
+
+    abstract public MasterGameTask.ActionType primaryActionType { get; }
 
     // Selectable Interface
     public string description => title;
@@ -143,6 +145,7 @@ public class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
         } else {
             print("Complpete Task" + masterTask.taskNumber);
 
+            masterTask.MarkTaskFinished();
             masterTask = null;
             currentGameTask = null;
             timeBeforeNextTaskCheck = 0;

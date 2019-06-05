@@ -141,8 +141,11 @@ public class Building : MonoBehaviour, ActionableItem, Selectable {
                     GameTask dropTask = new GameTask(worldPosition, GameTask.ActionType.DropOff, building);
 
                     GameTask buildTask = new GameTask(worldPosition, GameTask.ActionType.Build, building);
-                    MasterGameTask masterBuildTask = new MasterGameTask("Build Building " + building.description, new GameTask[] { oreTask, dropTask, buildTask });
 
+                    MasterGameTask masterCollectTask = new MasterGameTask(MasterGameTask.ActionType.Move, "Build Building " + building.description, new GameTask[] { oreTask, dropTask });
+                    MasterGameTask masterBuildTask = new MasterGameTask(MasterGameTask.ActionType.Build, "Build Building " + building.description, new GameTask[] { buildTask }, masterCollectTask);
+
+                    queue.QueueTask(masterCollectTask);
                     queue.QueueTask(masterBuildTask);
                 }
             };
