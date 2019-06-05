@@ -22,17 +22,38 @@ public class TaskQueueManager : MonoBehaviour
         uiManager.UpdateTaskList(taskList.ToArray());
     }
 
-    public MasterGameTask GetNextDoableTask() {
+    public MasterGameTask GetNextDoableTask(Unit unit) {
+
+        float shortestDistance = float.MaxValue;
+        MasterGameTask shortestTask = null;
+
         foreach(MasterGameTask masterTask in taskList) {
             if (masterTask.SatisfiesStartRequirements()) {
 
-                taskList.Remove(masterTask);
-                uiManager.UpdateTaskList(taskList.ToArray());
+                if (masterTask.childTasks[0].pathRequestTargetType != PathRequestTargetType.Unknown) {
+                    float distance = Vector3.Distance(masterTask.childTasks[0].target.vector3, unit.transform.position);
 
-                return masterTask;
+                    if (distance < shortestDistance) {
+                        shortestDistance = distance;
+                        shortestTask = masterTask;
+                    }
+                } else {
+                    if (shortestTask == null) {
+                        shortestTask = masterTask;
+                    }
+
+                    // If we have an unknown task, this is the end of our search. 
+                    // Either we have a task above that is more important, and the shortest of those is the victor, or we use this unknown as the shortest task;
+                    break; 
+                }
             }
         }
 
-        return null;
+        if (shortestTask != null) {
+            taskList.Remove(shortestTask);
+            uiManager.UpdateTaskList(taskList.ToArray());
+        }       
+
+        return shortestTask;       
     }
 }

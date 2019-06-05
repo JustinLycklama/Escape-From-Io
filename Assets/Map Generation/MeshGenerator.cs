@@ -58,9 +58,50 @@ public static class MeshGenerator
         return meshData;
     }
 
-    public static MeshData UpdateTerrainMesh(MeshData meshData, float[,] heightMap, int featuresPerLayoutPerAxis, LayoutCoordinate layoutCoordinate) {
+    public static void UpdateTerrainMesh(MeshData meshData, float[,] heightMap, int featuresPerLayoutPerAxis, LayoutCoordinate layoutCoordinate) {
         // TODO: Optimize Terraform
-        return GenerateTerrainMesh(heightMap, featuresPerLayoutPerAxis);
+        for(int y = 0; y < featuresPerLayoutPerAxis; y++) {
+            int sampleY = layoutCoordinate.y * featuresPerLayoutPerAxis + y;
+            int meshPositionY = layoutCoordinate.y * (featuresPerLayoutPerAxis + 1) + y;
+
+            for(int x = 0; x < featuresPerLayoutPerAxis; x++) {
+                int sampleX = layoutCoordinate.x * featuresPerLayoutPerAxis + x;
+                int meshPositionX = layoutCoordinate.x * (featuresPerLayoutPerAxis + 1) + x;
+
+                float sampledHeight = heightMap[sampleX, sampleY];
+
+                meshData.EditHeight(sampledHeight, meshPositionX, meshPositionY);
+            }
+
+            // We need to do the extra vertex at the end of the row, remember it has the same height as the one previous
+            int lastSampleX = layoutCoordinate.x * featuresPerLayoutPerAxis + featuresPerLayoutPerAxis - 1;
+            int lastMeshPositionX = layoutCoordinate.x * (featuresPerLayoutPerAxis + 1) + featuresPerLayoutPerAxis;
+
+            float lastSampledHeight = heightMap[lastSampleX, sampleY];
+
+            meshData.EditHeight(lastSampledHeight, lastMeshPositionX, meshPositionY);
+        }
+
+        // Now do the last row of the Y
+        int lastSampleY = layoutCoordinate.y * featuresPerLayoutPerAxis + featuresPerLayoutPerAxis - 1;
+        int lastMeshPositionY = layoutCoordinate.y * (featuresPerLayoutPerAxis + 1) + featuresPerLayoutPerAxis;
+
+        for(int x = 0; x < featuresPerLayoutPerAxis; x++) {
+            int sampleX = layoutCoordinate.x * featuresPerLayoutPerAxis + x;
+            int meshPositionX = layoutCoordinate.x * (featuresPerLayoutPerAxis + 1) + x;
+
+            float sampledHeight = heightMap[sampleX, lastSampleY];
+
+            meshData.EditHeight(sampledHeight, meshPositionX, lastMeshPositionY);
+        }
+
+        // We need to do the extra vertex at the end of the row, remember it has the same height as the one previous
+        int finalMeshPositionX = layoutCoordinate.x * (featuresPerLayoutPerAxis + 1) + featuresPerLayoutPerAxis;
+        int finalSampleX = layoutCoordinate.x * featuresPerLayoutPerAxis + featuresPerLayoutPerAxis - 1;
+
+        float finalSampledHeight = heightMap[finalSampleX, lastSampleY];
+
+        meshData.EditHeight(finalSampledHeight, finalMeshPositionX, lastMeshPositionY);
     }
 }
 
@@ -77,6 +118,8 @@ public class MeshData {
     int vertexIndex = 0;
     int triangleIndex = 0;
 
+    Mesh mesh;
+
     public MeshData(int inputDataWidth, int inputDataHeight, int featuresPerLayoutPerAxis) {
 
         this.meshWidth = inputDataWidth + inputDataWidth / featuresPerLayoutPerAxis;
@@ -85,6 +128,8 @@ public class MeshData {
         verticies = new Vector3[meshWidth * meshHeight];
         uvs = new Vector2[meshWidth * meshHeight];
         triangles = new int[(inputDataWidth - 1) * (inputDataHeight - 1) * 6];
+
+        mesh = new Mesh();
     }
 
     public void addVertex(Vector3 vertex, Vector2 uv, bool hasTriangles) {
@@ -100,6 +145,12 @@ public class MeshData {
         vertexIndex++;
     }
 
+    public void EditHeight(float height, int x, int y) {
+        int vertexIndex = (y * meshWidth) + x;
+
+        verticies[vertexIndex].y = height;
+    }
+
     private void AddTriange (int a, int b, int c) {
         triangles[triangleIndex] = a;
         triangles[triangleIndex + 1] = b;
@@ -108,8 +159,7 @@ public class MeshData {
         triangleIndex += 3;
     }
 
-    public Mesh CreateMesh() {
-        Mesh mesh = new Mesh();
+    public Mesh FinalizeMesh() {
         mesh.vertices = verticies;
         mesh.triangles = triangles;
         mesh.uv = uvs;

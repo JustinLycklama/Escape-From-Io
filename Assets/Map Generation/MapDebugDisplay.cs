@@ -31,10 +31,10 @@ public class MapDebugDisplay : MonoBehaviour {
     public void DrawMeshes(MeshData layoutMeshData, Texture2D layoutMeshTexture,
         MeshData fraturesMeshData, Texture2D featuresMeshTexture) {
 
-        layoutMeshFilter.sharedMesh = layoutMeshData.CreateMesh();
+        layoutMeshFilter.sharedMesh = layoutMeshData.FinalizeMesh();
         layoutMeshRenderer.sharedMaterial.mainTexture = layoutMeshTexture;
 
-        featuresMeshFilter.sharedMesh = fraturesMeshData.CreateMesh();
+        featuresMeshFilter.sharedMesh = fraturesMeshData.FinalizeMesh();
         featuresMeshRenderer.sharedMaterial.mainTexture = featuresMeshTexture;
     }
 }

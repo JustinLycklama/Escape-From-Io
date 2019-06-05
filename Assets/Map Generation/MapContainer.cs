@@ -25,7 +25,7 @@ public class MapContainer : MonoBehaviour
     }
 
     public void DrawMesh() {
-        meshFilter.sharedMesh = map.meshData.CreateMesh();
+        meshFilter.sharedMesh = map.meshData.FinalizeMesh();
         meshRenderer.sharedMaterial.mainTexture = map.meshTexture;
     }
 }

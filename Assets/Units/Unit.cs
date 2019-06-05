@@ -78,7 +78,7 @@ public class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
         };
     }
 
-    private void Start() {
+    public void Init() {
         taskQueueManager = Script.Get<TaskQueueManager>();
         Script.Get<MapContainer>().getMap().AddTerrainUpdateDelegate(this);
     }
@@ -90,7 +90,7 @@ public class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
             timeBeforeNextTaskCheck = 0.10f;
 
             if(masterTask == null) {
-                masterTask = taskQueueManager.GetNextDoableTask();
+                masterTask = taskQueueManager.GetNextDoableTask(this);
 
                 // if we still have to task to do, we are IDLE
                 if (masterTask == null) {

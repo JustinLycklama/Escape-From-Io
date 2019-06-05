@@ -10,9 +10,9 @@ public class Narrator : MonoBehaviour
 
     Constants constants;
 
-    public GameObject unit;
-
     Material mapMaterial;
+
+    public List<Unit> startingUnits;
 
     // Start is called before the first frame update
     void Start() {
@@ -38,6 +38,10 @@ public class Narrator : MonoBehaviour
         grid.BlurPenaltyMap(4);
 
         //unit.GetComponent<Unit>().BeginQueueing();
+
+        foreach (Unit unit in startingUnits) {
+            unit.Init();
+        }
     }
 
     // Update is called once per frame

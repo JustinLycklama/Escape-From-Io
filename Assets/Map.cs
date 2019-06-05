@@ -238,7 +238,7 @@ public class Map : ActionableItem {
         MapGenerator mapGenerator = Script.Get<MapGenerator>();
         finalHeightMap = mapGenerator.TerraformHeightMap(layoutNoiseMap, featuresNoiseMap, currentHeightAtCoordinate, terraformTarget.coordinate);
 
-        meshData = MeshGenerator.UpdateTerrainMesh(meshData, finalHeightMap, featuresPerLayoutPerAxis, terraformTarget.coordinate);
+        MeshGenerator.UpdateTerrainMesh(meshData, finalHeightMap, featuresPerLayoutPerAxis, terraformTarget.coordinate);
         Script.Get<MapContainer>().DrawMesh();
 
         return terraformTarget.percentage;
