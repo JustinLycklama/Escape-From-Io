@@ -39,6 +39,12 @@ public class GameTask {
         LayoutCoordinate layoutCoordinate = new LayoutCoordinate(mapCoordinate);
         targetDescription = layoutCoordinate.description;
     }
+
+    public GameTask Clone() {
+        GameTask newTask = new GameTask(target, action, actionItem, pathRequestTargetType);
+
+        return newTask;
+    }
 }
 
 public class MasterGameTask {
@@ -54,11 +60,14 @@ public class MasterGameTask {
     public MasterGameTask blockerTask;
     public MasterGameTask taskBlockedByThis;
 
-    // We will create a child for each time this parent task needs to repeat
-    public int repeatCount = 0;
-    public List<GameTask> childTasks;
+    public List<GameTask> childGameTasks;
 
     public string description;
+
+    // If we have extra repeat counts, do not pop the item off the stack but instead make a clone of the task and give it to the unit
+    public int repeatCount = 0;
+    public List<MasterGameTask> childMasterTasks;
+    MasterGameTask parentMasterTask;
 
     public MasterGameTask(ActionType actionType, string description, GameTask[] childTasks, MasterGameTask blocker = null) {
 
@@ -67,10 +76,11 @@ public class MasterGameTask {
 
         this.actionType = actionType;
         this.description = description;
-        this.childTasks = new List<GameTask>();
+        this.childGameTasks = new List<GameTask>();
+        this.childMasterTasks = new List<MasterGameTask>();
 
-        foreach (GameTask task in childTasks) {
-            this.childTasks.Add(task);
+        foreach(GameTask task in childTasks) {
+            this.childGameTasks.Add(task);
             task.parentTask = this;
         }
 
@@ -85,6 +95,37 @@ public class MasterGameTask {
             taskBlockedByThis.UnblockTask(this);
             taskBlockedByThis = null;
         }
+
+        if (parentMasterTask != null) {
+            parentMasterTask.MarkChildFinished(this);
+        }
+    }
+
+    public void MarkChildFinished(MasterGameTask childMasterTask) {
+        childMasterTasks.Remove(childMasterTask);
+
+        if (childMasterTasks.Count == 0 && repeatCount == 0) {
+            MarkTaskFinished();
+        }
+    }
+
+    public MasterGameTask CloneTask() {
+        if (repeatCount <= 0) {
+            return null;
+        }
+
+        List<GameTask> newGameTasks = new List<GameTask>();
+        foreach (GameTask childGameTask in childGameTasks) {
+            newGameTasks.Add(childGameTask.Clone());
+        }
+
+        MasterGameTask newMasterTask = new MasterGameTask(actionType, description, newGameTasks.ToArray());
+        newMasterTask.parentMasterTask = this;
+
+        childMasterTasks.Add(newMasterTask);
+        repeatCount -= 1;
+
+        return newMasterTask;
     }
 
     public void UnblockTask(MasterGameTask blockerTask) {
@@ -98,7 +139,7 @@ public class MasterGameTask {
             return false;
         }
 
-        foreach (GameTask task in childTasks) {
+        foreach (GameTask task in childGameTasks) {
             if (task.SatisfiesStartRequirements == null) {
                 continue;
             }
@@ -110,17 +151,4 @@ public class MasterGameTask {
 
         return true;
     }
-        
-    //    {
-    //    get {
-    //        switch(action) {
-    //            case ActionType.Build:
-    //                return "Build " + actionItem.description;
-    //            case ActionType.Mine:
-    //                return "Mine Mountain at " + targetDescription;
-    //            default:
-    //                return "Undefined Action";
-    //        }
-    //    }
-    //}
 }

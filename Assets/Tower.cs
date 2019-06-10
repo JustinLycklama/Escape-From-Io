@@ -2,6 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Tower : Building
-{
+public class Tower : Building {
+    protected override int requiredOre => 3;
 }

@@ -38,7 +38,7 @@ public interface ActionableItem {
 //}
 
 
-public class Building : MonoBehaviour, ActionableItem, Selectable {
+public abstract class Building : MonoBehaviour, ActionableItem, Selectable {
     float percentComplete = 0;
     Color materialColor;
     Color baseColor;
@@ -49,9 +49,22 @@ public class Building : MonoBehaviour, ActionableItem, Selectable {
 
     StatusDelegate statusDelegate;
 
+    PercentageBar percentageBar;
+    public Transform statusLocation;
+
+    protected abstract int requiredOre {
+        get;
+    }
+
     private void Awake() {
         title = "Building #" + buildingCount;
         buildingCount++;
+
+        percentageBar = Instantiate(Resources.Load("PercentageBar", typeof(PercentageBar))) as PercentageBar;
+        percentageBar.transform.SetParent(Script.UIOverlayPanel.GetFromObject<RectTransform>());
+
+        percentageBar.SetFollower(statusLocation);
+        percentageBar.SetRequired(requiredOre, "Ore");
     }
 
     // Start is called before the first frame update
@@ -61,7 +74,9 @@ public class Building : MonoBehaviour, ActionableItem, Selectable {
         //buildingRenderer.material.shader = Shader.Find("Transparent/Diffuse");
 
         baseColor = buildingRenderer.material.color;
-        materialColor = baseColor;      
+        materialColor = baseColor;
+
+        //UpdateGUI();
     }
 
     // Update is called once per frame
@@ -98,7 +113,9 @@ public class Building : MonoBehaviour, ActionableItem, Selectable {
                 return percentComplete;                       
             case GameTask.ActionType.DropOff:
 
-                GameResourceManager.sharedInstance.ConsumeInBuilding(unit, this);
+                if (GameResourceManager.sharedInstance.ConsumeInBuilding(unit, this)) {
+                    percentageBar.IncrementRequired();
+                }
 
                 return 1;
             case GameTask.ActionType.Mine:
@@ -143,6 +160,8 @@ public class Building : MonoBehaviour, ActionableItem, Selectable {
                     GameTask buildTask = new GameTask(worldPosition, GameTask.ActionType.Build, building);
 
                     MasterGameTask masterCollectTask = new MasterGameTask(MasterGameTask.ActionType.Move, "Build Building " + building.description, new GameTask[] { oreTask, dropTask });
+                    masterCollectTask.repeatCount = building.requiredOre;
+
                     MasterGameTask masterBuildTask = new MasterGameTask(MasterGameTask.ActionType.Build, "Build Building " + building.description, new GameTask[] { buildTask }, masterCollectTask);
 
                     queue.QueueTask(masterCollectTask);

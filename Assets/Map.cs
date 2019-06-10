@@ -177,7 +177,6 @@ public class Map : ActionableItem {
 
             this.percentage = 0;
         }
-
     }
 
     public float performAction(GameTask task, float rate, Unit unit) {

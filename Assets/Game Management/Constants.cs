@@ -28,6 +28,7 @@ public class Tag {
     public static Tag MapGenerator { get { return new Tag("MapGenerator"); } }
     public static Tag AStar { get { return new Tag("AStar"); } }
     public static Tag UIManager { get { return new Tag("UIManager"); } }
+    public static Tag UIOverlayPanel { get { return new Tag("UIOverlayPanel"); } }
 
     public GameObject GetGameObject() {
         GameObject cachedObject;
@@ -57,6 +58,7 @@ public class Script {
     public static Script TaskQueue { get { return new Script(Tag.Narrator, typeof(TaskQueueManager)); } }
     public static Script MapGenerator { get { return new Script(Tag.MapGenerator, typeof(MapGenerator)); } }
     public static Script PathfindingGrid { get { return new Script(Tag.AStar, typeof(PathfindingGrid)); } }
+    public static Script UIOverlayPanel { get { return new Script(Tag.UIOverlayPanel, typeof(RectTransform)); } }
 
     public static Script[] allScripts = new Script[] { Constants, PlayerBehaviour, MapContainer, UIManager, TaskQueue, MapGenerator, PathfindingGrid }; 
 

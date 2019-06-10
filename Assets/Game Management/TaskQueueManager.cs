@@ -58,8 +58,8 @@ public class TaskQueueManager : MonoBehaviour
         foreach(MasterGameTask masterTask in taskList) {
             if(masterTask.SatisfiesStartRequirements()) {
 
-                if(masterTask.childTasks[0].pathRequestTargetType != PathRequestTargetType.Unknown) {
-                    float distance = Vector3.Distance(masterTask.childTasks[0].target.vector3, unit.transform.position);
+                if(masterTask.childGameTasks[0].pathRequestTargetType != PathRequestTargetType.Unknown) {
+                    float distance = Vector3.Distance(masterTask.childGameTasks[0].target.vector3, unit.transform.position);
 
                     if(distance < shortestDistance) {
                         shortestDistance = distance;
@@ -78,8 +78,19 @@ public class TaskQueueManager : MonoBehaviour
         }
 
         if(shortestTask != null) {
-            taskList.Remove(shortestTask);
-            uiManager.UpdateTaskList(taskList.ToArray());
+
+            if (shortestTask.repeatCount == 0) {
+                taskList.Remove(shortestTask);
+            } else {
+                MasterGameTask masterTask = shortestTask;
+                shortestTask = shortestTask.CloneTask();
+
+                if (masterTask.repeatCount == 0) {
+                    taskList.Remove(masterTask);
+                }
+            }
+            
+            //uiManager.UpdateTaskList(taskList.ToArray());
         }
 
         return shortestTask;

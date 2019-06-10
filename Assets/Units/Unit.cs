@@ -9,6 +9,8 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
     public float turnDistance;
     public float stoppingDistance;
 
+    UnitStatusPanel unitStatusPanel;
+
     Path path;
 
     MasterGameTask masterTask;
@@ -18,17 +20,30 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
     GameTask currentGameTask;
     Queue<GameTask> gameTasksQueue;
 
-    public static int unitCount = 0;
+    public Transform statusLocation;
 
-    string title;
+    public static int unitCount = 0;
 
     abstract public MasterGameTask.ActionType primaryActionType { get; }
 
     // Selectable Interface
+    private string title;
     public string description => title;
     public StatusDelegate statusDelegate;
 
-    private void Awake() {
+    private void Start() {
+        unitStatusPanel = Instantiate(Resources.Load("UnitStatusPanel", typeof(UnitStatusPanel))) as UnitStatusPanel;
+        unitStatusPanel.transform.SetParent(Script.UIOverlayPanel.GetFromObject<RectTransform>());
+
+        unitStatusPanel.SetFollower(statusLocation);
+
+        unitStatusPanel.SetTitle(title);
+        unitStatusPanel.SetTask(null);
+        unitStatusPanel.DisplayPercentageBar(false);
+    }
+
+    private void Awake() { 
+
         title = "Unit #" + unitCount;
         unitCount++;
 
@@ -39,12 +54,14 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
         // DO PATH FLOW
 
         completedTaskAction = (pathComplete) => {
+            unitStatusPanel.DisplayPercentageBar(false);
             ContinueGameTaskQueue();
         };
 
         completedPath = (pathComplete) => {
             print("Do Action for Task" + masterTask.taskNumber);
             navigatingToTask = false;
+            unitStatusPanel.DisplayPercentageBar(true);
             StartCoroutine(PerformTaskAction(completedTaskAction));
         };
 
@@ -88,7 +105,32 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
     float timeBeforeNextTaskCheck = 0;
     private void Update() {
 
-        if (timeBeforeNextTaskCheck <= 0) {
+        // Update Status
+
+        //// Translate the world position into viewport space.
+        //Vector3 screenPoint = Camera.main.WorldToScreenPoint(statusLocation.position);
+
+        //// Used to scale up UI
+        //float sizeOnScreen = 10;
+
+        //// Get distance from screen to modify local scale as the camera moves away
+        //Vector3 b = new Vector3(screenPoint.x, screenPoint.y + sizeOnScreen, screenPoint.z);
+
+        //Vector3 aa = Camera.main.ScreenToWorldPoint(screenPoint);
+        //Vector3 bb = Camera.main.ScreenToWorldPoint(b);
+
+        //unitStatusPanel.transform.localScale = Vector3.one * (1.0f / (aa - bb).magnitude);
+
+        //// Canvas local coordinates are relative to its center, 
+        //// so we offset by half. We also discard the depth.
+        //screenPoint -= 0.5f * Vector3.one;
+        //screenPoint.z = 0;
+
+        //unitStatusPanel.transform.position = screenPoint;
+
+
+        // Check Task
+        if(timeBeforeNextTaskCheck <= 0) {
             timeBeforeNextTaskCheck = 0.10f;
 
             if(masterTask == null) {
@@ -121,6 +163,8 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
 
     private void DoTask() {
 
+        unitStatusPanel.SetTask(masterTask);
+
         // Let the UI Know our status is changing
         if(statusDelegate != null) {
             statusDelegate.InformCurrentTask(masterTask);
@@ -129,7 +173,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
         gameTasksQueue.Clear();
 
         //navigatingToTask = true;
-        foreach (GameTask task in masterTask.childTasks) {
+        foreach (GameTask task in masterTask.childGameTasks) {
             gameTasksQueue.Enqueue(task);
         }
 
@@ -149,16 +193,17 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
             masterTask = null;
             currentGameTask = null;
             timeBeforeNextTaskCheck = 0;
-        }        
+            unitStatusPanel.SetTask(masterTask);
+        }
     }
 
     IEnumerator PerformTaskAction(System.Action<bool> callBack) {
 
         float speed = 0.25f;
-        ////bool performingAction = true;
 
         while (true) {
             float completion = currentGameTask.actionItem.performAction(currentGameTask, Time.deltaTime * speed, this);
+            unitStatusPanel.percentageBar.SetPercent(completion);
 
             if (completion >= 1) {
                 callBack(true);
