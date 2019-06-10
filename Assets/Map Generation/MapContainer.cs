@@ -9,11 +9,6 @@ public class MapContainer : MonoBehaviour
     MeshFilter meshFilter;
     MeshRenderer meshRenderer;
 
-    private void Awake() {
-        meshFilter = GetComponent<MeshFilter>();
-        meshRenderer = GetComponent<MeshRenderer>();
-    }
-
     public void setMap(Map map) {
         this.map = map;
 
@@ -25,6 +20,11 @@ public class MapContainer : MonoBehaviour
     }
 
     public void DrawMesh() {
+        if (meshFilter == null) {
+            meshFilter = GetComponent<MeshFilter>();
+            meshRenderer = GetComponent<MeshRenderer>();
+        }
+
         meshFilter.sharedMesh = map.meshData.FinalizeMesh();
         meshRenderer.sharedMaterial.mainTexture = map.meshTexture;
     }

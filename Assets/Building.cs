@@ -143,9 +143,9 @@ public abstract class Building : MonoBehaviour, ActionableItem, Selectable {
                 description = "Build " + description,
                 performAction = () => {
 
-                    worldPosition.y += 25 / 2f;
-
                     Building building = UnityEngine.Object.Instantiate(resource) as Building;
+
+                    worldPosition.y += 0.5f * building.transform.localScale.y;
                     building.transform.position = worldPosition.vector3;
 
                     TaskQueueManager queue = Script.Get<TaskQueueManager>();

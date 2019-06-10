@@ -61,6 +61,7 @@ public class Map : ActionableItem {
         return buildingData[layoutCoordinate.x, layoutCoordinate.y];
     }
 
+    // Returns the height in MAP COORDINATE position
     public float getHeightAt(MapCoordinate coordinate) {
         int mapWidth = finalHeightMap.GetLength(0);
         int mapHeight = finalHeightMap.GetLength(1);
@@ -71,7 +72,7 @@ public class Map : ActionableItem {
         //}
 
         // TODO: Triangle Calculations        
-       
+
         return finalHeightMap[coordinate.xLowSample, coordinate.yLowSample];
     }
 

@@ -20,6 +20,8 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
     GameTask currentGameTask;
     Queue<GameTask> gameTasksQueue;
 
+    //Map map;
+
     public Transform statusLocation;
 
     public static int unitCount = 0;
@@ -40,6 +42,8 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
         unitStatusPanel.SetTitle(title);
         unitStatusPanel.SetTask(null);
         unitStatusPanel.DisplayPercentageBar(false);
+
+        //map = Script.Get<MapContainer>().getMap();
     }
 
     private void Awake() { 
@@ -104,30 +108,6 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
 
     float timeBeforeNextTaskCheck = 0;
     private void Update() {
-
-        // Update Status
-
-        //// Translate the world position into viewport space.
-        //Vector3 screenPoint = Camera.main.WorldToScreenPoint(statusLocation.position);
-
-        //// Used to scale up UI
-        //float sizeOnScreen = 10;
-
-        //// Get distance from screen to modify local scale as the camera moves away
-        //Vector3 b = new Vector3(screenPoint.x, screenPoint.y + sizeOnScreen, screenPoint.z);
-
-        //Vector3 aa = Camera.main.ScreenToWorldPoint(screenPoint);
-        //Vector3 bb = Camera.main.ScreenToWorldPoint(b);
-
-        //unitStatusPanel.transform.localScale = Vector3.one * (1.0f / (aa - bb).magnitude);
-
-        //// Canvas local coordinates are relative to its center, 
-        //// so we offset by half. We also discard the depth.
-        //screenPoint -= 0.5f * Vector3.one;
-        //screenPoint.z = 0;
-
-        //unitStatusPanel.transform.position = screenPoint;
-
 
         // Check Task
         if(timeBeforeNextTaskCheck <= 0) {
@@ -219,7 +199,9 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
         bool followingPath = true;
         int pathIndex = 0;
 
-        transform.LookAt(path.lookPoints[0].vector3);
+        Vector3 startPoint = path.lookPoints[0].vector3;
+
+        transform.LookAt(new Vector3(startPoint.x, transform.position.y, startPoint.z));
 
         float speedPercent = 1;
 
@@ -239,10 +221,14 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
             if(followingPath) {
                 if(pathIndex >= path.slowDownIndex && stoppingDistance > 0) {
                     speedPercent = Mathf.Clamp(path.turnBoundaries[path.finishLineIndex].DistanceFromPoint(position2D) / stoppingDistance, 0.15f, 1);
-                }
+                }               
 
-                Vector3 lookPoint = path.lookPoints[pathIndex].vector3;
-                lookPoint.y = transform.position.y;
+                WorldPosition worldPos = path.lookPoints[pathIndex];
+                MapCoordinate mapCoordinate = new MapCoordinate(worldPos);
+
+                float height = (Script.Get<MapContainer>().getMap().getHeightAt(mapCoordinate) * Script.Get<MapContainer>().transform.localScale.y) + (0.5f * transform.localScale.y);
+                Vector3 lookPoint = new Vector3(worldPos.vector3.x, height, worldPos.vector3.z);
+
                 Quaternion targetRotation = Quaternion.LookRotation(lookPoint - transform.position);
                 transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * turnSpeed);
                 transform.Translate(Vector3.forward * Time.deltaTime * speed * speedPercent, Space.Self);
