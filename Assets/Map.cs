@@ -17,10 +17,11 @@ public class Map : ActionableItem {
     private TerrainType[,] terrainData;
     private Building[,] buildingData;
 
-    int featuresPerLayoutPerAxis;
+    public int featuresPerLayoutPerAxis;
 
     float[,] layoutNoiseMap;
-    float[,] featuresNoiseMap;
+    float[,] groundFeaturesNoiseMap;
+    float[,] mountainFeaturesNoiseMap;
 
     float[,] finalHeightMap;
 
@@ -29,7 +30,7 @@ public class Map : ActionableItem {
 
     public string description => "The World? What should go here";
 
-    public Map(float[,] finalHeightMap, float[,] layoutNoiseMap, float[,] featuresNoiseMap,
+    public Map(float[,] finalHeightMap, float[,] layoutNoiseMap, float[,] groundFeaturesNoiseMap, float[,] mountainFeaturesNoiseMap,
         int featuresPerLayoutPerAxis, MeshData meshData, Texture2D meshTexture, TerrainType[,] terrainData) {
 
         mapWidth = finalHeightMap.GetLength(0);
@@ -42,7 +43,8 @@ public class Map : ActionableItem {
         this.finalHeightMap = finalHeightMap;
 
         this.layoutNoiseMap = layoutNoiseMap;
-        this.featuresNoiseMap = featuresNoiseMap;
+        this.groundFeaturesNoiseMap = groundFeaturesNoiseMap;
+        this.mountainFeaturesNoiseMap = mountainFeaturesNoiseMap;
 
         this.meshData = meshData;
         this.meshTexture = meshTexture;
@@ -51,6 +53,8 @@ public class Map : ActionableItem {
         buildingData = new Building[terrainData.GetLength(0), terrainData.GetLength(1)];
         terrainUpdateDelegates = new List<TerrainUpdateDelegate>();
         terraformTargetDictionary = new Dictionary<GameTask, TerraformTarget>();
+
+        BoxCollider collider = new BoxCollider();        
     }
 
     public TerrainType GetTerrainAt(LayoutCoordinate layoutCoordinate) {
@@ -236,7 +240,7 @@ public class Map : ActionableItem {
         float currentHeightAtCoordinate = Mathf.Lerp(terraformTarget.initialHeight, terraformTarget.heightTarget, terraformTarget.percentage);
 
         MapGenerator mapGenerator = Script.Get<MapGenerator>();
-        finalHeightMap = mapGenerator.TerraformHeightMap(layoutNoiseMap, featuresNoiseMap, currentHeightAtCoordinate, terraformTarget.coordinate);
+        finalHeightMap = mapGenerator.TerraformHeightMap(layoutNoiseMap, groundFeaturesNoiseMap, mountainFeaturesNoiseMap, terrainData, currentHeightAtCoordinate, terraformTarget.coordinate);
 
         MeshGenerator.UpdateTerrainMesh(meshData, finalHeightMap, featuresPerLayoutPerAxis, terraformTarget.coordinate);
         Script.Get<MapContainer>().DrawMesh();

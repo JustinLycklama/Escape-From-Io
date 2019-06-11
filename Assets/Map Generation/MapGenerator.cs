@@ -52,10 +52,15 @@ public class MapGenerator : MonoBehaviour {
     private int layoutMapHeight;
 
     public NoiseData layoutMapNoiseData;
-    public NoiseData featuresMapNoiseData;
+    public NoiseData groundFeaturesMapNoiseData;
+    public NoiseData mountainFeaturesMapNoiseData;
 
     [Range(0, 2)]
-    public float featuresImpactOnLayout;
+    public float groundFeaturesImpactOnLayout;
+
+    [Range(0, 2)]
+    public float mountainFeaturesImpactOnLayout;
+
     private int featuresPerLayoutPerAxis;    
 
     public bool autoUpdate;
@@ -100,14 +105,15 @@ public class MapGenerator : MonoBehaviour {
         int noiseMapHeight = layoutMapHeight * featuresPerLayoutPerAxis;
 
         // Then generate a larger scale noise map, and overlay it on the small one
-        float[,] featuresNoiseMap = NoiseGenerator.GenerateNoiseMap(noiseMapWidth, noiseMapHeight, featuresMapNoiseData);
+        float[,] groundFeaturesNoiseMap = NoiseGenerator.GenerateNoiseMap(noiseMapWidth, noiseMapHeight, groundFeaturesMapNoiseData);
+        float[,] mountainFeaturesNoiseMap = NoiseGenerator.GenerateNoiseMap(noiseMapWidth, noiseMapHeight, mountainFeaturesMapNoiseData);
 
         TerrainType[,] terrainMap = PlateauMap(layoutNoiseMap);
-        float[,] noiseMap = CreateMapWithFeatures(layoutNoiseMap, featuresNoiseMap);
+        float[,] noiseMap = CreateMapWithFeatures(layoutNoiseMap, groundFeaturesNoiseMap, mountainFeaturesNoiseMap, terrainMap);
 
         NormalizeMap(noiseMap);
 
-        Map map = new Map(noiseMap, layoutNoiseMap, featuresNoiseMap,
+        Map map = new Map(noiseMap, layoutNoiseMap, groundFeaturesNoiseMap, mountainFeaturesNoiseMap,
             featuresPerLayoutPerAxis,
             MeshGenerator.GenerateTerrainMesh(noiseMap, featuresPerLayoutPerAxis),
             TextureGenerator.TextureFromColorMap(CreateColorMapWithTerrain(noiseMap, terrainMap), noiseMapWidth, noiseMapHeight),
@@ -119,7 +125,7 @@ public class MapGenerator : MonoBehaviour {
             case DrawMode.NoiseMap:
                 if (debugDisplay != null) {
                     debugDisplay.DrawTexture(TextureGenerator.TextureFromNoiseMap(noiseMap));
-                    debugDisplay.DrawTextures(TextureGenerator.TextureFromNoiseMap(layoutNoiseMap), TextureGenerator.TextureFromNoiseMap(featuresNoiseMap));
+                    debugDisplay.DrawTextures(TextureGenerator.TextureFromNoiseMap(layoutNoiseMap), TextureGenerator.TextureFromNoiseMap(groundFeaturesNoiseMap));
                 }                
                 break;
             case DrawMode.ColorMap:
@@ -127,7 +133,7 @@ public class MapGenerator : MonoBehaviour {
 
                     debugDisplay.DrawTexture(TextureGenerator.TextureFromColorMap(CreateColorMap(noiseMap), noiseMap.GetLength(0), noiseMap.GetLength(1)));
                     debugDisplay.DrawTextures(TextureGenerator.TextureFromColorMap(CreateColorMap(layoutNoiseMap), layoutNoiseMap.GetLength(0), layoutNoiseMap.GetLength(1)),
-                        TextureGenerator.TextureFromColorMap(CreateColorMap(featuresNoiseMap), featuresNoiseMap.GetLength(0), featuresNoiseMap.GetLength(1))
+                        TextureGenerator.TextureFromColorMap(CreateColorMap(groundFeaturesNoiseMap), groundFeaturesNoiseMap.GetLength(0), groundFeaturesNoiseMap.GetLength(1))
                         );
                 }
                 break;
@@ -138,7 +144,7 @@ public class MapGenerator : MonoBehaviour {
 
                 if(debugDisplay != null) {
                         debugDisplay.DrawMeshes(MeshGenerator.GenerateTerrainMesh(layoutNoiseMap, 1), TextureGenerator.TextureFromColorMap(CreateColorMap(layoutNoiseMap), layoutNoiseMap.GetLength(0), layoutNoiseMap.GetLength(1)),
-                        MeshGenerator.GenerateTerrainMesh(featuresNoiseMap, 1), TextureGenerator.TextureFromColorMap(CreateColorMap(featuresNoiseMap), featuresNoiseMap.GetLength(0), featuresNoiseMap.GetLength(1))
+                        MeshGenerator.GenerateTerrainMesh(groundFeaturesNoiseMap, 1), TextureGenerator.TextureFromColorMap(CreateColorMap(groundFeaturesNoiseMap), groundFeaturesNoiseMap.GetLength(0), groundFeaturesNoiseMap.GetLength(1))
                         );
                 }
                 break;
@@ -147,12 +153,12 @@ public class MapGenerator : MonoBehaviour {
         return map;
     }
 
-    public float[,] TerraformHeightMap(float[,] layoutNoiseMap, float[,] featuresNoiseMap, float currentLayoutHeight, LayoutCoordinate coordinate) {
+    public float[,] TerraformHeightMap(float[,] layoutNoiseMap, float[,] groundFeaturesNoiseMap, float[,] mountainFeaturesNoiseMap, TerrainType[,] terrainMap, float currentLayoutHeight, LayoutCoordinate coordinate) {
         // TODO More interesting interpolations to mimic mining
 
         layoutNoiseMap[coordinate.x, coordinate.y] = currentLayoutHeight;
 
-        float[,] noiseMap = CreateMapWithFeatures(layoutNoiseMap, featuresNoiseMap);
+        float[,] noiseMap = CreateMapWithFeatures(layoutNoiseMap, groundFeaturesNoiseMap, mountainFeaturesNoiseMap, terrainMap);
         NormalizeMap(noiseMap);
 
         return noiseMap;
@@ -160,9 +166,9 @@ public class MapGenerator : MonoBehaviour {
 
     // PRIVATE
 
-    private float[,] CreateMapWithFeatures(float[,] layoutMap, float[,] featuresMap) {
-        int featuresWidth = featuresMap.GetLength(0);
-        int featuresHeight = featuresMap.GetLength(1);
+    private float[,] CreateMapWithFeatures(float[,] layoutMap, float[,] groundFeaturesMap, float[,] mountainFeaturesMap, TerrainType[,] terrainMap) {
+        int featuresWidth = groundFeaturesMap.GetLength(0);
+        int featuresHeight = groundFeaturesMap.GetLength(1);
 
         float[,] fullMap = new float[featuresWidth, featuresHeight];
         for(int y = 0; y < featuresWidth; y++) {
@@ -170,7 +176,17 @@ public class MapGenerator : MonoBehaviour {
                 int sampleX = x / featuresPerLayoutPerAxis;
                 int sampleY = y / featuresPerLayoutPerAxis;
 
-                fullMap[x, y] = layoutMap[sampleX, sampleY] + (featuresMap[x, y] * featuresImpactOnLayout);
+                switch(terrainMap[sampleX, sampleY].regionType) {
+                    case RegionType.Water:
+                        fullMap[x, y] = layoutMap[sampleX, sampleY];
+                        break;
+                    case RegionType.Land:
+                        fullMap[x, y] = (layoutMap[sampleX, sampleY]) + ((groundFeaturesMap[x, y] * groundFeaturesImpactOnLayout) - 0.5f);
+                        break;
+                    case RegionType.Mountain:
+                        fullMap[x, y] = layoutMap[sampleX, sampleY] + (mountainFeaturesMap[x, y] * mountainFeaturesImpactOnLayout);
+                        break;
+                }
             }
         }
 

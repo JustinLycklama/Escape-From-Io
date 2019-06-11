@@ -19,7 +19,10 @@ public class PlayerBehaviour : MonoBehaviour
     // Update is called once per frame
     void Update() {
         MoveCamera();
-        SelectTile();        
+    }
+
+    private void FixedUpdate() {
+        SelectTile();
     }
 
     public 
@@ -56,11 +59,25 @@ public class PlayerBehaviour : MonoBehaviour
         }
     }
 
-        void SelectTile() {
+    Ray lastRay;
+    RaycastHit? lastHit;
+
+    void SelectTile() {
+        Debug.DrawRay(lastRay.origin, lastRay.direction * 1000, Color.yellow);
+
+        if (lastHit != null) {
+            Debug.DrawRay(lastHit.Value.point, Vector3.up * 1000, Color.red);
+        }
+        
         if(Input.GetMouseButtonDown(0)) {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
+
+            lastRay = ray;
+
             if(Physics.Raycast(ray, out hit)) {
+                lastHit = hit;
+
                 if (selection != null) {
                     selection.deselectCurrent();
                 }
@@ -70,7 +87,8 @@ public class PlayerBehaviour : MonoBehaviour
                 // Select a Terrain Selection
                 if(objectHit == Tag.Map.GetGameObject()) {
                     MapCoordinate selectedCoordinate = new WorldPosition(hit.point).mapCoordinate;
-                    selection = Selection.createTerrainSelection(new LayoutCoordinate(selectedCoordinate));
+                    LayoutCoordinate coordinate = new LayoutCoordinate(selectedCoordinate);
+                    selection = Selection.createTerrainSelection(coordinate);
                 }
 
                 // Select a unit

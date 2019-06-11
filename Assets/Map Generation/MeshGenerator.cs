@@ -2,8 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class MeshGenerator
-{
+public static class MeshGenerator {   
     public static MeshData GenerateTerrainMesh(float[,] heightMap, int featuresPerLayoutPerAxis) {
         int width = heightMap.GetLength(0);
         int height = heightMap.GetLength(1);
