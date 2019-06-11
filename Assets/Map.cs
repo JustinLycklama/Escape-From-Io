@@ -53,8 +53,6 @@ public class Map : ActionableItem {
         buildingData = new Building[terrainData.GetLength(0), terrainData.GetLength(1)];
         terrainUpdateDelegates = new List<TerrainUpdateDelegate>();
         terraformTargetDictionary = new Dictionary<GameTask, TerraformTarget>();
-
-        BoxCollider collider = new BoxCollider();        
     }
 
     public TerrainType GetTerrainAt(LayoutCoordinate layoutCoordinate) {

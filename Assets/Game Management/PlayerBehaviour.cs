@@ -19,13 +19,8 @@ public class PlayerBehaviour : MonoBehaviour
     // Update is called once per frame
     void Update() {
         MoveCamera();
-    }
-
-    private void FixedUpdate() {
         SelectTile();
-    }
-
-    public 
+    } 
 
     void MoveCamera() {
 
@@ -86,7 +81,11 @@ public class PlayerBehaviour : MonoBehaviour
 
                 // Select a Terrain Selection
                 if(objectHit == Tag.Map.GetGameObject()) {
-                    MapCoordinate selectedCoordinate = new WorldPosition(hit.point).mapCoordinate;
+                    BoxCollider boxCollider = hit.collider as BoxCollider;
+
+                    Vector3 worldPosition = boxCollider.transform.TransformPoint(boxCollider.center);
+
+                    MapCoordinate selectedCoordinate = new WorldPosition(worldPosition).mapCoordinate;
                     LayoutCoordinate coordinate = new LayoutCoordinate(selectedCoordinate);
                     selection = Selection.createTerrainSelection(coordinate);
                 }
