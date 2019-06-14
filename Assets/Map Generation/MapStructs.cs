@@ -8,7 +8,7 @@ public struct LayoutCoordinate {
 
     public string description {
         get {
-            return "x: " + x + " y: " + y;
+            return "x: " + x + " y: " + y + ", of map X " + mapContainer.mapX + " Y " + mapContainer.mapY;
         }
     }
 
@@ -71,25 +71,35 @@ public struct PathGridCoordinate {
             return Mathf.Clamp(yLowSample, 0, constants.layoutMapHeight * constants.nodesPerLayoutPerAxis - 1);
         } }
 
-    public PathGridCoordinate(MapCoordinate mapCoordinate) {
-        Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();
-
-        x = mapCoordinate.x / constants.featuresPerLayoutPerAxis * constants.nodesPerLayoutPerAxis;
-        y = mapCoordinate.y / constants.featuresPerLayoutPerAxis * constants.nodesPerLayoutPerAxis;
+    public string description {
+        get {
+            return "x: " + x + " y: " + y;
+        }
     }
+
+    public static PathGridCoordinate fromMapCoordinate(MapCoordinate mapCoordinate) {
+        return Script.Get<MapsManager>().PathGridCoordinateFromMapCoordinate(mapCoordinate);
+    }
+
+    //public PathGridCoordinate(MapCoordinate mapCoordinate) {
+    //    Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();
+
+    //    x = mapCoordinate.x / constants.featuresPerLayoutPerAxis * constants.nodesPerLayoutPerAxis;
+    //    y = mapCoordinate.y / constants.featuresPerLayoutPerAxis * constants.nodesPerLayoutPerAxis;
+    //}
 
     public static PathGridCoordinate[][] pathCoordiatesFromLayoutCoordinate (LayoutCoordinate layoutCoordinate) {
         Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();
 
         List<PathGridCoordinate[]> pathColumns = new List<PathGridCoordinate[]>();
 
-        int mapPostionX = layoutCoordinate.mapContainer.mapX + 1;
-        int mapPostionY = layoutCoordinate.mapContainer.mapY + 1;
+        int mapPostionX = layoutCoordinate.mapContainer.mapX * constants.layoutMapWidth * constants.nodesPerLayoutPerAxis;
+        int mapPostionY = layoutCoordinate.mapContainer.mapY * constants.layoutMapHeight * constants.nodesPerLayoutPerAxis;
 
-        for(int x = layoutCoordinate.x * constants.nodesPerLayoutPerAxis * mapPostionX; x < (layoutCoordinate.x + 1) * constants.nodesPerLayoutPerAxis; x++) {
+        for(int x = mapPostionX + layoutCoordinate.x * constants.nodesPerLayoutPerAxis; x < mapPostionX + (layoutCoordinate.x + 1) * constants.nodesPerLayoutPerAxis; x++) {
             List<PathGridCoordinate> pathCoordinates = new List<PathGridCoordinate>();
 
-            for(int y = layoutCoordinate.y * constants.nodesPerLayoutPerAxis * mapPostionY; y < (layoutCoordinate.y + 1) * constants.nodesPerLayoutPerAxis; y++) {
+            for(int y = mapPostionY + layoutCoordinate.y * constants.nodesPerLayoutPerAxis; y < mapPostionY + (layoutCoordinate.y + 1) * constants.nodesPerLayoutPerAxis; y++) {
                 pathCoordinates.Add(new PathGridCoordinate(x, y));
             }
 
@@ -116,6 +126,16 @@ public struct MapCoordinate {
     public int yHighSample { get { return Mathf.Clamp(yLowSample, 0, Tag.Narrator.GetGameObject().GetComponent<Constants>().mapHeight); } }
 
     public MapContainer mapContainer;
+
+    public string description {
+        get {
+            return "x: " + x + " y: " + y + ", of map X " + mapContainer.mapX + " Y " + mapContainer.mapY;
+        }
+    }
+
+    public static MapCoordinate FromGridCoordinate(PathGridCoordinate pathGridCoordinate) {
+        return Script.Get<MapsManager>().MapCoordinateFromPathGridCoordinate(pathGridCoordinate);
+    }
 
     //public MapCoordinate(PathGridCoordinate pathGridCoordinate) {
     //    Constants constants = Script.Get<Constants>();
@@ -201,15 +221,21 @@ public struct WorldPosition {
         get { return new Vector3(x, y, z); }
     }
 
+    public string description {
+        get {
+            return "x: " + x + " y: " + y + " z: " + z;
+        }
+    }
+
     public WorldPosition(Vector3 position) {
         x = position.x;
         y = position.y;
         z = position.z;
     }    
 
-    public static WorldPosition FromGridCoordinate(PathGridCoordinate pathGridCoordinate) {
-        return Script.Get<MapsManager>().WorldPositionFromPathGridCoordinate(pathGridCoordinate);
-    }
+    //public static WorldPosition FromGridCoordinate(PathGridCoordinate pathGridCoordinate) {
+    //    return Script.Get<MapsManager>().mapCoordinateFromPathGridCoordinate(pathGridCoordinate);
+    //}
 
     public WorldPosition(MapCoordinate mapCoordinate) {
         MapContainer mapContainer = mapCoordinate.mapContainer;

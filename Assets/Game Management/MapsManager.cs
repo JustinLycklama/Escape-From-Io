@@ -43,9 +43,9 @@ public class MapsManager : MonoBehaviour {
         float mapEdgeY = mapsBoundaries.y - (mapsBoundaries.height / 2f);
 
         for(int x = 0; x < horizontalMaps; x++) {        
-            for(int y = 0; y < verticalMaps; y++) {
+            for(int y = 0; y < verticalMaps; y++) {               
                 // We need to create a Map Rect in MAPS MANAGER SPACE
-                Vector2 mapPoint = new Vector2(mapEdgeX + (constants.mapWidth * x) , mapEdgeY + (constants.mapHeight * y));                
+                Vector2 mapPoint = new Vector2(mapEdgeX + (constants.mapWidth * x) , mapEdgeY + (constants.mapHeight * (verticalMaps - 1 - y)));                
                 Rect mapRect = new Rect(mapPoint, new Vector2(constants.mapWidth, constants.mapHeight));
 
                 MapContainer mapContainer = Instantiate(mapResource) as MapContainer;                
@@ -100,26 +100,62 @@ public class MapsManager : MonoBehaviour {
 
     //}
 
-    public WorldPosition WorldPositionFromPathGridCoordinate(PathGridCoordinate pathGridCoordinate) {
+    public PathGridCoordinate PathGridCoordinateFromMapCoordinate(MapCoordinate mapCoordinate) {
+        Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();
+
+        float nodesPerMapWidth = (constants.nodesPerLayoutPerAxis * constants.layoutMapWidth);
+        float nodesPerMapHeight = (constants.nodesPerLayoutPerAxis * constants.layoutMapHeight);
+
+        float mapSpecificGridX = mapCoordinate.x / constants.featuresPerLayoutPerAxis * constants.nodesPerLayoutPerAxis;
+        float mapSpecificGridY = mapCoordinate.y / constants.featuresPerLayoutPerAxis * constants.nodesPerLayoutPerAxis;
+
+        mapSpecificGridX += mapCoordinate.mapContainer.mapX * nodesPerMapWidth;
+        mapSpecificGridY += mapCoordinate.mapContainer.mapY * nodesPerMapHeight;
+
+        return new PathGridCoordinate(mapSpecificGridX, mapSpecificGridY);
+    }
+
+    public MapCoordinate MapCoordinateFromPathGridCoordinate(PathGridCoordinate pathGridCoordinate) {
         Constants constants = Script.Get<Constants>();
 
-        // Path grid converts into the "Maps Manager Object Space' beause there is one grid for all maps, not a grid per map
-        // To get into MapsManager space, x and y need to be centered at 0,0, not starting at 0,0
-        float mapsManagerXCoord = pathGridCoordinate.x / constants.nodesPerLayoutPerAxis * constants.featuresPerLayoutPerAxis - (mapsBoundaries.width / 2f);
-        float mapsManagerYCoord = pathGridCoordinate.y / constants.nodesPerLayoutPerAxis * constants.featuresPerLayoutPerAxis - (mapsBoundaries.height / 2f);
+        float mapCoordinateX = pathGridCoordinate.x / constants.nodesPerLayoutPerAxis * constants.featuresPerLayoutPerAxis;// - (mapsBoundaries.width / 2f);
+        float mapCoordinateY = pathGridCoordinate.y / constants.nodesPerLayoutPerAxis * constants.featuresPerLayoutPerAxis;// + (mapsBoundaries.height / 2f);
 
-        MapContainer mapContainer = MapContainerForPoint(new Vector2(mapsManagerXCoord, mapsManagerYCoord));
+        // If we are on Map (0,0) then the mapCoordinateX and Y are fine, but if we are on a different Map we have to scale the CoordinateX and Y relative to that map
+        mapCoordinateX = mapCoordinateX % (constants.featuresPerLayoutPerAxis * constants.layoutMapWidth);
+        mapCoordinateY = mapCoordinateY % (constants.featuresPerLayoutPerAxis * constants.layoutMapHeight);
 
-        // We do not know the coordinates for the map we are looking at right now, so we can't create a map coordinate
-        Vector3 currentPointObjectSpace = new Vector3(mapsManagerXCoord, 0, mapsManagerYCoord);
-        Vector3 positionWorldSpace = transform.TransformPoint(currentPointObjectSpace);
+        int mapContainerX = Mathf.FloorToInt(pathGridCoordinate.x / (constants.nodesPerLayoutPerAxis * constants.layoutMapWidth));
+        int mapContainerY = Mathf.FloorToInt(pathGridCoordinate.y / (constants.nodesPerLayoutPerAxis * constants.layoutMapHeight));
 
-        // Now we create a mapCoordinate to figure out the height
-        MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(new WorldPosition(positionWorldSpace));
+        MapContainer mapContainer = mapContainer2d[mapContainerX, mapContainerY];
 
-        // And we can finally send back the correct world position with height
-        return new WorldPosition(mapCoordinate);
+        return new MapCoordinate(mapCoordinateX, mapCoordinateY, mapContainer);
 
+        //Vector3 currentPointObjectSpace = new Vector3(mapCoordinateX, 0, mapCoordinateY);
+        //Vector3 positionWorldSpace = mapContainer.transform.TransformPoint(currentPointObjectSpace);
+
+        //WorldPosition worldPosition = new WorldPosition(positionWorldSpace);
+        //worldPosition.recalculateHeight();
+
+        //return worldPosition;
+
+        // ----
+
+        //MapContainer mapContainer = MapContainerForPoint(new Vector2(mapsManagerXCoord, mapsManagerYCoord));
+
+        //// We do not know the coordinates for the map we are looking at right now, so we can't create a map coordinate
+        //Vector3 currentPointObjectSpace = new Vector3(mapsManagerXCoord, 0, mapsManagerYCoord);
+        ////Vector3 positionWorldSpace = transform.TransformPoint(currentPointObjectSpace);
+
+        //// Now we create a mapCoordinate to figure out the height
+        //MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(new WorldPosition(positionWorldSpace));
+
+        //// And we can finally send back the correct world position with height
+        //return new WorldPosition(mapCoordinate);
+
+
+        // --------------------
 
         //MapCoordinate mapCoordinate = new MapCoordinate(mapsManagerXCoord, mapsManagerYCoord, mapContainer);
 
@@ -184,7 +220,7 @@ public class MapsManager : MonoBehaviour {
             }
         }
 
-        if (map == null) {
+        if(map == null) {
             print("Null");
         }
 

@@ -82,13 +82,10 @@ public class PathFinding : MonoBehaviour {
         int completedCalls = 0;
 
         foreach (PathGridCoordinate gridCoordinate in gridCoordinatesSurroundingLayoutCoordinate) {
-            WorldPosition? worldPos = WorldPosition.FromGridCoordinate(gridCoordinate);
+            MapCoordinate mapCoordinate = MapCoordinate.FromGridCoordinate(gridCoordinate);
+            WorldPosition worldPos = new WorldPosition(mapCoordinate);
 
-            if (worldPos == null) {
-                continue;
-            }
-
-            StartCoroutine(FindPath(startPos, worldPos.Value.vector3, (path, success) => {
+            StartCoroutine(FindPath(startPos, worldPos.vector3, (path, success) => {
                 completedCalls++;
 
                 if (success && path.Length < lowestLength) {

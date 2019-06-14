@@ -71,8 +71,8 @@ public class PathfindingGrid : MonoBehaviour {
                 PathGridCoordinate pathGridCoordinate = new PathGridCoordinate(x + 0.5f, y + 0.5f);
                 //MapCoordinate mapCoordinate = new MapCoordinate(pathGridCoordinate);
 
-                WorldPosition worldPosition = WorldPosition.FromGridCoordinate(pathGridCoordinate);
-                MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(worldPosition);
+                MapCoordinate mapCoordinate = MapCoordinate.FromGridCoordinate(pathGridCoordinate);
+                WorldPosition worldPosition = new WorldPosition(mapCoordinate);
 
                 LayoutCoordinate layoutCoordinate = new LayoutCoordinate(mapCoordinate);                
                 TerrainType terrain = Script.Get<MapsManager>().GetTerrainAt(layoutCoordinate);
@@ -223,7 +223,7 @@ public class PathfindingGrid : MonoBehaviour {
 
     public Node nodeFromWorldPoint(WorldPosition worldPos) {
         MapCoordinate mapCoordinate =  MapCoordinate.FromWorldPosition(worldPos);
-        PathGridCoordinate pathGridCoordinate = new PathGridCoordinate(mapCoordinate);
+        PathGridCoordinate pathGridCoordinate = PathGridCoordinate.fromMapCoordinate(mapCoordinate);
 
         //float percentX = (worldPos.x + gridWorldSize.x / 2) / gridWorldSize.x;
         //float percentY = (worldPos.z + gridWorldSize.y / 2) / gridWorldSize.y;
@@ -292,7 +292,7 @@ public class PathfindingGrid : MonoBehaviour {
                  
 
                 Gizmos.DrawCube(n.worldPosition.vector3, Vector3.one *cubeDiameter);
-
+                //Handles.Label(n.worldPosition.vector3, n.gridX + ", " + n.gridY);
                 //Handles.Label(n.worldPosition.vector3, "G: " + n.gCost + " H: " + n.hCost + "\n   F: " + n.fCost);
             }
         }
