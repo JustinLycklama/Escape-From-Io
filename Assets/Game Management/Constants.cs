@@ -4,6 +4,9 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Constants : MonoBehaviour {
+    public int mapCountX;
+    public int mapCountY;
+
     public int layoutMapWidth;
     public int layoutMapHeight;
 
@@ -24,7 +27,8 @@ public class Tag {
     private static Dictionary<Tag, GameObject> objectCache = new Dictionary<Tag, GameObject>();    
 
     public static Tag Narrator { get { return new Tag("Narrator"); } }
-    public static Tag Map { get { return new Tag("Map"); } }
+    //public static Tag Map { get { return new Tag("Map"); } }
+    public static Tag MapsManager { get { return new Tag("MapsManager"); } }
     public static Tag MapGenerator { get { return new Tag("MapGenerator"); } }
     public static Tag AStar { get { return new Tag("AStar"); } }
     public static Tag UIManager { get { return new Tag("UIManager"); } }
@@ -53,14 +57,15 @@ public class Script {
 
     public static Script Constants { get { return new Script(Tag.Narrator, typeof(Constants)); } }
     public static Script PlayerBehaviour { get { return new Script(Tag.Narrator, typeof(PlayerBehaviour)); } }
-    public static Script MapContainer { get { return new Script(Tag.Map, typeof(MapContainer)); } }
+    //public static Script MapContainer { get { return new Script(Tag.Map, typeof(MapContainer)); } }
+    public static Script MapsManager { get { return new Script(Tag.MapsManager, typeof(MapsManager)); } }
     public static Script UIManager { get { return new Script(Tag.UIManager, typeof(UIManager)); } }
     public static Script TaskQueue { get { return new Script(Tag.Narrator, typeof(TaskQueueManager)); } }
     public static Script MapGenerator { get { return new Script(Tag.MapGenerator, typeof(MapGenerator)); } }
     public static Script PathfindingGrid { get { return new Script(Tag.AStar, typeof(PathfindingGrid)); } }
     public static Script UIOverlayPanel { get { return new Script(Tag.UIOverlayPanel, typeof(RectTransform)); } }
 
-    public static Script[] allScripts = new Script[] { Constants, PlayerBehaviour, MapContainer, UIManager, TaskQueue, MapGenerator, PathfindingGrid }; 
+    public static Script[] allScripts = new Script[] { Constants, PlayerBehaviour, MapsManager, UIManager, TaskQueue, MapGenerator, PathfindingGrid }; 
 
     public static T Get<T> () where T : Component {
 

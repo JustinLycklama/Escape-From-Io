@@ -89,7 +89,7 @@ public class MapGenerator : MonoBehaviour {
         }
     }
 
-    public Map GenerateMap() {
+    public Map GenerateMap(MapContainer mapContainer) {
 
         Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();
 
@@ -116,7 +116,7 @@ public class MapGenerator : MonoBehaviour {
         Map map = new Map(noiseMap, layoutNoiseMap, groundFeaturesNoiseMap, mountainFeaturesNoiseMap,
             featuresPerLayoutPerAxis,
             MeshGenerator.GenerateTerrainMesh(noiseMap, featuresPerLayoutPerAxis),
-            TextureGenerator.TextureFromColorMap(CreateColorMapWithTerrain(noiseMap, terrainMap), noiseMapWidth, noiseMapHeight),
+            TextureGenerator.TextureFromColorMap(CreateColorMapWithTerrain(noiseMap, terrainMap, mapContainer), noiseMapWidth, noiseMapHeight),
             terrainMap
             );
 
@@ -138,8 +138,6 @@ public class MapGenerator : MonoBehaviour {
                 }
                 break;
             case DrawMode.Mesh:
-
-                MapContainer mapContainer = Tag.Map.GetGameObject().GetComponent<MapContainer>();
                 mapContainer.setMap(map);
 
                 if(debugDisplay != null) {
@@ -219,7 +217,7 @@ public class MapGenerator : MonoBehaviour {
         return colorMap;
     }
 
-    private Color[] CreateColorMapWithTerrain(float[,] noiseMap, TerrainType[,] terrainTypeMap) {
+    private Color[] CreateColorMapWithTerrain(float[,] noiseMap, TerrainType[,] terrainTypeMap, MapContainer mapContainer) {
 
         int noiseMapWidth = noiseMap.GetLength(0);
         int noiseMapHeight = noiseMap.GetLength(1);
@@ -233,7 +231,7 @@ public class MapGenerator : MonoBehaviour {
         for(int y = 0; y < noiseMapHeight; y++) {
             for(int x = 0; x < noiseMapWidth; x++) {
 
-                MapCoordinate coordinate = new MapCoordinate(x, y);
+                MapCoordinate coordinate = new MapCoordinate(x, y, mapContainer);
 
                 if((x + 1) % featuresPerLayoutPerAxis == 0 || (y + 1) % featuresPerLayoutPerAxis == 0) {
                     colorMap[y * noiseMapWidth + x] = Color.white;

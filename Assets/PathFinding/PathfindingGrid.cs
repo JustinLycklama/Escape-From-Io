@@ -20,13 +20,13 @@ public class PathfindingGrid : MonoBehaviour {
 
     int gridSizeX {
         get {
-            return constants.layoutMapWidth * constants.nodesPerLayoutPerAxis;
+            return constants.layoutMapWidth * constants.nodesPerLayoutPerAxis * constants.mapCountX;
         }
     }
         
     int gridSizeY {
         get {
-            return constants.layoutMapHeight * constants.nodesPerLayoutPerAxis;
+            return constants.layoutMapHeight * constants.nodesPerLayoutPerAxis * constants.mapCountY;
         }
     }
 
@@ -59,7 +59,7 @@ public class PathfindingGrid : MonoBehaviour {
         }
     }
 
-    public void createGrid(Map map = null) {
+    public void createGrid() {
         //gridSizeX = Mathf.RoundToInt(gridWorldSize.x / nodeDiameter);
         //gridSizeY = Mathf.RoundToInt(gridWorldSize.y / nodeDiameter);
 
@@ -69,12 +69,13 @@ public class PathfindingGrid : MonoBehaviour {
             for(int y = 0; y < gridSizeY; y++) {
 
                 PathGridCoordinate pathGridCoordinate = new PathGridCoordinate(x + 0.5f, y + 0.5f);
-                MapCoordinate mapCoordinate = new MapCoordinate(pathGridCoordinate);
+                //MapCoordinate mapCoordinate = new MapCoordinate(pathGridCoordinate);
 
-                WorldPosition worldPosition = new WorldPosition(mapCoordinate);
+                WorldPosition worldPosition = WorldPosition.FromGridCoordinate(pathGridCoordinate);
+                MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(worldPosition);
 
-                LayoutCoordinate layoutCoordinate = new LayoutCoordinate(mapCoordinate);
-                TerrainType terrain = map.GetTerrainAt(layoutCoordinate);
+                LayoutCoordinate layoutCoordinate = new LayoutCoordinate(mapCoordinate);                
+                TerrainType terrain = Script.Get<MapsManager>().GetTerrainAt(layoutCoordinate);
 
                 grid[x, y] = new Node(terrain.walkable, worldPosition, x, y, 0);
             }
@@ -221,7 +222,7 @@ public class PathfindingGrid : MonoBehaviour {
     }
 
     public Node nodeFromWorldPoint(WorldPosition worldPos) {
-        MapCoordinate mapCoordinate = new MapCoordinate(worldPos);
+        MapCoordinate mapCoordinate =  MapCoordinate.FromWorldPosition(worldPos);
         PathGridCoordinate pathGridCoordinate = new PathGridCoordinate(mapCoordinate);
 
         //float percentX = (worldPos.x + gridWorldSize.x / 2) / gridWorldSize.x;
@@ -270,12 +271,14 @@ public class PathfindingGrid : MonoBehaviour {
 
     void OnDrawGizmos() {
         Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();
-        Vector3 mapScale = Tag.Map.GetGameObject().transform.localScale;
 
         float cubeDiameter = constants.layoutMapWidth / constants.nodesPerLayoutPerAxis;
-        if(grid != null && displayGridGizmos) {
+        if(Script.Get<MapsManager>().mapContainers.Count > 0 && grid != null && displayGridGizmos) {
 
-            Gizmos.DrawWireCube(transform.position, new Vector3(gridSizeX * mapScale.x, 1 * mapScale.y, gridSizeY * mapScale.z));
+            Vector3 mapScale = Script.Get<MapsManager>().mapContainers[0].transform.localScale;
+
+            Transform mapsManagerPosition = Script.Get<MapsManager>().transform;
+            Gizmos.DrawWireCube(mapsManagerPosition.position, new Vector3(gridSizeX * mapScale.x, 1 * mapScale.y, gridSizeY * mapScale.z));
 
             foreach(Node n in grid) {
                 Gizmos.color = Color.Lerp(Color.white, Color.black, Mathf.InverseLerp(penaltyMin, penaltyMax, n.movementPenalty));

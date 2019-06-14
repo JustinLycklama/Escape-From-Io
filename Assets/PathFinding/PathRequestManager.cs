@@ -93,7 +93,7 @@ public class PathRequestManager : MonoBehaviour {
                 request = new PathRequest(position, task.target.vector3, callback);
                 break;
             case PathRequestTargetType.Layout:
-                MapCoordinate mapCoordinate = new MapCoordinate(task.target);
+                MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(task.target);
                 LayoutCoordinate layoutCoordinate = new LayoutCoordinate(mapCoordinate);
                 request = new PathRequest(position, layoutCoordinate, callback);
                 break;

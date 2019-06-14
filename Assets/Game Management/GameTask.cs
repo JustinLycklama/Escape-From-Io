@@ -35,7 +35,7 @@ public class GameTask {
         this.action = action;
         this.actionItem = actionItem;
 
-        MapCoordinate mapCoordinate = new MapCoordinate(target);
+        MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(target);
         LayoutCoordinate layoutCoordinate = new LayoutCoordinate(mapCoordinate);
         targetDescription = layoutCoordinate.description;
     }

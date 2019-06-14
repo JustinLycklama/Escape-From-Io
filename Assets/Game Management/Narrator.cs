@@ -6,11 +6,9 @@ public class Narrator : MonoBehaviour
 {
     PathfindingGrid grid;
     MapGenerator mapGenerator;
-    MapContainer mapContainer;
+    MapsManager mapsManager;
 
     Constants constants;
-
-    Material mapMaterial;
 
     public List<Unit> startingUnits;
 
@@ -18,23 +16,21 @@ public class Narrator : MonoBehaviour
     void Start() {
         grid = Tag.AStar.GetGameObject().GetComponent<PathfindingGrid>();
         mapGenerator = Tag.MapGenerator.GetGameObject().GetComponent<MapGenerator>();
-        mapContainer = Tag.Map.GetGameObject().GetComponent<MapContainer>();
+        mapsManager = Script.Get<MapsManager>();
         constants = GetComponent<Constants>();
 
-        mapMaterial = Tag.Map.GetGameObject().GetComponent<MeshRenderer>().material;
-
-        // Pass in "towers"
-        //mapMaterial.SetVectorArray
-
+        mapsManager.InitializeMaps(constants.mapCountX, constants.mapCountY);
 
         // Setup world
-        Map map = mapGenerator.GenerateMap();
-        mapContainer.setMap(map);
-
-        grid.gameObject.transform.position = mapContainer.transform.position;
+        foreach (MapContainer container in mapsManager.mapContainers) {
+            Map map = mapGenerator.GenerateMap(container);
+            container.setMap(map);
+        }
+     
+        grid.gameObject.transform.position = mapsManager.transform.position;
         //grid.gridWorldSize = new Vector2(map.mapWidth * mapContainer.gameObject.transform.localScale.x, map.mapHeight * mapContainer.gameObject.transform.localScale.z);
 
-        grid.createGrid(map);
+        grid.createGrid();
         grid.BlurPenaltyMap(4);
 
         //unit.GetComponent<Unit>().BeginQueueing();

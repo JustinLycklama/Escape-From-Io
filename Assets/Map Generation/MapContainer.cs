@@ -4,12 +4,21 @@ using UnityEngine;
 
 public class MapContainer : MonoBehaviour
 {
-    Map map;
+    public Map map;
+
+    public int mapX, mapY; // Virtual position within the maps manager
+    public Rect mapRect; // World position within the Maps Manager
 
     MeshFilter meshFilter;
     MeshRenderer meshRenderer;
 
     BoxCollider[,] boxColliderArray;
+
+    public void SetMapPosition(int mapX, int mapY, Rect mapRect) {
+        this.mapX = mapX;
+        this.mapY = mapY;
+        this.mapRect = mapRect;
+    }
 
     public void setMap(Map map) {
 
@@ -18,11 +27,13 @@ public class MapContainer : MonoBehaviour
         }        
 
         this.map = map;
+        map.mapContainer = this;
 
         DrawMesh();
         AddBoxColliders();
     }
 
+    // TODO Remove
     public Map getMap() {
         return map;
     }
@@ -67,7 +78,7 @@ public class MapContainer : MonoBehaviour
             for(int y = 0; y < height; y++) {
                 BoxCollider boxCollider = gameObject.AddComponent<BoxCollider>();
 
-                LayoutCoordinate layoutCoordinate = new LayoutCoordinate(x, height - 1 - y);
+                LayoutCoordinate layoutCoordinate = new LayoutCoordinate(x, height - 1 - y, this);
                 MapCoordinate mapCoordinate = new MapCoordinate(layoutCoordinate);
 
                 boxCollider.center = new Vector3((x * boxSizeX - halfTotalWidth) + boxSizeX / 2f, 0 , (y * boxSizeZ - halfTotalHeight) + boxSizeZ / 2f);

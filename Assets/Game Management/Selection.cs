@@ -37,7 +37,7 @@ public class Selection {
 
         // Select
         Constants constants = Script.Get<Constants>();
-        Material mapMaterial = Tag.Map.GetGameObject().GetComponent<MeshRenderer>().material;
+        Material mapMaterial = Script.Get<MapsManager>().GetMaterialForMap(coordinate);
 
         mapMaterial.SetFloat("selectedXOffsetLow", coordinate.x * constants.featuresPerLayoutPerAxis - (constants.layoutMapWidth * constants.featuresPerLayoutPerAxis / 2f));
         mapMaterial.SetFloat("selectedXOffsetHigh", (coordinate.x + 1) * constants.featuresPerLayoutPerAxis - (constants.layoutMapWidth * constants.featuresPerLayoutPerAxis / 2f));
@@ -67,7 +67,7 @@ public class Selection {
 
     public void deselectCurrent() {
         if(selectionType == SelectionType.Terrain) {
-            Material mapMaterial = Tag.Map.GetGameObject().GetComponent<MeshRenderer>().material;
+            Material mapMaterial = Script.Get<MapsManager>().GetMaterialForMap(coordinate);
             mapMaterial.SetFloat("hasSelection", 0);
 
         } else if(selectionType == SelectionType.Selectable) {
@@ -80,9 +80,7 @@ public class Selection {
     public string Title() {
         switch(selectionType) {
             case SelectionType.Terrain:
-                Map map = Script.MapContainer.GetFromObject<MapContainer>().getMap();
-
-                return map.GetTerrainAt(coordinate).name;
+                return coordinate.mapContainer.map.GetTerrainAt(coordinate).name;
             case SelectionType.Selectable:
                 return selection.description;
             default:
@@ -93,9 +91,7 @@ public class Selection {
     public UserAction[] UserActions() {
         switch(selectionType) {
             case SelectionType.Terrain:
-                Map map = Script.MapContainer.GetFromObject<MapContainer>().getMap();
-
-                return map.ActionsAvailableAt(coordinate);
+                return Script.Get<MapsManager>().ActionsAvailableAt(coordinate);
             case SelectionType.Selectable:
 
                 return new UserAction[0];

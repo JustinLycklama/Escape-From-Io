@@ -1,20 +1,10 @@
 ﻿using UnityEngine;
 
-public class PlayerBehaviour : MonoBehaviour
-{
-    //public LayoutCoordinate selectedLayoutTile = new LayoutCoordinate(0, 0);
-
+public class PlayerBehaviour : MonoBehaviour {
     float cameraMovementSpeed = 200;
-    float cameraRotateSpeed = 100;
-
-    Material mapMaterial;
+    float cameraRotateSpeed = 100;  
 
     public Selection selection;
-
-    // Start is called before the first frame update
-    void Start() {
-        mapMaterial = Tag.Map.GetGameObject().GetComponent<MeshRenderer>().material;
-    }
 
     // Update is called once per frame
     void Update() {
@@ -80,12 +70,12 @@ public class PlayerBehaviour : MonoBehaviour
                 GameObject objectHit = hit.transform.gameObject;
 
                 // Select a Terrain Selection
-                if(objectHit == Tag.Map.GetGameObject()) {
+                if(objectHit.GetComponent<MapContainer>() != null) {
                     BoxCollider boxCollider = hit.collider as BoxCollider;
 
                     Vector3 worldPosition = boxCollider.transform.TransformPoint(boxCollider.center);
 
-                    MapCoordinate selectedCoordinate = new WorldPosition(worldPosition).mapCoordinate;
+                    MapCoordinate selectedCoordinate = MapCoordinate.FromWorldPosition(new WorldPosition(worldPosition));
                     LayoutCoordinate coordinate = new LayoutCoordinate(selectedCoordinate);
                     selection = Selection.createTerrainSelection(coordinate);
                 }

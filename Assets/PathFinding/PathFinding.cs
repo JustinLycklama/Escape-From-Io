@@ -82,10 +82,13 @@ public class PathFinding : MonoBehaviour {
         int completedCalls = 0;
 
         foreach (PathGridCoordinate gridCoordinate in gridCoordinatesSurroundingLayoutCoordinate) {
-            MapCoordinate mapCoordinate = new MapCoordinate(gridCoordinate);
-            WorldPosition worldPos = new WorldPosition(mapCoordinate);
+            WorldPosition? worldPos = WorldPosition.FromGridCoordinate(gridCoordinate);
 
-            StartCoroutine(FindPath(startPos, worldPos.vector3, (path, success) => {
+            if (worldPos == null) {
+                continue;
+            }
+
+            StartCoroutine(FindPath(startPos, worldPos.Value.vector3, (path, success) => {
                 completedCalls++;
 
                 if (success && path.Length < lowestLength) {
@@ -193,9 +196,6 @@ public class PathFinding : MonoBehaviour {
     WorldPosition[] SimplifyPath(Node[] path) {
         List<WorldPosition> waypoints = new List<WorldPosition>();
         Vector2 oldDirection = Vector2.zero;
-
-        GameObject mapMesh = Tag.Map.GetGameObject();
-        Map map = mapMesh.GetComponent<MapContainer>().getMap();
 
         int lastAddedIndex = 0;
 

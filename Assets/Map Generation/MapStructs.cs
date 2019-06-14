@@ -12,16 +12,22 @@ public struct LayoutCoordinate {
         }
     }
 
+    public MapContainer mapContainer;
+
     public LayoutCoordinate(MapCoordinate coodrinate) {
         Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();
 
         x = (int)coodrinate.x / constants.featuresPerLayoutPerAxis;
         y = (int)coodrinate.y / constants.featuresPerLayoutPerAxis;
+
+        mapContainer = coodrinate.mapContainer;
     }
 
-    public LayoutCoordinate(int layoutX, int layoutY) {
+    public LayoutCoordinate(int layoutX, int layoutY, MapContainer mapContainer) {
         x = layoutX;
         y = layoutY;
+
+        this.mapContainer = mapContainer;
     }
 
     public override bool Equals(object obj) {
@@ -77,10 +83,13 @@ public struct PathGridCoordinate {
 
         List<PathGridCoordinate[]> pathColumns = new List<PathGridCoordinate[]>();
 
-        for(int x = layoutCoordinate.x * constants.nodesPerLayoutPerAxis; x < (layoutCoordinate.x + 1) * constants.nodesPerLayoutPerAxis; x++) {
+        int mapPostionX = layoutCoordinate.mapContainer.mapX + 1;
+        int mapPostionY = layoutCoordinate.mapContainer.mapY + 1;
+
+        for(int x = layoutCoordinate.x * constants.nodesPerLayoutPerAxis * mapPostionX; x < (layoutCoordinate.x + 1) * constants.nodesPerLayoutPerAxis; x++) {
             List<PathGridCoordinate> pathCoordinates = new List<PathGridCoordinate>();
 
-            for(int y = layoutCoordinate.y * constants.nodesPerLayoutPerAxis; y < (layoutCoordinate.y + 1) * constants.nodesPerLayoutPerAxis; y++) {
+            for(int y = layoutCoordinate.y * constants.nodesPerLayoutPerAxis * mapPostionY; y < (layoutCoordinate.y + 1) * constants.nodesPerLayoutPerAxis; y++) {
                 pathCoordinates.Add(new PathGridCoordinate(x, y));
             }
 
@@ -92,7 +101,7 @@ public struct PathGridCoordinate {
 
     public PathGridCoordinate(float x, float y) {
         this.x = x;
-        this.y = y;
+        this.y = y;      
     }
 }
 
@@ -106,35 +115,43 @@ public struct MapCoordinate {
     public int yLowSample { get { return Mathf.FloorToInt(y); } }
     public int yHighSample { get { return Mathf.Clamp(yLowSample, 0, Tag.Narrator.GetGameObject().GetComponent<Constants>().mapHeight); } }
 
-    public MapCoordinate(PathGridCoordinate pathGridCoordinate) {
-        Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();
+    public MapContainer mapContainer;
 
-        x = pathGridCoordinate.x / constants.nodesPerLayoutPerAxis * constants.featuresPerLayoutPerAxis;
-        y = pathGridCoordinate.y / constants.nodesPerLayoutPerAxis * constants.featuresPerLayoutPerAxis;
-    }
+    //public MapCoordinate(PathGridCoordinate pathGridCoordinate) {
+    //    Constants constants = Script.Get<Constants>();
+
+    //    x = pathGridCoordinate.x / constants.nodesPerLayoutPerAxis * constants.featuresPerLayoutPerAxis;
+    //    y = pathGridCoordinate.y / constants.nodesPerLayoutPerAxis * constants.featuresPerLayoutPerAxis;
+
+    //}
 
     public MapCoordinate(LayoutCoordinate layoutCoordinate) {
-        Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();
-
+        Constants constants = Script.Get<Constants>();
         x = layoutCoordinate.x * constants.featuresPerLayoutPerAxis + (constants.featuresPerLayoutPerAxis / 2f);
         y = layoutCoordinate.y * constants.featuresPerLayoutPerAxis + (constants.featuresPerLayoutPerAxis / 2f);
+
+        mapContainer = layoutCoordinate.mapContainer;
     }
 
-    public MapCoordinate(WorldPosition worldPosition) {
+    public static MapCoordinate FromWorldPosition(WorldPosition worldPosition) {
 
-        GameObject map = Tag.Map.GetGameObject();
-        Transform mapObjectSpace = map.transform;
-        Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();
+        return Script.Get<MapsManager>().MapCoordinateFromWorld(worldPosition);
 
-        Vector3 mapPosition = mapObjectSpace.InverseTransformPoint(worldPosition.vector3);
+        //GameObject map = Tag.Map.GetGameObject();
+        //Transform mapObjectSpace = map.transform;
+        //Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();
 
-        x = mapPosition.x + constants.mapWidth / 2f;
-        y = - mapPosition.z + constants.mapHeight / 2f;
+        //Vector3 mapPosition = mapObjectSpace.InverseTransformPoint(worldPosition.vector3);
+
+        //x = mapPosition.x + constants.mapWidth / 2f;
+        //y = - mapPosition.z + constants.mapHeight / 2f;
     }
     
-    public MapCoordinate(float x, float y) {
+    public MapCoordinate(float x, float y, MapContainer mapContainer) {
         this.x = x;
         this.y = y;
+
+        this.mapContainer = mapContainer;
     }
 
     public override bool Equals(object obj) {
@@ -184,22 +201,22 @@ public struct WorldPosition {
         get { return new Vector3(x, y, z); }
     }
 
-    public MapCoordinate mapCoordinate {
-        get { return new MapCoordinate(this); }
-    }
-
     public WorldPosition(Vector3 position) {
         x = position.x;
         y = position.y;
         z = position.z;
     }    
 
-    public WorldPosition(MapCoordinate mapCoordinate) {
-        GameObject mapObject = Tag.Map.GetGameObject();
-        Map map = mapObject.GetComponent<MapContainer>().getMap();
-        Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();
+    public static WorldPosition FromGridCoordinate(PathGridCoordinate pathGridCoordinate) {
+        return Script.Get<MapsManager>().WorldPositionFromPathGridCoordinate(pathGridCoordinate);
+    }
 
-        Transform mapObjectSpace = mapObject.transform;
+    public WorldPosition(MapCoordinate mapCoordinate) {
+        MapContainer mapContainer = mapCoordinate.mapContainer;
+        Map map = mapContainer.getMap();
+        Constants constants = Script.Get<Constants>();
+
+        Transform mapObjectSpace = mapContainer.transform;
 
         Vector3 currentPointObjectSpace = new Vector3(mapCoordinate.x, map.getHeightAt(mapCoordinate), mapCoordinate.y);
 
@@ -215,6 +232,6 @@ public struct WorldPosition {
     }
 
     public void recalculateHeight() {
-        this = new WorldPosition(new MapCoordinate(this));
+        this = new WorldPosition(MapCoordinate.FromWorldPosition(this));
     }
 }

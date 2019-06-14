@@ -2,11 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface TerrainUpdateDelegate {
-    void NotifyTerrainUpdate();
-}
-
 public class Map : ActionableItem {
+
     public int mapWidth;
     public int mapHeight;
     public Vector2 textureMapSize;
@@ -25,7 +22,8 @@ public class Map : ActionableItem {
 
     float[,] finalHeightMap;
 
-    List<TerrainUpdateDelegate> terrainUpdateDelegates;
+    public MapContainer mapContainer;
+
     Dictionary<GameTask, TerraformTarget> terraformTargetDictionary;
 
     public string description => "The World? What should go here";
@@ -51,11 +49,14 @@ public class Map : ActionableItem {
         this.terrainData = terrainData;
 
         buildingData = new Building[terrainData.GetLength(0), terrainData.GetLength(1)];
-        terrainUpdateDelegates = new List<TerrainUpdateDelegate>();
         terraformTargetDictionary = new Dictionary<GameTask, TerraformTarget>();
     }
 
     public TerrainType GetTerrainAt(LayoutCoordinate layoutCoordinate) {
+        if (layoutCoordinate.x >= terrainData.GetLength(0) || layoutCoordinate.y >= terrainData.GetLength(1)) {
+            throw new MissingReferenceException();
+        }
+
         return terrainData[layoutCoordinate.x, layoutCoordinate.y];
     }
 
@@ -69,21 +70,13 @@ public class Map : ActionableItem {
         int mapHeight = finalHeightMap.GetLength(1);
 
         // If I have a map coordinate, should it be guarenteed to be on the map?
-        //if (coordinate.x < 0 || coordinate.y < 0 || coordinate.x >= mapWidth || coordinate.y >= mapHeight) {
-        //    return 0;
-        //}
+        if(coordinate.x < 0 || coordinate.y < 0 || coordinate.x >= mapWidth || coordinate.y >= mapHeight) {
+            return 0;
+        }
 
         // TODO: Triangle Calculations        
 
         return finalHeightMap[coordinate.xLowSample, coordinate.yLowSample];
-    }
-
-    public void AddTerrainUpdateDelegate(TerrainUpdateDelegate updateDelegate) {
-        terrainUpdateDelegates.Add(updateDelegate);
-    }
-
-    public void RemoveTerrainUpdateDelegate(TerrainUpdateDelegate updateDelegate) {
-        terrainUpdateDelegates.Remove(updateDelegate);
     }
 
     public UserAction[] ActionsAvailableAt(LayoutCoordinate coordinate) {
@@ -189,7 +182,7 @@ public class Map : ActionableItem {
         if (terraformTargetDictionary.ContainsKey(task)) {
             terraformTarget = terraformTargetDictionary[task];
         } else {
-            MapCoordinate mapCoordinate = new MapCoordinate(task.target);
+            MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(task.target);
             LayoutCoordinate coordinate = new LayoutCoordinate(mapCoordinate);
 
             TerrainType targetTerrain = Script.Get<MapGenerator>().TerrainForRegion(RegionType.Land);
@@ -218,9 +211,7 @@ public class Map : ActionableItem {
             Script.Get<PathfindingGrid>().UpdateGrid(this, terraformTarget.coordinate);
 
             // Notify all users of path finding grid about ubdate
-            foreach(TerrainUpdateDelegate updateDelegate in terrainUpdateDelegates) {
-                updateDelegate.NotifyTerrainUpdate();
-            }
+            Script.Get<MapsManager>().NotifyTerrainUpdateDelegates();
 
             // Create Ore at location
 
@@ -241,7 +232,7 @@ public class Map : ActionableItem {
         finalHeightMap = mapGenerator.TerraformHeightMap(layoutNoiseMap, groundFeaturesNoiseMap, mountainFeaturesNoiseMap, terrainData, currentHeightAtCoordinate, terraformTarget.coordinate);
 
         MeshGenerator.UpdateTerrainMesh(meshData, finalHeightMap, featuresPerLayoutPerAxis, terraformTarget.coordinate);
-        Script.Get<MapContainer>().DrawMesh();
+        mapContainer.DrawMesh();
 
         return terraformTarget.percentage;
     }

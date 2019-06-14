@@ -103,7 +103,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
 
     public void Init() {
         taskQueueManager = Script.Get<TaskQueueManager>();
-        Script.Get<MapContainer>().getMap().AddTerrainUpdateDelegate(this);
+        Script.Get<MapsManager>().AddTerrainUpdateDelegate(this);
     }
 
     float timeBeforeNextTaskCheck = 0;
@@ -130,7 +130,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
     }
 
     private void OnDestroy() {
-        Script.Get<MapContainer>().getMap().RemoveTerrainUpdateDelegate(this);
+        Script.Get<MapsManager>().RemoveTerrainUpdateDelegate(this);
     }
 
     // DO PATH FLOW
@@ -224,9 +224,9 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
                 }               
 
                 WorldPosition worldPos = path.lookPoints[pathIndex];
-                MapCoordinate mapCoordinate = new MapCoordinate(worldPos);
+                MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(worldPos);
 
-                float height = (Script.Get<MapContainer>().getMap().getHeightAt(mapCoordinate) * Script.Get<MapContainer>().transform.localScale.y) + (0.5f * transform.localScale.y);
+                float height = Script.Get<MapsManager>().GetHeightAt(mapCoordinate) * mapCoordinate.mapContainer.transform.localScale.y + (0.5f * transform.localScale.y);
                 Vector3 lookPoint = new Vector3(worldPos.vector3.x, height, worldPos.vector3.z);
 
                 Quaternion targetRotation = Quaternion.LookRotation(lookPoint - transform.position);
