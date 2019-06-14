@@ -28,38 +28,48 @@ public class Selection {
         Selection selection = new Selection();
         selection.setTerrain(coordinate);
 
-        MonoBehaviour.print("-----");
+        //MonoBehaviour.print("-----");
 
-        MonoBehaviour.print("LayoutCoordinate: " + coordinate.description);
+        //MonoBehaviour.print("LayoutCoordinate: " + coordinate.description);
 
-        MapCoordinate mapCoordinate = new MapCoordinate(coordinate);
-        MonoBehaviour.print("MapCoordinate: " + mapCoordinate.description);
+        //MapCoordinate mapCoordinate = new MapCoordinate(coordinate);
+        //MonoBehaviour.print("MapCoordinate: " + mapCoordinate.description);
 
-        WorldPosition worldPosition = new WorldPosition(mapCoordinate);
-        MonoBehaviour.print("WorldPosition: " + worldPosition.description);
+        //WorldPosition worldPosition = new WorldPosition(mapCoordinate);
+        //MonoBehaviour.print("WorldPosition: " + worldPosition.description);
 
-        MapCoordinate newMapCoordinate = MapCoordinate.FromWorldPosition(worldPosition);
-        MonoBehaviour.print("Back Into MapCoordinate: " + newMapCoordinate.description);
+        //MapCoordinate newMapCoordinate = MapCoordinate.FromWorldPosition(worldPosition);
+        //MonoBehaviour.print("Back Into MapCoordinate: " + newMapCoordinate.description);
 
-        LayoutCoordinate layoutCoordinate = new LayoutCoordinate(newMapCoordinate);
-        MonoBehaviour.print("Back Into LayoutCoordinate: " + layoutCoordinate.description);
+        //LayoutCoordinate layoutCoordinate = new LayoutCoordinate(newMapCoordinate);
+        //MonoBehaviour.print("Back Into LayoutCoordinate: " + layoutCoordinate.description);
 
-        PathGridCoordinate anyGridCoordinate = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(layoutCoordinate)[0][0];
-        MonoBehaviour.print("Any PathGridCoordiate: " + anyGridCoordinate.description);
+        //PathGridCoordinate anyGridCoordinate = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(layoutCoordinate)[0][0];
+        //MonoBehaviour.print("Any PathGridCoordiate: " + anyGridCoordinate.description);
 
-        MapCoordinate secondMapCoordinate = MapCoordinate.FromGridCoordinate(anyGridCoordinate);
-        MonoBehaviour.print("MapCoordinate For PathGrid: " + secondMapCoordinate.description);
+        //MapCoordinate secondMapCoordinate = MapCoordinate.FromGridCoordinate(anyGridCoordinate);
+        //MonoBehaviour.print("MapCoordinate For PathGrid: " + secondMapCoordinate.description);
 
-        WorldPosition pathGridWorldPosition = new WorldPosition(secondMapCoordinate);
-        MonoBehaviour.print("WorldPosition For PathGrid: " + worldPosition.description);
+        //WorldPosition pathGridWorldPosition = new WorldPosition(secondMapCoordinate);
+        //MonoBehaviour.print("WorldPosition For PathGrid: " + worldPosition.description);
 
-        MapCoordinate thirdMapCoordinate = MapCoordinate.FromWorldPosition(pathGridWorldPosition);
-        MonoBehaviour.print("Back Into MapCoordinate: " + thirdMapCoordinate.description);
+        //MapCoordinate thirdMapCoordinate = MapCoordinate.FromWorldPosition(pathGridWorldPosition);
+        //MonoBehaviour.print("Back Into MapCoordinate: " + thirdMapCoordinate.description);
 
-        PathGridCoordinate newPathGrid = PathGridCoordinate.fromMapCoordinate(thirdMapCoordinate);
-        MonoBehaviour.print("Back Into PathGrid: " + newPathGrid.description);
+        //PathGridCoordinate newPathGrid = PathGridCoordinate.fromMapCoordinate(thirdMapCoordinate);
+        //MonoBehaviour.print("Back Into PathGrid: " + newPathGrid.description);
 
-        MonoBehaviour.print("-----");
+        //MonoBehaviour.print("-----");
+
+        //MonoBehaviour.print("-----");
+
+        //foreach(PathGridCoordinate[] anyGridCoordinates in PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(coordinate)) {
+        //    foreach(PathGridCoordinate anyGridCoordinate in anyGridCoordinates) {
+        //        MonoBehaviour.print("PathGridCoordiate: " + anyGridCoordinate.description);
+        //    }
+        //}
+
+        //MonoBehaviour.print("-----");
 
 
         return selection;

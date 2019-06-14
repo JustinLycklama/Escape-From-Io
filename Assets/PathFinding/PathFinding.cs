@@ -51,28 +51,32 @@ public class PathFinding : MonoBehaviour {
         PathGridCoordinate[][] pathGridCoordinatesOfLayout = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(layoutCoordinate);
         List<PathGridCoordinate> gridCoordinatesSurroundingLayoutCoordinate = new List<PathGridCoordinate>();
 
+        int gridCoordinateCountWidth = constants.layoutMapWidth * constants.nodesPerLayoutPerAxis * constants.mapCountX;
+        int gridCoordinateCountHeight = constants.layoutMapHeight * constants.nodesPerLayoutPerAxis * constants.mapCountY;
+
+        PathGridCoordinate sample;
+
         // Left Side
-        if (layoutCoordinate.x > 0) {
-            PathGridCoordinate sample = pathGridCoordinatesOfLayout[0][Mathf.FloorToInt((constants.nodesPerLayoutPerAxis) / 2f)];               
+        sample = pathGridCoordinatesOfLayout[0][Mathf.FloorToInt((constants.nodesPerLayoutPerAxis) / 2f)];
+        if(sample.xLowSample - 1 >= 0) {
             gridCoordinatesSurroundingLayoutCoordinate.Add(new PathGridCoordinate(sample.xLowSample - 1, sample.yLowSample)); 
         }
 
         // Top Side
-        if(layoutCoordinate.y > 0) {
-            PathGridCoordinate sample = pathGridCoordinatesOfLayout[Mathf.FloorToInt((constants.nodesPerLayoutPerAxis) / 2f)][0];
-            gridCoordinatesSurroundingLayoutCoordinate.Add(new PathGridCoordinate(sample.xLowSample, sample.yLowSample - 1));
-            
+        sample = pathGridCoordinatesOfLayout[Mathf.FloorToInt((constants.nodesPerLayoutPerAxis) / 2f)][0];
+        if(sample.yLowSample - 1 >= 0) {
+            gridCoordinatesSurroundingLayoutCoordinate.Add(new PathGridCoordinate(sample.xLowSample, sample.yLowSample - 1));            
         }
 
         // Right Side
-        if(layoutCoordinate.x < constants.layoutMapWidth - 1) {
-            PathGridCoordinate sample = pathGridCoordinatesOfLayout[constants.nodesPerLayoutPerAxis - 1][Mathf.FloorToInt((constants.nodesPerLayoutPerAxis) / 2f)];                
+        sample = pathGridCoordinatesOfLayout[constants.nodesPerLayoutPerAxis - 1][Mathf.FloorToInt((constants.nodesPerLayoutPerAxis) / 2f)];
+        if(sample.xLowSample + 1 < gridCoordinateCountWidth - 1) {
             gridCoordinatesSurroundingLayoutCoordinate.Add(new PathGridCoordinate(sample.xLowSample + 1, sample.yLowSample));           
         }
 
         // Bottom Side
-        if(layoutCoordinate.y < constants.layoutMapHeight - 1) {
-            PathGridCoordinate sample = pathGridCoordinatesOfLayout[Mathf.FloorToInt((constants.nodesPerLayoutPerAxis) / 2f)][constants.nodesPerLayoutPerAxis - 1];
+        sample = pathGridCoordinatesOfLayout[Mathf.FloorToInt((constants.nodesPerLayoutPerAxis) / 2f)][constants.nodesPerLayoutPerAxis - 1];
+        if(sample.yLowSample + 1 < gridCoordinateCountHeight - 1) {
             gridCoordinatesSurroundingLayoutCoordinate.Add(new PathGridCoordinate(sample.xLowSample, sample.yLowSample + 1));
         }
 
@@ -80,6 +84,12 @@ public class PathFinding : MonoBehaviour {
         Node[] foundPath = null;
 
         int completedCalls = 0;
+
+        //MonoBehaviour.print("Four Corners");
+
+        //foreach(PathGridCoordinate anyGridCoordinate in gridCoordinatesSurroundingLayoutCoordinate) {
+        //    MonoBehaviour.print("Corner: " + anyGridCoordinate.description);            
+        //}
 
         foreach (PathGridCoordinate gridCoordinate in gridCoordinatesSurroundingLayoutCoordinate) {
             MapCoordinate mapCoordinate = MapCoordinate.FromGridCoordinate(gridCoordinate);
