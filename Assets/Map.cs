@@ -2,6 +2,28 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public class ComputedNoiseData {
+    public float[,] layoutNoiseMap;
+    public float[,] groundFeaturesNoiseMap;
+    public float[,] mountainFeaturesNoiseMap;
+
+    public float[,] finalHeightMap;
+
+    public ComputedNoiseData(float[,] layoutNoiseMap, float[,] groundFeaturesNoiseMap, float[,] mountainFeaturesNoiseMap, float[,] finalHeightMap) {
+        this.layoutNoiseMap = layoutNoiseMap;
+        this.groundFeaturesNoiseMap = groundFeaturesNoiseMap;
+        this.mountainFeaturesNoiseMap = mountainFeaturesNoiseMap;
+        this.finalHeightMap = finalHeightMap;
+    }
+}
+
+public class MapNoiseData {
+    public ComputedNoiseData mainMap;
+
+    // Should always be of size 4
+    public ComputedNoiseData[] overhangSet;
+}
+
 public class Map : ActionableItem {
 
     public int mapWidth;

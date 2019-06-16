@@ -20,7 +20,7 @@ public class MapContainer : MonoBehaviour
         this.mapRect = mapRect;
     }
 
-    public void setMap(Map map) {
+    public void setMap(Map map, bool withColliders = true) {
 
         if (this.map != null) {
             RemoveBoxColliders();
@@ -30,7 +30,10 @@ public class MapContainer : MonoBehaviour
         map.mapContainer = this;
 
         DrawMesh();
-        AddBoxColliders();
+
+        if (withColliders == true) {
+            AddBoxColliders();
+        }
     }
 
     // TODO Remove
@@ -50,15 +53,22 @@ public class MapContainer : MonoBehaviour
 
 
     private void RemoveBoxColliders() {
-        int width = boxColliderArray.GetLength(0);
-        int height = boxColliderArray.GetLength(1);
+        if(boxColliderArray != null) {
+            int width = boxColliderArray.GetLength(0);
+            int height = boxColliderArray.GetLength(1);
 
-        for(int x = 0; x < width; x++) {
-            for(int y = 0; y < height; y++) {
-                BoxCollider boxCollider = boxColliderArray[x,y];
-                Destroy(boxCollider);
+            for(int x = 0; x < width; x++) {
+                for(int y = 0; y < height; y++) {
+                    BoxCollider boxCollider = boxColliderArray[x, y];
+                    DestroyImmediate(boxCollider);
+                }
             }
-        }
+        } else {
+            BoxCollider[] colliders = GetComponents<BoxCollider>();
+            foreach(BoxCollider collider in colliders) {
+                DestroyImmediate(collider);
+}
+        }       
     }
 
     private void AddBoxColliders() {

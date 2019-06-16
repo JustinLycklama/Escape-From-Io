@@ -31,13 +31,16 @@ public class MapsManager : MonoBehaviour {
 
         horizontalMapCount = horizontalMaps;
         verticalMapCount = verticalMaps;
-     
-        mapsBoundaries = new Rect(Vector2.zero, new Vector2(constants.mapWidth * horizontalMapCount, constants.mapHeight * verticalMapCount));
+
+        int mapWidth = constants.mapWidth;
+        int mapHeight = constants.mapHeight;
+
+        mapsBoundaries = new Rect(Vector2.zero, new Vector2(mapWidth * horizontalMapCount, mapHeight * verticalMapCount));
 
         mapContainers.Clear();
         mapContainer2d = new MapContainer[horizontalMaps, verticalMaps];
 
-        Object mapResource = Resources.Load("Map", typeof(MapContainer));
+        //Object mapResource = Resources.Load("Map", typeof(MapContainer));
 
         float mapEdgeX = mapsBoundaries.x - (mapsBoundaries.width / 2f);
         float mapEdgeY = mapsBoundaries.y - (mapsBoundaries.height / 2f);
@@ -45,16 +48,22 @@ public class MapsManager : MonoBehaviour {
         for(int x = 0; x < horizontalMaps; x++) {        
             for(int y = 0; y < verticalMaps; y++) {               
                 // We need to create a Map Rect in MAPS MANAGER SPACE
-                Vector2 mapPoint = new Vector2(mapEdgeX + (constants.mapWidth * x) , mapEdgeY + (constants.mapHeight * (verticalMaps - 1 - y)));                
-                Rect mapRect = new Rect(mapPoint, new Vector2(constants.mapWidth, constants.mapHeight));
+                Vector2 mapPoint = new Vector2(mapEdgeX + (mapWidth * x) , mapEdgeY + (mapHeight * (verticalMaps - 1 - y)));                
+                Rect mapRect = new Rect(mapPoint, new Vector2(mapWidth, mapHeight));
 
-                MapContainer mapContainer = Instantiate(mapResource) as MapContainer;                
+                GameObject mapContainerObject = new GameObject();
+                MapContainer mapContainer = mapContainerObject.AddComponent<MapContainer>();
+
+                MeshRenderer renderer = mapContainerObject.AddComponent<MeshRenderer>();
+                mapContainerObject.AddComponent<MeshFilter>();
+
+                renderer.material = new Material(Shader.Find("Custom/TerrainSelection"));
 
                 mapContainer.SetMapPosition(x, y, mapRect);
 
-                Vector3 MapsManagerSpacePosition = new Vector3(mapPoint.x + (constants.mapWidth / 2f), 0, mapPoint.y + (constants.mapHeight / 2f));
-                mapContainer.transform.position = transform.TransformPoint(MapsManagerSpacePosition);
-                mapContainer.transform.localScale = transform.localScale;
+                Vector3 MapsManagerSpacePosition = new Vector3(mapPoint.x + (mapWidth / 2f), 0, mapPoint.y + (mapHeight / 2f));
+                mapContainerObject.transform.position = transform.TransformPoint(MapsManagerSpacePosition);
+                mapContainerObject.transform.localScale = transform.localScale;
 
                 mapContainer2d[x, y] = mapContainer;
                 mapContainers.Add(mapContainer);

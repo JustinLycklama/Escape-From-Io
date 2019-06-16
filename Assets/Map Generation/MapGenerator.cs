@@ -51,6 +51,8 @@ public class MapGenerator : MonoBehaviour {
     private int layoutMapWidth;
     private int layoutMapHeight;
 
+    public MapContainer demoMapContainer;
+
     public NoiseData layoutMapNoiseData;
     public NoiseData groundFeaturesMapNoiseData;
     public NoiseData mountainFeaturesMapNoiseData;
@@ -89,24 +91,35 @@ public class MapGenerator : MonoBehaviour {
         }
     }
 
-    public Map GenerateMap(MapContainer mapContainer) {
+    public float[,] GenerateLayoutMap(int width, int length) {
+        return NoiseGenerator.GenerateNoiseMap(width, length, layoutMapNoiseData);
+    }
 
+    public float[,] GenerateGroundFeaturesMap(int width, int length) {
+        return NoiseGenerator.GenerateNoiseMap(width, length, groundFeaturesMapNoiseData);
+    }
+
+    public float[,] GenerateMountainFeaturesMap(int width, int length) {
+        return NoiseGenerator.GenerateNoiseMap(width, length, mountainFeaturesMapNoiseData);
+    }
+
+    public Map GenerateMap(MapContainer mapContainer, float[,] layoutNoiseMap, float[,] groundFeaturesNoiseMap, float[,] mountainFeaturesNoiseMap) {
         Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();
 
-        this.layoutMapWidth = constants.layoutMapWidth;
-        this.layoutMapHeight = constants.layoutMapHeight;
+        this.layoutMapWidth = layoutNoiseMap.GetLength(0);
+        this.layoutMapHeight = layoutNoiseMap.GetLength(1);
         this.featuresPerLayoutPerAxis = constants.featuresPerLayoutPerAxis;
 
         // First generate a small noise map, use for the general layout (eg. which area is a path, which is a rock, ...)
         // This is the noise map the grid and selectons will use
-        float[,] layoutNoiseMap = NoiseGenerator.GenerateNoiseMap(layoutMapWidth, layoutMapHeight, layoutMapNoiseData);
+        //float[,] layoutNoiseMap = NoiseGenerator.GenerateNoiseMap(layoutMapWidth, layoutMapHeight, layoutMapNoiseData);
 
-        int noiseMapWidth = layoutMapWidth * featuresPerLayoutPerAxis;
-        int noiseMapHeight = layoutMapHeight * featuresPerLayoutPerAxis;
+        int noiseMapWidth = groundFeaturesNoiseMap.GetLength(0);
+        int noiseMapHeight = groundFeaturesNoiseMap.GetLength(1);
 
         // Then generate a larger scale noise map, and overlay it on the small one
-        float[,] groundFeaturesNoiseMap = NoiseGenerator.GenerateNoiseMap(noiseMapWidth, noiseMapHeight, groundFeaturesMapNoiseData);
-        float[,] mountainFeaturesNoiseMap = NoiseGenerator.GenerateNoiseMap(noiseMapWidth, noiseMapHeight, mountainFeaturesMapNoiseData);
+        //float[,] groundFeaturesNoiseMap = NoiseGenerator.GenerateNoiseMap(noiseMapWidth, noiseMapHeight, groundFeaturesMapNoiseData);
+        //float[,] mountainFeaturesNoiseMap = NoiseGenerator.GenerateNoiseMap(noiseMapWidth, noiseMapHeight, mountainFeaturesMapNoiseData);
 
         TerrainType[,] terrainMap = PlateauMap(layoutNoiseMap);
         float[,] noiseMap = CreateMapWithFeatures(layoutNoiseMap, groundFeaturesNoiseMap, mountainFeaturesNoiseMap, terrainMap);
@@ -138,7 +151,7 @@ public class MapGenerator : MonoBehaviour {
                 }
                 break;
             case DrawMode.Mesh:
-                mapContainer.setMap(map);
+                mapContainer.setMap(map, false);
 
                 if(debugDisplay != null) {
                         debugDisplay.DrawMeshes(MeshGenerator.GenerateTerrainMesh(layoutNoiseMap, 1), TextureGenerator.TextureFromColorMap(CreateColorMap(layoutNoiseMap), layoutNoiseMap.GetLength(0), layoutNoiseMap.GetLength(1)),
@@ -179,7 +192,7 @@ public class MapGenerator : MonoBehaviour {
                         fullMap[x, y] = layoutMap[sampleX, sampleY];
                         break;
                     case RegionType.Land:
-                        fullMap[x, y] = (layoutMap[sampleX, sampleY]) + ((groundFeaturesMap[x, y] * groundFeaturesImpactOnLayout) - 0.5f);
+                        fullMap[x, y] = (layoutMap[sampleX, sampleY]) + ((groundFeaturesMap[x, y] * groundFeaturesImpactOnLayout));
                         break;
                     case RegionType.Mountain:
                         fullMap[x, y] = layoutMap[sampleX, sampleY] + (mountainFeaturesMap[x, y] * mountainFeaturesImpactOnLayout);
