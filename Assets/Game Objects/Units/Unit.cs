@@ -9,7 +9,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
     public float turnDistance;
     public float stoppingDistance;
 
-    UnitStatusPanel unitStatusPanel;
+    UnitStatusTooltip unitStatusPanel;
 
     Path path;
 
@@ -36,7 +36,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
     public StatusDelegate statusDelegate;
 
     private void Start() {
-        unitStatusPanel = Instantiate(Resources.Load("UnitStatusPanel", typeof(UnitStatusPanel))) as UnitStatusPanel;
+        unitStatusPanel = Instantiate(Resources.Load("UnitStatusPanel", typeof(UnitStatusTooltip))) as UnitStatusTooltip;
         unitStatusPanel.transform.SetParent(Script.UIOverlayPanel.GetFromObject<RectTransform>());
 
         unitStatusPanel.SetFollower(statusLocation);
