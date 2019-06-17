@@ -129,7 +129,7 @@ public class MapGenerator : MonoBehaviour {
         Map map = new Map(noiseMap, layoutNoiseMap, groundFeaturesNoiseMap, mountainFeaturesNoiseMap,
             featuresPerLayoutPerAxis,
             MeshGenerator.GenerateTerrainMesh(noiseMap, featuresPerLayoutPerAxis),
-            TextureGenerator.TextureFromColorMap(CreateColorMapWithTerrain(noiseMap, terrainMap, mapContainer), noiseMapWidth, noiseMapHeight),
+            TextureGenerator.TextureFromColorMap(CreateColorMapWithTerrain(noiseMap, terrainMap, mapContainer), noiseMapWidth + 2, noiseMapHeight + 2),
             terrainMap
             );
 
@@ -235,31 +235,33 @@ public class MapGenerator : MonoBehaviour {
         int noiseMapWidth = noiseMap.GetLength(0);
         int noiseMapHeight = noiseMap.GetLength(1);
 
+        //  + 2 for overhang
+        int colorMapWidth = noiseMapWidth + 2;
+        int colorMapHeight = noiseMapHeight + 2;
+
         int terrainMapWidth = terrainTypeMap.GetLength(0);
         int terrainMapHeight = terrainTypeMap.GetLength(1);
 
-        //PlayerBehaviour beh = GetComponent<PlayerBehaviour>();
+        Color[] colorMap = new Color[(colorMapWidth) * (colorMapHeight)];
+        for(int y = 0; y < colorMapWidth; y++) {
+            for(int x = 0; x < colorMapHeight; x++) {
 
-        Color[] colorMap = new Color[noiseMapWidth * noiseMapHeight];
-        for(int y = 0; y < noiseMapHeight; y++) {
-            for(int x = 0; x < noiseMapWidth; x++) {
+                int boundedX = x - 1;
+                int boundedY = y - 1;
 
-                MapCoordinate coordinate = new MapCoordinate(x, y, mapContainer);
+                Color colorAtIndex = Color.white;
+                if(!(boundedX < 0 || boundedX > noiseMapWidth - 1 || boundedY < 0 || boundedY > noiseMapHeight - 1)) {                   
+                    int finalSampleX = boundedX / (noiseMapWidth / terrainMapWidth);
+                    int finalSampleY = boundedY / (noiseMapHeight / terrainMapHeight);
 
-                if((x + 1) % featuresPerLayoutPerAxis == 0 || (y + 1) % featuresPerLayoutPerAxis == 0) {
-                    colorMap[y * noiseMapWidth + x] = Color.white;
-                    continue;
+                    colorAtIndex = terrainTypeMap[finalSampleX, finalSampleY].color;
+
+                    if((boundedX + 1) % featuresPerLayoutPerAxis == 0 || (boundedY + 1) % featuresPerLayoutPerAxis == 0) {
+                        colorAtIndex *= 2;
+                    }
                 }
 
-                int sampleX = x / (noiseMapWidth / terrainMapWidth);
-                int sampleY = y / (noiseMapHeight / terrainMapHeight);
-
-                colorMap[y * noiseMapWidth + x] = terrainTypeMap[sampleX, sampleY].color;
-
-                //PlayerBehaviour beh = Tag.Narrator.GetGameObject().GetComponent<PlayerBehaviour>();
-                //if(coordinate == beh.selectedLayoutTile) {
-                //    colorMap[y * noiseMapWidth + x] = colorMap[y * noiseMapWidth + x] + Color.cyan;
-                //}
+                colorMap[y * colorMapWidth + x] = colorAtIndex;
             }
         }
 

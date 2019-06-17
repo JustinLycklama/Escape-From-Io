@@ -24,6 +24,41 @@ public class Narrator : MonoBehaviour
         return subset;
     }
 
+    int spawnCoordX;
+    int spawnCoordY;
+    LayoutCoordinate spawnCoordinate;
+    const int suitableCoordinateDistance = 3;
+
+    // returns false if unable to get appropriate coordinate
+    private bool GetSpawnCoordinate(float[,] layoutNoiseMap) {
+        int midX = (layoutNoiseMap.GetLength(0) / 2) - 1;
+        int midY = (layoutNoiseMap.GetLength(1) / 2) - 1;
+
+        TerrainType land = mapGenerator.TerrainForRegion(RegionType.Land);
+
+        for (int x = -suitableCoordinateDistance; x <= suitableCoordinateDistance; x++) {
+            for(int y = -suitableCoordinateDistance; y <= suitableCoordinateDistance; y++) {
+                float sample = layoutNoiseMap[midX + x, midY + y];
+
+                if(land.ValueIsMember(sample)) {
+                    spawnCoordX = midX + x;
+                    spawnCoordY = midY + y;
+                    return true;
+                }
+            }
+        } 
+
+        return false;
+    }
+
+    private bool IsLayoutSuitable(float[,] layoutNoiseMap) {        
+        if (GetSpawnCoordinate(layoutNoiseMap) == false) {
+            return false;
+        }
+
+        return true;
+    }
+
 
     // Start is called before the first frame update
     void Start() {
@@ -40,7 +75,13 @@ public class Narrator : MonoBehaviour
         int totalWidth = mapWidth * constants.mapCountX;
         int totalHeight = mapHeight * constants.mapCountY;
 
-        float[,] layoutNoiseMap = mapGenerator.GenerateLayoutMap(totalWidth, totalHeight);
+        float[,] layoutNoiseMap = new float[0,0];
+        bool success = false;
+
+        while(success == false) {
+            layoutNoiseMap = mapGenerator.GenerateLayoutMap(totalWidth, totalHeight);
+            success = IsLayoutSuitable(layoutNoiseMap);
+        }               
 
         float[,] groundFeaturesNoiseMap = mapGenerator.GenerateGroundFeaturesMap(totalWidth * constants.featuresPerLayoutPerAxis, totalHeight * constants.featuresPerLayoutPerAxis);
         float[,] mountainFeaturesNoiseMap = mapGenerator.GenerateMountainFeaturesMap(totalWidth * constants.featuresPerLayoutPerAxis, totalHeight * constants.featuresPerLayoutPerAxis);
@@ -50,6 +91,10 @@ public class Narrator : MonoBehaviour
         foreach(MapContainer container in mapsManager.mapContainers) {
             int startX = container.mapX * mapWidth;
             int startY = container.mapY * mapHeight;
+
+            if (spawnCoordX >= startX && spawnCoordX < startX + mapWidth && spawnCoordY >= startY && spawnCoordY < startY + mapHeight) {
+                spawnCoordinate = new LayoutCoordinate(spawnCoordX - startX, spawnCoordY - startY, container);
+            }
 
             //int xOffset = (container.mapX == 0 ? 0 : 1);
             //int yOffset = (container.mapY == 0 ? 0 : 1);
@@ -79,9 +124,17 @@ public class Narrator : MonoBehaviour
 
         //unit.GetComponent<Unit>().BeginQueueing();
 
+        PathGridCoordinate[][] coordinatesForSpawnCoordinate = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(spawnCoordinate);
+
+        int i = 0;
         foreach (Unit unit in startingUnits) {
             unit.Init();
+            WorldPosition worldPos = new WorldPosition(MapCoordinate.FromGridCoordinate(coordinatesForSpawnCoordinate[1][i]));
+            unit.transform.position = worldPos.vector3;
+            i++;
         }
+
+        Camera.main.transform.position = new WorldPosition(new MapCoordinate(spawnCoordinate)).vector3 + new Vector3(0, 250, -400);
     }
 
     // Update is called once per frame
