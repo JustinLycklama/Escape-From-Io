@@ -4,7 +4,9 @@ using UnityEngine;
 
 public class GameTask {
 
-    public enum ActionType { Build, Mine, PickUp, DropOff };
+    public enum ActionType { Build, Mine, PickUp, DropOff, FlattenPath };
+
+    public string description;
 
     public WorldPosition target;
     private string targetDescription;
@@ -20,19 +22,20 @@ public class GameTask {
 
     public System.Func<bool> SatisfiesStartRequirements;
 
-    public GameTask(WorldPosition target, ActionType action, ActionableItem actionItem, PathRequestTargetType targetType = PathRequestTargetType.World) {
+    public GameTask(string description, WorldPosition target, ActionType action, ActionableItem actionItem, PathRequestTargetType targetType = PathRequestTargetType.World) {
         this.target = target;
-        Init(action, actionItem, targetType);
+        Init(description, action, actionItem, targetType);
     }
 
-    public GameTask(GameResourceManager.GatherType gatherGoal, ActionType action, ActionableItem actionItem) {
+    public GameTask(string description, GameResourceManager.GatherType gatherGoal, ActionType action, ActionableItem actionItem) {
         this.gatherType = gatherGoal;
-        Init(action, actionItem, PathRequestTargetType.Unknown);
+        Init(description, action, actionItem, PathRequestTargetType.Unknown);
     }
 
-    private void Init(ActionType action, ActionableItem actionItem, PathRequestTargetType targetType = PathRequestTargetType.World) {
+    private void Init(string description, ActionType action, ActionableItem actionItem, PathRequestTargetType targetType = PathRequestTargetType.World) {
         this.pathRequestTargetType = targetType;
         this.action = action;
+        this.description = description;
         this.actionItem = actionItem;
 
         MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(target);
@@ -41,7 +44,7 @@ public class GameTask {
     }
 
     public GameTask Clone() {
-        GameTask newTask = new GameTask(target, action, actionItem, pathRequestTargetType);
+        GameTask newTask = new GameTask(description, target, action, actionItem, pathRequestTargetType);
 
         return newTask;
     }

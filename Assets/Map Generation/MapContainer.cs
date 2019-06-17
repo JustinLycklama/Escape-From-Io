@@ -99,6 +99,16 @@ public class MapContainer : MonoBehaviour
         }
     }
 
+    public void ResizeBoxColliderAt(LayoutCoordinate layoutCoordinate) {
+        float boxSizeX = map.featuresPerLayoutPerAxis;
+        float boxSizeZ = map.featuresPerLayoutPerAxis;
+
+        MapCoordinate mapCoordinate = new MapCoordinate(layoutCoordinate);
+
+        BoxCollider boxCollider = boxColliderArray[layoutCoordinate.x, (map.mapHeight / map.featuresPerLayoutPerAxis) - 1 - layoutCoordinate.y];
+        boxCollider.size = new Vector3(boxSizeX, map.getHeightAt(mapCoordinate) * 2, boxSizeZ);
+    }
+
     //private void OnDrawGizmos() {
     //    if (boxColliderArray == null) {
     //        return;

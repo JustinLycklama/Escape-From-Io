@@ -127,7 +127,7 @@ public class UIManager : MonoBehaviour, TableViewDelegate, StatusDelegate
 
     public void CellForRowAtIndex(TableView table, int row, GameObject cell) {
         if (table == queueTable) {
-            cell.GetComponent<TaskItemCell>().SetTask(taskList[row]);
+            //cell.GetComponent<TaskItemCell>().SetTask(taskList[row]);
         } else if (table == actionsTable) {
             cell.GetComponent<ActionItemCell>().SetAction(selection.UserActions()[row]);
         }
@@ -135,8 +135,8 @@ public class UIManager : MonoBehaviour, TableViewDelegate, StatusDelegate
 
     // MARK Status Delegate
 
-    public void InformCurrentTask(MasterGameTask task) {
-        selectionCurrentTaskCell.SetTask(task);
+    public void InformCurrentTask(MasterGameTask task, GameTask gameTask) {
+        selectionCurrentTaskCell.SetTask(task, gameTask);
     }
 
     /* public void textCreation() {

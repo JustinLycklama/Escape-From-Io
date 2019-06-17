@@ -15,11 +15,11 @@ public class TaskItemCell : MonoBehaviour
         taskDescription.text = defaultText;
     }
 
-    public void SetTask(MasterGameTask task) {
+    public void SetTask(MasterGameTask task, GameTask gameTask) {
         this.task = task;
 
         if (task != null) {
-            taskDescription.text = task.description;
+            taskDescription.text = task.description + " - " + gameTask.description;
         } else {
             taskDescription.text = defaultText;
         }

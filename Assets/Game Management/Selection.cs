@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 public interface StatusDelegate {
-    void InformCurrentTask(MasterGameTask task);
+    void InformCurrentTask(MasterGameTask task, GameTask gameTask);
 }
 
 public interface Selectable {
