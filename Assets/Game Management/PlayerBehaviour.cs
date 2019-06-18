@@ -3,18 +3,26 @@ using UnityEngine.EventSystems;
 
 public class PlayerBehaviour : MonoBehaviour {
     float cameraMovementSpeed = 200;
-    float cameraRotateSpeed = 100;  
+    float cameraRotateSpeed = 100;
+
+    Rect UIRect;
+
+    private void Start() {
+        RectTransform localRect = Tag.UIArea.GetGameObject().GetComponent<RectTransform>();
+
+        Vector2 size = Vector2.Scale(localRect.rect.size, transform.lossyScale);
+        UIRect = new Rect((Vector2)localRect.transform.position - (size * 0.5f), size);
+    }
 
     // Update is called once per frame
     void Update() {
         MoveCamera();
 
-        //if(EventSystem.current.IsPointerOverGameObject()) {
-        //    return;
-        //}
-
-        SelectTile();
-    } 
+        Vector2 mousePos = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
+        if(!UIRect.Contains(mousePos)) {
+            SelectGameObject();
+        }       
+    }
 
     void MoveCamera() {
 
@@ -51,7 +59,7 @@ public class PlayerBehaviour : MonoBehaviour {
     Ray lastRay;
     RaycastHit? lastHit;
 
-    void SelectTile() {
+    void SelectGameObject() {
         Debug.DrawRay(lastRay.origin, lastRay.direction * 1000, Color.yellow);
 
         if (lastHit != null) {
