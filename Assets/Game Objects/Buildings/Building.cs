@@ -2,12 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface ActionableItem {
-    float performAction(GameTask task, float rate, Unit unit);
-    void AssociateTask(GameTask task);
-    string description { get; }
-}
-
 //public class BuildingManager {
 
 //    public static BuildingManager sharedInstance = new BuildingManager();
@@ -39,7 +33,7 @@ public interface ActionableItem {
 //}
 
 
-public abstract class Building : MonoBehaviour, ActionableItem, Selectable {
+public abstract class Building : ActionableItem, Selectable {
     float percentComplete = 0;
 
     Dictionary<GameTask, float> percentPerTask;
@@ -51,7 +45,7 @@ public abstract class Building : MonoBehaviour, ActionableItem, Selectable {
 
     public Material material;
 
-    StatusDelegate statusDelegate;
+    //StatusDelegate statusDelegate;
 
     PercentageBar percentageBar;
     public Transform statusLocation;
@@ -98,16 +92,16 @@ public abstract class Building : MonoBehaviour, ActionableItem, Selectable {
         materialColor = tintColor;
     }
 
-    public void SetStatusDelegate(StatusDelegate statusDelegate) {
-        this.statusDelegate = statusDelegate;
-    }
+    //public void SetStatusDelegate(StatusDelegate statusDelegate) {
+    //    this.statusDelegate = statusDelegate;
+    //}
 
     // Actionable Item
 
-    public void AssociateTask(GameTask task) { }
+    public override void AssociateTask(GameTask task) { }
 
     // Returns the percent to completion the action is
-    public float performAction(GameTask task, float rate, Unit unit) {
+    public override float performAction(GameTask task, float rate, Unit unit) {
 
 
 

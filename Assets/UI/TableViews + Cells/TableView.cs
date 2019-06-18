@@ -13,13 +13,16 @@ public class TableView : MonoBehaviour
     public GameObject cellPrototype;
     public VerticalLayoutGroup layoutGroup;
 
+    [HideInInspector]
+    public TableViewDelegate dataDelegate;
+
     List<GameObject> cells;
 
     private void Awake() {
         cells = new List<GameObject>();
     }
 
-    public void ReloadData(TableViewDelegate dataDelegate) {
+    public void ReloadData() {
        
         // Size the table appropriately
         int requiredNumberOfCells = dataDelegate.NumberOfRows(this);

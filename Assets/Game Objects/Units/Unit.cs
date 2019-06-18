@@ -2,7 +2,16 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
+public interface TaskStatusNotifiable {
+    void RegisterForNotifications(TaskStatusUpdateDelegate notificationDelegate);
+    void EndNotifications(TaskStatusUpdateDelegate notificationDelegate);
+}
+
+public interface TaskStatusUpdateDelegate {
+    void NowPerformingTask(MasterGameTask masterGameTask, GameTask gameTask);
+}
+
+public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, TaskStatusNotifiable
 {
     public float speed;
     public float turnSpeed;
@@ -13,10 +22,12 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
 
     Path path;
 
-    MasterGameTask masterTask;
     bool navigatingToTask;
     TaskQueueManager taskQueueManager;
 
+
+    
+    MasterGameTask currentMasterTask;
     GameTask currentGameTask;
     Queue<GameTask> gameTasksQueue;
 
@@ -33,7 +44,10 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
     // Selectable Interface
     private string title;
     public string description => title;
-    public StatusDelegate statusDelegate;
+
+    public List<TaskStatusUpdateDelegate> delegateList = new List<TaskStatusUpdateDelegate>();
+
+    //public StatusDelegate statusDelegate;
 
     private void Start() {
         unitStatusPanel = Instantiate(Resources.Load("UnitStatusPanel", typeof(UnitStatusTooltip))) as UnitStatusTooltip;
@@ -65,7 +79,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
         };
 
         completedPath = (pathComplete) => {
-            print("Do Action for Task" + masterTask.taskNumber);
+            print("Do Action for Task" + currentMasterTask.taskNumber);
             navigatingToTask = false;
             unitStatusPanel.DisplayPercentageBar(true);
             StartCoroutine(PerformTaskAction(completedTaskAction));
@@ -75,7 +89,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
             StopAllCoroutines();
 
             if(success) {
-                print("Follow Path for Task" + masterTask.taskNumber);
+                print("Follow Path for Task" + currentMasterTask.taskNumber);
 
                 path = new Path(waypoints, transform.position, turnDistance, stoppingDistance);
 
@@ -88,17 +102,17 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
                 StartCoroutine(FollowPath(completedPath));
             } else {
                 // There is no path to task, we cannot do this.
-                print("Give up Task" + masterTask.taskNumber);
+                print("Give up Task" + currentMasterTask.taskNumber);
                 print("Put task back in Queue");
 
-                taskQueueManager.QueueTask(masterTask);
+                taskQueueManager.QueueTask(currentMasterTask);
                 timeBeforeNextTaskCheck = 1;
 
                 navigatingToTask = false;
 
                 gameTasksQueue.Clear();
                 currentGameTask = null;
-                masterTask = null;
+                currentMasterTask = null;
             }
         };
     }
@@ -111,19 +125,21 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
     float timeBeforeNextTaskCheck = 0;
     private void Update() {
 
+        return;
+
         // Check Task
         if(timeBeforeNextTaskCheck <= 0) {
             timeBeforeNextTaskCheck = 0.10f;
 
-            if(masterTask == null) {
-                masterTask = taskQueueManager.GetNextDoableTask(this);
+            if(currentMasterTask == null) {
+                currentMasterTask = taskQueueManager.GetNextDoableTask(this);
 
                 // if we still have to task to do, we are IDLE
-                if (masterTask == null) {
+                if (currentMasterTask == null) {
                     return;
                 }
 
-                print("Start Task " + masterTask.taskNumber);
+                print("Start Task " + currentMasterTask.taskNumber);
                 DoTask();                
             }
         }
@@ -145,12 +161,12 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
 
     private void DoTask() {
 
-        unitStatusPanel.SetTask(masterTask);
+        unitStatusPanel.SetTask(currentMasterTask);
 
         gameTasksQueue.Clear();
 
         //navigatingToTask = true;
-        foreach (GameTask task in masterTask.childGameTasks) {
+        foreach (GameTask task in currentMasterTask.childGameTasks) {
             gameTasksQueue.Enqueue(task);
         }
 
@@ -163,19 +179,17 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
             currentGameTask = gameTasksQueue.Dequeue();
 
             // Let the UI Know our status is changing
-            if(statusDelegate != null) {
-                statusDelegate.InformCurrentTask(masterTask, currentGameTask);
-            }
+            NotifyAllTaskStatus();
 
             PathRequestManager.RequestPathForTask(transform.position, currentGameTask, foundWaypoints);
         } else {
-            print("Complpete Task" + masterTask.taskNumber);
+            print("Complpete Task" + currentMasterTask.taskNumber);
 
-            masterTask.MarkTaskFinished();
-            masterTask = null;
+            currentMasterTask.MarkTaskFinished();
+            currentMasterTask = null;
             currentGameTask = null;
             timeBeforeNextTaskCheck = 0;
-            unitStatusPanel.SetTask(masterTask);
+            unitStatusPanel.SetTask(currentMasterTask);
         }
     }
 
@@ -253,13 +267,13 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
         gameObject.GetComponent<MeshRenderer>().material.color = tintColor;
     }
 
-    public void SetStatusDelegate(StatusDelegate statusDelegate) {
-        this.statusDelegate = statusDelegate;
+    //public void SetStatusDelegate(StatusDelegate statusDelegate) {
+    //    this.statusDelegate = statusDelegate;
 
-        if (statusDelegate != null) {
-            statusDelegate.InformCurrentTask(masterTask, currentGameTask);
-        }
-    }
+    //    if (statusDelegate != null) {
+    //        statusDelegate.InformCurrentTask(masterTask, currentGameTask);
+    //    }
+    //}
 
     public void OnDrawGizmos() {
         if (path != null) {
@@ -270,9 +284,31 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate
     // Terrain Update Delegate Interface
 
     public void NotifyTerrainUpdate() {
-        if (masterTask != null && navigatingToTask == true && currentGameTask.target.vector3 != this.transform.position) {
+        if (currentMasterTask != null && navigatingToTask == true && currentGameTask.target.vector3 != this.transform.position) {
             // Request a new path if the world has updated and we are already on the move
             PathRequestManager.RequestPathForTask(transform.position, currentGameTask, foundWaypoints);
         }
     }
+
+    /*
+     * TaskStatusNotifiable Interface
+     * */
+
+    public void RegisterForNotifications(TaskStatusUpdateDelegate notificationDelegate) {
+        delegateList.Add(notificationDelegate);
+
+        // Let the subscriber know our status immediately
+        notificationDelegate.NowPerformingTask(currentMasterTask, currentGameTask);
+    }
+
+    public void EndNotifications(TaskStatusUpdateDelegate notificationDelegate) {
+        delegateList.Remove(notificationDelegate);
+    }
+
+    public void NotifyAllTaskStatus() {
+        foreach(TaskStatusUpdateDelegate updateDelegate in delegateList) {
+            updateDelegate.NowPerformingTask(currentMasterTask, currentGameTask);
+        }
+    }
+
 }

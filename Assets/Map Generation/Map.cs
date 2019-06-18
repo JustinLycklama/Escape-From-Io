@@ -195,9 +195,9 @@ public class Map : ActionableItem {
      * */
 
     // Associating a task with a map does nothing  
-    public void AssociateTask(GameTask task) { }
+    public override void AssociateTask(GameTask task) { }
 
-    public float performAction(GameTask task, float rate, Unit unit) {
+    public override float performAction(GameTask task, float rate, Unit unit) {
 
         TerraformTarget terraformTarget;
 

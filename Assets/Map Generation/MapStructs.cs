@@ -239,7 +239,7 @@ public struct WorldPosition {
 
     public WorldPosition(MapCoordinate mapCoordinate) {
         MapContainer mapContainer = mapCoordinate.mapContainer;
-        Map map = mapContainer.getMap();
+        Map map = mapContainer.map;
         Constants constants = Script.Get<Constants>();
 
         Transform mapObjectSpace = mapContainer.transform;

@@ -77,7 +77,7 @@ public class GameResourceManager {
     }
 }
 
-public class Ore : MonoBehaviour, ActionableItem {
+public class Ore : ActionableItem {
     public string description => throw new NotImplementedException();
 
 
@@ -86,11 +86,11 @@ public class Ore : MonoBehaviour, ActionableItem {
     float actionPercent = 0;
 
     public GameTask associatedTask;
-    public void AssociateTask(GameTask task) {
+    public override void AssociateTask(GameTask task) {
         associatedTask = task;
     }
 
-    public float performAction(GameTask task, float rate, Unit unit) {
+    public override float performAction(GameTask task, float rate, Unit unit) {
         switch(task.action) {
 
             case GameTask.ActionType.PickUp:

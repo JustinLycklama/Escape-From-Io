@@ -1,33 +1,44 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 
 
-public class UIManager : MonoBehaviour, TableViewDelegate, StatusDelegate
+public class UIManager : MonoBehaviour
 {
     public Text selectionTitle;
     //public Button button;
 
-    public TableView actionsTable;
-    public TableView queueTable;
+    //public TableView actionsTable;
+    //public TableView queueTable;
 
-    public TaskItemCell selectionCurrentTaskCell;
+    public MasterAndGameTaskCell selectionCurrentTaskCell;
 
 
     Selection selection;
 
 
-    // Update is called once per frame
-    void Start()
-    {
-        //button.onClick.AddListener(buttonPress);
-        //button.enabled = false;
 
-        // Hide the taskItemLabel above the content, used for duplication
-        //taskItemLabel.transform.position += new Vector3(0, taskItemLabel.GetComponent<RectTransform>().rect.height, 0);
-        //taskItemLabel.transform.SetParent(null);
+    public NavigationPanel currentTopPanel;
+
+    public class Blueprint : PrefabBlueprint {
+        public Blueprint(string fileName, string description, Type type) : base(fileName, description, type) { }
+
+        public static Blueprint TaskAndUnitDetail = new Blueprint("TaskAndUnitDetailPanel", "Task and Unit Details", typeof(TaskAndUnitDetailPanel));
+    }
+
+    public NavigationPanel Push(Blueprint blueprint) {
+        NavigationPanel panel = blueprint.Instantiate() as NavigationPanel;
+        panel.PushOntoStackFrom(currentTopPanel);
+        currentTopPanel = panel;
+
+        return panel;
+    }
+
+    public void Pop() {
+        currentTopPanel = currentTopPanel.PopFromStack();
     }
 
     public void SetSelection(Selection selection) {
@@ -36,7 +47,7 @@ public class UIManager : MonoBehaviour, TableViewDelegate, StatusDelegate
         selectionTitle.text = selection.Title();
         
 
-        actionsTable.ReloadData(this);
+        //actionsTable.ReloadData(this);
 
         //button.enabled = selection.selectionType == Selection.SelectionType.Terrain;
 
@@ -88,11 +99,15 @@ public class UIManager : MonoBehaviour, TableViewDelegate, StatusDelegate
     }
 
 
-    MasterGameTask[] taskList;
+    //MasterGameTask[] taskList;
 
-    public void UpdateTaskList(MasterGameTask[] taskList) {
-        this.taskList = taskList;
-        queueTable.ReloadData(this);
+    //public void UpdateTaskList(MasterGameTask[] taskList, MasterGameTask.ActionType taskType) {
+    //    this.taskList = taskList;
+
+
+        //queueTable.ReloadData(this);
+
+
 
         //    if (itemLabelObjects.Count < taskList.Length) {
         //        for (int i = itemLabelObjects.Count; i < taskList.Length; i++) {
@@ -111,33 +126,33 @@ public class UIManager : MonoBehaviour, TableViewDelegate, StatusDelegate
         //    for (int i = 0; i < taskList.Length; i++) {
         //        itemLabelObjects[i].GetComponent<TaskItemLabel>().SetTask(taskList[i]);
         //    }
-    }
+    //}
 
     // TABLEVIEW DELEGATE
-    public int NumberOfRows(TableView table) {
-        if (table == queueTable) {
-            print("Displaying " + taskList.Length);
-            return taskList.Length;            
-        } else if (table == actionsTable) {
-            return selection.UserActions().Length;
-        }
+    //public int NumberOfRows(TableView table) {
+    //    if(table == queueTable) {
+    //        print("Displaying " + taskList.Length);
+    //        return taskList.Length;
+    //    } else if(table == actionsTable) {
+    //        return selection.UserActions().Length;
+    //    }
 
-        return 0;
-    }
+    //    return 0;
+    //}
 
-    public void CellForRowAtIndex(TableView table, int row, GameObject cell) {
-        if (table == queueTable) {
-            //cell.GetComponent<TaskItemCell>().SetTask(taskList[row]);
-        } else if (table == actionsTable) {
-            cell.GetComponent<ActionItemCell>().SetAction(selection.UserActions()[row]);
-        }
-    }
+    //public void CellForRowAtIndex(TableView table, int row, GameObject cell) {
+    //    if(table == queueTable) {
+    //        //cell.GetComponent<TaskItemCell>().SetTask(taskList[row]);
+    //    } else if(table == actionsTable) {
+    //        cell.GetComponent<ActionItemCell>().SetAction(selection.UserActions()[row]);
+    //    }
+    //}
 
     // MARK Status Delegate
 
-    public void InformCurrentTask(MasterGameTask task, GameTask gameTask) {
-        selectionCurrentTaskCell.SetTask(task, gameTask);
-    }
+    //public void InformCurrentTask(MasterGameTask task, GameTask gameTask) {
+    //    selectionCurrentTaskCell.SetTask(task, gameTask);
+    //}
 
     /* public void textCreation() {
          Font arial;

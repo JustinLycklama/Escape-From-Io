@@ -2,53 +2,89 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public interface TaskQueueDelegate {
+    void NotifyUpdateTaskList(MasterGameTask[] taskList, MasterGameTask.ActionType actionType);
+}
+
 public class TaskQueueManager : MonoBehaviour
 {
     //List<MasterGameTask> taskList;
-    UIManager uiManager;
+    //UIManager uiManager;
 
-    List<MasterGameTask> mineTaskList;
-    List<MasterGameTask> moveTaskList;
-    List<MasterGameTask> buildTaskList;
+    //List<MasterGameTask> mineTaskList;
+    //List<MasterGameTask> moveTaskList;
+    //List<MasterGameTask> buildTaskList;
+
+    Dictionary<MasterGameTask.ActionType, List<MasterGameTask>> taskListMap;
+    Dictionary<MasterGameTask.ActionType, List<TaskQueueDelegate>> delegateListMap;
 
     void Awake()
     {
-        mineTaskList = new List<MasterGameTask>();
-        moveTaskList = new List<MasterGameTask>();
-        buildTaskList = new List<MasterGameTask>();
+        //mineTaskList = new List<MasterGameTask>();
+        //moveTaskList = new List<MasterGameTask>();
+        //buildTaskList = new List<MasterGameTask>();
+
+        taskListMap = new Dictionary<MasterGameTask.ActionType, List<MasterGameTask>>();
+        delegateListMap = new Dictionary<MasterGameTask.ActionType, List<TaskQueueDelegate>>();
+
+        foreach(MasterGameTask.ActionType actionType in new MasterGameTask.ActionType[] { MasterGameTask.ActionType.Build, MasterGameTask.ActionType.Mine, MasterGameTask.ActionType.Move }) {
+            taskListMap[actionType] = new List<MasterGameTask>();
+            delegateListMap[actionType] = new List<TaskQueueDelegate>();
+        }
     }
 
-    private void Start() {
-        uiManager = Script.Get<UIManager>();
+    //private void Start() {
+    //    //uiManager = Script.Get<UIManager>();
+    //}
+
+    public void RegisterForNotifications(TaskQueueDelegate notificationDelegate, MasterGameTask.ActionType ofType) {
+        delegateListMap[ofType].Add(notificationDelegate);
+
+        notificationDelegate.NotifyUpdateTaskList(taskListMap[ofType].ToArray(), ofType);
+    }
+
+    public void EndNotifications(TaskQueueDelegate notificationDelegate, MasterGameTask.ActionType forType) {
+        delegateListMap[forType].Remove(notificationDelegate);
+    }
+
+    private void NotifyDelegates(MasterGameTask.ActionType forType) {
+        foreach(TaskQueueDelegate notificationDelegate in delegateListMap[forType]) {
+            notificationDelegate.NotifyUpdateTaskList(taskListMap[forType].ToArray(), forType);
+        }
     }
 
     public void QueueTask(MasterGameTask task) {
-        switch(task.actionType) {
-            case MasterGameTask.ActionType.Mine:
-                mineTaskList.Add(task);
-                break;
-            case MasterGameTask.ActionType.Build:
-                buildTaskList.Add(task);
-                break;
-            case MasterGameTask.ActionType.Move:
-                moveTaskList.Add(task);
-                break;
-        }
+        taskListMap[task.actionType].Add(task);
+        NotifyDelegates(task.actionType);
+
+        //switch(task.actionType) {
+        //    case MasterGameTask.ActionType.Mine:
+        //        mineTaskList.Add(task);
+        //        break;
+        //    case MasterGameTask.ActionType.Build:
+        //        buildTaskList.Add(task);
+        //        break;
+        //    case MasterGameTask.ActionType.Move:
+        //        moveTaskList.Add(task);
+        //        break;
+        //}
 
         //uiManager.UpdateTaskList(mineTaskList.InsertRange(moveTaskList.Count, moveTaskList).toArray());
     }
 
     public MasterGameTask GetNextDoableTask(Unit unit) {
-        switch(unit.primaryActionType) {
-            case MasterGameTask.ActionType.Mine:
-                return getNextAvailableFromList(mineTaskList, unit);
-            case MasterGameTask.ActionType.Build:
-                return getNextAvailableFromList(buildTaskList, unit);
-            case MasterGameTask.ActionType.Move:
-                return getNextAvailableFromList(moveTaskList, unit);
-        }
+        return getNextAvailableFromList(taskListMap[unit.primaryActionType], unit);
 
-        return null;
+        //switch(unit.primaryActionType) {
+        //    case MasterGameTask.ActionType.Mine:
+        //        return getNextAvailableFromList(mineTaskList, unit);
+        //    case MasterGameTask.ActionType.Build:
+        //        return getNextAvailableFromList(buildTaskList, unit);
+        //    case MasterGameTask.ActionType.Move:
+        //        return getNextAvailableFromList(moveTaskList, unit);
+        //}
+
+        //return null;
     }
 
     private MasterGameTask getNextAvailableFromList(List<MasterGameTask> taskList, Unit unit) {
@@ -89,7 +125,8 @@ public class TaskQueueManager : MonoBehaviour
                     taskList.Remove(masterTask);
                 }
             }
-            
+
+            NotifyDelegates(shortestTask.actionType);
             //uiManager.UpdateTaskList(taskList.ToArray());
         }
 

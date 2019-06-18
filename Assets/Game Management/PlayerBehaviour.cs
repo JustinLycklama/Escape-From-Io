@@ -1,14 +1,18 @@
 ﻿using UnityEngine;
+using UnityEngine.EventSystems;
 
 public class PlayerBehaviour : MonoBehaviour {
     float cameraMovementSpeed = 200;
     float cameraRotateSpeed = 100;  
 
-    public Selection selection;
-
     // Update is called once per frame
     void Update() {
         MoveCamera();
+
+        //if(EventSystem.current.IsPointerOverGameObject()) {
+        //    return;
+        //}
+
         SelectTile();
     } 
 
@@ -63,10 +67,6 @@ public class PlayerBehaviour : MonoBehaviour {
             if(Physics.Raycast(ray, out hit)) {
                 lastHit = hit;
 
-                if (selection != null) {
-                    selection.deselectCurrent();
-                }
-
                 GameObject objectHit = hit.transform.gameObject;
 
                 // Select a Terrain Selection
@@ -77,23 +77,21 @@ public class PlayerBehaviour : MonoBehaviour {
 
                     MapCoordinate selectedCoordinate = MapCoordinate.FromWorldPosition(new WorldPosition(worldPosition));
                     LayoutCoordinate coordinate = new LayoutCoordinate(selectedCoordinate);
-                    selection = Selection.createTerrainSelection(coordinate);
+
+                    Script.Get<SelectionManager>().SelectTerrain(coordinate);
                 }
 
                 // Select a unit
                 Unit unit = objectHit.GetComponent<Unit>();
                 if (unit != null) {
-                    selection = Selection.createSelectableSelection(unit);
+                    Script.Get<SelectionManager>().SelectSelectable(unit);              
                 }
 
                 // Select a Building
                 Building building = objectHit.GetComponent<Building>();
                 if(building != null) {
-                    selection = Selection.createSelectableSelection(building);
+                    Script.Get<SelectionManager>().SelectSelectable(building);                    
                 }
-
-                Script.UIManager.GetFromObject<UIManager>().SetSelection(selection);
-
             }
         }
     }

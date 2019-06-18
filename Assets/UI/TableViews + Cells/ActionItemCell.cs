@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class UserAction {
@@ -10,25 +11,32 @@ public class UserAction {
     public Action performAction;
 }
 
-public class ActionItemCell : MonoBehaviour
-{
+public class ActionItemCell : MonoBehaviour, IPointerClickHandler {
     public Text actionItemTitle;
-    public Button performAction;
-
     UserAction action;
 
-    private void Start() {
-        performAction.onClick.AddListener(ButtonPress);
+    const string defaultText = " - ";
+
+    private void Awake() {
+        actionItemTitle.text = defaultText;
     }
 
     public void SetAction(UserAction action) {
         this.action = action;
 
-        actionItemTitle.text = action.description;
+        if (action == null) {
+            actionItemTitle.text = defaultText;
+        } else {
+            actionItemTitle.text = action.description;
+        }   
     }
 
-    private void ButtonPress() {
-        if (action == null) {
+    /*
+   * IPointerClickHandler Interface
+   * */
+
+    public void OnPointerClick(PointerEventData eventData) {
+        if(action == null) {
             return;
         }
 

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MapContainer : MonoBehaviour
+public class MapContainer : MonoBehaviour, SelectionManagerDelegate
 {
     public Map map;
 
@@ -13,6 +13,14 @@ public class MapContainer : MonoBehaviour
     MeshRenderer meshRenderer;
 
     BoxCollider[,] boxColliderArray;
+
+    private void Start() {
+        Script.Get<SelectionManager>().RegisterForNotifications(this);
+    }
+
+    private void OnDestroy() {
+        Script.Get<SelectionManager>().EndNotifications(this);
+    }
 
     public void SetMapPosition(int mapX, int mapY, Rect mapRect) {
         this.mapX = mapX;
@@ -36,11 +44,6 @@ public class MapContainer : MonoBehaviour
         }
     }
 
-    // TODO Remove
-    public Map getMap() {
-        return map;
-    }
-
     public void DrawMesh() {
         if (meshFilter == null) {
             meshFilter = GetComponent<MeshFilter>();
@@ -50,7 +53,6 @@ public class MapContainer : MonoBehaviour
         meshFilter.sharedMesh = map.meshData.FinalizeMesh();
         meshRenderer.sharedMaterial.mainTexture = map.meshTexture;
     }
-
 
     private void RemoveBoxColliders() {
         if(boxColliderArray != null) {
@@ -67,7 +69,7 @@ public class MapContainer : MonoBehaviour
             BoxCollider[] colliders = GetComponents<BoxCollider>();
             foreach(BoxCollider collider in colliders) {
                 DestroyImmediate(collider);
-}
+            }
         }       
     }
 
@@ -107,6 +109,29 @@ public class MapContainer : MonoBehaviour
 
         BoxCollider boxCollider = boxColliderArray[layoutCoordinate.x, (map.mapHeight / map.featuresPerLayoutPerAxis) - 1 - layoutCoordinate.y];
         boxCollider.size = new Vector3(boxSizeX, map.getHeightAt(mapCoordinate) * 2, boxSizeZ);
+    }
+
+    /*
+     * SelectionManagerDelegate Interface
+     * */
+
+    public void NotifyUpdateSelection(Selection selection) {
+        Constants constants = Script.Get<Constants>();
+
+        //Material mapMaterial = meshRenderer.material; meshRenderer Null??
+        Material mapMaterial = GetComponent<MeshRenderer>().material;
+
+        if(selection.selectionType == Selection.SelectionType.Terrain && selection.coordinate.mapContainer == this) {
+            mapMaterial.SetFloat("selectedXOffsetLow", selection.coordinate.x * constants.featuresPerLayoutPerAxis - (constants.layoutMapWidth * constants.featuresPerLayoutPerAxis / 2f));
+            mapMaterial.SetFloat("selectedXOffsetHigh", (selection.coordinate.x + 1) * constants.featuresPerLayoutPerAxis - (constants.layoutMapWidth * constants.featuresPerLayoutPerAxis / 2f));
+
+            mapMaterial.SetFloat("selectedYOffsetLow", selection.coordinate.y * constants.featuresPerLayoutPerAxis - (constants.layoutMapHeight * constants.featuresPerLayoutPerAxis / 2f));
+            mapMaterial.SetFloat("selectedYOffsetHigh", (selection.coordinate.y + 1) * constants.featuresPerLayoutPerAxis - (constants.layoutMapHeight * constants.featuresPerLayoutPerAxis / 2f));
+
+            mapMaterial.SetFloat("hasSelection", 1);
+        } else {
+            mapMaterial.SetFloat("hasSelection", 0);
+        }
     }
 
     //private void OnDrawGizmos() {
