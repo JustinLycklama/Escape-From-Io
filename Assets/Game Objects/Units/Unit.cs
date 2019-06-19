@@ -106,10 +106,15 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
                 // When requesting a path for an unknown resource (like ore) we will get the closest resource back as an actionable item
                 if (actionableItem != null) {
                     currentGameTask.actionItem = actionableItem;
+                }
 
-                    // TODO: This is  not the right place
-                    //actionableItem.AssociateTask(currentMasterTask);
-                }                
+                // If the task item is a known, like a location or builing, the actionItem was set at initialization
+                // If the task item was an unknown resource, it has just been set above
+
+                // In the first case, I want to let the the item know that this Master Task has an assigned unit
+                // In the second, we need to alert the unknown resource that it has a new task associated
+                currentGameTask.actionItem.AssociateTask(currentMasterTask);
+
 
                 StartCoroutine(FollowPath(completedPath));
             } else {
@@ -127,6 +132,10 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
                 currentMasterTask = null;
             }
         };
+    }
+
+    private void OnDestroy() {
+        Script.Get<MapsManager>().RemoveTerrainUpdateDelegate(this);
     }
 
     public void Init() {
@@ -157,9 +166,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
         timeBeforeNextTaskCheck -= Time.deltaTime;
     }
 
-    private void OnDestroy() {
-        Script.Get<MapsManager>().RemoveTerrainUpdateDelegate(this);
-    }
+
 
     // DO PATH FLOW
 
@@ -170,6 +177,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
     System.Action<WorldPosition[], ActionableItem, bool> foundWaypoints;
 
     private void DoTask() {
+        currentMasterTask.assignedUnit = this;
 
         unitStatusPanel.SetTask(currentMasterTask);
 
@@ -202,6 +210,10 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
         // Let the UI Know our status is changing
         NotifyAllTaskStatus();
     }
+
+    /*
+     * Task Coroutines
+     * */
 
     IEnumerator PerformTaskAction(System.Action<bool> callBack) {
 
@@ -270,34 +282,31 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
         }
     }
 
-    // Selectable Interface
-    public void SetSelected(bool selected) {
-
-        Color tintColor = selected ? Color.cyan : Color.white;
-        gameObject.GetComponent<MeshRenderer>().material.color = tintColor;
-    }
-
-    //public void SetStatusDelegate(StatusDelegate statusDelegate) {
-    //    this.statusDelegate = statusDelegate;
-
-    //    if (statusDelegate != null) {
-    //        statusDelegate.InformCurrentTask(masterTask, currentGameTask);
-    //    }
-    //}
-
     public void OnDrawGizmos() {
         if (path != null) {
             path.DrawWithGizmos();
         }
     }
 
-    // Terrain Update Delegate Interface
+    /*
+     * TerrainUpdateDelegate Interface
+     * */
 
     public void NotifyTerrainUpdate() {
         if (currentMasterTask != null && navigatingToTask == true && currentGameTask.target.vector3 != this.transform.position) {
             // Request a new path if the world has updated and we are already on the move
             PathRequestManager.RequestPathForTask(transform.position, currentGameTask, foundWaypoints);
         }
+    }
+
+    /*
+     * Selectable Interface
+     * */
+
+    public void SetSelected(bool selected) {
+
+        Color tintColor = selected ? Color.cyan : Color.white;
+        gameObject.GetComponent<MeshRenderer>().material.color = tintColor;
     }
 
     /*

@@ -54,6 +54,8 @@ public class TaskQueueManager : MonoBehaviour
     }
 
     public void QueueTask(MasterGameTask task) {
+        task.assignedUnit = null;
+
         taskListMap[task.actionType].Add(task);
         NotifyDelegates(task.actionType);
 
@@ -70,6 +72,13 @@ public class TaskQueueManager : MonoBehaviour
         //}
 
         //uiManager.UpdateTaskList(mineTaskList.InsertRange(moveTaskList.Count, moveTaskList).toArray());
+    }
+
+    public void DeQueueTask(MasterGameTask task) {
+        task.assignedUnit = null;
+
+        taskListMap[task.actionType].Remove(task);
+        NotifyDelegates(task.actionType);
     }
 
     public MasterGameTask GetNextDoableTask(Unit unit) {

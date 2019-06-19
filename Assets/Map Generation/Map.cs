@@ -153,6 +153,25 @@ public class Map : ActionableItem  {
 
         List<UserAction> actionList = new List<UserAction>();
 
+        if (associatedTasksCoordinateMap[coordinate.x, coordinate.y] != null) {
+            UserAction action = new UserAction();
+
+            action.description = "Cancel";
+            action.performAction = () => {
+                associatedTasksCoordinateMap[coordinate.x, coordinate.y].CancelTask();
+
+                //TaskQueueManager queue = Script.Get<TaskQueueManager>();
+
+                //GameTask miningTask = new GameTask("Mining", worldPosition, GameTask.ActionType.Mine, this, PathRequestTargetType.Layout);
+                //MasterGameTask masterMiningTask = new MasterGameTask(MasterGameTask.ActionType.Mine, "Mine at location " + coordinate.description, new GameTask[] { miningTask });
+
+                //queue.QueueTask(masterMiningTask);
+                //this.AssociateTask(masterMiningTask, coordinate);
+            };
+
+            actionList.Add(action);
+        }
+
         // Build?
         if (GetTerrainAt(coordinate).regionType == RegionType.Land) {
             foreach (Building.Blueprint blueprint in Building.Blueprints()) {
@@ -326,24 +345,31 @@ public class Map : ActionableItem  {
      * Invalud ActionableItem Components
      * */
 
-    [System.Obsolete("Invalid for type Map", true)]
-#pragma warning disable CS0809 // Obsolete member overrides non-obsolete member
     public override void AssociateTask(MasterGameTask task) {
-        throw new System.InvalidOperationException();
+        foreach(GameTask gameTask in task.childGameTasks) {
+            UpdateMasterTaskByGameTask(gameTask, task);
+        }
     }
-#pragma warning restore CS0809 // Obsolete member overrides non-obsolete member
+
+    // Any time we try to remove associated MasterTask without a layout coordinate, we find all relevant GameTasks and remove at those coordinates
+    public override void UpdateMasterTaskByGameTask(GameTask gameTask, MasterGameTask masterGameTask) {
+        if (gameTask.actionItem == this) {
+            LayoutCoordinate layoutCoordinate = new LayoutCoordinate(MapCoordinate.FromWorldPosition(gameTask.target));
+
+            AssociateTask(masterGameTask, layoutCoordinate);
+        }        
+    }
 
     /*
      * ActionableItem Components
      * */
 
+    public void AssociateTask(MasterGameTask task, LayoutCoordinate coordinate) {
+        associatedTasksCoordinateMap[coordinate.x, coordinate.y] = task;
 
-    public void AssociateTask(MasterGameTask task, LayoutCoordinate coodrinate) {
-        associatedTasksCoordinateMap[coodrinate.x, coodrinate.y] = task;
-
-        NotifyAllTaskStatus(coodrinate);
+        UpdateUserActionsAt(coordinate);
+        NotifyAllTaskStatus(coordinate);
     }
-
 
     /*
      * Map Version Of TaskStatusNotifiable Interface

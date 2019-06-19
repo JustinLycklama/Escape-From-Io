@@ -24,6 +24,12 @@ public abstract class ActionableItem : MonoBehaviour, TaskStatusNotifiable {
         NotifyAllTaskStatus();
     }
 
+    public virtual void UpdateMasterTaskByGameTask(GameTask gameTask, MasterGameTask masterGameTask) {
+        associatedTask = masterGameTask;
+
+        NotifyAllTaskStatus();
+    }
+
     public abstract float performAction(GameTask task, float rate, Unit unit);
 
     /*

@@ -54,6 +54,8 @@ public class MasterGameTask {
 
     private static int gameTaskCounter = 0;
 
+    public Unit assignedUnit;
+
     // Don't know if we need a type on the master...
     public enum ActionType { Mine, Build, Move};
     public ActionType actionType;
@@ -93,6 +95,28 @@ public class MasterGameTask {
         }
     }
 
+    private void UpdateAllGameTasksActionItemsWith(MasterGameTask masterGameTask) {
+        foreach(GameTask gameTask in childGameTasks) {
+            gameTask.actionItem.UpdateMasterTaskByGameTask(gameTask, masterGameTask);
+        }
+    }
+
+    public void CancelTask() {
+        if (assignedUnit == null) {
+            // Remove references to this gameTask
+            UpdateAllGameTasksActionItemsWith(null);
+
+            childGameTasks.Clear();
+            Script.Get<TaskQueueManager>().DeQueueTask(this);
+
+            // TODO?
+            //if(taskBlockedByThis != null) {
+            //    taskBlockedByThis.UnblockTask(this);
+            //    taskBlockedByThis = null;
+            //}
+        }
+    }
+
     public void MarkTaskFinished() {
         if (taskBlockedByThis != null) {
             taskBlockedByThis.UnblockTask(this);
@@ -102,6 +126,9 @@ public class MasterGameTask {
         if (parentMasterTask != null) {
             parentMasterTask.MarkChildFinished(this);
         }
+
+        // Complete all children GameTask's ActionItems
+        UpdateAllGameTasksActionItemsWith(null);
     }
 
     public void MarkChildFinished(MasterGameTask childMasterTask) {
