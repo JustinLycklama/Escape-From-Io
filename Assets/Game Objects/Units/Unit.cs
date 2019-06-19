@@ -3,16 +3,24 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public interface TaskStatusNotifiable {
-    void RegisterForNotifications(TaskStatusUpdateDelegate notificationDelegate);
-    void EndNotifications(TaskStatusUpdateDelegate notificationDelegate);
+    void RegisterForTaskStatusNotifications(TaskStatusUpdateDelegate notificationDelegate);
+    void EndTaskStatusNotifications(TaskStatusUpdateDelegate notificationDelegate);
 }
 
 public interface TaskStatusUpdateDelegate {
     void NowPerformingTask(MasterGameTask masterGameTask, GameTask gameTask);
 }
 
-public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, TaskStatusNotifiable
-{
+public interface UserActionNotifiable {
+    void RegisterForUserActionNotifications(UserActionUpdateDelegate notificationDelegate);
+    void EndUserActionNotifications(UserActionUpdateDelegate notificationDelegate);
+}
+
+public interface UserActionUpdateDelegate {
+    void UpdateUserActionsAvailable(UserAction[] userActions);
+}
+
+public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
     public float speed;
     public float turnSpeed;
     public float turnDistance;
@@ -45,7 +53,9 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, T
     private string title;
     public string description => title;
 
-    public List<TaskStatusUpdateDelegate> delegateList = new List<TaskStatusUpdateDelegate>();
+    public List<TaskStatusUpdateDelegate> taskStatusDelegateList = new List<TaskStatusUpdateDelegate>();
+    public List<UserActionUpdateDelegate> userActionDelegateList = new List<UserActionUpdateDelegate>();
+
 
     //public StatusDelegate statusDelegate;
 
@@ -96,7 +106,9 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, T
                 // When requesting a path for an unknown resource (like ore) we will get the closest resource back as an actionable item
                 if (actionableItem != null) {
                     currentGameTask.actionItem = actionableItem;
-                    actionableItem.AssociateTask(currentGameTask);
+
+                    // TODO: This is  not the right place
+                    //actionableItem.AssociateTask(currentMasterTask);
                 }                
 
                 StartCoroutine(FollowPath(completedPath));
@@ -124,8 +136,6 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, T
 
     float timeBeforeNextTaskCheck = 0;
     private void Update() {
-
-        return;
 
         // Check Task
         if(timeBeforeNextTaskCheck <= 0) {
@@ -177,10 +187,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, T
 
         if (gameTasksQueue.Count > 0) {
             currentGameTask = gameTasksQueue.Dequeue();
-
-            // Let the UI Know our status is changing
-            NotifyAllTaskStatus();
-
+        
             PathRequestManager.RequestPathForTask(transform.position, currentGameTask, foundWaypoints);
         } else {
             print("Complpete Task" + currentMasterTask.taskNumber);
@@ -191,6 +198,9 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, T
             timeBeforeNextTaskCheck = 0;
             unitStatusPanel.SetTask(currentMasterTask);
         }
+
+        // Let the UI Know our status is changing
+        NotifyAllTaskStatus();
     }
 
     IEnumerator PerformTaskAction(System.Action<bool> callBack) {
@@ -294,21 +304,41 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, T
      * TaskStatusNotifiable Interface
      * */
 
-    public void RegisterForNotifications(TaskStatusUpdateDelegate notificationDelegate) {
-        delegateList.Add(notificationDelegate);
+    public void RegisterForTaskStatusNotifications(TaskStatusUpdateDelegate notificationDelegate) {
+        taskStatusDelegateList.Add(notificationDelegate);
 
         // Let the subscriber know our status immediately
         notificationDelegate.NowPerformingTask(currentMasterTask, currentGameTask);
     }
 
-    public void EndNotifications(TaskStatusUpdateDelegate notificationDelegate) {
-        delegateList.Remove(notificationDelegate);
+    public void EndTaskStatusNotifications(TaskStatusUpdateDelegate notificationDelegate) {
+        taskStatusDelegateList.Remove(notificationDelegate);
     }
 
     public void NotifyAllTaskStatus() {
-        foreach(TaskStatusUpdateDelegate updateDelegate in delegateList) {
+        foreach(TaskStatusUpdateDelegate updateDelegate in taskStatusDelegateList) {
             updateDelegate.NowPerformingTask(currentMasterTask, currentGameTask);
         }
     }
 
+    /*
+     * UserActionNotifiable Interface
+     * */
+
+    public void RegisterForUserActionNotifications(UserActionUpdateDelegate notificationDelegate) {
+        userActionDelegateList.Add(notificationDelegate);
+
+        // Let the subscriber know our status immediately
+        notificationDelegate.UpdateUserActionsAvailable(null);
+    }
+
+    public void EndUserActionNotifications(UserActionUpdateDelegate notificationDelegate) {
+        userActionDelegateList.Remove(notificationDelegate);
+    }
+
+    public void NotifyAllUserActionsUpdate() {
+        foreach(UserActionUpdateDelegate updateDelegate in userActionDelegateList) {
+            updateDelegate.UpdateUserActionsAvailable(null);
+        }
+    }
 }

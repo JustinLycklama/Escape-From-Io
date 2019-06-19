@@ -132,6 +132,8 @@ public class Narrator : MonoBehaviour
             WorldPosition worldPos = new WorldPosition(MapCoordinate.FromGridCoordinate(coordinatesForSpawnCoordinate[1][i]));
             unit.transform.position = worldPos.vector3;
             i++;
+
+            Script.Get<UnitManager>().RegisterUnit(unit);
         }
 
         Camera.main.transform.position = new WorldPosition(new MapCoordinate(spawnCoordinate)).vector3 + new Vector3(0, 250, -400);

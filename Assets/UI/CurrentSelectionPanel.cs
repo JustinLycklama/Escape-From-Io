@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CurrentSelectionPanel : MonoBehaviour, SelectionManagerDelegate, TaskStatusUpdateDelegate {
+public class CurrentSelectionPanel : MonoBehaviour, SelectionManagerDelegate, TaskStatusUpdateDelegate, UserActionUpdateDelegate {
 
     Selection currentSelection;
 
@@ -28,17 +28,20 @@ public class CurrentSelectionPanel : MonoBehaviour, SelectionManagerDelegate, Ta
 
     public void NotifyUpdateSelection(Selection nextSelection) {
 
-        if(currentSelection != null && currentSelection.selectionType == Selection.SelectionType.Selectable && currentSelection.selection is TaskStatusNotifiable) {
-            (currentSelection.selection as TaskStatusNotifiable).EndNotifications(this);
+        //if(currentSelection != null && currentSelection.selectionType == Selection.SelectionType.Selectable && currentSelection.selection is TaskStatusNotifiable) {
+        //    (currentSelection.selection as TaskStatusNotifiable).EndNotifications(this);
+        //}
+
+        if (currentSelection != null) {
+            currentSelection.EndSubscriptionToUserActions(this);
+            currentSelection.EndSubscriptionToTaskStatus(this);
         }
 
         if (nextSelection != null) {
             title.text = nextSelection.Title();
-            actionsList.SetActions(nextSelection.UserActions());
 
-            if (nextSelection.selectionType == Selection.SelectionType.Selectable && nextSelection.selection is TaskStatusNotifiable) {
-                (nextSelection.selection as TaskStatusNotifiable).RegisterForNotifications(this);
-            }            
+            nextSelection.SubscribeToUserActions(this);
+            nextSelection.SubscribeToTaskStatus(this);           
         } else {
             title.text = noSelectionText;
             actionsList.SetActions(new UserAction[] { });
@@ -53,5 +56,13 @@ public class CurrentSelectionPanel : MonoBehaviour, SelectionManagerDelegate, Ta
 
     public void NowPerformingTask(MasterGameTask masterGameTask, GameTask gameTask) {
         taskItemCell.SetTask(masterGameTask, gameTask);
+    }
+
+    /*
+     * UserActionUpdateDelegate Interface
+     * */
+
+    public void UpdateUserActionsAvailable(UserAction[] userActions) {
+        actionsList.SetActions(userActions);
     }
 }

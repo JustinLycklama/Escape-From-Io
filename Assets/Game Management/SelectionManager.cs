@@ -5,11 +5,12 @@ using UnityEngine;
 //    void InformCurrentTask(MasterGameTask task, GameTask gameTask);
 //}
 
-public interface Selectable {
+public interface Selectable : TaskStatusNotifiable, UserActionNotifiable {
     string description { get; }
 
     void SetSelected(bool selected);
     //void SetStatusDelegate(StatusDelegate statusDelegate);
+    //UserAction[] UserAction
 
 }
 
@@ -152,15 +153,59 @@ public class Selection {
         }
     }
 
-    public UserAction[] UserActions() {
+    /*
+    * TaskStatusNotifiable Passthrough to selection
+    * */
+
+    public void SubscribeToTaskStatus(TaskStatusUpdateDelegate taskStatusUpdateDelegate) {
         switch(selectionType) {
             case SelectionType.Terrain:
-                return Script.Get<MapsManager>().ActionsAvailableAt(coordinate);
+                coordinate.mapContainer.map.RegisterForTaskStatusNotifications(taskStatusUpdateDelegate, coordinate);
+                break;
             case SelectionType.Selectable:
-
-                return new UserAction[0];
-            default:
-                return new UserAction[0];
+                selection.RegisterForTaskStatusNotifications(taskStatusUpdateDelegate);
+                break;
         }
     }
+
+    public void EndSubscriptionToTaskStatus(TaskStatusUpdateDelegate taskStatusUpdateDelegate) {
+        switch(selectionType) {
+            case SelectionType.Terrain:
+                coordinate.mapContainer.map.EndTaskStatusNotifications(taskStatusUpdateDelegate, coordinate);
+                break;
+            case SelectionType.Selectable:
+                selection.EndTaskStatusNotifications(taskStatusUpdateDelegate);
+                break;
+        }
+    }
+      
+    /*
+    * UserActionNotifiable Passthrough to selection
+    * */
+
+    public void SubscribeToUserActions(UserActionUpdateDelegate userActionDelegate) {
+        switch(selectionType) {
+            case SelectionType.Terrain:
+                coordinate.mapContainer.map.RegisterForUserActionNotifications(userActionDelegate, coordinate);
+                //return Script.Get<MapsManager>().ActionsAvailableAt(coordinate);
+                break;
+            case SelectionType.Selectable:
+                selection.RegisterForUserActionNotifications(userActionDelegate);
+                break;
+        }
+    }
+
+    public void EndSubscriptionToUserActions(UserActionUpdateDelegate userActionDelegate) {
+        switch(selectionType) {
+            case SelectionType.Terrain:
+                coordinate.mapContainer.map.EndUserActionNotifications(userActionDelegate, coordinate);
+                break;
+            case SelectionType.Selectable:
+                selection.EndUserActionNotifications(userActionDelegate);
+                break;
+
+        }
+    }
+
+
 }

@@ -98,7 +98,8 @@ public abstract class Building : ActionableItem, Selectable {
 
     // Actionable Item
 
-    public override void AssociateTask(GameTask task) { }
+
+    //public override void AssociateTask(GameTask task) { }
 
     // Returns the percent to completion the action is
     public override float performAction(GameTask task, float rate, Unit unit) {
@@ -191,5 +192,21 @@ public abstract class Building : ActionableItem, Selectable {
 
     public static Blueprint[] Blueprints() {
         return new Blueprint[] { Blueprint.Tower, Blueprint.Refinery };
+    }
+
+    public void RegisterForTaskStatusNotifications(TaskStatusUpdateDelegate notificationDelegate) {
+        throw new NotImplementedException();
+    }
+
+    public void EndTaskStatusNotifications(TaskStatusUpdateDelegate notificationDelegate) {
+        throw new NotImplementedException();
+    }
+
+    public void RegisterForUserActionNotifications(UserActionUpdateDelegate notificationDelegate) {
+        throw new NotImplementedException();
+    }
+
+    public void EndUserActionNotifications(UserActionUpdateDelegate notificationDelegate) {
+        throw new NotImplementedException();
     }
 }

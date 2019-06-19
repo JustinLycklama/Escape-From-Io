@@ -94,9 +94,9 @@ public class MapsManager : MonoBehaviour {
         return layoutCoordinate.mapContainer.map.GetTerrainAt(layoutCoordinate);
     }
 
-    public UserAction[] ActionsAvailableAt(LayoutCoordinate layoutCoordinate) {
-        return layoutCoordinate.mapContainer.map.ActionsAvailableAt(layoutCoordinate);
-    }
+    //public UserAction[] ActionsAvailableAt(LayoutCoordinate layoutCoordinate) {
+    //    return layoutCoordinate.mapContainer.map.ActionsAvailableAt(layoutCoordinate);
+    //}
 
     public Material GetMaterialForMap(LayoutCoordinate layoutCoordinate) {
         return layoutCoordinate.mapContainer.GetComponent<MeshRenderer>().material;

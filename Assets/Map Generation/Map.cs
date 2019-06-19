@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Map : ActionableItem {
+public class Map : ActionableItem  {
 
     class TerraformTarget {
         public LayoutCoordinate coordinate;
@@ -69,6 +69,8 @@ public class Map : ActionableItem {
 
         buildingData = new Building[terrainData.GetLength(0), terrainData.GetLength(1)];
         terraformTargetDictionary = new Dictionary<GameTask, TerraformTarget>();
+
+        //InitCoordinateArrays(terrainData.GetLength(0), terrainData.GetLength(1));
     }
 
     public TerrainType GetTerrainAt(LayoutCoordinate layoutCoordinate) {
@@ -98,7 +100,51 @@ public class Map : ActionableItem {
         return finalHeightMap[coordinate.xLowSample, coordinate.yLowSample];
     }
 
-    public UserAction[] ActionsAvailableAt(LayoutCoordinate coordinate) {
+    //Dictionary<LayoutCoordinate, UserAction[]> userActionDictionary = new Dictionary<LayoutCoordinate, UserAction[]>();
+    //Dictionary<LayoutCoordinate, List<UserActionUpdateDelegate>> userActionDelegateMap = new Dictionary<LayoutCoordinate, List<UserActionUpdateDelegate>>();
+
+    /*
+     * Actionable Item Override Properties
+     * */
+
+    UserAction[,][] userActionCoordinateMap;
+    List<UserActionUpdateDelegate>[,] userActionDelegateMap;
+
+    private MasterGameTask[,] associatedTasksCoordinateMap;
+    private List<TaskStatusUpdateDelegate>[,] taskUpdateDelegateMap;
+
+
+    public void CreateAllActionableItemOverrides() {
+
+        int width = terrainData.GetLength(0);
+        int height = terrainData.GetLength(1);
+
+        userActionCoordinateMap = new UserAction[width, height][];
+        associatedTasksCoordinateMap = new MasterGameTask[width, height];
+
+        userActionDelegateMap = new List<UserActionUpdateDelegate>[width, height];
+        taskUpdateDelegateMap = new List<TaskStatusUpdateDelegate>[width, height];
+
+        for(int x = 0; x < width; x++) {
+            for(int y = 0; y < height; y++) {
+                LayoutCoordinate layoutCoordinate = new LayoutCoordinate(x, y, mapContainer);
+
+                userActionCoordinateMap[x, y] = ActionsAvailableAt(layoutCoordinate);
+                associatedTasksCoordinateMap[x, y] = null;
+
+                userActionDelegateMap[x, y] = new List<UserActionUpdateDelegate>();
+                taskUpdateDelegateMap[x, y] = new List<TaskStatusUpdateDelegate>();
+            }
+        }
+    }
+
+    private void UpdateUserActionsAt(LayoutCoordinate layoutCoordinate) {
+        userActionCoordinateMap[layoutCoordinate.x, layoutCoordinate.y] = ActionsAvailableAt(layoutCoordinate);
+
+        NotifyAllUserActionsUpdate(layoutCoordinate);
+    }
+
+    private UserAction[] ActionsAvailableAt(LayoutCoordinate coordinate) {
 
         MapCoordinate mapCoordinate = new MapCoordinate(coordinate);
         WorldPosition worldPosition = new WorldPosition(mapCoordinate);
@@ -124,6 +170,8 @@ public class Map : ActionableItem {
                     MasterGameTask masterMiningTask = new MasterGameTask(MasterGameTask.ActionType.Build, "Build Path At " + coordinate.description, new GameTask[] { miningTask });
 
                     queue.QueueTask(masterMiningTask);
+
+
                 };
 
                 actionList.Add(action);
@@ -143,7 +191,8 @@ public class Map : ActionableItem {
                 GameTask miningTask = new GameTask("Mining", worldPosition, GameTask.ActionType.Mine, this, PathRequestTargetType.Layout);
                 MasterGameTask masterMiningTask = new MasterGameTask(MasterGameTask.ActionType.Mine, "Mine at location " + coordinate.description, new GameTask[] { miningTask });
 
-                queue.QueueTask(masterMiningTask);                
+                queue.QueueTask(masterMiningTask);
+                this.AssociateTask(masterMiningTask, coordinate);
             };
 
             actionList.Add(action);
@@ -193,10 +242,6 @@ public class Map : ActionableItem {
     /*
      * Actionable Item Interface
      * */
-
-    // Associating a task with a map does nothing  
-    public override void AssociateTask(GameTask task) { }
-
     public override float performAction(GameTask task, float rate, Unit unit) {
 
         TerraformTarget terraformTarget;
@@ -262,6 +307,7 @@ public class Map : ActionableItem {
             }
 
             terraformTargetDictionary.Remove(task);
+            UpdateUserActionsAt(terraformTarget.coordinate);
         }
 
         float currentHeightAtCoordinate = Mathf.Lerp(terraformTarget.initialHeight, terraformTarget.heightTarget, terraformTarget.percentage);
@@ -275,7 +321,92 @@ public class Map : ActionableItem {
         return terraformTarget.percentage;
     }
 
-    private void CompleteAction(GameTask task, float rate, Unit unit) {
 
+    /*
+     * Invalud ActionableItem Components
+     * */
+
+    [System.Obsolete("Invalid for type Map", true)]
+#pragma warning disable CS0809 // Obsolete member overrides non-obsolete member
+    public override void AssociateTask(MasterGameTask task) {
+        throw new System.InvalidOperationException();
+    }
+#pragma warning restore CS0809 // Obsolete member overrides non-obsolete member
+
+    /*
+     * ActionableItem Components
+     * */
+
+
+    public void AssociateTask(MasterGameTask task, LayoutCoordinate coodrinate) {
+        associatedTasksCoordinateMap[coodrinate.x, coodrinate.y] = task;
+
+        NotifyAllTaskStatus(coodrinate);
+    }
+
+
+    /*
+     * Map Version Of TaskStatusNotifiable Interface
+     * */
+
+
+
+    public void RegisterForTaskStatusNotifications(TaskStatusUpdateDelegate notificationDelegate, LayoutCoordinate layoutCoordinate) {
+        taskUpdateDelegateMap[layoutCoordinate.x, layoutCoordinate.y].Add(notificationDelegate);
+
+        notificationDelegate.NowPerformingTask(associatedTasksCoordinateMap[layoutCoordinate.x, layoutCoordinate.y], null);
+    }
+
+    public void EndTaskStatusNotifications(TaskStatusUpdateDelegate notificationDelegate, LayoutCoordinate layoutCoordinate) {
+        taskUpdateDelegateMap[layoutCoordinate.x, layoutCoordinate.y].Remove(notificationDelegate);
+    }
+
+    protected void NotifyAllTaskStatus(LayoutCoordinate coordinate) {
+        foreach(TaskStatusUpdateDelegate updateDelegate in taskUpdateDelegateMap[coordinate.x, coordinate.y]) {
+            updateDelegate.NowPerformingTask(associatedTasksCoordinateMap[coordinate.x, coordinate.y], null);
+        }
+    }
+
+    /*
+    * Invalid TaskStatusNotifiable Interface
+    * */
+
+    [System.Obsolete("Invalid for type Map", true)]
+#pragma warning disable CS0809 // Obsolete member overrides non-obsolete member
+    public override void RegisterForTaskStatusNotifications(TaskStatusUpdateDelegate notificationDelegate) {
+        throw new System.InvalidOperationException();
+
+    }
+
+    [System.Obsolete("Invalid for type Map", true)]
+    public override void EndTaskStatusNotifications(TaskStatusUpdateDelegate notificationDelegate) {
+        throw new System.InvalidOperationException();
+    }
+
+    [System.Obsolete("Invalid for type Map", true)]
+    protected override void NotifyAllTaskStatus() {
+        throw new System.InvalidOperationException();
+    }
+#pragma warning restore CS0809 // Obsolete member overrides non-obsolete member
+
+
+    /*
+     * Map Version Of UserActionNotifiable Interface
+     * */
+
+    public void RegisterForUserActionNotifications(UserActionUpdateDelegate notificationDelegate, LayoutCoordinate layoutCoordinate) {
+        userActionDelegateMap[layoutCoordinate.x, layoutCoordinate.y].Add(notificationDelegate);
+
+        notificationDelegate.UpdateUserActionsAvailable(userActionCoordinateMap[layoutCoordinate.x, layoutCoordinate.y]);
+    }
+
+    public void EndUserActionNotifications(UserActionUpdateDelegate notificationDelegate, LayoutCoordinate layoutCoordinate) {
+        userActionDelegateMap[layoutCoordinate.x, layoutCoordinate.y].Remove(notificationDelegate);
+    }
+
+    public void NotifyAllUserActionsUpdate(LayoutCoordinate layoutCoordinate) {
+        foreach(UserActionUpdateDelegate updateDelegate in userActionDelegateMap[layoutCoordinate.x, layoutCoordinate.y]) {
+            updateDelegate.UpdateUserActionsAvailable(userActionCoordinateMap[layoutCoordinate.x, layoutCoordinate.y]);
+        }
     }
 }

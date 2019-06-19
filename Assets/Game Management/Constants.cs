@@ -66,8 +66,10 @@ public class Script {
     public static Script PathfindingGrid { get { return new Script(Tag.AStar, typeof(PathfindingGrid)); } }
     public static Script UIOverlayPanel { get { return new Script(Tag.UIOverlayPanel, typeof(RectTransform)); } }
     public static Script SelectionManager { get { return new Script(Tag.Narrator, typeof(SelectionManager)); } }
+    public static Script UnitManager { get { return new Script(Tag.Narrator, typeof(UnitManager)); } }
 
-    public static Script[] allScripts = new Script[] { Constants, PlayerBehaviour, MapsManager, UIManager, TaskQueue, MapGenerator, PathfindingGrid, SelectionManager }; 
+
+    public static Script[] allScripts = new Script[] { Constants, PlayerBehaviour, MapsManager, UIManager, TaskQueue, MapGenerator, PathfindingGrid, SelectionManager, UnitManager }; 
 
     public static T Get<T> () where T : Component {
 

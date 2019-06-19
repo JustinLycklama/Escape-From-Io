@@ -25,6 +25,7 @@ public class NavigationPanel : MonoBehaviour
         Text text = backButtonObject.AddComponent<Text>();
         text.font = Resources.GetBuiltinResource(typeof(Font), "Arial.ttf") as Font;
         text.text = "Back";
+        text.alignment = TextAnchor.MiddleCenter;
 
         LayoutElement layoutElement = backButtonObject.AddComponent<LayoutElement>();
         layoutElement.ignoreLayout = true;
@@ -34,7 +35,7 @@ public class NavigationPanel : MonoBehaviour
         rectTransform.anchorMax = new Vector2(0, 1);
 
         rectTransform.pivot = new Vector2(0, 1);
-        rectTransform.sizeDelta = new Vector2(100, 100);
+        rectTransform.sizeDelta = new Vector2(50, 33);
 
         backButtonObject.SetActive(false);
     }
@@ -59,8 +60,8 @@ public class NavigationPanel : MonoBehaviour
     public NavigationPanel PopFromStack() {
         backTrace.gameObject.SetActive(true);
 
-        transform.SetParent(null);
-        Destroy(this);
+        gameObject.transform.SetParent(null);
+        Destroy(gameObject);
 
         return backTrace;
     }

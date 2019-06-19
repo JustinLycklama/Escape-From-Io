@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDelegate {
+public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDelegate, UnitManagerDelegate {
 
     public Text title;
 
@@ -18,13 +18,16 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
 
     private void Start() {
         title.text = actionType.ToString();
-        unitText.text = "1 Unit";
+        unitText.text = "";
 
         Script.Get<TaskQueueManager>().RegisterForNotifications(this, actionType);
+        Script.Get<UnitManager>().RegisterForNotifications(this, actionType);
+
     }
 
     private void OnDestroy() {
         Script.Get<TaskQueueManager>().EndNotifications(this, actionType);
+        Script.Get<UnitManager>().EndNotifications(this, actionType);
     }
 
     /*
@@ -42,5 +45,13 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
 
     public void NotifyUpdateTaskList(MasterGameTask[] taskList, MasterGameTask.ActionType actionType) {
         taskText.text = taskList.Length + " " + actionType.ToString() + " Task" + ((taskList.Length == 1)? "" : "s");
+    }
+
+    /*
+     * UnitManagerDelegate Interface
+     * */
+
+    public void NotifyUpdateUnitList(Unit[] unitList, MasterGameTask.ActionType actionType) {
+        unitText.text = unitList.Length + " Unit" + ((unitList.Length == 1) ? "" : "s");
     }
 }

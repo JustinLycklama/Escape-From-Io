@@ -8,6 +8,7 @@ public class MasterAndGameTaskCell : MonoBehaviour
     public Text taskDescription;
 
     MasterGameTask task;
+    GameTask gameTask;
 
     private string defaultText = "No Current Task"; 
 
@@ -17,12 +18,24 @@ public class MasterAndGameTaskCell : MonoBehaviour
 
     public void SetTask(MasterGameTask task, GameTask gameTask) {
         this.task = task;
+        this.gameTask = gameTask;
 
-        if (task != null) {
-            taskDescription.text = task.description + " - " + gameTask.description;
-        } else {
+
+
+        if (task == null && gameTask == null) {
             taskDescription.text = defaultText;
-        }        
-    }
+        } else {
+            string description = "";
 
+            if (task != null) {
+                description += task.description;
+            }
+
+            if (gameTask != null) {
+                description += (description.Length > 0) ? " - " : "" + gameTask.description;
+            }
+
+            taskDescription.text = description;
+        }
+    }
 }

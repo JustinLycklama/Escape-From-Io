@@ -37,6 +37,8 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate
         this.map = map;
         map.mapContainer = this;
 
+        map.CreateAllActionableItemOverrides();
+
         DrawMesh();
 
         if (withColliders == true) {

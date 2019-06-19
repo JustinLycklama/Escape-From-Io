@@ -85,10 +85,12 @@ public class Ore : ActionableItem {
 
     float actionPercent = 0;
 
+    
+    //public Unit associatedUnit;
     public GameTask associatedTask;
-    public override void AssociateTask(GameTask task) {
-        associatedTask = task;
-    }
+    //public override void AssociateTask(GameTask task) {
+    //    associatedTask = task;
+    //}
 
     public override float performAction(GameTask task, float rate, Unit unit) {
         switch(task.action) {

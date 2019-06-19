@@ -1,13 +1,18 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class TaskAndUnitDetailPanel : NavigationPanel, TaskQueueDelegate, TableViewDelegate {
     private MasterGameTask.ActionType actionType;
 
     private MasterGameTask[] taskList = new MasterGameTask[0];
+
+    public Text taskListTitle;
     public TableView tasksQueueTableView;
 
+    public Text unitListTitle;
+    public TableView unitListTableView;
 
     public void SetActionType(MasterGameTask.ActionType actionType) {
         this.actionType = actionType;
