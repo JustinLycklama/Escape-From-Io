@@ -128,7 +128,7 @@ public class Narrator : MonoBehaviour
 
         int i = 0;
         foreach (Unit unit in startingUnits) {
-            unit.Init();
+            unit.Initialize();
             WorldPosition worldPos = new WorldPosition(MapCoordinate.FromGridCoordinate(coordinatesForSpawnCoordinate[1][i]));
             unit.transform.position = worldPos.vector3;
             i++;
@@ -137,10 +137,5 @@ public class Narrator : MonoBehaviour
         }
 
         Camera.main.transform.position = new WorldPosition(new MapCoordinate(spawnCoordinate)).vector3 + new Vector3(0, 250, -400);
-    }
-
-    // Update is called once per frame
-    void Update() {
-        
     }
 }

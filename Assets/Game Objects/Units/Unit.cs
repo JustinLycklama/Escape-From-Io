@@ -21,77 +21,85 @@ public interface UserActionUpdateDelegate {
 }
 
 public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
+
+    public static int unitCount = 0;
+
+    // TaskQueue Reference
+    TaskQueueManager taskQueueManager;
+
+    // Pathfinding
     public float speed;
     public float turnSpeed;
     public float turnDistance;
     public float stoppingDistance;
 
-    UnitStatusTooltip unitStatusPanel;
-
     Path path;
-
     bool navigatingToTask;
-    TaskQueueManager taskQueueManager;
 
-
-    
-    MasterGameTask currentMasterTask;
-    GameTask currentGameTask;
-    Queue<GameTask> gameTasksQueue;
-
-    //Map map;
-
+    // Status Tooltip
     public Transform statusLocation;
+    UnitStatusTooltip unitStatusTooltip;
 
-    public static int unitCount = 0;
+    // Tasks
+    MasterGameTask currentMasterTask;
+
+    // The queue of all tasks to do for the current Master Task
+    Queue<GameTask> gameTasksQueue;
+    GameTask currentGameTask; // The current Game Task we are working on to complete the Master Task
 
     abstract public MasterGameTask.ActionType primaryActionType { get; }
 
     abstract public float SpeedForTask(GameTask task);
 
-    // Selectable Interface
+    /*
+     * Selectable Interface Properties
+     * */
+
     private string title;
     public string description => title;
 
     public List<TaskStatusUpdateDelegate> taskStatusDelegateList = new List<TaskStatusUpdateDelegate>();
     public List<UserActionUpdateDelegate> userActionDelegateList = new List<UserActionUpdateDelegate>();
 
-
-    //public StatusDelegate statusDelegate;
-
-    private void Start() {
-        unitStatusPanel = Instantiate(Resources.Load("UnitStatusPanel", typeof(UnitStatusTooltip))) as UnitStatusTooltip;
-        unitStatusPanel.transform.SetParent(Script.UIOverlayPanel.GetFromObject<RectTransform>());
-
-        unitStatusPanel.SetFollower(statusLocation);
-
-        unitStatusPanel.SetTitle(title);
-        unitStatusPanel.SetTask(null);
-        unitStatusPanel.DisplayPercentageBar(false);
-
-        //map = Script.Get<MapContainer>().getMap();
-    }
+    /*
+     * Lifecycle
+     * */ 
 
     private void Awake() { 
-
         title = "Unit #" + unitCount;
         unitCount++;
 
-        gameTasksQueue = new Queue<GameTask>();
+        gameTasksQueue = new Queue<GameTask>();  
+    }
 
-        // PATH FLOW INIT
+    private void Start() {
+        unitStatusTooltip = Instantiate(Resources.Load("UnitStatusPanel", typeof(UnitStatusTooltip))) as UnitStatusTooltip;
+        unitStatusTooltip.transform.SetParent(Script.UIOverlayPanel.GetFromObject<RectTransform>());
 
-        // DO PATH FLOW
+        unitStatusTooltip.SetFollower(statusLocation);
+
+        unitStatusTooltip.SetTitle(title);
+        unitStatusTooltip.SetTask(null);
+        unitStatusTooltip.DisplayPercentageBar(false);
+    }
+
+    private void OnDestroy() {
+        Script.Get<MapsManager>().RemoveTerrainUpdateDelegate(this);
+    }
+
+    public void Initialize() {
+        taskQueueManager = Script.Get<TaskQueueManager>();
+        Script.Get<MapsManager>().AddTerrainUpdateDelegate(this);
 
         completedTaskAction = (pathComplete) => {
-            unitStatusPanel.DisplayPercentageBar(false);
+            unitStatusTooltip.DisplayPercentageBar(false);
             ContinueGameTaskQueue();
         };
 
         completedPath = (pathComplete) => {
             print("Do Action for Task" + currentMasterTask.taskNumber);
             navigatingToTask = false;
-            unitStatusPanel.DisplayPercentageBar(true);
+            unitStatusTooltip.DisplayPercentageBar(true);
             StartCoroutine(PerformTaskAction(completedTaskAction));
         };
 
@@ -104,7 +112,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
                 path = new Path(waypoints, transform.position, turnDistance, stoppingDistance);
 
                 // When requesting a path for an unknown resource (like ore) we will get the closest resource back as an actionable item
-                if (actionableItem != null) {
+                if(actionableItem != null) {
                     currentGameTask.actionItem = actionableItem;
                 }
 
@@ -123,69 +131,41 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
                 print("Put task back in Queue");
 
                 taskQueueManager.QueueTask(currentMasterTask);
-                timeBeforeNextTaskCheck = 1;
-
-                navigatingToTask = false;
-
-                gameTasksQueue.Clear();
-                currentGameTask = null;
-                currentMasterTask = null;
+                ResetTaskState();
             }
         };
+
+        StartCoroutine(FindTask());
     }
 
-    private void OnDestroy() {
-        Script.Get<MapsManager>().RemoveTerrainUpdateDelegate(this);
-    }
-
-    public void Init() {
-        taskQueueManager = Script.Get<TaskQueueManager>();
-        Script.Get<MapsManager>().AddTerrainUpdateDelegate(this);
-    }
-
-    float timeBeforeNextTaskCheck = 0;
-    private void Update() {
-
-        // Check Task
-        if(timeBeforeNextTaskCheck <= 0) {
-            timeBeforeNextTaskCheck = 0.10f;
-
-            if(currentMasterTask == null) {
-                currentMasterTask = taskQueueManager.GetNextDoableTask(this);
-
-                // if we still have to task to do, we are IDLE
-                if (currentMasterTask == null) {
-                    return;
-                }
-
-                print("Start Task " + currentMasterTask.taskNumber);
-                DoTask();                
-            }
+    public void CancelTask() {
+        if (currentMasterTask == null) {
+            return;
         }
 
-        timeBeforeNextTaskCheck -= Time.deltaTime;
+        StopAllCoroutines();
+        ResetTaskState();
     }
 
-
-
-    // DO PATH FLOW
+    /*
+     * Task Pipeline
+     * */
 
     System.Action<bool> completedTaskAction;
-
     System.Action<bool> completedPath;
-
     System.Action<WorldPosition[], ActionableItem, bool> foundWaypoints;
 
-    private void DoTask() {
+    private void DoTask(MasterGameTask task) {
+        currentMasterTask = task;
         currentMasterTask.assignedUnit = this;
 
-        unitStatusPanel.SetTask(currentMasterTask);
+        unitStatusTooltip.SetTask(currentMasterTask);
 
         gameTasksQueue.Clear();
 
         //navigatingToTask = true;
-        foreach (GameTask task in currentMasterTask.childGameTasks) {
-            gameTasksQueue.Enqueue(task);
+        foreach (GameTask gameTask in currentMasterTask.childGameTasks) {
+            gameTasksQueue.Enqueue(gameTask);
         }
 
         ContinueGameTaskQueue();
@@ -201,19 +181,41 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
             print("Complpete Task" + currentMasterTask.taskNumber);
 
             currentMasterTask.MarkTaskFinished();
-            currentMasterTask = null;
-            currentGameTask = null;
-            timeBeforeNextTaskCheck = 0;
-            unitStatusPanel.SetTask(currentMasterTask);
+            ResetTaskState();
         }
 
         // Let the UI Know our status is changing
         NotifyAllTaskStatus();
     }
 
+    private void ResetTaskState() {
+        currentMasterTask = null;
+        currentGameTask = null;
+
+        gameTasksQueue.Clear();
+
+        NotifyAllTaskStatus();
+        unitStatusTooltip.SetTask(null);
+        unitStatusTooltip.DisplayPercentageBar(false);
+
+        StartCoroutine(FindTask());
+    }
+
     /*
      * Task Coroutines
      * */
+
+    IEnumerator FindTask() {
+        MasterGameTask masterGameTask = null;
+
+        while(masterGameTask == null) {
+            yield return new WaitForSeconds(0.25f);
+
+            masterGameTask = taskQueueManager.GetNextDoableTask(this);            
+        }
+
+        DoTask(masterGameTask);
+    }
 
     IEnumerator PerformTaskAction(System.Action<bool> callBack) {
 
@@ -221,7 +223,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
 
         while (true) {
             float completion = currentGameTask.actionItem.performAction(currentGameTask, Time.deltaTime * speed, this);
-            unitStatusPanel.percentageBar.SetPercent(completion);
+            unitStatusTooltip.percentageBar.SetPercent(completion);
 
             if (completion >= 1) {
                 callBack(true);

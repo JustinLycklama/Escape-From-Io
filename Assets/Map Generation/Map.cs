@@ -43,7 +43,9 @@ public class Map : ActionableItem  {
 
     public MapContainer mapContainer;
 
-    Dictionary<GameTask, TerraformTarget> terraformTargetDictionary;
+    //Dictionary<GameTask, TerraformTarget> terraformTargetDictionary;
+
+    TerraformTarget[,] terraformTargetCoordinateMap;
 
     public string description => "The World? What should go here";
 
@@ -67,8 +69,11 @@ public class Map : ActionableItem  {
         this.meshTexture = meshTexture;
         this.terrainData = terrainData;
 
-        buildingData = new Building[terrainData.GetLength(0), terrainData.GetLength(1)];
-        terraformTargetDictionary = new Dictionary<GameTask, TerraformTarget>();
+        int terrainWidth = terrainData.GetLength(0);
+        int terrainHeight = terrainData.GetLength(1);
+
+        buildingData = new Building[terrainWidth, terrainHeight];
+        terraformTargetCoordinateMap = new TerraformTarget[terrainWidth, terrainHeight];
 
         //InitCoordinateArrays(terrainData.GetLength(0), terrainData.GetLength(1));
     }
@@ -263,14 +268,14 @@ public class Map : ActionableItem  {
      * */
     public override float performAction(GameTask task, float rate, Unit unit) {
 
+        MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(task.target);
+        LayoutCoordinate coordinate = new LayoutCoordinate(mapCoordinate);
+
         TerraformTarget terraformTarget;
 
-        if (terraformTargetDictionary.ContainsKey(task)) {
-            terraformTarget = terraformTargetDictionary[task];
-        } else {
-            MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(task.target);
-            LayoutCoordinate coordinate = new LayoutCoordinate(mapCoordinate);
-
+        if (terraformTargetCoordinateMap[coordinate.x, coordinate.y] != null) {
+            terraformTarget = terraformTargetCoordinateMap[coordinate.x, coordinate.y];
+        } else {           
             TerrainType targetTerrain = Script.Get<MapGenerator>().TerrainForRegion(RegionType.Land);
 
             if (task.action == GameTask.ActionType.FlattenPath) {
@@ -285,7 +290,7 @@ public class Map : ActionableItem  {
             float targetTerrainHeight = targetTerrain.plateauAtBase ? targetTerrain.noiseBaseline : targetTerrain.noiseMax;
 
             terraformTarget = new TerraformTarget(coordinate, targetTerrain, targetTerrainHeight, layoutNoiseMap[coordinate.x, coordinate.y]);
-            terraformTargetDictionary[task] = terraformTarget;
+            terraformTargetCoordinateMap[coordinate.x, coordinate.y] = terraformTarget;
         }
 
         terraformTarget.percentage += rate;
@@ -325,7 +330,7 @@ public class Map : ActionableItem  {
                 ore.transform.position = positions[i];
             }
 
-            terraformTargetDictionary.Remove(task);
+            terraformTargetCoordinateMap[coordinate.x, coordinate.y] = null;
             UpdateUserActionsAt(terraformTarget.coordinate);
         }
 
@@ -339,7 +344,6 @@ public class Map : ActionableItem  {
 
         return terraformTarget.percentage;
     }
-
 
     /*
      * Invalud ActionableItem Components

@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class MasterAndGameTaskCell : MonoBehaviour
 {
     public Text taskDescription;
+    public Text unitAsigneeText;
 
     MasterGameTask task;
     GameTask gameTask;
@@ -19,8 +20,6 @@ public class MasterAndGameTaskCell : MonoBehaviour
     public void SetTask(MasterGameTask task, GameTask gameTask) {
         this.task = task;
         this.gameTask = gameTask;
-
-
 
         if (task == null && gameTask == null) {
             taskDescription.text = defaultText;
@@ -36,6 +35,12 @@ public class MasterAndGameTaskCell : MonoBehaviour
             }
 
             taskDescription.text = description;
+        }
+
+        if (task != null && task.assignedUnit != null) {
+            unitAsigneeText.text = "Assigned to " + task.assignedUnit.description;
+        } else {
+            unitAsigneeText.text = "";
         }
     }
 }

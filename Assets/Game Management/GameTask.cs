@@ -102,19 +102,23 @@ public class MasterGameTask {
     }
 
     public void CancelTask() {
-        if (assignedUnit == null) {
-            // Remove references to this gameTask
-            UpdateAllGameTasksActionItemsWith(null);
-
-            childGameTasks.Clear();
+        if(assignedUnit != null) {
+            assignedUnit.CancelTask();
+        } else {            
             Script.Get<TaskQueueManager>().DeQueueTask(this);
-
-            // TODO?
-            //if(taskBlockedByThis != null) {
-            //    taskBlockedByThis.UnblockTask(this);
-            //    taskBlockedByThis = null;
-            //}
         }
+
+        // Remove references to this gameTask
+        UpdateAllGameTasksActionItemsWith(null);
+
+
+        // TODO?
+        childGameTasks.Clear();
+        
+        //if(taskBlockedByThis != null) {
+        //    taskBlockedByThis.UnblockTask(this);
+        //    taskBlockedByThis = null;
+        //}
     }
 
     public void MarkTaskFinished() {
