@@ -7,8 +7,12 @@ using UnityEngine.UI;
 
 public class UserAction {
     public string description;
+    public LayoutCoordinate layoutCoordinate;
 
-    public Action performAction;
+    // We can have a single action to perform, or a list of construction blueprints which will contain their own actions
+    public Action<LayoutCoordinate> performAction;
+
+    public ConstructionBlueprint[] blueprintList;
 }
 
 public class ActionItemCell : MonoBehaviour, IPointerClickHandler {
@@ -40,6 +44,12 @@ public class ActionItemCell : MonoBehaviour, IPointerClickHandler {
             return;
         }
 
-        action.performAction();
+        // We either have an action to perform, or a list of blueprints to display
+        if (action.performAction != null) {
+            action.performAction(action.layoutCoordinate);
+        } else if (action.blueprintList != null) {
+            BlueprintPanel blueprintPanel = Script.Get<UIManager>().Push(UIManager.Blueprint.BlueprintPanel) as BlueprintPanel;
+            blueprintPanel.SetData(action.description, action.blueprintList, action.layoutCoordinate);
+        }
     }
 }

@@ -7,9 +7,11 @@ public class GameResourceManager {
     public static GameResourceManager sharedInstance = new GameResourceManager();
 
     private class Blueprint : PrefabBlueprint {
-        public static Blueprint Basic = new Blueprint("Ore", "StandardOre", typeof(Ore));
+        private static string folder = "Ore/";
 
-        private Blueprint(string fileName, string description, Type type) : base(fileName, description, type) { }
+        public static Blueprint Basic = new Blueprint("Ore", typeof(Ore));
+
+        private Blueprint(string fileName, Type type) : base(folder+fileName, type) { }
     }
 
     List<Ore> globalOreList;

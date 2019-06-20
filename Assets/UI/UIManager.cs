@@ -8,6 +8,16 @@ using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour
 {
+    public class Blueprint : PrefabBlueprint {
+        private static string folder = "UI/";
+
+        public Blueprint(string fileName,  Type type) : base(folder+fileName, type) { }
+
+        public static Blueprint PercentageBar = new Blueprint("PercentageBar", typeof(PercentageBar));
+        public static Blueprint TaskAndUnitDetail = new Blueprint("TaskAndUnitDetailPanel", typeof(TaskAndUnitDetailPanel));
+        public static Blueprint BlueprintPanel = new Blueprint("BlueprintPanel", typeof(BlueprintPanel));
+    }
+
     public Text selectionTitle;
     //public Button button;
 
@@ -23,18 +33,18 @@ public class UIManager : MonoBehaviour
 
     public NavigationPanel currentTopPanel;
 
-    public class Blueprint : PrefabBlueprint {
-        public Blueprint(string fileName, string description, Type type) : base(fileName, description, type) { }
-
-        public static Blueprint TaskAndUnitDetail = new Blueprint("TaskAndUnitDetailPanel", "Task and Unit Details", typeof(TaskAndUnitDetailPanel));
-    }
-
     public NavigationPanel Push(Blueprint blueprint) {
         NavigationPanel panel = blueprint.Instantiate() as NavigationPanel;
         panel.PushOntoStackFrom(currentTopPanel);
         currentTopPanel = panel;
 
         return panel;
+    }
+
+    public void PopToRoot() {
+        while (currentTopPanel.backTrace != null) {
+            Pop();
+        }
     }
 
     public void Pop() {

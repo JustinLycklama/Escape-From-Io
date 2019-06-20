@@ -3,5 +3,5 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Refinery : Building {
-    protected override int requiredOre => 5;
+    //protected override int requiredOre => 5;
 }

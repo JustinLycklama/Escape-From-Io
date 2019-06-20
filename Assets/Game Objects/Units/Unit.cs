@@ -73,7 +73,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
     }
 
     private void Start() {
-        unitStatusTooltip = Instantiate(Resources.Load("UnitStatusPanel", typeof(UnitStatusTooltip))) as UnitStatusTooltip;
+        unitStatusTooltip = Instantiate(Resources.Load("UI/UnitStatusPanel", typeof(UnitStatusTooltip))) as UnitStatusTooltip;
         unitStatusTooltip.transform.SetParent(Script.UIOverlayPanel.GetFromObject<RectTransform>());
 
         unitStatusTooltip.SetFollower(statusLocation);

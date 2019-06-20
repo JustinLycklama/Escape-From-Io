@@ -1,10 +1,11 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PercentageBar : TrackingUIElement
-{
+public class PercentageBar : TrackingUIElement {
+
     public Slider sliderBar;
     public Text detailText;
 

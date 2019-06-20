@@ -43,8 +43,6 @@ public class Map : ActionableItem  {
 
     public MapContainer mapContainer;
 
-    //Dictionary<GameTask, TerraformTarget> terraformTargetDictionary;
-
     TerraformTarget[,] terraformTargetCoordinateMap;
 
     public string description => "The World? What should go here";
@@ -74,8 +72,6 @@ public class Map : ActionableItem  {
 
         buildingData = new Building[terrainWidth, terrainHeight];
         terraformTargetCoordinateMap = new TerraformTarget[terrainWidth, terrainHeight];
-
-        //InitCoordinateArrays(terrainData.GetLength(0), terrainData.GetLength(1));
     }
 
     public TerrainType GetTerrainAt(LayoutCoordinate layoutCoordinate) {
@@ -162,61 +158,66 @@ public class Map : ActionableItem  {
             UserAction action = new UserAction();
 
             action.description = "Cancel";
-            action.performAction = () => {
-                associatedTasksCoordinateMap[coordinate.x, coordinate.y].CancelTask();
+            action.layoutCoordinate = coordinate;
 
-                //TaskQueueManager queue = Script.Get<TaskQueueManager>();
-
-                //GameTask miningTask = new GameTask("Mining", worldPosition, GameTask.ActionType.Mine, this, PathRequestTargetType.Layout);
-                //MasterGameTask masterMiningTask = new MasterGameTask(MasterGameTask.ActionType.Mine, "Mine at location " + coordinate.description, new GameTask[] { miningTask });
-
-                //queue.QueueTask(masterMiningTask);
-                //this.AssociateTask(masterMiningTask, coordinate);
+            action.performAction = (LayoutCoordinate layoutCoordinate) => {
+                associatedTasksCoordinateMap[layoutCoordinate.x, layoutCoordinate.y].CancelTask();
             };
 
             actionList.Add(action);
         }
 
         // Build?
-        if (GetTerrainAt(coordinate).regionType == RegionType.Land) {
-            foreach (Building.Blueprint blueprint in Building.Blueprints()) {
-                actionList.Add(blueprint.ConstructionAction(worldPosition));
+        else if (GetTerrainAt(coordinate).regionType == RegionType.Land) {
 
-                UserAction action = new UserAction();
+            UserAction action = new UserAction();
+            action.description = "Building";
+            action.layoutCoordinate = coordinate;
 
-                TerrainType landTerrain = Script.Get<MapGenerator>().TerrainForRegion(RegionType.Land);
+            action.blueprintList = new ConstructionBlueprint[] { Building.Blueprint.Tower, Building.Blueprint.Refinery };
 
-                action.description = "Add Path";
-                action.performAction = () => {
-                    TaskQueueManager queue = Script.Get<TaskQueueManager>();
+            actionList.Add(action);
 
-                    GameTask miningTask = new GameTask("Building", worldPosition, GameTask.ActionType.FlattenPath, this, PathRequestTargetType.Layout);
-                    MasterGameTask masterMiningTask = new MasterGameTask(MasterGameTask.ActionType.Build, "Build Path At " + coordinate.description, new GameTask[] { miningTask });
+            //foreach (Building.Blueprint blueprint in Building.Blueprints()) {
+            //    actionList.Add(blueprint.ConstructionAction(worldPosition));
 
-                    queue.QueueTask(masterMiningTask);
+            //UserAction action = new UserAction();
+
+            //TerrainType landTerrain = Script.Get<MapGenerator>().TerrainForRegion(RegionType.Land);
+
+            //action.description = "Add Path";
+            //action.performAction = () => {
+            //    TaskQueueManager queue = Script.Get<TaskQueueManager>();
+
+            //    GameTask miningTask = new GameTask("Building", worldPosition, GameTask.ActionType.FlattenPath, this, PathRequestTargetType.Layout);
+            //    MasterGameTask masterMiningTask = new MasterGameTask(MasterGameTask.ActionType.Build, "Build Path At " + coordinate.description, new GameTask[] { miningTask });
+
+            //    queue.QueueTask(masterMiningTask);
 
 
-                };
+            //};
 
-                actionList.Add(action);
-            }
+            //actionList.Add(action);
+            //}
         }
 
         // Mine?
-        if(GetTerrainAt(coordinate).regionType == RegionType.Mountain) {
+        else if(GetTerrainAt(coordinate).regionType == RegionType.Mountain) {
             UserAction action = new UserAction();
 
             TerrainType landTerrain = Script.Get<MapGenerator>().TerrainForRegion(RegionType.Land);
 
             action.description = "Mine Wall";
-            action.performAction = () => {
+            action.layoutCoordinate = coordinate;
+
+            action.performAction = (LayoutCoordinate layoutCoordinate) => {
                 TaskQueueManager queue = Script.Get<TaskQueueManager>();
 
                 GameTask miningTask = new GameTask("Mining", worldPosition, GameTask.ActionType.Mine, this, PathRequestTargetType.Layout);
-                MasterGameTask masterMiningTask = new MasterGameTask(MasterGameTask.ActionType.Mine, "Mine at location " + coordinate.description, new GameTask[] { miningTask });
+                MasterGameTask masterMiningTask = new MasterGameTask(MasterGameTask.ActionType.Mine, "Mine at location " + layoutCoordinate.description, new GameTask[] { miningTask });
 
                 queue.QueueTask(masterMiningTask);
-                this.AssociateTask(masterMiningTask, coordinate);
+                this.AssociateTask(masterMiningTask, layoutCoordinate);
             };
 
             actionList.Add(action);

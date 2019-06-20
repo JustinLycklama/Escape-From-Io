@@ -25,6 +25,7 @@ public class SelectionManager : MonoBehaviour {
 
     private void UpdateSelection(Selection newSelection) {
         RemoveSelection();
+        Script.Get<UIManager>().PopToRoot();
 
         currentSelection = newSelection;
         

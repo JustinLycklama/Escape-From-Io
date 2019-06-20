@@ -98,16 +98,14 @@ public class Script {
 }
 
 public abstract class PrefabBlueprint {
-    public PrefabBlueprint(string fileName, string description, Type type) {
+    public PrefabBlueprint(string fileName, Type type) {
         this.fileName = fileName;
-        this.description = description;
         this.type = type;
 
         this.resource = Resources.Load(fileName, type);
     }
 
     public string fileName { get; set; }
-    public string description { get; set; }
     public Type type { get; set; }
 
     public UnityEngine.Object resource;
@@ -115,4 +113,16 @@ public abstract class PrefabBlueprint {
     public UnityEngine.Object Instantiate() {
         return UnityEngine.Object.Instantiate(resource);
     }
+}
+
+public abstract class ConstructionBlueprint : PrefabBlueprint {
+    public ConstructionBlueprint(string fileName, Type type, string label, int cost) : base(fileName, type) {
+        this.label = label;
+        this.cost = cost;
+    }
+
+    public int cost;
+    public string label;
+
+    public abstract void ConstructAt(LayoutCoordinate layoutCoordinate);
 }
