@@ -30175,11 +30175,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1104112686625619838}
-  - component: {fileID: 1068568246934671830}
   - component: {fileID: 1062419919112631848}
   - component: {fileID: 1056042495605715142}
   m_Layer: 0
-  m_Name: AmbleGuy
+  m_Name: MinerModel
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -30204,22 +30203,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1068568246934671830
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1101061539481755994}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4e67d0b31b333a74294408accc2b05ac, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Mass: 20
-  MoveSpeed: 8
-  RotateSpeed: 360
-  MouseFacing: 0
 --- !u!143 &1062419919112631848
 CharacterController:
   m_ObjectHideFlags: 0

@@ -127,8 +127,16 @@ public class MapsManager : MonoBehaviour {
     public MapCoordinate MapCoordinateFromPathGridCoordinate(PathGridCoordinate pathGridCoordinate) {
         Constants constants = Script.Get<Constants>();
 
-        float mapCoordinateX = pathGridCoordinate.x / constants.nodesPerLayoutPerAxis * constants.featuresPerLayoutPerAxis;// - (mapsBoundaries.width / 2f);
-        float mapCoordinateY = pathGridCoordinate.y / constants.nodesPerLayoutPerAxis * constants.featuresPerLayoutPerAxis;// + (mapsBoundaries.height / 2f);
+        float mapCoordinateX = (pathGridCoordinate.x / constants.nodesPerLayoutPerAxis) * constants.featuresPerLayoutPerAxis;// - (mapsBoundaries.width / 2f);
+        float mapCoordinateY = (pathGridCoordinate.y / constants.nodesPerLayoutPerAxis) * constants.featuresPerLayoutPerAxis;// + (mapsBoundaries.height / 2f);
+
+        // This map coordinate doesn't take in to account the padding we want. For example:
+        // given 10 features per layout and 3 nodes per layout, the center node (1 / 3 * 10) is at 3.33, and the last node it at 6. 
+        // To center this, we should add padding of half of the node width.
+        float nodeWidth = (constants.featuresPerLayoutPerAxis / constants.nodesPerLayoutPerAxis) / 2f;
+
+        mapCoordinateX += nodeWidth;
+        mapCoordinateY += nodeWidth;
 
         // If we are on Map (0,0) then the mapCoordinateX and Y are fine, but if we are on a different Map we have to scale the CoordinateX and Y relative to that map
         mapCoordinateX = mapCoordinateX % (constants.featuresPerLayoutPerAxis * constants.layoutMapWidth);

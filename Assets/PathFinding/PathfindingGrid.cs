@@ -68,7 +68,7 @@ public class PathfindingGrid : MonoBehaviour {
         for(int x = 0; x < gridSizeX; x++) {
             for(int y = 0; y < gridSizeY; y++) {
 
-                PathGridCoordinate pathGridCoordinate = new PathGridCoordinate(x + 0.5f, y + 0.5f);
+                PathGridCoordinate pathGridCoordinate = new PathGridCoordinate(x, y);
                 //MapCoordinate mapCoordinate = new MapCoordinate(pathGridCoordinate);
 
                 MapCoordinate mapCoordinate = MapCoordinate.FromGridCoordinate(pathGridCoordinate);
@@ -289,7 +289,19 @@ public class PathfindingGrid : MonoBehaviour {
 
                 Gizmos.color = col;
 
-                 
+                if (PathFinding.staticGridCoordinatesSurroundingLayoutCoordinate != null) {
+                    PathGridCoordinate pathGridCoordinate = new PathGridCoordinate(n.gridX, n.gridY);
+                    if(PathFinding.staticGridCoordinatesSurroundingLayoutCoordinate.Contains(pathGridCoordinate)) {
+                        Gizmos.color = Color.cyan;
+
+                        WorldPosition worldPosition = new WorldPosition(MapCoordinate.FromGridCoordinate(pathGridCoordinate));
+
+                        WorldPosition to = worldPosition;
+                        to.y = 100;
+
+                        Gizmos.DrawLine(worldPosition.vector3, to.vector3);
+                    }
+                }                 
 
                 Gizmos.DrawCube(n.worldPosition.vector3, Vector3.one *cubeDiameter);
                 //Handles.Label(n.worldPosition.vector3, n.gridX + ", " + n.gridY);
