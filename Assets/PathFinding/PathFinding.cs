@@ -45,7 +45,7 @@ public class PathFinding : MonoBehaviour {
         }
     }
 
-    public static List<PathGridCoordinate> staticGridCoordinatesSurroundingLayoutCoordinate;
+    //public static List<PathGridCoordinate> staticGridCoordinatesSurroundingLayoutCoordinate;
 
     public void FindSimplifiedPathToAnySurrounding(Vector3 startPos, LayoutCoordinate layoutCoordinate, Action<WorldPosition[], bool> callback) {
         Constants constants = Script.Get<Constants>();
@@ -85,7 +85,7 @@ public class PathFinding : MonoBehaviour {
             gridCoordinatesSurroundingLayoutCoordinate.Add(new PathGridCoordinate(sample.xLowSample, sample.yLowSample + 1));
         }
 
-        staticGridCoordinatesSurroundingLayoutCoordinate = gridCoordinatesSurroundingLayoutCoordinate;
+        //staticGridCoordinatesSurroundingLayoutCoordinate = gridCoordinatesSurroundingLayoutCoordinate;
 
         int lowestLength = int.MaxValue;
         Node[] foundPath = null;

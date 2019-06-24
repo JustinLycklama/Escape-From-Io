@@ -33,7 +33,8 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
     public float turnDistance;
     public float stoppingDistance;
 
-    Path path;
+    //Path path;
+    Path pathToDraw;
     bool navigatingToTask;
 
     // Status Tooltip
@@ -108,9 +109,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
 
             if(success) {
                 print("Follow Path for Task" + currentMasterTask.taskNumber);
-
-                path = new Path(waypoints, transform.position, turnDistance, stoppingDistance);
-
+              
                 // When requesting a path for an unknown resource (like ore) we will get the closest resource back as an actionable item
                 if(actionableItem != null) {
                     currentGameTask.actionItem = actionableItem;
@@ -123,8 +122,10 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
                 // In the second, we need to alert the unknown resource that it has a new task associated
                 currentGameTask.actionItem.AssociateTask(currentMasterTask);
 
+                Path path = new Path(waypoints, transform.position, turnDistance, stoppingDistance, currentGameTask.target);
+                pathToDraw = path;
 
-                StartCoroutine(FollowPath(completedPath));
+                StartCoroutine(FollowPath(path, completedPath));
             } else {
                 // There is no path to task, we cannot do this.
                 print("Give up Task" + currentMasterTask.taskNumber);
@@ -234,14 +235,30 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
         }     
     }
 
-    IEnumerator FollowPath(System.Action<bool> callBack) {
+    IEnumerator FollowPath(Path path, System.Action<bool> callBack) {
 
-        bool followingPath = true;
         int pathIndex = 0;
+        bool turningToStart = true;
 
         Vector3 startPoint = path.lookPoints[0].vector3;
+        Quaternion originalRotation = transform.rotation;
+        Quaternion targetRotation = Quaternion.LookRotation(startPoint - transform.position);
 
-        transform.LookAt(new Vector3(startPoint.x, transform.position.y, startPoint.z));
+        float totalTurnDistance = 0;
+        float degreesToTurn = (targetRotation.eulerAngles - originalRotation.eulerAngles).magnitude;
+
+        while(turningToStart) {           
+            if(totalTurnDistance == 1) {
+                turningToStart = false;
+            } else {
+                totalTurnDistance = Mathf.Clamp01(totalTurnDistance + ((Time.deltaTime * turnSpeed) / degreesToTurn * 180));
+                transform.rotation = Quaternion.Slerp(originalRotation, targetRotation, totalTurnDistance);
+            }
+
+            yield return null;
+        }
+        
+        bool followingPath = true;
 
         // Used to slow as we approach target
         float speedPercent = 1;
@@ -251,9 +268,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
             while(path.turnBoundaries[pathIndex].HasCrossedLine(position2D)) {
                 if(pathIndex == path.finishLineIndex) {
                     followingPath = false;
-
-                    callBack(true);
-                    yield break; // Stop Coroutine
+                    break;
                 } else {
                     pathIndex++;
                 }
@@ -272,12 +287,39 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
 
                 float localSpeed = currentTerrain.walkSpeedMultiplier * speed;
 
-                float height = Script.Get<MapsManager>().GetHeightAt(mapCoordinate) * mapCoordinate.mapContainer.transform.localScale.y + (0.5f * transform.localScale.y);
+                float height = Script.Get<MapsManager>().GetHeightAt(mapCoordinate) * mapCoordinate.mapContainer.transform.localScale.y; //  + (0.5f * transform.localScale.y)
                 Vector3 lookPoint = new Vector3(worldPos.vector3.x, height, worldPos.vector3.z);
 
-                Quaternion targetRotation = Quaternion.LookRotation(lookPoint - transform.position);
+                targetRotation = Quaternion.LookRotation(lookPoint - transform.position);
                 transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * turnSpeed);
                 transform.Translate(Vector3.forward * Time.deltaTime * speed * speedPercent, Space.Self);
+            }
+
+            yield return null;
+        }
+
+
+        bool lookingAtTarget = true;
+
+        originalRotation = transform.rotation;
+        Vector3 finalLookAtBalancedHeight = path.finalLookAt.vector3;
+        finalLookAtBalancedHeight.y = transform.position.y;
+
+        targetRotation = Quaternion.LookRotation(finalLookAtBalancedHeight - transform.position);
+
+        totalTurnDistance = 0;
+        degreesToTurn = (targetRotation.eulerAngles - originalRotation.eulerAngles).magnitude;
+
+
+        while(lookingAtTarget) {
+            if(totalTurnDistance == 1) {
+                lookingAtTarget = false;
+
+                callBack(true);
+                yield break; // Stop Coroutine
+            } else {
+                totalTurnDistance = Mathf.Clamp01(totalTurnDistance + ((Time.deltaTime * turnSpeed) / degreesToTurn * 180));
+                transform.rotation = Quaternion.Slerp(originalRotation, targetRotation, totalTurnDistance);
             }
 
             yield return null;
@@ -285,8 +327,8 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
     }
 
     public void OnDrawGizmos() {
-        if (path != null) {
-            path.DrawWithGizmos();
+        if (pathToDraw != null) {
+            pathToDraw.DrawWithGizmos();
         }
     }
 

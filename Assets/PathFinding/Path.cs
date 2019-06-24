@@ -14,11 +14,13 @@ public class Path
     public readonly Line[] turnBoundaries;
     public readonly int finishLineIndex;
     public readonly int slowDownIndex;
+    public readonly WorldPosition finalLookAt;
 
-    public Path(WorldPosition[] waypoints, Vector3 startPos, float turnDistance, float stoppingDistance) {
+    public Path(WorldPosition[] waypoints, Vector3 startPos, float turnDistance, float stoppingDistance, WorldPosition finalLookAt) {
         lookPoints = waypoints;
         turnBoundaries = new Line[lookPoints.Length];
         finishLineIndex = turnBoundaries.Length - 1;
+        this.finalLookAt = finalLookAt;
 
         Vector2 previousPoint = startPos.ToVector2();
         for (int i = 0; i < lookPoints.Length; i++) {
