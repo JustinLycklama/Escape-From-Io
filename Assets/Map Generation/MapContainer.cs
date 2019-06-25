@@ -2,6 +2,12 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+public class MapContainerNeighbours {
+    public MapContainer topMap, bottomMap, leftMap, rightMap;
+    public MapContainer topLeftMap, topRightMap, bottomLeftMap, bottomRightMap;
+}
+
+
 public class MapContainer : MonoBehaviour, SelectionManagerDelegate
 {
     public Map map;
@@ -10,9 +16,11 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate
     public Rect mapRect; // World position within the Maps Manager
 
     MeshFilter meshFilter;
-    MeshRenderer meshRenderer;
+    public MeshRenderer meshRenderer;
 
     BoxCollider[,] boxColliderArray;
+
+    public MapContainerNeighbours neighbours = new MapContainerNeighbours();
 
     private void Start() {
         Script.Get<SelectionManager>().RegisterForNotifications(this);
@@ -54,6 +62,11 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate
 
         meshFilter.sharedMesh = map.meshData.FinalizeMesh();
         meshRenderer.sharedMaterial.mainTexture = map.meshTexture;
+    }
+
+    public void UpdateMapOverhang() {
+        MeshGenerator.UpdateMeshOverhang(map.meshData, neighbours);
+        DrawMesh();
     }
 
     private void RemoveBoxColliders() {
@@ -135,6 +148,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate
             mapMaterial.SetFloat("hasSelection", 0);
         }
     }
+
 
     //private void OnDrawGizmos() {
     //    if (boxColliderArray == null) {

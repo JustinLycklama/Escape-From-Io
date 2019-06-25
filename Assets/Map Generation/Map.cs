@@ -23,6 +23,7 @@ public class Map : ActionableItem  {
         }
     }
 
+    // Map Width + Height in Map Coordinates (Not Layout Coordinates)
     public int mapWidth;
     public int mapHeight;
     public Vector2 textureMapSize;

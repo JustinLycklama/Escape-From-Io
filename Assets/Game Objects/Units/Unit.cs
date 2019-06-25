@@ -30,6 +30,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
     // Pathfinding
     public float speed;
     public float turnSpeed;
+    public float followPathTurnSpeed;
     public float turnDistance;
     public float stoppingDistance;
 
@@ -47,6 +48,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
     // The queue of all tasks to do for the current Master Task
     Queue<GameTask> gameTasksQueue;
     GameTask currentGameTask; // The current Game Task we are working on to complete the Master Task
+    private HashSet<int> refuseTaskSet; // Set of tasks we aready know we cannot perform
 
     abstract public MasterGameTask.ActionType primaryActionType { get; }
 
@@ -70,7 +72,8 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
         title = "Unit #" + unitCount;
         unitCount++;
 
-        gameTasksQueue = new Queue<GameTask>();  
+        gameTasksQueue = new Queue<GameTask>();
+        refuseTaskSet = new HashSet<int>();
     }
 
     private void Start() {
@@ -131,7 +134,9 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
                 print("Give up Task" + currentMasterTask.taskNumber);
                 print("Put task back in Queue");
 
-                taskQueueManager.QueueTask(currentMasterTask);
+                refuseTaskSet.Add(currentMasterTask.taskNumber);
+
+                taskQueueManager.PutBackTask(currentMasterTask);
                 ResetTaskState();
             }
         };
@@ -212,7 +217,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
         while(masterGameTask == null) {
             yield return new WaitForSeconds(0.25f);
 
-            masterGameTask = taskQueueManager.GetNextDoableTask(this);            
+            masterGameTask = taskQueueManager.GetNextDoableTask(this, refuseTaskSet);            
         }
 
         DoTask(masterGameTask);
@@ -291,7 +296,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
                 Vector3 lookPoint = new Vector3(worldPos.vector3.x, height, worldPos.vector3.z);
 
                 targetRotation = Quaternion.LookRotation(lookPoint - transform.position);
-                transform.rotation = Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * turnSpeed);
+                transform.rotation =  Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * followPathTurnSpeed);
                 transform.Translate(Vector3.forward * Time.deltaTime * speed * speedPercent, Space.Self);
             }
 
@@ -337,6 +342,8 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
      * */
 
     public void NotifyTerrainUpdate() {
+        refuseTaskSet.Clear();
+
         if (currentMasterTask != null && navigatingToTask == true && currentGameTask.target.vector3 != this.transform.position) {
             // Request a new path if the world has updated and we are already on the move
             PathRequestManager.RequestPathForTask(transform.position, currentGameTask, foundWaypoints);

@@ -35,7 +35,7 @@ public static class MeshGenerator {
             int clampedX = Mathf.Clamp(x - 1, 0, width - 3);
             int clampedY = Mathf.Clamp(y - 1, 0, height - 3);
 
-            float heightAtIndex = 0f;
+            float heightAtIndex = -1f;
             if(!(boundedX < 0 || boundedX > width - 3 || boundedY < 0 || boundedY > height - 3)) {
                 heightAtIndex = heightMap[clampedX, clampedY];
             }
@@ -66,11 +66,11 @@ public static class MeshGenerator {
         // TODO: Optimize Terraform
         for(int y = 0; y < featuresPerLayoutPerAxis; y++) {
             int sampleY = layoutCoordinate.y * featuresPerLayoutPerAxis + y;
-            int meshPositionY = layoutCoordinate.y * (featuresPerLayoutPerAxis + 1) + y;
+            int meshPositionY = layoutCoordinate.y * (featuresPerLayoutPerAxis + 1) + y + 1;
 
             for(int x = 0; x < featuresPerLayoutPerAxis; x++) {
                 int sampleX = layoutCoordinate.x * featuresPerLayoutPerAxis + x;
-                int meshPositionX = layoutCoordinate.x * (featuresPerLayoutPerAxis + 1) + x;
+                int meshPositionX = layoutCoordinate.x * (featuresPerLayoutPerAxis + 1) + x + 1;
 
                 float sampledHeight = heightMap[sampleX, sampleY];
 
@@ -79,7 +79,7 @@ public static class MeshGenerator {
 
             // We need to do the extra vertex at the end of the row, remember it has the same height as the one previous
             int lastSampleX = layoutCoordinate.x * featuresPerLayoutPerAxis + featuresPerLayoutPerAxis - 1;
-            int lastMeshPositionX = layoutCoordinate.x * (featuresPerLayoutPerAxis + 1) + featuresPerLayoutPerAxis;
+            int lastMeshPositionX = layoutCoordinate.x * (featuresPerLayoutPerAxis + 1) + featuresPerLayoutPerAxis + 1;
 
             float lastSampledHeight = heightMap[lastSampleX, sampleY];
 
@@ -88,7 +88,7 @@ public static class MeshGenerator {
 
         // Now do the last row of the Y
         int lastSampleY = layoutCoordinate.y * featuresPerLayoutPerAxis + featuresPerLayoutPerAxis - 1;
-        int lastMeshPositionY = layoutCoordinate.y * (featuresPerLayoutPerAxis + 1) + featuresPerLayoutPerAxis;
+        int lastMeshPositionY = layoutCoordinate.y * (featuresPerLayoutPerAxis + 1) + featuresPerLayoutPerAxis + 1;
 
         for(int x = 0; x < featuresPerLayoutPerAxis; x++) {
             int sampleX = layoutCoordinate.x * featuresPerLayoutPerAxis + x;
@@ -100,12 +100,96 @@ public static class MeshGenerator {
         }
 
         // We need to do the extra vertex at the end of the row, remember it has the same height as the one previous
-        int finalMeshPositionX = layoutCoordinate.x * (featuresPerLayoutPerAxis + 1) + featuresPerLayoutPerAxis;
         int finalSampleX = layoutCoordinate.x * featuresPerLayoutPerAxis + featuresPerLayoutPerAxis - 1;
+        int finalMeshPositionX = layoutCoordinate.x * (featuresPerLayoutPerAxis + 1) + featuresPerLayoutPerAxis + 1;
 
         float finalSampledHeight = heightMap[finalSampleX, lastSampleY];
 
         meshData.EditHeight(finalSampledHeight, finalMeshPositionX, lastMeshPositionY);
+    }
+
+    public static void UpdateMeshOverhang(MeshData meshData, MapContainerNeighbours neibours) {
+        int width = meshData.meshWidth;
+        int height = meshData.meshHeight;
+
+        // Left edge
+        int x = 0;
+        int y = 0;
+
+        for(y = 0; y < height; y++) {
+            float finalSampleHeight = 0;
+
+            if(y == 0 && neibours.topLeftMap != null) {
+                MapCoordinate coordinate = new MapCoordinate(neibours.topLeftMap.map.mapWidth - 1, neibours.topLeftMap.map.mapHeight - 1, neibours.topLeftMap);
+                finalSampleHeight = neibours.topLeftMap.map.getHeightAt(coordinate);
+            }
+
+            if(y > 0 && y < height - 1 && neibours.leftMap != null) {
+                MapCoordinate coordinate = new MapCoordinate(neibours.leftMap.map.mapWidth - 1, (y - 1), neibours.leftMap);
+                finalSampleHeight = neibours.leftMap.map.getHeightAt(coordinate);
+            }
+
+            if (y == height && neibours.bottomLeftMap != null ) {
+                MapCoordinate coordinate = new MapCoordinate(neibours.bottomLeftMap.map.mapWidth - 1, 0, neibours.bottomLeftMap);
+                finalSampleHeight = neibours.bottomLeftMap.map.getHeightAt(coordinate);
+            }
+
+            meshData.EditHeight(finalSampleHeight, x, y);
+        }
+
+        // Right edge
+       /* x = width - 1;
+
+        for(y = 0; y < height; y++) {
+            float finalSampleHeight = 0;
+
+            if(y == 0 && neibours.topRightMap != null) {
+                MapCoordinate coordinate = new MapCoordinate(0, neibours.topRightMap.map.mapHeight - 1, neibours.topRightMap);
+                finalSampleHeight = neibours.topRightMap.map.getHeightAt(coordinate);
+            }
+
+            if(y > 0 && y < height - 1 && neibours.rightMap != null) {
+                MapCoordinate coordinate = new MapCoordinate(0, y - 1, neibours.rightMap);
+                finalSampleHeight = neibours.rightMap.map.getHeightAt(coordinate);
+            }
+
+            if(y == height && neibours.bottomRightMap != null) {
+                MapCoordinate coordinate = new MapCoordinate(0, 0, neibours.bottomRightMap);
+                finalSampleHeight = neibours.bottomRightMap.map.getHeightAt(coordinate);
+            }
+
+            meshData.EditHeight(finalSampleHeight, x, y);
+        }
+        */
+        // Top 
+
+        y = 0;
+
+        for(x = 1; x < width - 1; x++) {
+            float finalSampleHeight = 0;
+
+            if(neibours.topMap != null) {
+                MapCoordinate coordinate = new MapCoordinate(x - 1, neibours.topMap.map.mapHeight - 1, neibours.topMap);
+                finalSampleHeight = neibours.topMap.map.getHeightAt(coordinate);
+            }
+
+            meshData.EditHeight(finalSampleHeight, x, y);
+        }
+
+        // Bottom
+        /*
+        y = height - 1;
+
+        for(x = 1; x < width - 1; x++) {
+            float finalSampleHeight = 0;
+
+            if(neibours.bottomMap != null) {
+                MapCoordinate coordinate = new MapCoordinate(x - 1, 0, neibours.bottomMap);
+                finalSampleHeight = neibours.bottomMap.map.getHeightAt(coordinate);
+            }
+
+            meshData.EditHeight(finalSampleHeight, x, y);
+        }*/
     }
 }
 
@@ -116,8 +200,8 @@ public class MeshData {
     // UVs are a relation for each of our verticies to the rest of mesh, in the x and y axis. 
     public Vector2[] uvs;
 
-    int meshWidth;
-    int meshHeight;
+    public int meshWidth;
+    public int meshHeight;
 
     int vertexIndex = 0;
     int triangleIndex = 0;

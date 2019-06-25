@@ -27,7 +27,7 @@ public class Narrator : MonoBehaviour
     int spawnCoordX;
     int spawnCoordY;
     LayoutCoordinate spawnCoordinate;
-    const int suitableCoordinateDistance = 3;
+    const int suitableCoordinateDistance = 1;
 
     // returns false if unable to get appropriate coordinate
     private bool GetSpawnCoordinate(float[,] layoutNoiseMap) {
@@ -113,9 +113,15 @@ public class Narrator : MonoBehaviour
                 mapWidth * constants.featuresPerLayoutPerAxis, 
                 mapHeight * constants.featuresPerLayoutPerAxis);
 
-            Map map = mapGenerator.GenerateMap(container, mapLayoutNoise, groundFeaturesLayoutNoise, mountainFeaturesLayoutNoise); container.setMap(map);
+            Map map = mapGenerator.GenerateMap(container, mapLayoutNoise, groundFeaturesLayoutNoise, mountainFeaturesLayoutNoise);
+            container.setMap(map);
         }
-     
+
+        // Second pass to fill in overhang
+        foreach(MapContainer container in mapsManager.mapContainers) {
+            container.UpdateMapOverhang();
+        }
+
         grid.gameObject.transform.position = mapsManager.transform.position;
         //grid.gridWorldSize = new Vector2(map.mapWidth * mapContainer.gameObject.transform.localScale.x, map.mapHeight * mapContainer.gameObject.transform.localScale.z);
 

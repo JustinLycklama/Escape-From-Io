@@ -53,6 +53,14 @@ public class TaskQueueManager : MonoBehaviour
         }
     }
 
+    // If a unit cannot handle a task, he can put it back
+    public void PutBackTask(MasterGameTask task) {
+        task.assignedUnit = null;
+
+        taskListMap[task.actionType].Insert(0, task);
+        NotifyDelegates(task.actionType);
+    }
+
     public void QueueTask(MasterGameTask task) {
         task.assignedUnit = null;
 
@@ -81,8 +89,8 @@ public class TaskQueueManager : MonoBehaviour
         NotifyDelegates(task.actionType);
     }
 
-    public MasterGameTask GetNextDoableTask(Unit unit) {
-        return getNextAvailableFromList(taskListMap[unit.primaryActionType], unit);
+    public MasterGameTask GetNextDoableTask(Unit unit, HashSet<int> refuseTaskList = null) {
+        return getNextAvailableFromList(taskListMap[unit.primaryActionType], unit, refuseTaskList);
 
         //switch(unit.primaryActionType) {
         //    case MasterGameTask.ActionType.Mine:
@@ -96,11 +104,16 @@ public class TaskQueueManager : MonoBehaviour
         //return null;
     }
 
-    private MasterGameTask getNextAvailableFromList(List<MasterGameTask> taskList, Unit unit) {
+    private MasterGameTask getNextAvailableFromList(List<MasterGameTask> taskList, Unit unit, HashSet<int> refuseTaskList = null) {
         float shortestDistance = float.MaxValue;
         MasterGameTask shortestTask = null;
 
         foreach(MasterGameTask masterTask in taskList) {
+
+            if (refuseTaskList != null && refuseTaskList.Contains(masterTask.taskNumber)) {
+                continue;
+            }
+
             if(masterTask.SatisfiesStartRequirements()) {
 
                 if(masterTask.childGameTasks[0].pathRequestTargetType != PathRequestTargetType.Unknown) {

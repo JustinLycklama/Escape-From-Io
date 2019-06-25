@@ -15,16 +15,34 @@ public class MapsManager : MonoBehaviour {
     public List<MapContainer> mapContainers;
     public MapContainer[,] mapContainer2d;
 
+    private List<MapContainer> activeContainers;
+
     List<TerrainUpdateDelegate> terrainUpdateDelegates;
 
     void Awake() {
         mapContainers = new List<MapContainer>();
+        activeContainers = new List<MapContainer>();
         terrainUpdateDelegates = new List<TerrainUpdateDelegate>();
     }
 
-    //public MapContainer[] GetMapContainers() {
-    //    return mapContainers.ToArray();
-    //}
+    // Manage Visible Maps
+    private void Update() {
+        Plane[] planes = GeometryUtility.CalculateFrustumPlanes(Camera.main);
+
+        foreach(MapContainer container in mapContainers) {
+            if(GeometryUtility.TestPlanesAABB(planes, container.meshRenderer.bounds)) {
+                if(!activeContainers.Contains(container)) {
+                    container.gameObject.SetActive(true);
+                    activeContainers.Add(container);
+                }
+            } else {
+                if (activeContainers.Contains(container)) {
+                    container.gameObject.SetActive(false);
+                    activeContainers.Remove(container);
+                }
+            }
+        }      
+    }
 
     public void InitializeMaps(int horizontalMaps, int verticalMaps) {
         Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();
@@ -45,10 +63,10 @@ public class MapsManager : MonoBehaviour {
         float mapEdgeX = mapsBoundaries.x - (mapsBoundaries.width / 2f);
         float mapEdgeY = mapsBoundaries.y - (mapsBoundaries.height / 2f);
 
-        for(int x = 0; x < horizontalMaps; x++) {        
-            for(int y = 0; y < verticalMaps; y++) {               
+        for(int x = 0; x < horizontalMaps; x++) {
+            for(int y = 0; y < verticalMaps; y++) {
                 // We need to create a Map Rect in MAPS MANAGER SPACE
-                Vector2 mapPoint = new Vector2(mapEdgeX + (mapWidth * x) , mapEdgeY + (mapHeight * (verticalMaps - 1 - y)));                
+                Vector2 mapPoint = new Vector2(mapEdgeX + (mapWidth * x), mapEdgeY + (mapHeight * (verticalMaps - 1 - y)));
                 Rect mapRect = new Rect(mapPoint, new Vector2(mapWidth, mapHeight));
 
                 GameObject mapContainerObject = new GameObject();
@@ -67,6 +85,43 @@ public class MapsManager : MonoBehaviour {
 
                 mapContainer2d[x, y] = mapContainer;
                 mapContainers.Add(mapContainer);
+            }
+        }
+
+        // Second pass to setup map neibours
+        for(int x = 0; x < horizontalMaps; x++) {
+            for(int y = 0; y < verticalMaps; y++) {
+                if (x > 0) {
+                    mapContainer2d[x, y].neighbours.leftMap = mapContainer2d[x - 1, y];
+                }
+
+                //if (x < horizontalMaps - 1) {
+                //    mapContainer2d[x, y].neighbours.rightMap = mapContainer2d[x + 1, y];
+                //}
+
+                if (y > 0) {
+                    mapContainer2d[x, y].neighbours.topMap = mapContainer2d[x, y - 1];
+
+                    if(x > 0) {
+                        mapContainer2d[x, y].neighbours.topLeftMap = mapContainer2d[x - 1, y - 1];
+                    }
+
+                    if(x < horizontalMaps - 1) {
+                        mapContainer2d[x, y].neighbours.topRightMap = mapContainer2d[x + 1, y - 1];
+                    }
+                }
+
+                //if (y < verticalMaps - 1) {
+                //    mapContainer2d[x, y].neighbours.bottomMap = mapContainer2d[x, y + 1];
+
+                //    if(x > 0) {
+                //        mapContainer2d[x, y].neighbours.bottomLeftMap = mapContainer2d[x - 1, y + 1];
+                //    }
+
+                //    if(x < horizontalMaps - 1) {
+                //        mapContainer2d[x, y].neighbours.bottomRightMap = mapContainer2d[x + 1, y + 1];
+                //    }
+                //}               
             }
         }
     }

@@ -182,7 +182,7 @@ public class MapGenerator : MonoBehaviour {
         int featuresWidth = groundFeaturesMap.GetLength(0);
         int featuresHeight = groundFeaturesMap.GetLength(1);
 
-        int dipRadius = 2;
+        int dipRadius = 3;
 
         float[,] fullMap = new float[featuresWidth, featuresHeight];
         for(int y = 0; y < featuresWidth; y++) {
@@ -211,18 +211,21 @@ public class MapGenerator : MonoBehaviour {
                 fullMap[x, y] = SampleAtXY(x, y, layoutMap, groundFeaturesMap, mountainFeaturesMap, terrainMap);
 
                 for(int i = 0; i < dipRadius; i++) {
+
+                    float baseline = thisTerrainType.noiseBaseline * (dipRadius - (i + 1)) / dipRadius;                    
+
                     // Left
-                    if ((sampleX - 1 == 0) || (sampleX - 1 >= 0 && thisTerrainType.noiseBaseline > terrainMap[sampleX - 1, sampleY].noiseBaseline)) {
+                    if((sampleX == 0) || (sampleX - 1 >= 0 && thisTerrainType.noiseBaseline > terrainMap[sampleX - 1, sampleY].noiseBaseline)) {
                         if (distanceToEdgeX == i) {
-                            fullMap[x, y] *= 0.30f * (i + 1);
+                            fullMap[x, y] = baseline + (fullMap[x, y] * ((i + 1)) / dipRadius);
                             continue;
                         }
                     }
 
                     // Top
-                    if((sampleY - 1 == 0) || (sampleY - 1 >= 0 && thisTerrainType.noiseBaseline > terrainMap[sampleX, sampleY - 1].noiseBaseline)) {
+                    if((sampleY == 0) || (sampleY - 1 >= 0 && thisTerrainType.noiseBaseline > terrainMap[sampleX, sampleY - 1].noiseBaseline)) {
                         if(distanceToEdgeY == i) {
-                            fullMap[x, y] *= 0.30f * (i + 1);
+                            fullMap[x, y] = baseline + (fullMap[x, y] * ((i + 1)) / dipRadius);
                             continue;
                         }
                     }
@@ -230,7 +233,7 @@ public class MapGenerator : MonoBehaviour {
                     // Right
                     if( (sampleX + 1 == terrainMap.GetLength(0)) || (sampleX + 1 < terrainMap.GetLength(0) && thisTerrainType.noiseBaseline > terrainMap[sampleX + 1, sampleY].noiseBaseline)) {
                         if((featuresPerLayoutPerAxis - distanceToEdgeX - 1) == i) {
-                            fullMap[x, y] *= 0.30f * (i + 1);
+                            fullMap[x, y] = baseline + (fullMap[x, y] * ((i + 1)) / dipRadius);
                             continue;
                         }
                     }
@@ -238,8 +241,8 @@ public class MapGenerator : MonoBehaviour {
                     //// Bottom
                     if((sampleY + 1 == terrainMap.GetLength(1)) ||(sampleY + 1 < terrainMap.GetLength(1) && thisTerrainType.noiseBaseline > terrainMap[sampleX, sampleY + 1].noiseBaseline)) {
                         if(featuresPerLayoutPerAxis - distanceToEdgeY - 1 == i) {
-                            fullMap[x, y] *= 0.30f * (i + 1);
-                        continue;
+                            fullMap[x, y] = baseline + (fullMap[x, y] * ((i + 1)) / dipRadius);
+                            continue;
                         }
                     }
                 }

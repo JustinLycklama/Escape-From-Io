@@ -13,17 +13,17 @@
 
 		protected override void Update () {
 
-			Vector3 mousePos = GetMouseWorldPosition(transform.position, Vector3.up);
-			Quaternion aimRot = Quaternion.RotateTowards(
-				transform.rotation,
-				Quaternion.LookRotation(
-					mousePos - transform.position,
-					Vector3.up
-				),
-				Time.deltaTime * RotateSpeed
-			);
+			//Vector3 mousePos = GetMouseWorldPosition(transform.position, Vector3.up);
+			//Quaternion aimRot = Quaternion.RotateTowards(
+			//	transform.rotation,
+			//	Quaternion.LookRotation(
+			//		mousePos - transform.position,
+			//		Vector3.up
+			//	),
+			//	Time.deltaTime * RotateSpeed
+			//);
 
-			Rotate(aimRot.eulerAngles.y);
+			//Rotate(aimRot.eulerAngles.y);
 
 			base.Update();
 

@@ -39,7 +39,7 @@
 		protected virtual void Update () {
 
 			// Rot
-			transform.rotation = Quaternion.Euler(0f, AimRotationY, 0f);
+			//transform.rotation = Quaternion.Euler(0f, AimRotationY, 0f);
 
 			// Clamp
 			float localY = Mathf.Repeat(transform.localRotation.eulerAngles.y + 180f, 360f) - 180f;
