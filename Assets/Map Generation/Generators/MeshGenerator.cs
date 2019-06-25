@@ -16,9 +16,9 @@ public static class MeshGenerator {
         for (int y = 0; y < height; y++) {
 
             // If we are on a y-row that needs duplicates, do the set of non-triangle verticies first
-            if((y + 1) % featuresPerLayoutPerAxis == 0) {
-                DoAllXFor(y, topLeftX, topLeftZ, width, height, heightMap, meshData, featuresPerLayoutPerAxis, false);
-            }
+            //if((y + 1) % featuresPerLayoutPerAxis == 0) {
+            //    DoAllXFor(y, topLeftX, topLeftZ, width, height, heightMap, meshData, featuresPerLayoutPerAxis, false);
+            //}
 
             DoAllXFor(y, topLeftX, topLeftZ, width, height, heightMap, meshData, featuresPerLayoutPerAxis, true);
         }
@@ -55,7 +55,7 @@ public static class MeshGenerator {
                 // On the tile edge, create two sets of verticies in the same spot
 
                 // Add a closing set of verticies to finish off the tile. 
-                meshData.addVertex(vertex, uv, false);
+                //meshData.addVertex(vertex, uv, false);
             }
 
             meshData.addVertex(vertex, uv, hasTriangleAssociatedToVertex);
@@ -63,6 +63,23 @@ public static class MeshGenerator {
     }
 
     public static void UpdateTerrainMesh(MeshData meshData, float[,] heightMap, int featuresPerLayoutPerAxis, LayoutCoordinate layoutCoordinate) {
+        // TODO: Optimize Terraform
+        for(int y = 0; y < featuresPerLayoutPerAxis; y++) {
+            int sampleY = layoutCoordinate.y * featuresPerLayoutPerAxis + y;
+            int meshPositionY = sampleY + 1;
+
+            for(int x = 0; x < featuresPerLayoutPerAxis; x++) {
+                int sampleX = layoutCoordinate.x * featuresPerLayoutPerAxis + x;
+                int meshPositionX = sampleX + 1;
+
+                float sampledHeight = heightMap[sampleX, sampleY];
+
+                meshData.EditHeight(sampledHeight, meshPositionX, meshPositionY);
+            }
+        } 
+    }
+
+    public static void UpdateTerrainMeshExtraVerticies(MeshData meshData, float[,] heightMap, int featuresPerLayoutPerAxis, LayoutCoordinate layoutCoordinate) {
         // TODO: Optimize Terraform
         for(int y = 0; y < featuresPerLayoutPerAxis; y++) {
             int sampleY = layoutCoordinate.y * featuresPerLayoutPerAxis + y;
@@ -129,7 +146,7 @@ public static class MeshGenerator {
                 finalSampleHeight = neibours.leftMap.map.getHeightAt(coordinate);
             }
 
-            if (y == height && neibours.bottomLeftMap != null ) {
+            if(y == height && neibours.bottomLeftMap != null) {
                 MapCoordinate coordinate = new MapCoordinate(neibours.bottomLeftMap.map.mapWidth - 1, 0, neibours.bottomLeftMap);
                 finalSampleHeight = neibours.bottomLeftMap.map.getHeightAt(coordinate);
             }
@@ -138,29 +155,29 @@ public static class MeshGenerator {
         }
 
         // Right edge
-       /* x = width - 1;
+        /*x = width - 1;
 
-        for(y = 0; y < height; y++) {
-            float finalSampleHeight = 0;
+         for(y = 0; y < height; y++) {
+             float finalSampleHeight = 0;
 
-            if(y == 0 && neibours.topRightMap != null) {
-                MapCoordinate coordinate = new MapCoordinate(0, neibours.topRightMap.map.mapHeight - 1, neibours.topRightMap);
-                finalSampleHeight = neibours.topRightMap.map.getHeightAt(coordinate);
-            }
+             if(y == 0 && neibours.topRightMap != null) {
+                 MapCoordinate coordinate = new MapCoordinate(0, neibours.topRightMap.map.mapHeight - 1, neibours.topRightMap);
+                 finalSampleHeight = neibours.topRightMap.map.getHeightAt(coordinate);
+             }
 
-            if(y > 0 && y < height - 1 && neibours.rightMap != null) {
-                MapCoordinate coordinate = new MapCoordinate(0, y - 1, neibours.rightMap);
-                finalSampleHeight = neibours.rightMap.map.getHeightAt(coordinate);
-            }
+             if(y > 0 && y < height - 1 && neibours.rightMap != null) {
+                 MapCoordinate coordinate = new MapCoordinate(0, y - 1, neibours.rightMap);
+                 finalSampleHeight = neibours.rightMap.map.getHeightAt(coordinate);
+             }
 
-            if(y == height && neibours.bottomRightMap != null) {
-                MapCoordinate coordinate = new MapCoordinate(0, 0, neibours.bottomRightMap);
-                finalSampleHeight = neibours.bottomRightMap.map.getHeightAt(coordinate);
-            }
+             if(y == height && neibours.bottomRightMap != null) {
+                 MapCoordinate coordinate = new MapCoordinate(0, 0, neibours.bottomRightMap);
+                 finalSampleHeight = neibours.bottomRightMap.map.getHeightAt(coordinate);
+             }
 
-            meshData.EditHeight(finalSampleHeight, x, y);
-        }
-        */
+             meshData.EditHeight(finalSampleHeight, x, y);
+         }*/
+         
         // Top 
 
         y = 0;
@@ -177,8 +194,8 @@ public static class MeshGenerator {
         }
 
         // Bottom
-        /*
-        y = height - 1;
+
+        /*y = height - 1;
 
         for(x = 1; x < width - 1; x++) {
             float finalSampleHeight = 0;
@@ -210,8 +227,8 @@ public class MeshData {
 
     public MeshData(int inputDataWidth, int inputDataHeight, int featuresPerLayoutPerAxis) {
 
-        this.meshWidth = inputDataWidth + inputDataWidth / featuresPerLayoutPerAxis;
-        this.meshHeight = inputDataHeight + inputDataHeight / featuresPerLayoutPerAxis;
+        this.meshWidth = inputDataWidth; // + inputDataWidth / featuresPerLayoutPerAxis;
+        this.meshHeight = inputDataHeight; // + inputDataHeight / featuresPerLayoutPerAxis;
 
         verticies = new Vector3[meshWidth * meshHeight];
         uvs = new Vector2[meshWidth * meshHeight];
@@ -221,6 +238,10 @@ public class MeshData {
     }
 
     public void addVertex(Vector3 vertex, Vector2 uv, bool hasTriangles) {
+
+        if (vertexIndex >= meshWidth * meshHeight) {
+            MonoBehaviour.print("yo");
+        }
 
         verticies[vertexIndex] = vertex;
         uvs[vertexIndex] = uv;

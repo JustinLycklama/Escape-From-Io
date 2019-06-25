@@ -94,7 +94,7 @@ public class Map : ActionableItem  {
 
         // If I have a map coordinate, should it be guarenteed to be on the map?
         if(coordinate.x < 0 || coordinate.y < 0 || coordinate.x >= mapWidth || coordinate.y >= mapHeight) {
-            return 0;
+            return 10;
         }
 
         // TODO: Triangle Calculations        
@@ -336,6 +336,13 @@ public class Map : ActionableItem  {
             UpdateUserActionsAt(terraformTarget.coordinate);
         }
 
+
+        TerraformHeightMap(terraformTarget);
+
+        return terraformTarget.percentage;
+    }
+
+    private void TerraformHeightMap(TerraformTarget terraformTarget) {
         float currentHeightAtCoordinate = Mathf.Lerp(terraformTarget.initialHeight, terraformTarget.heightTarget, terraformTarget.percentage);
 
         MapGenerator mapGenerator = Script.Get<MapGenerator>();
@@ -344,7 +351,30 @@ public class Map : ActionableItem  {
         MeshGenerator.UpdateTerrainMesh(meshData, finalHeightMap, featuresPerLayoutPerAxis, terraformTarget.coordinate);
         mapContainer.DrawMesh();
 
-        return terraformTarget.percentage;
+        int layoutWidth = (mapWidth / featuresPerLayoutPerAxis);
+        int layoutHeight = (mapHeight / featuresPerLayoutPerAxis);
+
+        // Update neibour overhang
+        if(terraformTarget.coordinate.x == layoutWidth - 1) {
+
+            if(terraformTarget.coordinate.y == 0) {
+                if(mapContainer.neighbours.topRightMap != null) {
+                    mapContainer.neighbours.topRightMap.UpdateMapOverhang();
+                }
+            } else if(terraformTarget.coordinate.y == layoutHeight - 1) {
+                if(mapContainer.neighbours.bottomRightMap != null) {
+                    mapContainer.neighbours.bottomRightMap.UpdateMapOverhang();
+                }
+            }
+
+            if (mapContainer.neighbours.rightMap != null) {
+                mapContainer.neighbours.rightMap.UpdateMapOverhang();
+            }
+        }
+
+        if (terraformTarget.coordinate.y == layoutHeight - 1 && mapContainer.neighbours.bottomMap != null) {
+            mapContainer.neighbours.bottomMap.UpdateMapOverhang();
+        }
     }
 
     /*

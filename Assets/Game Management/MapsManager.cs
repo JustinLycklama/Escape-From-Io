@@ -95,9 +95,9 @@ public class MapsManager : MonoBehaviour {
                     mapContainer2d[x, y].neighbours.leftMap = mapContainer2d[x - 1, y];
                 }
 
-                //if (x < horizontalMaps - 1) {
-                //    mapContainer2d[x, y].neighbours.rightMap = mapContainer2d[x + 1, y];
-                //}
+                if(x < horizontalMaps - 1) {
+                    mapContainer2d[x, y].neighbours.rightMap = mapContainer2d[x + 1, y];
+                }
 
                 if (y > 0) {
                     mapContainer2d[x, y].neighbours.topMap = mapContainer2d[x, y - 1];
@@ -111,17 +111,17 @@ public class MapsManager : MonoBehaviour {
                     }
                 }
 
-                //if (y < verticalMaps - 1) {
-                //    mapContainer2d[x, y].neighbours.bottomMap = mapContainer2d[x, y + 1];
+                if(y < verticalMaps - 1) {
+                    mapContainer2d[x, y].neighbours.bottomMap = mapContainer2d[x, y + 1];
 
-                //    if(x > 0) {
-                //        mapContainer2d[x, y].neighbours.bottomLeftMap = mapContainer2d[x - 1, y + 1];
-                //    }
+                    if(x > 0) {
+                        mapContainer2d[x, y].neighbours.bottomLeftMap = mapContainer2d[x - 1, y + 1];
+                    }
 
-                //    if(x < horizontalMaps - 1) {
-                //        mapContainer2d[x, y].neighbours.bottomRightMap = mapContainer2d[x + 1, y + 1];
-                //    }
-                //}               
+                    if(x < horizontalMaps - 1) {
+                        mapContainer2d[x, y].neighbours.bottomRightMap = mapContainer2d[x + 1, y + 1];
+                    }
+                }
             }
         }
     }
