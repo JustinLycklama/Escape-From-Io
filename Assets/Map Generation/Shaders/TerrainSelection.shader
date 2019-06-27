@@ -120,13 +120,64 @@
 			return xProjection + yProjection + zProjection;
 		}
 
+		void sampleAndStrength(float origCoord, int sizeInDimension, out int sampleCoord, out float drawStrength) {
+			const float overrideLine = 1 / tileSize; // Point where higher terrain takes complete precedence
 
+			int floorCoord = floor(origCoord);
 
+			sampleCoord = floorCoord;
+			drawStrength = 1;
 
+			if (origCoord - floorCoord < overrideLine && floorCoord > 0) {
+				sampleCoord = floorCoord - 1;
+				drawStrength = (origCoord - floorCoord) / overrideLine;
+			}
+
+			if ((floorCoord + 1) - origCoord < overrideLine && floorCoord < sizeInDimension - 1) {
+				sampleCoord = floorCoord + 1;
+				drawStrength = ((floorCoord + 1) - origCoord) / overrideLine;
+			}
+		}
+
+		/*float3 axisBlendColor(float origCoord, float otherCoord, int sizeInDimension, bool isX, float3 worldPos, float3 blendAxes) {
+			const float overrideLine = 1 / tileSize; // Point where higher terrain takes complete precedence
+
+			int floorCoord = floor(origCoord);
+			int floorOther = floor(otherCoord);
+
+			int sampleCoord;
+			float drawStrength;
+
+			sampleAndStrength(origCoord, sizeInDimension, sampleCoord, drawStrength);
+
+			// The color from our terrain at this index
+			int baseIndex = (isX) ? floorOther * sizeInDimension + floorCoord : floorCoord * sizeInDimension + floorOther;
+			float3 baseColor = triplanar(worldPos, 100, blendAxes, layoutTextures[baseIndex]);
+
+			// The color to blend from adjacent index
+			int sampleIndex = (isX) ? floorOther * sizeInDimension + sampleCoord : sampleCoord * sizeInDimension + floorOther;								
+			float3 otherColor = triplanar(worldPos, 100, blendAxes, layoutTextures[sampleIndex]);
+
+			// Set drawstrength to a value between 0.5 and 1
+			drawStrength = (drawStrength + 1) / 2;
+
+			// We are overridden by adjacent
+			if (indexPriority[layoutTextures[sampleIndex]] > indexPriority[layoutTextures[baseIndex]]) {
+				// We are overridden by adjacent. HEAVILY favour the adjacent color
+				drawStrength = drawStrength * drawStrength * drawStrength;
+			}
+			// We Override Adjacent
+			else if (indexPriority[layoutTextures[sampleIndex]] < indexPriority[layoutTextures[baseIndex]]) {
+				// We override the adjacent, do not take any samples from them
+				drawStrength = 1;
+			}
+
+			// If we neither override or are overriden by adjacent, drawstrength will blend the two evenly in the center
+			return (drawStrength * baseColor) + ((1 - drawStrength) * otherColor);
+		}*/
 
 
 		void surf(Input IN, inout SurfaceOutput o) {
-			const float overrideLine = 1 / tileSize; // Point where higher terrain takes complete precedence
 		
 			float x = IN.layoutCoordinate.x;
 			float y = IN.layoutCoordinate.y;
@@ -137,53 +188,68 @@
 			float3 blendAxes = abs(IN.worldNormal);
 			blendAxes /= blendAxes.x + blendAxes.y + blendAxes.z;
 
-			// Check for override
-			//bool override = false;
-
-			int sampleX = floorX;
-			int sampleY = floorY;
-
+			// Sample
+			int sampleCoordX = floorX;
+			int sampleCoordY = floorY;
 			float drawStrengthX = 1;
 			float drawStrengthY = 1;
 
-			if (x - floorX < overrideLine && floorX > 0) {
-				sampleX = floorX - 1;
-				drawStrengthX = (x - floorX) / overrideLine;
-			}
+			sampleAndStrength(x, mapLayoutWidth, sampleCoordX, drawStrengthX);
+			sampleAndStrength(y, mapLayoutHeight, sampleCoordY, drawStrengthY);
 
-			if ((floorX + 1) - x < overrideLine && floorX < mapLayoutWidth - 1) {
-				sampleX = floorX + 1;
-				drawStrengthX = ((floorX + 1) - x) / overrideLine;
-			}
+			// We cannot sample a corner layout. Choose the smaller draw strength
+			if (sampleCoordX != floorX && sampleCoordY != floorY) {
+				if (drawStrengthX == drawStrengthY) {
 
-			// Set drawstrength to a value between 0.5 and 1
-			drawStrengthX = (drawStrengthX + 1) / 2;
+				}
 
-		
-			// We are overridden by adjacent
-			if (indexPriority[layoutTextures[sampleIndex]] > indexPriority[layoutTextures[baseIndex]]) {
-				// We are overridden by adjacent. HEAVILY favour the adjacent color
-				drawStrengthX = drawStrengthX * drawStrengthX * drawStrengthX;
+				else if (drawStrengthY < drawStrengthX) {
+					sampleCoordX = floorX;
+				}
+				else {
+					sampleCoordY = floorY;
+				}
 			}
-			// We Override Adjacent
-			else if (indexPriority[layoutTextures[sampleIndex]] < indexPriority[layoutTextures[baseIndex]]) {
-				// We override the adjacent, do not take any samples from them
-				drawStrengthX = 1;				
-			}
-
-			// If we neither override or are overriden by adjacent, drawstrength will blend the two evenly in the center
 
 			// The color from our terrain at this index
 			int baseIndex = floorY * mapLayoutWidth + floorX;
 			float3 baseColor = triplanar(IN.worldPos, 100, blendAxes, layoutTextures[baseIndex]);
-			
+
 			// The color to blend from adjacent index
-			int sampleIndex = sampleY * mapLayoutWidth + sampleX;
-			float3 otherXColor = triplanar(IN.worldPos, 100, blendAxes, layoutTextures[sampleIndex]);
+			int sampleIndex = sampleCoordY * mapLayoutWidth + sampleCoordX;
+			float3 otherColor = triplanar(IN.worldPos, 100, blendAxes, layoutTextures[sampleIndex]);
 
-			o.Albedo = (drawStrengthX * baseColor) + ((1 - drawStrengthX) * otherXColor); 
+			// Set drawstrength to a value between 0.5 and 1
+			drawStrengthX = (drawStrengthX + 1) / 2;
+			drawStrengthY = (drawStrengthY + 1) / 2;
 
+			// We are overridden by adjacent
+			if (indexPriority[layoutTextures[sampleIndex]] > indexPriority[layoutTextures[baseIndex]]) {
+				// We are overridden by adjacent. HEAVILY favour the adjacent color
+				drawStrengthX = drawStrengthX * drawStrengthX * drawStrengthX;
+				drawStrengthY = drawStrengthY * drawStrengthY * drawStrengthY;
+			}
+			// We Override Adjacent
+			else if (indexPriority[layoutTextures[sampleIndex]] < indexPriority[layoutTextures[baseIndex]]) {
+				// We override the adjacent, do not take any samples from them
+				drawStrengthX = 1;
+				drawStrengthY = 1;
+			}
+
+			float drawStrength = drawStrengthX;
+			if (drawStrengthY < drawStrength) {
+				drawStrength = drawStrengthY;
+			}
+
+			// If we neither override or are overriden by adjacent, drawstrength will blend the two evenly in the center
+			o.Albedo = (drawStrength * baseColor) + ((1 - drawStrength) * otherColor);
+
+
+	/*		float3 xColor = axisBlendColor(x, y, mapLayoutWidth, true, IN.worldPos, blendAxes);
+			float3 yColor = axisBlendColor(y, x, mapLayoutHeight, false, IN.worldPos, blendAxes);*/
 		
+			//o.Albedo = axisBlendColor(y, x, mapLayoutHeight, false, IN.worldPos, blendAxes);
+
 			//if (IN.isSelected) {
 			//	o.Albedo *= float3(0, 1, 1);
 			//}
