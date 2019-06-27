@@ -52,6 +52,8 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate
         if (withColliders == true) {
             AddBoxColliders();
         }
+
+        SetupMaterialShader();
     }
 
     public void DrawMesh() {
@@ -124,6 +126,42 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate
 
         BoxCollider boxCollider = boxColliderArray[layoutCoordinate.x, (map.mapHeight / map.featuresPerLayoutPerAxis) - 1 - layoutCoordinate.y];
         boxCollider.size = new Vector3(boxSizeX, map.getHeightAt(mapCoordinate) * 2, boxSizeZ);
+    }
+
+    private void SetupMaterialShader() {
+        Constants constants = Script.Get<Constants>();
+        Material mapMaterial = GetComponent<MeshRenderer>().sharedMaterial;
+
+        mapMaterial.SetFloat("tileSize", constants.featuresPerLayoutPerAxis);
+
+        mapMaterial.SetFloat("mapLayoutWidth", constants.layoutMapWidth);
+        mapMaterial.SetFloat("mapLayoutHeight", constants.layoutMapHeight);
+
+
+        mapMaterial.SetFloat("mapXOffsetLow", 0 - (constants.layoutMapWidth * constants.featuresPerLayoutPerAxis / 2f));
+        mapMaterial.SetFloat("mapXOffsetHigh", constants.layoutMapWidth - (constants.layoutMapWidth * constants.featuresPerLayoutPerAxis / 2f));
+
+        mapMaterial.SetFloat("mapYOffsetLow", 0 - (constants.layoutMapHeight * constants.featuresPerLayoutPerAxis / 2f));
+        mapMaterial.SetFloat("mapYOffsetHigh", constants.layoutMapHeight - (constants.layoutMapHeight * constants.featuresPerLayoutPerAxis / 2f));
+
+        float[] textureIndexList = new float[constants.layoutMapWidth * constants.layoutMapHeight];
+        TextureGenerator texGen = Script.Get<TextureGenerator>();
+
+        for(int y = 0; y < constants.layoutMapHeight; y++) {
+            for (int x = 0; x < constants.layoutMapWidth; x++) {
+
+                LayoutCoordinate layoutCoordinate = new LayoutCoordinate(x, y, this);
+                TerrainType terrain = map.GetTerrainAt(layoutCoordinate);
+
+                textureIndexList[y * constants.layoutMapWidth + x] = texGen.RegionTypeTextureIndex(terrain.regionType);
+            }
+        }
+
+        mapMaterial.SetFloatArray("layoutTextures", textureIndexList);
+        mapMaterial.SetFloatArray("indexPriority", texGen.TexturePriorityList());
+
+        Texture2DArray texturesArray = texGen.GenerateTextureArray();
+        mapMaterial.SetTexture("baseTextures", texturesArray);
     }
 
     /*

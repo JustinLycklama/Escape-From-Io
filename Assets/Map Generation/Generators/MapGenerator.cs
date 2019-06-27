@@ -19,6 +19,13 @@ public struct TerrainType {
     public bool plateau;
     public bool plateauAtBase;
 
+    public Texture2D texture;
+    public Color tint;
+    [Range(0, 1)]
+    public float tintStrength;
+    public float textureScale;
+    public int priority;
+
     public override bool Equals(object obj) {
         return base.Equals(obj);
     }
@@ -127,10 +134,12 @@ public class MapGenerator : MonoBehaviour {
 
         NormalizeMap(noiseMap);
 
+        TextureGenerator textureGenerator = Script.Get<TextureGenerator>();
+
         Map map = new Map(noiseMap, layoutNoiseMap, groundFeaturesNoiseMap, mountainFeaturesNoiseMap,
             featuresPerLayoutPerAxis,
             MeshGenerator.GenerateTerrainMesh(noiseMap, featuresPerLayoutPerAxis),
-            TextureGenerator.TextureFromColorMap(CreateColorMapWithTerrain(noiseMap, terrainMap, mapContainer), noiseMapWidth + 2, noiseMapHeight + 2),
+            textureGenerator.TextureFromColorMap(CreateColorMapWithTerrain(noiseMap, terrainMap, mapContainer), noiseMapWidth + 2, noiseMapHeight + 2),
             terrainMap
             );
 
@@ -138,16 +147,16 @@ public class MapGenerator : MonoBehaviour {
         switch (drawMode) {
             case DrawMode.NoiseMap:
                 if (debugDisplay != null) {
-                    debugDisplay.DrawTexture(TextureGenerator.TextureFromNoiseMap(noiseMap));
-                    debugDisplay.DrawTextures(TextureGenerator.TextureFromNoiseMap(layoutNoiseMap), TextureGenerator.TextureFromNoiseMap(groundFeaturesNoiseMap));
+                    debugDisplay.DrawTexture(textureGenerator.TextureFromNoiseMap(noiseMap));
+                    debugDisplay.DrawTextures(textureGenerator.TextureFromNoiseMap(layoutNoiseMap), textureGenerator.TextureFromNoiseMap(groundFeaturesNoiseMap));
                 }                
                 break;
             case DrawMode.ColorMap:
                 if(debugDisplay != null) {
 
-                    debugDisplay.DrawTexture(TextureGenerator.TextureFromColorMap(CreateColorMap(noiseMap), noiseMap.GetLength(0), noiseMap.GetLength(1)));
-                    debugDisplay.DrawTextures(TextureGenerator.TextureFromColorMap(CreateColorMap(layoutNoiseMap), layoutNoiseMap.GetLength(0), layoutNoiseMap.GetLength(1)),
-                        TextureGenerator.TextureFromColorMap(CreateColorMap(groundFeaturesNoiseMap), groundFeaturesNoiseMap.GetLength(0), groundFeaturesNoiseMap.GetLength(1))
+                    debugDisplay.DrawTexture(textureGenerator.TextureFromColorMap(CreateColorMap(noiseMap), noiseMap.GetLength(0), noiseMap.GetLength(1)));
+                    debugDisplay.DrawTextures(textureGenerator.TextureFromColorMap(CreateColorMap(layoutNoiseMap), layoutNoiseMap.GetLength(0), layoutNoiseMap.GetLength(1)),
+                        textureGenerator.TextureFromColorMap(CreateColorMap(groundFeaturesNoiseMap), groundFeaturesNoiseMap.GetLength(0), groundFeaturesNoiseMap.GetLength(1))
                         );
                 }
                 break;
@@ -155,8 +164,8 @@ public class MapGenerator : MonoBehaviour {
                 mapContainer.setMap(map, false);
 
                 if(debugDisplay != null) {
-                        debugDisplay.DrawMeshes(MeshGenerator.GenerateTerrainMesh(layoutNoiseMap, 1), TextureGenerator.TextureFromColorMap(CreateColorMap(layoutNoiseMap), layoutNoiseMap.GetLength(0), layoutNoiseMap.GetLength(1)),
-                        MeshGenerator.GenerateTerrainMesh(groundFeaturesNoiseMap, 1), TextureGenerator.TextureFromColorMap(CreateColorMap(groundFeaturesNoiseMap), groundFeaturesNoiseMap.GetLength(0), groundFeaturesNoiseMap.GetLength(1))
+                        debugDisplay.DrawMeshes(MeshGenerator.GenerateTerrainMesh(layoutNoiseMap, 1), textureGenerator.TextureFromColorMap(CreateColorMap(layoutNoiseMap), layoutNoiseMap.GetLength(0), layoutNoiseMap.GetLength(1)),
+                        MeshGenerator.GenerateTerrainMesh(groundFeaturesNoiseMap, 1), textureGenerator.TextureFromColorMap(CreateColorMap(groundFeaturesNoiseMap), groundFeaturesNoiseMap.GetLength(0), groundFeaturesNoiseMap.GetLength(1))
                         );
                 }
                 break;

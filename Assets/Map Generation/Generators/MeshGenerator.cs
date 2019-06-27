@@ -239,10 +239,6 @@ public class MeshData {
 
     public void addVertex(Vector3 vertex, Vector2 uv, bool hasTriangles) {
 
-        if (vertexIndex >= meshWidth * meshHeight) {
-            MonoBehaviour.print("yo");
-        }
-
         verticies[vertexIndex] = vertex;
         uvs[vertexIndex] = uv;
 

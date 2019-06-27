@@ -65,7 +65,7 @@ public class Map : ActionableItem  {
         this.mountainFeaturesNoiseMap = mountainFeaturesNoiseMap;
 
         this.meshData = meshData;
-        this.meshTexture = meshTexture;
+        //this.meshTexture = meshTexture;
         this.terrainData = terrainData;
 
         int terrainWidth = terrainData.GetLength(0);
