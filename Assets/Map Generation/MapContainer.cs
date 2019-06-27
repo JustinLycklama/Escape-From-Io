@@ -68,6 +68,8 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate
 
     public void UpdateMapOverhang() {
         MeshGenerator.UpdateMeshOverhang(map.meshData, neighbours);
+
+        UpdateMaterialOverhangTextures();
         DrawMesh();
     }
 
@@ -128,14 +130,135 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate
         boxCollider.size = new Vector3(boxSizeX, map.getHeightAt(mapCoordinate) * 2, boxSizeZ);
     }
 
+    private void UpdateMaterialOverhangTextures() {
+        Constants constants = Script.Get<Constants>();
+        Material mapMaterial = GetComponent<MeshRenderer>().sharedMaterial;
+
+        float[] leftList = new float[constants.layoutMapHeight + 2];
+        float[] rightList = new float[constants.layoutMapHeight + 2];
+        float[] topList = new float[constants.layoutMapWidth + 2];
+        float[] bottomList = new float[constants.layoutMapWidth + 2];
+
+        TextureGenerator texGen = Script.Get<TextureGenerator>();
+
+        int mapWidthWithOverhang = constants.layoutMapWidth + 2;
+        int mapHeightWithOverhang = constants.layoutMapHeight + 2;
+
+        // Left side
+
+        // Left edge
+        int x = 0;
+        int y = 0;
+
+        for(y = 0; y < constants.layoutMapHeight + 2; y++) {
+            if(y == 0 && neighbours.topLeftMap != null) {
+                LayoutCoordinate coordinate = new LayoutCoordinate(constants.layoutMapWidth - 1, constants.layoutMapHeight - 1, neighbours.topLeftMap);
+
+                TerrainType terrain = neighbours.topLeftMap.map.GetTerrainAt(coordinate);
+                textureIndexList[y * mapWidthWithOverhang] = texGen.RegionTypeTextureIndex(terrain.regionType); 
+            }
+
+            if(y > 0 && y < constants.layoutMapHeight - 1 && neighbours.leftMap != null) {
+                LayoutCoordinate coordinate = new LayoutCoordinate(constants.layoutMapWidth - 1, (y - 1), neighbours.leftMap);
+
+                TerrainType terrain = neighbours.leftMap.map.GetTerrainAt(coordinate);
+                textureIndexList[y * mapWidthWithOverhang] = texGen.RegionTypeTextureIndex(terrain.regionType);
+            }
+
+            if(y == constants.layoutMapHeight + 1 && neighbours.bottomLeftMap != null) {
+                LayoutCoordinate coordinate = new LayoutCoordinate(constants.layoutMapWidth - 1, 0, neighbours.bottomLeftMap);
+
+                TerrainType terrain = neighbours.bottomLeftMap.map.GetTerrainAt(coordinate);
+                textureIndexList[y * mapWidthWithOverhang] = texGen.RegionTypeTextureIndex(terrain.regionType);
+            }
+        }
+
+        // Right edge
+        x = mapWidthWithOverhang - 1;
+
+        for(y = 0; y < constants.layoutMapHeight + 2; y++) {
+             if(y == 0 && neighbours.topRightMap != null) {
+                LayoutCoordinate coordinate = new LayoutCoordinate(0, constants.layoutMapHeight - 1, neighbours.topRightMap);
+
+                TerrainType terrain = neighbours.topRightMap.map.GetTerrainAt(coordinate);
+                textureIndexList[y + mapWidthWithOverhang + x] = texGen.RegionTypeTextureIndex(terrain.regionType);
+
+
+                //finalSampleHeight = neibours.topRightMap.map.getHeightAt(coordinate);
+             }
+
+             if(y > 0 && y < constants.layoutMapHeight + 1 && neighbours.rightMap != null) {
+                 LayoutCoordinate coordinate = new LayoutCoordinate(0, y - 1, neighbours.rightMap);
+
+                TerrainType terrain = neighbours.rightMap.map.GetTerrainAt(coordinate);
+                textureIndexList[y * mapWidthWithOverhang + x] = texGen.RegionTypeTextureIndex(terrain.regionType);
+            }
+
+             if(y == constants.layoutMapHeight + 1 && neighbours.bottomRightMap != null) {
+                LayoutCoordinate coordinate = new LayoutCoordinate(0, 0, neighbours.bottomRightMap);
+
+                TerrainType terrain = neighbours.bottomRightMap.map.GetTerrainAt(coordinate);
+                textureIndexList[y * mapWidthWithOverhang + x] = texGen.RegionTypeTextureIndex(terrain.regionType);
+            }
+
+         }
+
+
+        // Top 
+
+        y = 0;
+
+        for(x = 1; x < constants.layoutMapWidth + 1; x++) {
+            if(neighbours.topMap != null) {
+                LayoutCoordinate coordinate = new LayoutCoordinate(x - 1, constants.layoutMapHeight - 1, neighbours.topMap);
+
+                TerrainType terrain = neighbours.topMap.map.GetTerrainAt(coordinate);
+                textureIndexList[y * mapWidthWithOverhang + x] = texGen.RegionTypeTextureIndex(terrain.regionType);
+            }
+        }
+
+        // Bottom
+
+        y = mapHeightWithOverhang - 1;
+
+        for(x = 1; x < mapWidthWithOverhang - 1; x++) {
+            if(neighbours.bottomMap != null) {
+                LayoutCoordinate coordinate = new LayoutCoordinate(x - 1, 0, neighbours.bottomMap);
+
+                TerrainType terrain = neighbours.bottomMap.map.GetTerrainAt(coordinate);
+                textureIndexList[y * mapWidthWithOverhang + x] = texGen.RegionTypeTextureIndex(terrain.regionType);
+            }
+        }
+
+
+        mapMaterial.SetFloatArray("layoutTextures", textureIndexList);
+
+
+        //for(int y = 0; y < constants.layoutMapHeight; y++) {
+        //    for(int x = 0; x < constants.layoutMapWidth; x++) {
+
+        //        LayoutCoordinate layoutCoordinate = new LayoutCoordinate(x, y, this);
+        //        TerrainType terrain = map.GetTerrainAt(layoutCoordinate);
+
+        //        textureIndexList[y * constants.layoutMapWidth + x] = texGen.RegionTypeTextureIndex(terrain.regionType);
+        //    }
+        //}
+
+    }
+
+    float[] textureIndexList;
+
     private void SetupMaterialShader() {
         Constants constants = Script.Get<Constants>();
         Material mapMaterial = GetComponent<MeshRenderer>().sharedMaterial;
 
         mapMaterial.SetFloat("tileSize", constants.featuresPerLayoutPerAxis);
 
-        mapMaterial.SetFloat("mapLayoutWidth", constants.layoutMapWidth);
-        mapMaterial.SetFloat("mapLayoutHeight", constants.layoutMapHeight);
+        int mapWidthWithOverhang = constants.layoutMapWidth + 2;
+        int mapHeightWithOverhang = constants.layoutMapHeight + 2;
+
+        mapMaterial.SetFloat("mapLayoutWidth", mapWidthWithOverhang);
+        mapMaterial.SetFloat("mapLayoutHeight", mapHeightWithOverhang);
 
 
         mapMaterial.SetFloat("mapXOffsetLow", 0 - (constants.layoutMapWidth * constants.featuresPerLayoutPerAxis / 2f));
@@ -144,16 +267,21 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate
         mapMaterial.SetFloat("mapYOffsetLow", 0 - (constants.layoutMapHeight * constants.featuresPerLayoutPerAxis / 2f));
         mapMaterial.SetFloat("mapYOffsetHigh", constants.layoutMapHeight - (constants.layoutMapHeight * constants.featuresPerLayoutPerAxis / 2f));
 
-        float[] textureIndexList = new float[constants.layoutMapWidth * constants.layoutMapHeight];
+        textureIndexList = new float[mapWidthWithOverhang * mapHeightWithOverhang];
         TextureGenerator texGen = Script.Get<TextureGenerator>();
 
-        for(int y = 0; y < constants.layoutMapHeight; y++) {
-            for (int x = 0; x < constants.layoutMapWidth; x++) {
+        for(int y = 0; y < mapHeightWithOverhang; y++) {
+            for (int x = 0; x < mapWidthWithOverhang; x++) {
 
-                LayoutCoordinate layoutCoordinate = new LayoutCoordinate(x, y, this);
+                if (x == 0 || x == mapWidthWithOverhang - 1 || y == 0 || y == mapHeightWithOverhang - 1) {
+                    textureIndexList[y * mapWidthWithOverhang + x] = -1;
+                    continue;
+                }
+
+                LayoutCoordinate layoutCoordinate = new LayoutCoordinate(x - 1, y - 1, this);
                 TerrainType terrain = map.GetTerrainAt(layoutCoordinate);
 
-                textureIndexList[y * constants.layoutMapWidth + x] = texGen.RegionTypeTextureIndex(terrain.regionType);
+                textureIndexList[y * mapWidthWithOverhang + x] = texGen.RegionTypeTextureIndex(terrain.regionType);
             }
         }
 

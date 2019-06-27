@@ -17,7 +17,12 @@
 		// Use shader model 3.0 target, to get nicer looking lighting
 		#pragma target 3.0
 
-		float layoutTextures[20*20];	
+		float leftTextures[22];
+		float rightTextures[22];
+		float topTextures[22];
+		float bottomTextures[22];
+
+		float layoutTextures[22*22];	
 		float indexPriority[10];
 
 		float mapLayoutWidth;
@@ -33,6 +38,7 @@
 
 		UNITY_DECLARE_TEX2DARRAY(baseTextures);
 
+		float2 selectionIndex;
 
 		// Used as a bool. 0 is skip selection calculations
 		//float hasSelection;
@@ -43,6 +49,8 @@
 		//float selectedYOffsetLow;
 		//float selectedYOffsetHigh;
 
+		//sampler2D _MainTex;
+		//fixed4 _Color;
 
 		struct Input
 		{
@@ -54,13 +62,6 @@
 
 			// Custom
 			float2 layoutCoordinate;
-			//bool isSelected;
-
-			//bool isLand;
-			//float index;
-
-			//float coordX;
-			//float coordY;
 		};
 		
 		void vert(inout appdata_full v, out Input o) {
@@ -71,29 +72,7 @@
 			float layoutCoordinateX = ((vertex.x - mapXOffsetLow) / (tileSize));
 			float layoutCoordinateY = ((-vertex.z - mapYOffsetLow) / (tileSize));
 
-			o.layoutCoordinate = float2(layoutCoordinateX, layoutCoordinateY);
-
-
-
-				//o.coordX = layoutCoordinateX;
-				//o.coordY = layoutCoordinateY;
-
-				//int texturesIndex = layoutCoordinateY * mapLayoutWidth + layoutCoordinateX;
-
-				////o.index = texturesIndex;
-				//o.isLand = layoutTextures[texturesIndex];
-
-				//if ((vertex.x - mapXOffsetLow) % tileSize == 0 || (-vertex.z - mapYOffsetLow) % tileSize == 0) {
-				   // o.isLand = 0;
-				//}
-
-				//if (floor(((vertex.x - mapXOffsetLow) + 1) / tileSize) != layoutCoordinateX || floor(((-vertex.z - mapYOffsetLow) + 1) / tileSize) != layoutCoordinateY) {
-				   // o.isLand = 0;
-				//}
-
-				//if (floor(((vertex.x - mapXOffsetLow) - 1) / tileSize) != layoutCoordinateX || floor(((-vertex.z - mapYOffsetLow) - 1) / tileSize) != layoutCoordinateY) {
-				   // o.isLand = 0;
-				//}
+			o.layoutCoordinate = float2(layoutCoordinateX + 1, layoutCoordinateY + 1);
 
 
 				//if (hasSelection > 0.5) {
@@ -105,14 +84,16 @@
 				//}
 		}
 
-		sampler2D _MainTex;
-		fixed4 _Color;
-
 		float inverseLerp(float a, float b, float value) {
 			return saturate((value - a) / (b - a));
 		}
 
 		float3 triplanar(float3 worldPos, float scale, float3 blendAxes, int textureIndex) {
+
+			if (textureIndex == -1) {
+				textureIndex = 0; // Default to water
+			}
+
 			float3 scaledWorldPos = worldPos / scale;
 			float3 xProjection = UNITY_SAMPLE_TEX2DARRAY(baseTextures, float3(scaledWorldPos.y, scaledWorldPos.z, textureIndex)) * blendAxes.x;
 			float3 yProjection = UNITY_SAMPLE_TEX2DARRAY(baseTextures, float3(scaledWorldPos.x, scaledWorldPos.z, textureIndex)) * blendAxes.y;
@@ -232,7 +213,19 @@
 
 			// The color to blend from adjacent index
 			int sampleIndex = sampleCoordY * mapLayoutWidth + sampleCoordX;
-			float3 otherColor = triplanar(IN.worldPos, 100, blendAxes, layoutTextures[sampleIndex]);
+			float3 otherColor = float3(0, 0, 0);
+			
+			// Don't bother the blurr if there is nothing to blurr
+			if (drawStrengthX != 1 || drawStrengthY != 1) {
+				int textureIndex = layoutTextures[sampleIndex];
+				if (textureIndex != -1) {
+					otherColor = triplanar(IN.worldPos, 100, blendAxes, layoutTextures[sampleIndex]);
+				}
+				else {
+					drawStrengthX = 1;
+					drawStrengthY = 1;
+				}				
+			}
 
 			// Set drawstrength to a value between 0.5 and 1
 			drawStrengthX = (drawStrengthX + 1) / 2;
@@ -260,10 +253,6 @@
 			o.Albedo = (drawStrength * baseColor) + ((1 - drawStrength) * otherColor);
 
 
-	/*		float3 xColor = axisBlendColor(x, y, mapLayoutWidth, true, IN.worldPos, blendAxes);
-			float3 yColor = axisBlendColor(y, x, mapLayoutHeight, false, IN.worldPos, blendAxes);*/
-		
-			//o.Albedo = axisBlendColor(y, x, mapLayoutHeight, false, IN.worldPos, blendAxes);
 
 			//if (IN.isSelected) {
 			//	o.Albedo *= float3(0, 1, 1);
