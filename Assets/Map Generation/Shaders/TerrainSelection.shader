@@ -197,17 +197,32 @@
 			sampleAndStrength(x, mapLayoutWidth, sampleCoordX, drawStrengthX);
 			sampleAndStrength(y, mapLayoutHeight, sampleCoordY, drawStrengthY);
 
-			// We cannot sample a corner layout. Choose the smaller draw strength
+			// When sampling a corner, Choose the highest proity 
 			if (sampleCoordX != floorX && sampleCoordY != floorY) {
-				if (drawStrengthX == drawStrengthY) {
 
-				}
+				int sampleIndex = sampleCoordY * mapLayoutWidth + sampleCoordX;
+				int priority = indexPriority[layoutTextures[sampleIndex]];
 
-				else if (drawStrengthY < drawStrengthX) {
-					sampleCoordX = floorX;
-				}
-				else {
+				int firstSampleIndex = floorY * mapLayoutWidth + sampleCoordX;
+				int secondSampleIndex = sampleCoordY * mapLayoutWidth + floorX;
+
+				float savedSampleY = sampleCoordY;
+				if (priority < indexPriority[layoutTextures[firstSampleIndex]]) {
+					priority = indexPriority[layoutTextures[sampleIndex]];
 					sampleCoordY = floorY;
+				}
+
+				if (priority < indexPriority[layoutTextures[secondSampleIndex]]) {
+					sampleCoordY = savedSampleY;
+					sampleCoordX = floorX;
+					priority = indexPriority[layoutTextures[secondSampleIndex]];
+				}
+
+				// If we are still using the corner
+				if (priority == indexPriority[layoutTextures[sampleIndex]]) {
+					float combinedStrength = (drawStrengthX + drawStrengthY) / 2;
+					drawStrengthX = combinedStrength;
+					drawStrengthY = combinedStrength;
 				}
 			}
 
