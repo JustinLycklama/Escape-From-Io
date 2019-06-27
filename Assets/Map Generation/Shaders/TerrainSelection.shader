@@ -38,7 +38,8 @@
 
 		UNITY_DECLARE_TEX2DARRAY(baseTextures);
 
-		float2 selectionIndex;
+		float selectionX;
+		float selectionY;
 
 		// Used as a bool. 0 is skip selection calculations
 		//float hasSelection;
@@ -178,53 +179,105 @@
 			sampleAndStrength(x, mapLayoutWidth, sampleCoordX, drawStrengthX);
 			sampleAndStrength(y, mapLayoutHeight, sampleCoordY, drawStrengthY);
 
-			// When sampling a corner, Choose the highest proity 
+			// The color to blend from adjacent index
+			int baseIndex = floorY * mapLayoutWidth + floorX;
+			float3 baseColor = triplanar(IN.worldPos, 100, blendAxes, layoutTextures[baseIndex]);
+
+			// Is this tile selected
+			if (floorX - 1 == selectionX && floorY - 1 == selectionY) {
+				baseColor *= float3(0, 1, 1);
+			}
+
+			float3 otherColor = float3(0, 0, 0);
+			int highestSamplePriority = -1;
+
+			// When sampling a corner, merge the two options 
 			if (sampleCoordX != floorX && sampleCoordY != floorY) {
 
-				int sampleIndex = sampleCoordY * mapLayoutWidth + sampleCoordX;
-				int priority = indexPriority[layoutTextures[sampleIndex]];
+				//int sampleIndex = sampleCoordY * mapLayoutWidth + sampleCoordX;
+				//int priority = indexPriority[layoutTextures[sampleIndex]];
 
 				int firstSampleIndex = floorY * mapLayoutWidth + sampleCoordX;
 				int secondSampleIndex = sampleCoordY * mapLayoutWidth + floorX;
 
-				float savedSampleY = sampleCoordY;
-				if (priority < indexPriority[layoutTextures[firstSampleIndex]]) {
-					priority = indexPriority[layoutTextures[sampleIndex]];
+				int firstPriority = indexPriority[layoutTextures[firstSampleIndex]];
+				int secondPriority = indexPriority[layoutTextures[secondSampleIndex]];
+
+				if (firstPriority == secondPriority) {
+					int finalSampleIndex = sampleCoordY * mapLayoutWidth + sampleCoordX;
+
+					if (indexPriority[layoutTextures[finalSampleIndex]] > firstPriority) {
+						highestSamplePriority = indexPriority[layoutTextures[finalSampleIndex]];
+
+						otherColor = triplanar(IN.worldPos, 100, blendAxes, layoutTextures[finalSampleIndex]);
+
+						float combinedStrength = (drawStrengthX + drawStrengthY) / 1.25;
+
+						if (combinedStrength > 1) {
+							combinedStrength = 1;
+						}
+
+						drawStrengthX = combinedStrength;
+						drawStrengthY = combinedStrength;
+					} else {
+						highestSamplePriority = firstPriority;
+
+						float3 firstColor = triplanar(IN.worldPos, 100, blendAxes, layoutTextures[firstSampleIndex]);
+						float3 secondColor = triplanar(IN.worldPos, 100, blendAxes, layoutTextures[secondSampleIndex]);
+
+						otherColor = firstColor / 2 + secondColor / 2;
+					}
+				}
+
+				else if (firstPriority > secondPriority) {
 					sampleCoordY = floorY;
-				}
+					highestSamplePriority = firstPriority;
+					otherColor = triplanar(IN.worldPos, 100, blendAxes, layoutTextures[firstSampleIndex]);
+				} 
 
-				if (priority < indexPriority[layoutTextures[secondSampleIndex]]) {
-					sampleCoordY = savedSampleY;
-					sampleCoordX = floorX;
-					priority = indexPriority[layoutTextures[secondSampleIndex]];
-				}
-
-				// If we are still using the corner
-				if (priority == indexPriority[layoutTextures[sampleIndex]]) {
-					float combinedStrength = (drawStrengthX + drawStrengthY) / 2;
-					drawStrengthX = combinedStrength;
-					drawStrengthY = combinedStrength;
-				}
-			}
-
-			// The color from our terrain at this index
-			int baseIndex = floorY * mapLayoutWidth + floorX;
-			float3 baseColor = triplanar(IN.worldPos, 100, blendAxes, layoutTextures[baseIndex]);
-
-			// The color to blend from adjacent index
-			int sampleIndex = sampleCoordY * mapLayoutWidth + sampleCoordX;
-			float3 otherColor = float3(0, 0, 0);
-			
-			// Don't bother the blurr if there is nothing to blurr
-			if (drawStrengthX != 1 || drawStrengthY != 1) {
-				int textureIndex = layoutTextures[sampleIndex];
-				if (textureIndex != -1) {
-					otherColor = triplanar(IN.worldPos, 100, blendAxes, layoutTextures[sampleIndex]);
-				}
 				else {
-					drawStrengthX = 1;
-					drawStrengthY = 1;
-				}				
+					sampleCoordX = floorX;
+					highestSamplePriority = secondPriority;
+					otherColor = triplanar(IN.worldPos, 100, blendAxes, layoutTextures[secondSampleIndex]);
+
+
+				}								
+
+				//float savedSampleY = sampleCoordY;
+				//if (priority < indexPriority[layoutTextures[firstSampleIndex]]) {
+				//	priority = indexPriority[layoutTextures[sampleIndex]];
+				//	sampleCoordY = floorY;
+				//}
+
+				//if (priority < indexPriority[layoutTextures[secondSampleIndex]]) {
+				//	sampleCoordY = savedSampleY;
+				//	sampleCoordX = floorX;
+				//	priority = indexPriority[layoutTextures[secondSampleIndex]];
+				//}
+
+				//// If we are still using the corner
+				//if (priority == indexPriority[layoutTextures[sampleIndex]]) {
+				//	float combinedStrength = (drawStrengthX + drawStrengthY) / 2;
+				//	drawStrengthX = combinedStrength;
+				//	drawStrengthY = combinedStrength;
+				//}
+			}
+			else {
+				int sampleIndex = sampleCoordY * mapLayoutWidth + sampleCoordX;
+
+				// Don't bother the blurr if there is nothing to blurr
+				if (drawStrengthX != 1 || drawStrengthY != 1) {
+					int textureIndex = layoutTextures[sampleIndex];
+					if (textureIndex != -1) {
+						highestSamplePriority = indexPriority[layoutTextures[sampleIndex]];
+						otherColor = triplanar(IN.worldPos, 100, blendAxes, layoutTextures[sampleIndex]);
+					}
+				}
+			}			
+
+			// Is our other sample selected
+			if (sampleCoordX - 1 == selectionX && sampleCoordY - 1 == selectionY) {
+				otherColor *= float3(0, 1, 1);
 			}
 
 			// Set drawstrength to a value between 0.5 and 1
@@ -232,13 +285,13 @@
 			drawStrengthY = (drawStrengthY + 1) / 2;
 
 			// We are overridden by adjacent
-			if (indexPriority[layoutTextures[sampleIndex]] > indexPriority[layoutTextures[baseIndex]]) {
+			if (highestSamplePriority > indexPriority[layoutTextures[baseIndex]]) {
 				// We are overridden by adjacent. HEAVILY favour the adjacent color
 				drawStrengthX = drawStrengthX * drawStrengthX * drawStrengthX;
 				drawStrengthY = drawStrengthY * drawStrengthY * drawStrengthY;
 			}
 			// We Override Adjacent
-			else if (indexPriority[layoutTextures[sampleIndex]] < indexPriority[layoutTextures[baseIndex]]) {
+			else if (highestSamplePriority < indexPriority[layoutTextures[baseIndex]]) {
 				// We override the adjacent, do not take any samples from them
 				drawStrengthX = 1;
 				drawStrengthY = 1;
@@ -251,13 +304,6 @@
 
 			// If we neither override or are overriden by adjacent, drawstrength will blend the two evenly in the center
 			o.Albedo = (drawStrength * baseColor) + ((1 - drawStrength) * otherColor);
-
-
-
-			//if (IN.isSelected) {
-			//	o.Albedo *= float3(0, 1, 1);
-			//}
-
 		}
         ENDCG
     }

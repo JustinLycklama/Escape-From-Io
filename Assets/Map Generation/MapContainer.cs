@@ -303,15 +303,20 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate
         Material mapMaterial = GetComponent<MeshRenderer>().material;
 
         if(selection.selectionType == Selection.SelectionType.Terrain && selection.coordinate.mapContainer == this) {
-            mapMaterial.SetFloat("selectedXOffsetLow", selection.coordinate.x * constants.featuresPerLayoutPerAxis - (constants.layoutMapWidth * constants.featuresPerLayoutPerAxis / 2f));
-            mapMaterial.SetFloat("selectedXOffsetHigh", (selection.coordinate.x + 1) * constants.featuresPerLayoutPerAxis - (constants.layoutMapWidth * constants.featuresPerLayoutPerAxis / 2f));
+            //mapMaterial.SetFloat("selectedXOffsetLow", selection.coordinate.x * constants.featuresPerLayoutPerAxis - (constants.layoutMapWidth * constants.featuresPerLayoutPerAxis / 2f));
+            //mapMaterial.SetFloat("selectedXOffsetHigh", (selection.coordinate.x + 1) * constants.featuresPerLayoutPerAxis - (constants.layoutMapWidth * constants.featuresPerLayoutPerAxis / 2f));
 
-            mapMaterial.SetFloat("selectedYOffsetLow", selection.coordinate.y * constants.featuresPerLayoutPerAxis - (constants.layoutMapHeight * constants.featuresPerLayoutPerAxis / 2f));
-            mapMaterial.SetFloat("selectedYOffsetHigh", (selection.coordinate.y + 1) * constants.featuresPerLayoutPerAxis - (constants.layoutMapHeight * constants.featuresPerLayoutPerAxis / 2f));
+            //mapMaterial.SetFloat("selectedYOffsetLow", selection.coordinate.y * constants.featuresPerLayoutPerAxis - (constants.layoutMapHeight * constants.featuresPerLayoutPerAxis / 2f));
+            //mapMaterial.SetFloat("selectedYOffsetHigh", (selection.coordinate.y + 1) * constants.featuresPerLayoutPerAxis - (constants.layoutMapHeight * constants.featuresPerLayoutPerAxis / 2f));
 
-            mapMaterial.SetFloat("hasSelection", 1);
+            //mapMaterial.SetFloat("hasSelection", 1);
+            mapMaterial.SetFloat("selectionX", selection.coordinate.x);
+            mapMaterial.SetFloat("selectionY", selection.coordinate.y);
+
         } else {
-            mapMaterial.SetFloat("hasSelection", 0);
+            //mapMaterial.SetFloat("hasSelection", 0);
+            mapMaterial.SetFloat("selectionX", -1);
+            mapMaterial.SetFloat("selectionY", -1);
         }
     }
 

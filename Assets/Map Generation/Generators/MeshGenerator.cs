@@ -35,7 +35,7 @@ public static class MeshGenerator {
             int clampedX = Mathf.Clamp(x - 1, 0, width - 3);
             int clampedY = Mathf.Clamp(y - 1, 0, height - 3);
 
-            float heightAtIndex = -1f;
+            float heightAtIndex = 0f;
             if(!(boundedX < 0 || boundedX > width - 3 || boundedY < 0 || boundedY > height - 3)) {
                 heightAtIndex = heightMap[clampedX, clampedY];
             }
@@ -155,7 +155,7 @@ public static class MeshGenerator {
         }
 
         // Right edge
-        x = width - 1;
+        /*x = width - 1;
 
          for(y = 0; y < height; y++) {
              float finalSampleHeight = 0;
@@ -176,7 +176,7 @@ public static class MeshGenerator {
              }
 
              meshData.EditHeight(finalSampleHeight, x, y);
-         }
+         }*/
          
         // Top 
 
@@ -195,7 +195,7 @@ public static class MeshGenerator {
 
         // Bottom
 
-        y = height - 1;
+        /*y = height - 1;
 
         for(x = 1; x < width - 1; x++) {
             float finalSampleHeight = 0;
@@ -206,7 +206,7 @@ public static class MeshGenerator {
             }
 
             meshData.EditHeight(finalSampleHeight, x, y);
-        }
+        }*/
     }
 }
 
