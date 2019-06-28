@@ -84,6 +84,7 @@ public class MapsManager : MonoBehaviour {
                 mapContainerObject.transform.localScale = transform.localScale;
 
                 mapContainer2d[x, y] = mapContainer;
+                mapContainer.gameObject.SetActive(false);
                 mapContainers.Add(mapContainer);
             }
         }

@@ -65,7 +65,7 @@ public class MapGenerator : MonoBehaviour {
     public NoiseData groundFeaturesMapNoiseData;
     public NoiseData mountainFeaturesMapNoiseData;
 
-    [Range(0, 2)]
+    [Range(0, 1)]
     public float groundFeaturesImpactOnLayout;
 
     [Range(0, 2)]
@@ -207,7 +207,7 @@ public class MapGenerator : MonoBehaviour {
                         fullMap[x, y] = layoutMap[sampleX, sampleY];
                         break;
                     case RegionType.Land:
-                        fullMap[x, y] = (layoutMap[sampleX, sampleY]) + ((groundFeaturesMap[x, y] * groundFeaturesImpactOnLayout));
+                        fullMap[x, y] = (layoutMap[sampleX, sampleY]) * (1 - groundFeaturesImpactOnLayout) + ((groundFeaturesMap[x, y] * groundFeaturesImpactOnLayout));
                         break;
                     case RegionType.Mountain:
                         fullMap[x, y] = layoutMap[sampleX, sampleY] + (mountainFeaturesMap[x, y] * mountainFeaturesImpactOnLayout);

@@ -97,20 +97,25 @@ public class TextureGenerator: MonoBehaviour {
     const TextureFormat textureFormat = TextureFormat.RGB565;
 
     private TerrainType[] sortedTerrainTypes;
+    private Texture2DArray textureArray;
 
-
-
-
-    public Texture2DArray GenerateTextureArray() {
-        if (sortedTerrainTypes == null) {
-            CreateSortedTypes();
-        }
-
-        Texture2DArray textureArray = new Texture2DArray(textureSize, textureSize, sortedTerrainTypes.Length, textureFormat, true);
+    private void GenerateTextureArray() {
+        textureArray = new Texture2DArray(textureSize, textureSize, sortedTerrainTypes.Length, textureFormat, true);
         for(int i = 0; i < sortedTerrainTypes.Length; i++) {
             textureArray.SetPixels(sortedTerrainTypes[i].texture.GetPixels(), i);
         }
         textureArray.Apply();
+    }
+
+    public Texture2DArray TextureArray() {
+        if (sortedTerrainTypes == null) {
+            CreateSortedTypes();
+        }
+
+        if (textureArray == null) {
+            GenerateTextureArray();
+        }
+
         return textureArray;
     }
 

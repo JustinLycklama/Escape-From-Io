@@ -81,11 +81,12 @@ public class Narrator : MonoBehaviour
         while(success == false) {
             layoutNoiseMap = mapGenerator.GenerateLayoutMap(totalWidth, totalHeight);
             success = IsLayoutSuitable(layoutNoiseMap);
-        }               
+        }
+
+        print("Found Suitable Map");
 
         float[,] groundFeaturesNoiseMap = mapGenerator.GenerateGroundFeaturesMap(totalWidth * constants.featuresPerLayoutPerAxis, totalHeight * constants.featuresPerLayoutPerAxis);
         float[,] mountainFeaturesNoiseMap = mapGenerator.GenerateMountainFeaturesMap(totalWidth * constants.featuresPerLayoutPerAxis, totalHeight * constants.featuresPerLayoutPerAxis);
-
 
         // Setup world
         foreach(MapContainer container in mapsManager.mapContainers) {

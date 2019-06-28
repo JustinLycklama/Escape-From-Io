@@ -42,7 +42,7 @@
 		float selectionY;
 
 		// Used as a bool. 0 is skip selection calculations
-		//float hasSelection;
+		float hasSelection;
 
 		//float selectedXOffsetLow;
 		//float selectedXOffsetHigh;
@@ -160,7 +160,7 @@
 
 
 		void surf(Input IN, inout SurfaceOutput o) {
-		
+	
 			float x = IN.layoutCoordinate.x;
 			float y = IN.layoutCoordinate.y;
 
@@ -184,7 +184,7 @@
 			float3 baseColor = triplanar(IN.worldPos, 100, blendAxes, layoutTextures[baseIndex]);
 
 			// Is this tile selected
-			if (floorX - 1 == selectionX && floorY - 1 == selectionY) {
+			if (hasSelection && floorX - 1 == selectionX && floorY - 1 == selectionY) {
 				baseColor *= float3(0, 1, 1);
 			}
 
@@ -276,7 +276,7 @@
 			}			
 
 			// Is our other sample selected
-			if (sampleCoordX - 1 == selectionX && sampleCoordY - 1 == selectionY) {
+			if (hasSelection && sampleCoordX - 1 == selectionX && sampleCoordY - 1 == selectionY) {
 				otherColor *= float3(0, 1, 1);
 			}
 
@@ -304,6 +304,7 @@
 
 			// If we neither override or are overriden by adjacent, drawstrength will blend the two evenly in the center
 			o.Albedo = (drawStrength * baseColor) + ((1 - drawStrength) * otherColor);
+			//o.Albedo = float3(1, 1, 1);
 		}
         ENDCG
     }

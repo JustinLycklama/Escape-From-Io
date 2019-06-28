@@ -288,7 +288,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate
         mapMaterial.SetFloatArray("layoutTextures", textureIndexList);
         mapMaterial.SetFloatArray("indexPriority", texGen.TexturePriorityList());
 
-        Texture2DArray texturesArray = texGen.GenerateTextureArray();
+        Texture2DArray texturesArray = texGen.TextureArray();
         mapMaterial.SetTexture("baseTextures", texturesArray);
     }
 
@@ -309,12 +309,12 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate
             //mapMaterial.SetFloat("selectedYOffsetLow", selection.coordinate.y * constants.featuresPerLayoutPerAxis - (constants.layoutMapHeight * constants.featuresPerLayoutPerAxis / 2f));
             //mapMaterial.SetFloat("selectedYOffsetHigh", (selection.coordinate.y + 1) * constants.featuresPerLayoutPerAxis - (constants.layoutMapHeight * constants.featuresPerLayoutPerAxis / 2f));
 
-            //mapMaterial.SetFloat("hasSelection", 1);
+            mapMaterial.SetFloat("hasSelection", 1);
             mapMaterial.SetFloat("selectionX", selection.coordinate.x);
             mapMaterial.SetFloat("selectionY", selection.coordinate.y);
 
         } else {
-            //mapMaterial.SetFloat("hasSelection", 0);
+            mapMaterial.SetFloat("hasSelection", 0);
             mapMaterial.SetFloat("selectionX", -1);
             mapMaterial.SetFloat("selectionY", -1);
         }
