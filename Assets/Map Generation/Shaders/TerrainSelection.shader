@@ -23,7 +23,6 @@
 		float bottomTextures[22];
 
 		float layoutTextures[22*22];	
-		float indexPriority[10];
 
 		float mapLayoutWidth;
 		float mapLayoutHeight;
@@ -37,6 +36,8 @@
 		float mapYOffsetHigh;
 
 		UNITY_DECLARE_TEX2DARRAY(baseTextures);
+		float indexPriority[10];
+		float indexScale[10];
 
 		float selectionX;
 		float selectionY;
@@ -103,7 +104,7 @@
 		}
 
 		void sampleAndStrength(float origCoord, int sizeInDimension, out int sampleCoord, out float drawStrength) {
-			const float overrideLine = 1 / tileSize; // Point where higher terrain takes complete precedence
+			const float overrideLine = (1 / tileSize) / 2; // Point where higher terrain takes complete precedence
 
 			int floorCoord = floor(origCoord);
 
@@ -181,7 +182,7 @@
 
 			// The color to blend from adjacent index
 			int baseIndex = floorY * mapLayoutWidth + floorX;
-			float3 baseColor = triplanar(IN.worldPos, 100, blendAxes, layoutTextures[baseIndex]);
+			float3 baseColor = triplanar(IN.worldPos, indexScale[layoutTextures[baseIndex]], blendAxes, layoutTextures[baseIndex]);
 
 			// Is this tile selected
 			if (hasSelection && floorX - 1 == selectionX && floorY - 1 == selectionY) {
@@ -209,7 +210,7 @@
 					if (indexPriority[layoutTextures[finalSampleIndex]] > firstPriority) {
 						highestSamplePriority = indexPriority[layoutTextures[finalSampleIndex]];
 
-						otherColor = triplanar(IN.worldPos, 100, blendAxes, layoutTextures[finalSampleIndex]);
+						otherColor = triplanar(IN.worldPos, indexScale[layoutTextures[finalSampleIndex]], blendAxes, layoutTextures[finalSampleIndex]);
 
 						float combinedStrength = (drawStrengthX + drawStrengthY) / 1.25;
 
@@ -222,8 +223,8 @@
 					} else {
 						highestSamplePriority = firstPriority;
 
-						float3 firstColor = triplanar(IN.worldPos, 100, blendAxes, layoutTextures[firstSampleIndex]);
-						float3 secondColor = triplanar(IN.worldPos, 100, blendAxes, layoutTextures[secondSampleIndex]);
+						float3 firstColor = triplanar(IN.worldPos, indexScale[layoutTextures[firstSampleIndex]], blendAxes, layoutTextures[firstSampleIndex]);
+						float3 secondColor = triplanar(IN.worldPos, indexScale[layoutTextures[secondSampleIndex]], blendAxes, layoutTextures[secondSampleIndex]);
 
 						otherColor = firstColor / 2 + secondColor / 2;
 					}
@@ -232,13 +233,13 @@
 				else if (firstPriority > secondPriority) {
 					sampleCoordY = floorY;
 					highestSamplePriority = firstPriority;
-					otherColor = triplanar(IN.worldPos, 100, blendAxes, layoutTextures[firstSampleIndex]);
+					otherColor = triplanar(IN.worldPos, indexScale[layoutTextures[firstSampleIndex]], blendAxes, layoutTextures[firstSampleIndex]);
 				} 
 
 				else {
 					sampleCoordX = floorX;
 					highestSamplePriority = secondPriority;
-					otherColor = triplanar(IN.worldPos, 100, blendAxes, layoutTextures[secondSampleIndex]);
+					otherColor = triplanar(IN.worldPos, indexScale[layoutTextures[secondSampleIndex]], blendAxes, layoutTextures[secondSampleIndex]);
 
 
 				}								
@@ -270,7 +271,7 @@
 					int textureIndex = layoutTextures[sampleIndex];
 					if (textureIndex != -1) {
 						highestSamplePriority = indexPriority[layoutTextures[sampleIndex]];
-						otherColor = triplanar(IN.worldPos, 100, blendAxes, layoutTextures[sampleIndex]);
+						otherColor = triplanar(IN.worldPos, indexScale[layoutTextures[sampleIndex]], blendAxes, layoutTextures[sampleIndex]);
 					}
 				}
 			}			
@@ -287,8 +288,8 @@
 			// We are overridden by adjacent
 			if (highestSamplePriority > indexPriority[layoutTextures[baseIndex]]) {
 				// We are overridden by adjacent. HEAVILY favour the adjacent color
-				drawStrengthX = drawStrengthX * drawStrengthX * drawStrengthX;
-				drawStrengthY = drawStrengthY * drawStrengthY * drawStrengthY;
+				drawStrengthX = pow(drawStrengthX, 5);
+				drawStrengthY = pow(drawStrengthY, 5);
 			}
 			// We Override Adjacent
 			else if (highestSamplePriority < indexPriority[layoutTextures[baseIndex]]) {

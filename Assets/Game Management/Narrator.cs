@@ -79,11 +79,15 @@ public class Narrator : MonoBehaviour
         bool success = false;
 
         while(success == false) {
+            mapGenerator.RandomizeSeed();
             layoutNoiseMap = mapGenerator.GenerateLayoutMap(totalWidth, totalHeight);
             success = IsLayoutSuitable(layoutNoiseMap);
         }
 
         print("Found Suitable Map");
+
+        float[,] groundMutatorMap = mapGenerator.GenerateGroundMutatorMap(totalWidth, totalHeight);
+        float[,] mountainMutatorMap = mapGenerator.GenerateMountainMutatorMap(totalWidth, totalHeight);
 
         float[,] groundFeaturesNoiseMap = mapGenerator.GenerateGroundFeaturesMap(totalWidth * constants.featuresPerLayoutPerAxis, totalHeight * constants.featuresPerLayoutPerAxis);
         float[,] mountainFeaturesNoiseMap = mapGenerator.GenerateMountainFeaturesMap(totalWidth * constants.featuresPerLayoutPerAxis, totalHeight * constants.featuresPerLayoutPerAxis);
@@ -114,7 +118,7 @@ public class Narrator : MonoBehaviour
                 mapWidth * constants.featuresPerLayoutPerAxis, 
                 mapHeight * constants.featuresPerLayoutPerAxis);
 
-            Map map = mapGenerator.GenerateMap(container, mapLayoutNoise, groundFeaturesLayoutNoise, mountainFeaturesLayoutNoise);
+            Map map = mapGenerator.GenerateMap(container, mapLayoutNoise, groundMutatorMap, mountainMutatorMap, groundFeaturesLayoutNoise, mountainFeaturesLayoutNoise);
             container.setMap(map);
         }
 

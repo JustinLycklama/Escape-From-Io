@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class TextureGenerator: MonoBehaviour {
+public class TextureGenerator : MonoBehaviour {
 
     //private Color[] CreateColorMapWithTerrain(TerrainType[,] terrainTypeMap, MapContainer mapContainer) {
 
@@ -82,19 +82,40 @@ public class TextureGenerator: MonoBehaviour {
 
     private void CreateSortedTypes() {
         MapGenerator mapGen = Script.Get<MapGenerator>();
-        sortedTerrainTypes = mapGen.regions;
+        sortedTerrainTypes = new TerrainType[mapGen.regions.Length + mapGen.mutatableRegions.Length];
+
+        Dictionary<RegionType, TerrainType> regionTerrainMap = new Dictionary<RegionType, TerrainType>();
+
+        for(int i = 0; i < mapGen.regions.Length; i++) {
+            TerrainType type = mapGen.regions[i];
+            regionTerrainMap.Add(type.regionType, type);
+
+            sortedTerrainTypes[i] = type;
+        }
+
+        for(int i = 0; i < mapGen.mutatableRegions.Length; i++) {
+            TerrainMutator mutator = mapGen.mutatableRegions[i];
+
+            TerrainType type = regionTerrainMap[mutator.regionType];
+            type = TerrainType.Mutate(type, mutator);
+
+            sortedTerrainTypes[mapGen.regions.Length + i] = type;
+        }
 
         System.Array.Sort(sortedTerrainTypes, delegate (TerrainType type1, TerrainType type2) {
             return type1.noiseBaseline.CompareTo(type2.noiseBaseline);
         });
-
-
-
-
     }
 
     const int textureSize = 512;
     const TextureFormat textureFormat = TextureFormat.RGB565;
+
+    //struct TextureInfo {
+    //    string name;
+    //    Texture texture;
+    //    float textureScale;
+    //    float 
+    //}
 
     private TerrainType[] sortedTerrainTypes;
     private Texture2DArray textureArray;
@@ -119,13 +140,13 @@ public class TextureGenerator: MonoBehaviour {
         return textureArray;
     }
 
-    public int RegionTypeTextureIndex(RegionType regionType) {
+    public int RegionTypeTextureIndex(TerrainType terrainType) {
         if(sortedTerrainTypes == null) {
             CreateSortedTypes();
         }
 
         for(int i = 0; i < sortedTerrainTypes.Length; i++) {
-            if(sortedTerrainTypes[i].regionType == regionType) {
+            if(sortedTerrainTypes[i].name == terrainType.name) {
                 return i;
             }
         }
@@ -142,6 +163,20 @@ public class TextureGenerator: MonoBehaviour {
 
         for(int i = 0; i < sortedTerrainTypes.Length; i++) {
             priorityList[i] = sortedTerrainTypes[i].priority;
+        }
+
+        return priorityList;
+    }
+
+    public float[] TextureScaleList() {
+        if(sortedTerrainTypes == null) {
+            CreateSortedTypes();
+        }
+
+        float[] priorityList = new float[sortedTerrainTypes.Length];
+
+        for(int i = 0; i < sortedTerrainTypes.Length; i++) {
+            priorityList[i] = sortedTerrainTypes[i].textureScale;
         }
 
         return priorityList;

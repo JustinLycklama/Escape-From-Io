@@ -155,21 +155,21 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate
                 LayoutCoordinate coordinate = new LayoutCoordinate(constants.layoutMapWidth - 1, constants.layoutMapHeight - 1, neighbours.topLeftMap);
 
                 TerrainType terrain = neighbours.topLeftMap.map.GetTerrainAt(coordinate);
-                textureIndexList[y * mapWidthWithOverhang] = texGen.RegionTypeTextureIndex(terrain.regionType); 
+                textureIndexList[y * mapWidthWithOverhang] = texGen.RegionTypeTextureIndex(terrain); 
             }
 
             if(y > 0 && y < constants.layoutMapHeight - 1 && neighbours.leftMap != null) {
                 LayoutCoordinate coordinate = new LayoutCoordinate(constants.layoutMapWidth - 1, (y - 1), neighbours.leftMap);
 
                 TerrainType terrain = neighbours.leftMap.map.GetTerrainAt(coordinate);
-                textureIndexList[y * mapWidthWithOverhang] = texGen.RegionTypeTextureIndex(terrain.regionType);
+                textureIndexList[y * mapWidthWithOverhang] = texGen.RegionTypeTextureIndex(terrain);
             }
 
             if(y == constants.layoutMapHeight + 1 && neighbours.bottomLeftMap != null) {
                 LayoutCoordinate coordinate = new LayoutCoordinate(constants.layoutMapWidth - 1, 0, neighbours.bottomLeftMap);
 
                 TerrainType terrain = neighbours.bottomLeftMap.map.GetTerrainAt(coordinate);
-                textureIndexList[y * mapWidthWithOverhang] = texGen.RegionTypeTextureIndex(terrain.regionType);
+                textureIndexList[y * mapWidthWithOverhang] = texGen.RegionTypeTextureIndex(terrain);
             }
         }
 
@@ -181,7 +181,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate
                 LayoutCoordinate coordinate = new LayoutCoordinate(0, constants.layoutMapHeight - 1, neighbours.topRightMap);
 
                 TerrainType terrain = neighbours.topRightMap.map.GetTerrainAt(coordinate);
-                textureIndexList[y + mapWidthWithOverhang + x] = texGen.RegionTypeTextureIndex(terrain.regionType);
+                textureIndexList[y + mapWidthWithOverhang + x] = texGen.RegionTypeTextureIndex(terrain);
 
 
                 //finalSampleHeight = neibours.topRightMap.map.getHeightAt(coordinate);
@@ -191,14 +191,14 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate
                  LayoutCoordinate coordinate = new LayoutCoordinate(0, y - 1, neighbours.rightMap);
 
                 TerrainType terrain = neighbours.rightMap.map.GetTerrainAt(coordinate);
-                textureIndexList[y * mapWidthWithOverhang + x] = texGen.RegionTypeTextureIndex(terrain.regionType);
+                textureIndexList[y * mapWidthWithOverhang + x] = texGen.RegionTypeTextureIndex(terrain);
             }
 
              if(y == constants.layoutMapHeight + 1 && neighbours.bottomRightMap != null) {
                 LayoutCoordinate coordinate = new LayoutCoordinate(0, 0, neighbours.bottomRightMap);
 
                 TerrainType terrain = neighbours.bottomRightMap.map.GetTerrainAt(coordinate);
-                textureIndexList[y * mapWidthWithOverhang + x] = texGen.RegionTypeTextureIndex(terrain.regionType);
+                textureIndexList[y * mapWidthWithOverhang + x] = texGen.RegionTypeTextureIndex(terrain);
             }
 
          }
@@ -213,7 +213,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate
                 LayoutCoordinate coordinate = new LayoutCoordinate(x - 1, constants.layoutMapHeight - 1, neighbours.topMap);
 
                 TerrainType terrain = neighbours.topMap.map.GetTerrainAt(coordinate);
-                textureIndexList[y * mapWidthWithOverhang + x] = texGen.RegionTypeTextureIndex(terrain.regionType);
+                textureIndexList[y * mapWidthWithOverhang + x] = texGen.RegionTypeTextureIndex(terrain);
             }
         }
 
@@ -226,7 +226,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate
                 LayoutCoordinate coordinate = new LayoutCoordinate(x - 1, 0, neighbours.bottomMap);
 
                 TerrainType terrain = neighbours.bottomMap.map.GetTerrainAt(coordinate);
-                textureIndexList[y * mapWidthWithOverhang + x] = texGen.RegionTypeTextureIndex(terrain.regionType);
+                textureIndexList[y * mapWidthWithOverhang + x] = texGen.RegionTypeTextureIndex(terrain);
             }
         }
 
@@ -248,7 +248,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate
 
     float[] textureIndexList;
 
-    private void SetupMaterialShader() {
+    public void SetupMaterialShader() {
         Constants constants = Script.Get<Constants>();
         Material mapMaterial = GetComponent<MeshRenderer>().sharedMaterial;
 
@@ -281,12 +281,14 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate
                 LayoutCoordinate layoutCoordinate = new LayoutCoordinate(x - 1, y - 1, this);
                 TerrainType terrain = map.GetTerrainAt(layoutCoordinate);
 
-                textureIndexList[y * mapWidthWithOverhang + x] = texGen.RegionTypeTextureIndex(terrain.regionType);
+                textureIndexList[y * mapWidthWithOverhang + x] = texGen.RegionTypeTextureIndex(terrain);
             }
         }
 
         mapMaterial.SetFloatArray("layoutTextures", textureIndexList);
         mapMaterial.SetFloatArray("indexPriority", texGen.TexturePriorityList());
+        mapMaterial.SetFloatArray("indexScale", texGen.TextureScaleList());
+
 
         Texture2DArray texturesArray = texGen.TextureArray();
         mapMaterial.SetTexture("baseTextures", texturesArray);

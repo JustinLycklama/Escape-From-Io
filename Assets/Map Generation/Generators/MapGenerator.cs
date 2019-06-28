@@ -26,6 +26,15 @@ public struct TerrainType {
     public float textureScale;
     public int priority;
 
+    public static TerrainType Mutate(TerrainType type, TerrainMutator mutator) {
+        type.name = mutator.name;
+        type.texture = mutator.texture;
+        type.textureScale = mutator.textureScale;
+        type.walkSpeedMultiplier = mutator.walkSpeedMultiplier;
+
+        return type;
+    }
+
     public override bool Equals(object obj) {
         return base.Equals(obj);
     }
@@ -51,6 +60,23 @@ public struct TerrainType {
     }
 }
 
+[System.Serializable]
+public struct TerrainMutator {
+    public string name;
+
+    public Texture2D texture;
+    public float textureScale;
+    public float walkSpeedMultiplier;
+
+    public RegionType regionType;
+    public float noiseBaseline;
+    public float noiseMax;
+
+    public bool ValueIsMember(float value) {
+        return value <= noiseMax && value >= noiseBaseline;
+    }
+}
+
 public class MapGenerator : MonoBehaviour {
 
     public enum DrawMode {NoiseMap, ColorMap, Mesh}
@@ -59,7 +85,12 @@ public class MapGenerator : MonoBehaviour {
     private int layoutMapWidth;
     private int layoutMapHeight;
 
+    const int seedCap = 1000;
+
     public MapContainer demoMapContainer;
+
+    public NoiseData mountainMutatorNoiseData;
+    public NoiseData groundMutatorMapNoiseData;
 
     public NoiseData layoutMapNoiseData;
     public NoiseData groundFeaturesMapNoiseData;
@@ -76,6 +107,7 @@ public class MapGenerator : MonoBehaviour {
     public bool autoUpdate;
 
     public TerrainType[] regions;
+    public TerrainMutator[] mutatableRegions;
 
     public TerrainType TerrainForRegion(RegionType regionType) {
         foreach (TerrainType type in regions) {
@@ -99,11 +131,36 @@ public class MapGenerator : MonoBehaviour {
         }
     }
 
+
+    System.Random rnd = new System.Random();
+
+    public void RandomizeSeed() {
+        rnd = new System.Random(System.Guid.NewGuid().GetHashCode());
+
+        layoutMapNoiseData.seed = rnd.Next(1, seedCap);
+
+        groundMutatorMapNoiseData.seed = rnd.Next(1, seedCap);
+        mountainMutatorNoiseData.seed = rnd.Next(1, seedCap);
+
+        groundFeaturesMapNoiseData.seed = rnd.Next(1, seedCap);
+        mountainFeaturesMapNoiseData.seed = rnd.Next(1, seedCap);
+    }
+
     public float[,] GenerateLayoutMap(int width, int length) {
         return NoiseGenerator.GenerateNoiseMap(width, length, layoutMapNoiseData);
     }
 
+    public float[,] GenerateGroundMutatorMap(int width, int length) {
+        return NoiseGenerator.GenerateNoiseMap(width, length, groundMutatorMapNoiseData);
+    }
+
+    public float[,] GenerateMountainMutatorMap(int width, int length) {
+        return NoiseGenerator.GenerateNoiseMap(width, length, mountainMutatorNoiseData);
+    }
+
     public float[,] GenerateGroundFeaturesMap(int width, int length) {
+        layoutMapNoiseData.seed = rnd.Next(1, seedCap);
+
         return NoiseGenerator.GenerateNoiseMap(width, length, groundFeaturesMapNoiseData);
     }
 
@@ -111,7 +168,7 @@ public class MapGenerator : MonoBehaviour {
         return NoiseGenerator.GenerateNoiseMap(width, length, mountainFeaturesMapNoiseData);
     }
 
-    public Map GenerateMap(MapContainer mapContainer, float[,] layoutNoiseMap, float[,] groundFeaturesNoiseMap, float[,] mountainFeaturesNoiseMap) {
+    public Map GenerateMap(MapContainer mapContainer, float[,] layoutNoiseMap, float[,] groundMutatorMap, float[,] mountainMutatorMap, float[,] groundFeaturesNoiseMap, float[,] mountainFeaturesNoiseMap) {
         Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();
 
         this.layoutMapWidth = layoutNoiseMap.GetLength(0);
@@ -129,7 +186,7 @@ public class MapGenerator : MonoBehaviour {
         //float[,] groundFeaturesNoiseMap = NoiseGenerator.GenerateNoiseMap(noiseMapWidth, noiseMapHeight, groundFeaturesMapNoiseData);
         //float[,] mountainFeaturesNoiseMap = NoiseGenerator.GenerateNoiseMap(noiseMapWidth, noiseMapHeight, mountainFeaturesMapNoiseData);
 
-        TerrainType[,] terrainMap = PlateauMap(layoutNoiseMap);
+        TerrainType[,] terrainMap = PlateauMap(layoutNoiseMap, groundMutatorMap, mountainMutatorMap);
         float[,] noiseMap = CreateMapWithFeatures(layoutNoiseMap, groundFeaturesNoiseMap, mountainFeaturesNoiseMap, terrainMap);
 
         NormalizeMap(noiseMap);
@@ -368,7 +425,7 @@ public class MapGenerator : MonoBehaviour {
     }
 
     // Returns a Map of terrainTypes
-    private TerrainType[,] PlateauMap(float[,] map) {
+    private TerrainType[,] PlateauMap(float[,] map, float[,] groundMutatorMap, float[,] mountainMutatorMap) {
         int mapWidth = map.GetLength(0);
         int mapHeight = map.GetLength(1);
 
@@ -381,7 +438,24 @@ public class MapGenerator : MonoBehaviour {
                     if(regions[i].plateau && regions[i].ValueIsMember(map[x, y])) {
 
                         map[x, y] = (regions[i].plateauAtBase ? regions[i].noiseBaseline + 0.001f : regions[i].noiseMax - 0.001f);
+                        RegionType regionType = regions[i].regionType;
                         terrainMap[x, y] = regions[i];
+
+                        foreach(TerrainMutator mutator in mutatableRegions) {
+                            float mutatorValue = 0;
+
+                            if(mutator.regionType == RegionType.Land) {
+                                mutatorValue = groundMutatorMap[x, y];
+                            } else if(mutator.regionType == RegionType.Mountain) {
+                                mutatorValue = mountainMutatorMap[x, y];
+                            }
+
+                            if (mutator.regionType == regionType && mutator.ValueIsMember(mutatorValue)) {
+                                terrainMap[x, y] = TerrainType.Mutate(terrainMap[x, y], mutator);
+                                break;
+                            }
+                        }
+                        
                         break;
                     }
                 }

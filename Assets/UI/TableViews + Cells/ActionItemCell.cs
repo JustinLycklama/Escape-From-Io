@@ -15,7 +15,7 @@ public class UserAction {
     public ConstructionBlueprint[] blueprintList;
 }
 
-public class ActionItemCell : MonoBehaviour, IPointerClickHandler {
+public class ActionItemCell : Clickable {
     public Text actionItemTitle;
     UserAction action;
 
@@ -36,18 +36,18 @@ public class ActionItemCell : MonoBehaviour, IPointerClickHandler {
     }
 
     /*
-   * IPointerClickHandler Interface
-   * */
+    * Clickable Overrides
+    * */
 
-    public void OnPointerClick(PointerEventData eventData) {
+    protected override void DidClick() {
         if(action == null) {
             return;
         }
 
         // We either have an action to perform, or a list of blueprints to display
-        if (action.performAction != null) {
+        if(action.performAction != null) {
             action.performAction(action.layoutCoordinate);
-        } else if (action.blueprintList != null) {
+        } else if(action.blueprintList != null) {
             BlueprintPanel blueprintPanel = Script.Get<UIManager>().Push(UIManager.Blueprint.BlueprintPanel) as BlueprintPanel;
             blueprintPanel.SetData(action.description, action.blueprintList, action.layoutCoordinate);
         }

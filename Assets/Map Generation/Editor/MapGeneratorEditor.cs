@@ -27,10 +27,12 @@ public class MapGeneratorEditor : Editor {
         int mapHeight = constants.layoutMapHeight;
 
         float[,] layoutNoiseMap = mapGen.GenerateLayoutMap(mapWidth, mapHeight);
+        float[,] mutatorNoiseMap = mapGen.GenerateLayoutMap(mapWidth, mapHeight);
 
         float[,] groundFeaturesNoiseMap = mapGen.GenerateGroundFeaturesMap(mapWidth * constants.featuresPerLayoutPerAxis, mapHeight * constants.featuresPerLayoutPerAxis);
         float[,] mountainFeaturesNoiseMap = mapGen.GenerateMountainFeaturesMap(mapWidth * constants.featuresPerLayoutPerAxis, mapHeight * constants.featuresPerLayoutPerAxis);
 
-        mapGen.GenerateMap(mapGen.demoMapContainer, layoutNoiseMap, groundFeaturesNoiseMap, mountainFeaturesNoiseMap);
+        mapGen.GenerateMap(mapGen.demoMapContainer, layoutNoiseMap, mutatorNoiseMap, mutatorNoiseMap, groundFeaturesNoiseMap, mountainFeaturesNoiseMap);
+        mapGen.demoMapContainer.SetupMaterialShader();
     }
 }
