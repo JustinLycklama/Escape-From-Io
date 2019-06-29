@@ -34,13 +34,13 @@ public class Narrator : MonoBehaviour
         int midX = (layoutNoiseMap.GetLength(0) / 2) - 1;
         int midY = (layoutNoiseMap.GetLength(1) / 2) - 1;
 
-        TerrainType land = mapGenerator.TerrainForRegion(RegionType.Land);
+        TerrainManager manager = Script.Get<TerrainManager>();
 
         for (int x = -suitableCoordinateDistance; x <= suitableCoordinateDistance; x++) {
             for(int y = -suitableCoordinateDistance; y <= suitableCoordinateDistance; y++) {
                 float sample = layoutNoiseMap[midX + x, midY + y];
 
-                if(land.ValueIsMember(sample)) {
+                if(manager.RegionTypeForValue(sample).type == RegionType.Type.Land) {
                     spawnCoordX = midX + x;
                     spawnCoordY = midY + y;
                     return true;
@@ -89,6 +89,10 @@ public class Narrator : MonoBehaviour
         float[,] groundMutatorMap = mapGenerator.GenerateGroundMutatorMap(totalWidth, totalHeight);
         float[,] mountainMutatorMap = mapGenerator.GenerateMountainMutatorMap(totalWidth, totalHeight);
 
+        TerrainManager terrainManager = Script.Get<TerrainManager>();
+        terrainManager.SetGroundMutatorMap(groundMutatorMap);
+        terrainManager.SetMounainMutatorMap(mountainMutatorMap);
+
         float[,] groundFeaturesNoiseMap = mapGenerator.GenerateGroundFeaturesMap(totalWidth * constants.featuresPerLayoutPerAxis, totalHeight * constants.featuresPerLayoutPerAxis);
         float[,] mountainFeaturesNoiseMap = mapGenerator.GenerateMountainFeaturesMap(totalWidth * constants.featuresPerLayoutPerAxis, totalHeight * constants.featuresPerLayoutPerAxis);
 
@@ -118,7 +122,7 @@ public class Narrator : MonoBehaviour
                 mapWidth * constants.featuresPerLayoutPerAxis, 
                 mapHeight * constants.featuresPerLayoutPerAxis);
 
-            Map map = mapGenerator.GenerateMap(container, mapLayoutNoise, groundMutatorMap, mountainMutatorMap, groundFeaturesLayoutNoise, mountainFeaturesLayoutNoise);
+            Map map = mapGenerator.GenerateMap(container, mapLayoutNoise, groundFeaturesLayoutNoise, mountainFeaturesLayoutNoise);
             container.setMap(map);
         }
 

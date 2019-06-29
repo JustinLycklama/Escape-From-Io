@@ -23,6 +23,10 @@ public class PercentageBar : TrackingUIElement {
     private void SetDisplayType(DisplayType type) {
         displayType = type;
 
+        if (sliderBar == null) {
+            return;
+        }
+
         switch(displayType) {
             case DisplayType.Bar:                
                 sliderBar.gameObject.SetActive(true);

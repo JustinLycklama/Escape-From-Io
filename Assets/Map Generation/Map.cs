@@ -169,7 +169,7 @@ public class Map : ActionableItem  {
         }
 
         // Build?
-        else if (GetTerrainAt(coordinate).regionType == RegionType.Land) {
+        else if (GetTerrainAt(coordinate).buildable) {
 
             UserAction action = new UserAction();
             action.description = "Building";
@@ -200,13 +200,17 @@ public class Map : ActionableItem  {
 
             //actionList.Add(action);
             //}
+        } 
+        // We cannot build but we are a land, lets terraform to buildable
+        else if (false) {
+
         }
 
         // Mine?
-        else if(GetTerrainAt(coordinate).regionType == RegionType.Mountain) {
+        else if(GetTerrainAt(coordinate).regionType == RegionType.Type.Mountain) {
             UserAction action = new UserAction();
 
-            TerrainType landTerrain = Script.Get<MapGenerator>().TerrainForRegion(RegionType.Land);
+            //TerrainType landTerrain = Script.Get<MapGenerator>().TerrainForRegion(RegionType.Type.Land);
 
             action.description = "Mine Wall";
             action.layoutCoordinate = coordinate;
@@ -277,25 +281,28 @@ public class Map : ActionableItem  {
 
         if (terraformTargetCoordinateMap[coordinate.x, coordinate.y] != null) {
             terraformTarget = terraformTargetCoordinateMap[coordinate.x, coordinate.y];
-        } else {           
-            TerrainType targetTerrain = Script.Get<MapGenerator>().TerrainForRegion(RegionType.Land);
+        } else {
+            TerrainManager terrainManager = Script.Get<TerrainManager>();
 
-            if (task.action == GameTask.ActionType.FlattenPath) {
-                targetTerrain = Script.Get<MapGenerator>().TerrainForRegion(RegionType.Path);
-            }
+            TerrainType targetTerrain = terrainManager.terrainTypeMap[TerrainType.Type.Sand];
+
+            //if (task.action == GameTask.ActionType.FlattenPath) {
+            //    targetTerrain = Script.Get<MapGenerator>().TerrainForRegion(RegionType.Path);
+            //}
 
             if (GetTerrainAt(coordinate) == targetTerrain) {
                 // Do not attempt to terraform a target point into the same terrain type
                 return 1;
             }
 
-            float targetTerrainHeight = targetTerrain.plateauAtBase ? targetTerrain.noiseBaseline : targetTerrain.noiseMax;
+            RegionType regionType = terrainManager.regionTypeMap[targetTerrain.regionType];
+            float targetTerrainHeight = regionType.plateauAtBase ? regionType.noiseBase : regionType.noiseMax;
 
             terraformTarget = new TerraformTarget(coordinate, targetTerrain, targetTerrainHeight, layoutNoiseMap[coordinate.x, coordinate.y]);
             terraformTargetCoordinateMap[coordinate.x, coordinate.y] = terraformTarget;
         }
 
-        terraformTarget.percentage += rate;
+        terraformTarget.percentage += rate * GetTerrainAt(coordinate).modificationSpeedModifier;
         if (terraformTarget.percentage >= 1) {
             terraformTarget.percentage = 1;
 
@@ -334,8 +341,8 @@ public class Map : ActionableItem  {
 
             terraformTargetCoordinateMap[coordinate.x, coordinate.y] = null;
             UpdateUserActionsAt(terraformTarget.coordinate);
+            mapContainer.UpdateShaderTerrainTextures();
         }
-
 
         TerraformHeightMap(terraformTarget);
 

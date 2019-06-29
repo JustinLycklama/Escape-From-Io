@@ -86,4 +86,33 @@ public static class NoiseGenerator {
         
         return noiseMap;
     }
+
+    public static void NormalizeMap(float[,] noiseMap) {
+        int mapWidth = noiseMap.GetLength(0);
+        int mapHeight = noiseMap.GetLength(1);
+
+        float minNoiseHeight = float.MaxValue;
+        float maxNoiseHeight = float.MinValue;
+
+        for(int y = 0; y < mapWidth; y++) {
+            for(int x = 0; x < mapHeight; x++) {
+                float noiseHeight = noiseMap[x, y];
+
+                if(noiseHeight > maxNoiseHeight) {
+                    maxNoiseHeight = noiseHeight;
+                }
+
+                if(noiseHeight < minNoiseHeight) {
+                    minNoiseHeight = noiseHeight;
+                }
+            }
+        }
+
+        // Normalize noise map
+        for(int y = 0; y < mapHeight; y++) {
+            for(int x = 0; x < mapWidth; x++) {
+                noiseMap[x, y] = Mathf.InverseLerp(minNoiseHeight, maxNoiseHeight, noiseMap[x, y]);
+            }
+        }
+    }
 }

@@ -68,8 +68,9 @@ public class Script {
     public static Script SelectionManager { get { return new Script(Tag.Narrator, typeof(SelectionManager)); } }
     public static Script UnitManager { get { return new Script(Tag.Narrator, typeof(UnitManager)); } }
     public static Script TextureGenerator { get { return new Script(Tag.MapGenerator, typeof(TextureGenerator)); } }
+    public static Script TerrainManager { get { return new Script(Tag.MapGenerator, typeof(TerrainManager)); } }
 
-    public static Script[] allScripts = new Script[] { Constants, PlayerBehaviour, MapsManager, UIManager, TaskQueue, MapGenerator, PathfindingGrid, SelectionManager, UnitManager, TextureGenerator }; 
+    public static Script[] allScripts = new Script[] { Constants, PlayerBehaviour, MapsManager, UIManager, TaskQueue, MapGenerator, PathfindingGrid, SelectionManager, UnitManager, TextureGenerator, TerrainManager }; 
 
     public static T Get<T> () where T : Component {
 

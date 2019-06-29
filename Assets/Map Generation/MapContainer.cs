@@ -127,6 +127,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate
         MapCoordinate mapCoordinate = new MapCoordinate(layoutCoordinate);
 
         BoxCollider boxCollider = boxColliderArray[layoutCoordinate.x, (map.mapHeight / map.featuresPerLayoutPerAxis) - 1 - layoutCoordinate.y];
+
         boxCollider.size = new Vector3(boxSizeX, map.getHeightAt(mapCoordinate) * 2, boxSizeZ);
     }
 
@@ -267,13 +268,31 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate
         mapMaterial.SetFloat("mapYOffsetLow", 0 - (constants.layoutMapHeight * constants.featuresPerLayoutPerAxis / 2f));
         mapMaterial.SetFloat("mapYOffsetHigh", constants.layoutMapHeight - (constants.layoutMapHeight * constants.featuresPerLayoutPerAxis / 2f));
 
+        TextureGenerator texGen = Script.Get<TextureGenerator>();
+
+        UpdateShaderTerrainTextures();
+
+        mapMaterial.SetFloatArray("indexPriority", texGen.TexturePriorityList());
+        mapMaterial.SetFloatArray("indexScale", texGen.TextureScaleList());
+
+        Texture2DArray texturesArray = texGen.TextureArray();
+        mapMaterial.SetTexture("baseTextures", texturesArray);
+    }
+
+    public void UpdateShaderTerrainTextures() {
+        Constants constants = Script.Get<Constants>();
+        Material mapMaterial = GetComponent<MeshRenderer>().sharedMaterial;
+
+        int mapWidthWithOverhang = constants.layoutMapWidth + 2;
+        int mapHeightWithOverhang = constants.layoutMapHeight + 2;
+
         textureIndexList = new float[mapWidthWithOverhang * mapHeightWithOverhang];
         TextureGenerator texGen = Script.Get<TextureGenerator>();
 
         for(int y = 0; y < mapHeightWithOverhang; y++) {
-            for (int x = 0; x < mapWidthWithOverhang; x++) {
+            for(int x = 0; x < mapWidthWithOverhang; x++) {
 
-                if (x == 0 || x == mapWidthWithOverhang - 1 || y == 0 || y == mapHeightWithOverhang - 1) {
+                if(x == 0 || x == mapWidthWithOverhang - 1 || y == 0 || y == mapHeightWithOverhang - 1) {
                     textureIndexList[y * mapWidthWithOverhang + x] = -1;
                     continue;
                 }
@@ -286,12 +305,6 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate
         }
 
         mapMaterial.SetFloatArray("layoutTextures", textureIndexList);
-        mapMaterial.SetFloatArray("indexPriority", texGen.TexturePriorityList());
-        mapMaterial.SetFloatArray("indexScale", texGen.TextureScaleList());
-
-
-        Texture2DArray texturesArray = texGen.TextureArray();
-        mapMaterial.SetTexture("baseTextures", texturesArray);
     }
 
     /*

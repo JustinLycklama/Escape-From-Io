@@ -10,7 +10,7 @@ public class CurrentSelectionPanel : MonoBehaviour, SelectionManagerDelegate, Ta
     const string noSelectionText = "None";
     public Text title;
 
-    public MasterAndGameTaskCell taskItemCell;
+    //public MasterAndGameTaskCell taskItemCell;
     public ActionsList actionsList;
 
     void Start() {
@@ -55,7 +55,7 @@ public class CurrentSelectionPanel : MonoBehaviour, SelectionManagerDelegate, Ta
      * */
 
     public void NowPerformingTask(MasterGameTask masterGameTask, GameTask gameTask) {
-        taskItemCell.SetTask(masterGameTask, gameTask);
+        //taskItemCell.SetTask(masterGameTask, gameTask);
     }
 
     /*
