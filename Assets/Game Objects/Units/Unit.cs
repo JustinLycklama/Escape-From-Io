@@ -297,7 +297,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
 
                 targetRotation = Quaternion.LookRotation(lookPoint - transform.position);
                 transform.rotation =  Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * followPathTurnSpeed);
-                transform.Translate(Vector3.forward * Time.deltaTime * speed * speedPercent, Space.Self);
+                transform.Translate(Vector3.forward * Time.deltaTime * localSpeed * speedPercent, Space.Self);
             }
 
             yield return null;

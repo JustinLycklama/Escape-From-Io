@@ -24,7 +24,6 @@ public class Narrator : MonoBehaviour
         spawnCoordinate = mapGenerator.GenerateWorld(constants.mapCountX, constants.mapCountY);
 
         grid.gameObject.transform.position = mapsManager.transform.position;
-        //grid.gridWorldSize = new Vector2(map.mapWidth * mapContainer.gameObject.transform.localScale.x, map.mapHeight * mapContainer.gameObject.transform.localScale.z);
 
         grid.createGrid();
         grid.BlurPenaltyMap(4);

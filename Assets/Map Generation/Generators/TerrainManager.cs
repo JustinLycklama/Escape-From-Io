@@ -21,10 +21,6 @@ public class TerrainManager : MonoBehaviour {
             return waterTerrainTypes.Concat(landTerrainTypes).Concat(mountainTerrainTypes).ToArray();
         }
     }
-    //public TerrainMutator[] mutatableRegions;
-
-    //[HideInInspector]
-    //public TerrainType[] allTerrainTypesSorted;
 
     [HideInInspector]
     public Dictionary<RegionType.Type, RegionType> regionTypeMap;
@@ -37,7 +33,6 @@ public class TerrainManager : MonoBehaviour {
 
     private void Awake() {
         MapGenerator mapGen = Script.Get<MapGenerator>();
-        //allTerrainTypesSorted = new TerrainType[terrainTypes.Length + mutatableRegions.Length];
 
         regionTypeMap = new Dictionary<RegionType.Type, RegionType>();
         regionToTerrainTypeMap = new Dictionary<RegionType, List<TerrainType>>();
@@ -107,6 +102,79 @@ public class TerrainManager : MonoBehaviour {
 
         return terrainTypeMap[TerrainType.Type.Water];
     }
+
+    public TerrainType? CanTerriformTo(TerrainType terrainType) {
+        if (terrainType.regionType == RegionType.Type.Mountain) {
+            return terrainTypeMap[TerrainType.Type.Mud];
+        }
+
+        if(terrainType.type == TerrainType.Type.Mud || terrainType.type == TerrainType.Type.Grass) {
+            return terrainTypeMap[TerrainType.Type.Sand];
+        }
+
+        return null;
+    }
+
+    public UserAction[] ActionsAvailableForTerrain(LayoutCoordinate coordinate) {
+
+        Map map = coordinate.mapContainer.map;
+
+        TerrainType terrainType = map.GetTerrainAt(coordinate);
+        MapCoordinate mapCoordinate = new MapCoordinate(coordinate);
+        WorldPosition worldPosition = new WorldPosition(mapCoordinate);
+
+        List<UserAction> actionList = new List<UserAction>();
+
+        UserAction action = new UserAction();
+
+        TerrainType? terraformable = CanTerriformTo(terrainType);
+
+        switch(terrainType.regionType) {
+            case RegionType.Type.Land:
+
+                if (terraformable != null) {
+                    action.description = "Clean";
+                    action.layoutCoordinate = coordinate;
+
+                    action.performAction = (LayoutCoordinate layoutCoordinate) => {
+                        TaskQueueManager queue = Script.Get<TaskQueueManager>();
+
+                        GameTask miningTask = new GameTask("Mining", worldPosition, GameTask.ActionType.FlattenPath, map, PathRequestTargetType.Layout);
+                        MasterGameTask masterMiningTask = new MasterGameTask(MasterGameTask.ActionType.Move, "Mine at location " + layoutCoordinate.description, new GameTask[] { miningTask });
+
+                        queue.QueueTask(masterMiningTask);
+                        map.AssociateTask(masterMiningTask, layoutCoordinate);
+                    };
+
+                    actionList.Add(action);
+                }
+
+                break;
+            case RegionType.Type.Mountain:
+
+                if(terraformable != null) {
+                    action.description = "Mine Wall";
+                    action.layoutCoordinate = coordinate;
+
+                    action.performAction = (LayoutCoordinate layoutCoordinate) => {
+                        TaskQueueManager queue = Script.Get<TaskQueueManager>();
+
+                        GameTask miningTask = new GameTask("Mining", worldPosition, GameTask.ActionType.Mine, map, PathRequestTargetType.Layout);
+                        MasterGameTask masterMiningTask = new MasterGameTask(MasterGameTask.ActionType.Mine, "Mine at location " + layoutCoordinate.description, new GameTask[] { miningTask });
+
+                        queue.QueueTask(masterMiningTask);
+                        map.AssociateTask(masterMiningTask, layoutCoordinate);
+                    };
+
+                    actionList.Add(action);
+                }
+                break;
+            default:
+                break;
+        }
+
+        return actionList.ToArray();
+    }
 }
 
 [System.Serializable]
@@ -117,7 +185,6 @@ public struct RegionType {
     public float noiseBase;
     public float noiseMax;
 
-    //public bool plateau;
     public bool plateauAtBase;
 
     public Color color;
@@ -169,17 +236,6 @@ public struct TerrainType {
         }
     }
 
-    //public static TerrainType Mutate(TerrainType type, TerrainMutator mutator) {
-    //    type.name = mutator.name;
-    //    type.buildable = mutator.buildable;
-    //    type.texture = mutator.texture;
-    //    type.textureScale = mutator.textureScale;
-    //    type.walkSpeedMultiplier = mutator.walkSpeedMultiplier;
-    //    type.modificationSpeedModifier = mutator.modificationSpeedModifier;
-
-    //    return type;
-    //}
-
     public override bool Equals(object obj) {
         return base.Equals(obj);
     }
@@ -200,30 +256,6 @@ public struct TerrainType {
         return !(obj1 == obj2);
     }
 }
-
-//[System.Serializable]
-//public struct TerrainMutator {
-//    public string name;
-//    public RegionType.Type regionType;
-
-
-//    public Texture2D texture;
-//    public float textureScale;
-
-//    [Range(0, 1)]
-//    public float walkSpeedMultiplier;
-//    [Range(0, 1)]
-//    public float modificationSpeedModifier;
-
-//    public bool buildable;
-
-//    public float noiseBase;
-//    public float noiseMax;
-
-//    public bool ValueIsMember(float value) {
-//        return value <= noiseMax && value >= noiseBase;
-//    }
-//}
 
 static class EnumExtensions {
     public static int Priority(this RegionType.Type type) {

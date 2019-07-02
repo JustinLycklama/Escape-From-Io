@@ -151,11 +151,13 @@ public class Map : ActionableItem  {
         MapCoordinate mapCoordinate = new MapCoordinate(coordinate);
         WorldPosition worldPosition = new WorldPosition(mapCoordinate);
 
+        TerrainManager terrainManager = Script.Get<TerrainManager>();
+
         // Can I...
 
         List<UserAction> actionList = new List<UserAction>();
 
-        if (associatedTasksCoordinateMap[coordinate.x, coordinate.y] != null) {
+        if(associatedTasksCoordinateMap[coordinate.x, coordinate.y] != null) {
             UserAction action = new UserAction();
 
             action.description = "Cancel";
@@ -166,10 +168,14 @@ public class Map : ActionableItem  {
             };
 
             actionList.Add(action);
+        } else {
+            return terrainManager.ActionsAvailableForTerrain(coordinate);
+
+
+            // Build?
         }
 
-        // Build?
-        else if (GetTerrainAt(coordinate).buildable) {
+        if (GetTerrainAt(coordinate).buildable) {
 
             UserAction action = new UserAction();
             action.description = "Building";
@@ -202,72 +208,34 @@ public class Map : ActionableItem  {
             //}
         } 
         // We cannot build but we are a land, lets terraform to buildable
-        else if (false) {
+        //else if (false) {
 
-        }
+        //}
 
-        // Mine?
-        else if(GetTerrainAt(coordinate).regionType == RegionType.Type.Mountain) {
-            UserAction action = new UserAction();
+        //// Mine?
+        //else if(GetTerrainAt(coordinate).regionType == RegionType.Type.Mountain) {
+        //    UserAction action = new UserAction();
 
-            //TerrainType landTerrain = Script.Get<MapGenerator>().TerrainForRegion(RegionType.Type.Land);
+        //    //TerrainType landTerrain = Script.Get<MapGenerator>().TerrainForRegion(RegionType.Type.Land);
 
-            action.description = "Mine Wall";
-            action.layoutCoordinate = coordinate;
+        //    action.description = "Mine Wall";
+        //    action.layoutCoordinate = coordinate;
 
-            action.performAction = (LayoutCoordinate layoutCoordinate) => {
-                TaskQueueManager queue = Script.Get<TaskQueueManager>();
+        //    action.performAction = (LayoutCoordinate layoutCoordinate) => {
+        //        TaskQueueManager queue = Script.Get<TaskQueueManager>();
 
-                GameTask miningTask = new GameTask("Mining", worldPosition, GameTask.ActionType.Mine, this, PathRequestTargetType.Layout);
-                MasterGameTask masterMiningTask = new MasterGameTask(MasterGameTask.ActionType.Mine, "Mine at location " + layoutCoordinate.description, new GameTask[] { miningTask });
+        //        GameTask miningTask = new GameTask("Mining", worldPosition, GameTask.ActionType.Mine, this, PathRequestTargetType.Layout);
+        //        MasterGameTask masterMiningTask = new MasterGameTask(MasterGameTask.ActionType.Mine, "Mine at location " + layoutCoordinate.description, new GameTask[] { miningTask });
 
-                queue.QueueTask(masterMiningTask);
-                this.AssociateTask(masterMiningTask, layoutCoordinate);
-            };
+        //        queue.QueueTask(masterMiningTask);
+        //        this.AssociateTask(masterMiningTask, layoutCoordinate);
+        //    };
 
-            actionList.Add(action);
-        }
-
-
-        // TEST ACTIONS
-        //UserAction testAction1 = new UserAction();
-
-        //testAction1.description = "Find Any Ore";
-        //testAction1.performAction = () => {
-        //    TaskQueueManager queue = Script.Get<TaskQueueManager>();
-
-        //    GameTask oreTask = new GameTask(GameResourceManager.GatherType.Ore, GameTask.ActionType.PickUp, null);
-
-        //    MasterGameTask masterOreTask = new MasterGameTask("Gather Ore Somwhere ", new GameTask[] { oreTask });
-
-        //    queue.QueueTask(masterOreTask);
-        //};
-
-        //actionList.Add(testAction1);
-
-
+        //    actionList.Add(action);
+        //}
 
         return actionList.ToArray();
     }
-
-
-
-    //public void UpdateTerrain(TerrainType terrain, LayoutCoordinate coordinate) {
-    //    MapGenerator mapGenerator = Script.Get<MapGenerator>();
-
-    //    finalHeightMap = mapGenerator.TerraformHeightMap(layoutNoiseMap, featuresNoiseMap, 0.4f, coordinate);
-
-    //    meshData = MeshGenerator.UpdateTerrainMesh(meshData, finalHeightMap, featuresPerLayoutPerAxis, coordinate);
-
-    //    Script.Get<MapContainer>().DrawMesh();
-    //    terrainData[coordinate.x, coordinate.y] = terrain;
-
-    //    Script.Get<PathfindingGrid>().UpdateGrid(this, coordinate);
-
-    //    foreach (TerrainUpdateDelegate updateDelegate in terrainUpdateDelegates) {
-    //        updateDelegate.NotifyTerrainUpdate();
-    //    }
-    //}
 
     /*
      * Actionable Item Interface
@@ -283,22 +251,23 @@ public class Map : ActionableItem  {
             terraformTarget = terraformTargetCoordinateMap[coordinate.x, coordinate.y];
         } else {
             TerrainManager terrainManager = Script.Get<TerrainManager>();
+            TerrainType originalTerrain = GetTerrainAt(coordinate);
 
-            TerrainType targetTerrain = terrainManager.terrainTypeMap[TerrainType.Type.Sand];
+            TerrainType? targetTerrain = terrainManager.CanTerriformTo(originalTerrain);
 
             //if (task.action == GameTask.ActionType.FlattenPath) {
             //    targetTerrain = Script.Get<MapGenerator>().TerrainForRegion(RegionType.Path);
             //}
 
-            if (GetTerrainAt(coordinate) == targetTerrain) {
+            if (targetTerrain == null) {
                 // Do not attempt to terraform a target point into the same terrain type
                 return 1;
             }
 
-            RegionType regionType = terrainManager.regionTypeMap[targetTerrain.regionType];
+            RegionType regionType = terrainManager.regionTypeMap[targetTerrain.Value.regionType];
             float targetTerrainHeight = regionType.plateauAtBase ? regionType.noiseBase : regionType.noiseMax;
 
-            terraformTarget = new TerraformTarget(coordinate, targetTerrain, targetTerrainHeight, layoutNoiseMap[coordinate.x, coordinate.y]);
+            terraformTarget = new TerraformTarget(coordinate, targetTerrain.Value, targetTerrainHeight, layoutNoiseMap[coordinate.x, coordinate.y]);
             terraformTargetCoordinateMap[coordinate.x, coordinate.y] = terraformTarget;
         }
 
