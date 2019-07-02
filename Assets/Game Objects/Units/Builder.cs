@@ -19,4 +19,8 @@ public class Builder : Unit {
 
         return 0.1f;
     }
+
+    protected override void Animate() {
+        
+    }
 }

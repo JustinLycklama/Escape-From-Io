@@ -19,4 +19,7 @@ public class Mover : Unit {
 
         return 0.1f;
     }
+
+    protected override void Animate() {
+    }
 }

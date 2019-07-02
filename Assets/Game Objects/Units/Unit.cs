@@ -223,6 +223,8 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
         DoTask(masterGameTask);
     }
 
+    protected abstract void Animate();
+
     IEnumerator PerformTaskAction(System.Action<bool> callBack) {
 
         float speed = SpeedForTask(currentGameTask);
@@ -230,6 +232,8 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
         while (true) {
             float completion = currentGameTask.actionItem.performAction(currentGameTask, Time.deltaTime * speed, this);
             unitStatusTooltip.percentageBar.SetPercent(completion);
+
+            Animate();
 
             if (completion >= 1) {
                 callBack(true);

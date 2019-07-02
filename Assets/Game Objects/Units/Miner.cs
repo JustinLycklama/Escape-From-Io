@@ -5,6 +5,14 @@ using UnityEngine;
 public class Miner : Unit {
     public override MasterGameTask.ActionType primaryActionType => MasterGameTask.ActionType.Mine;
 
+    public MoenenGames.VoxelRobot.Weapon[] weaponSet; 
+
+    protected override void Animate() {
+        foreach(MoenenGames.VoxelRobot.Weapon weapon in weaponSet) {
+            weapon.Animate();
+        }
+    }
+
     public override float SpeedForTask(GameTask gameTask) {
         switch(gameTask.action) {
             case GameTask.ActionType.Build:
