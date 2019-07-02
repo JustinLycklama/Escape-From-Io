@@ -2,16 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-
 public class MapGenerator : MonoBehaviour {
 
     public enum DrawMode {NoiseMap, ColorMap, Mesh}
     public DrawMode drawMode;
-
-    private int layoutMapWidth;
-    private int layoutMapHeight;
-
-    private int featuresPerLayoutPerAxis;
 
     [Range(0, 1)]
     public float groundFeaturesImpactOnLayout;
@@ -29,21 +23,9 @@ public class MapGenerator : MonoBehaviour {
     public NoiseData mountainFeaturesMapNoiseData;
 
     const int seedCap = 1000;
-
-    private void OnValidate() {
-        if(layoutMapWidth < 1) {
-            layoutMapWidth = 1;
-        }
-
-        if(layoutMapHeight < 1) {
-            layoutMapHeight = 1;
-        }
-    }
-
-
     System.Random rnd = new System.Random();
 
-    public void RandomizeSeed() {
+    private void RandomizeSeed() {
         rnd = new System.Random(System.Guid.NewGuid().GetHashCode());
 
         layoutMapNoiseData.seed = rnd.Next(1, seedCap);
@@ -55,12 +37,16 @@ public class MapGenerator : MonoBehaviour {
         mountainFeaturesMapNoiseData.seed = rnd.Next(1, seedCap);
     }
 
+    /*
+     * Interface Data
+     * */
+
     public float[,] GenerateLayoutMap(int width, int length) {
         return NoiseGenerator.GenerateNoiseMap(width, length, layoutMapNoiseData);
     }
 
     public float[,] GenerateGroundMutatorMap(int width, int length) {
-        float[,] map = NoiseGenerator.GenerateNoiseMap(width, length, groundMutatorMapNoiseData); ;
+        float[,] map = NoiseGenerator.GenerateNoiseMap(width, length, groundMutatorMapNoiseData);
         NoiseGenerator.NormalizeMap(map);
 
         return map;
@@ -83,68 +69,153 @@ public class MapGenerator : MonoBehaviour {
         return NoiseGenerator.GenerateNoiseMap(width, length, mountainFeaturesMapNoiseData);
     }
 
-    public Map GenerateMap(MapContainer mapContainer, float[,] layoutNoiseMap, float[,] groundFeaturesNoiseMap, float[,] mountainFeaturesNoiseMap) {
-        Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();
+    /*
+     * World Generation (series of maps)
+     * */
 
-        this.layoutMapWidth = layoutNoiseMap.GetLength(0);
-        this.layoutMapHeight = layoutNoiseMap.GetLength(1);
-        this.featuresPerLayoutPerAxis = constants.featuresPerLayoutPerAxis;
+    private static T[,] RangeSubset<T>(T[,] array, int startIndexX, int startIndexY, int lengthX, int lengthY) {
+        T[,] subset = new T[lengthX, lengthY];
 
-        // First generate a small noise map, use for the general layout (eg. which area is a path, which is a rock, ...)
-        // This is the noise map the grid and selectons will use
-        //float[,] layoutNoiseMap = NoiseGenerator.GenerateNoiseMap(layoutMapWidth, layoutMapHeight, layoutMapNoiseData);
+        for(int x = startIndexX; x < startIndexX + lengthX; x++) {
+            for(int y = startIndexY; y < startIndexY + lengthY; y++) {
+                subset[x - startIndexX, y - startIndexY] = array[x, y];
+            }
+        }
 
-        int noiseMapWidth = groundFeaturesNoiseMap.GetLength(0);
-        int noiseMapHeight = groundFeaturesNoiseMap.GetLength(1);
+        return subset;
+    }
 
-        // Then generate a larger scale noise map, and overlay it on the small one
-        //float[,] groundFeaturesNoiseMap = NoiseGenerator.GenerateNoiseMap(noiseMapWidth, noiseMapHeight, groundFeaturesMapNoiseData);
-        //float[,] mountainFeaturesNoiseMap = NoiseGenerator.GenerateNoiseMap(noiseMapWidth, noiseMapHeight, mountainFeaturesMapNoiseData);
+    int spawnCoordX;
+    int spawnCoordY;
+    const int suitableCoordinateDistance = 1;
+
+    // returns false if unable to get appropriate coordinate
+    private bool GetSpawnCoordinate(float[,] layoutNoiseMap) {
+        int midX = (layoutNoiseMap.GetLength(0) / 2) - 1;
+        int midY = (layoutNoiseMap.GetLength(1) / 2) - 1;
+
+        TerrainManager manager = Script.Get<TerrainManager>();
+
+        for(int x = -suitableCoordinateDistance; x <= suitableCoordinateDistance; x++) {
+            for(int y = -suitableCoordinateDistance; y <= suitableCoordinateDistance; y++) {
+                float sample = layoutNoiseMap[midX + x, midY + y];
+
+                if(manager.RegionTypeForValue(sample).type == RegionType.Type.Land) {
+                    spawnCoordX = midX + x;
+                    spawnCoordY = midY + y;
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private bool IsLayoutSuitable(float[,] layoutNoiseMap) {
+        if(GetSpawnCoordinate(layoutNoiseMap) == false) {
+            return false;
+        }
+
+        return true;
+    }
+
+    // Generate the series of maps, returning a suitable spawn coordinate
+    public LayoutCoordinate GenerateWorld(int mapCountX, int mapCountY) {
+        MapsManager mapsManager = Script.Get<MapsManager>();
+        Constants constants = Script.Get<Constants>();
+
+        mapsManager.InitializeMaps(mapCountX, mapCountY);
+
+        /*
+         * Generate Layout 
+         * */
+
+        int mapLayoutWidth = constants.layoutMapWidth;
+        int mapLayoutHeight = constants.layoutMapHeight;
+
+        int totalLayoutWidth = mapLayoutWidth * constants.mapCountX;
+        int totalLayoutHeight = mapLayoutHeight * constants.mapCountY;
+
+        float[,] layoutNoiseMap = new float[0, 0];
+        bool success = false;
+
+        while(success == false) {
+            RandomizeSeed();
+            layoutNoiseMap = GenerateLayoutMap(totalLayoutWidth, totalLayoutHeight);
+            success = IsLayoutSuitable(layoutNoiseMap);
+        }
+
+        print("Found Suitable Map");
+
+        float[,] groundMutatorMap = GenerateGroundMutatorMap(totalLayoutWidth, totalLayoutHeight);
+        float[,] mountainMutatorMap = GenerateMountainMutatorMap(totalLayoutWidth, totalLayoutHeight);
+
+        TerrainManager terrainManager = Script.Get<TerrainManager>();
+        terrainManager.SetGroundMutatorMap(groundMutatorMap);
+        terrainManager.SetMounainMutatorMap(mountainMutatorMap);
 
         TerrainType[,] terrainMap = PlateauMap(layoutNoiseMap);
-        float[,] noiseMap = CreateMapWithFeatures(layoutNoiseMap, groundFeaturesNoiseMap, mountainFeaturesNoiseMap, terrainMap);
 
-        NoiseGenerator.NormalizeMap(noiseMap);
+        /*
+         * Generate Details
+         * */
 
-        TextureGenerator textureGenerator = Script.Get<TextureGenerator>();
+        int mapFullWidth = mapLayoutWidth * constants.featuresPerLayoutPerAxis;
+        int mapFullHeight = mapLayoutHeight * constants.featuresPerLayoutPerAxis;
 
-        Map map = new Map(noiseMap, layoutNoiseMap, groundFeaturesNoiseMap, mountainFeaturesNoiseMap,
-            featuresPerLayoutPerAxis,
-            MeshGenerator.GenerateTerrainMesh(noiseMap, featuresPerLayoutPerAxis),
-            textureGenerator.TextureFromColorMap(CreateColorMapWithTerrain(noiseMap, terrainMap, mapContainer), noiseMapWidth + 2, noiseMapHeight + 2),
-            terrainMap
-            );
+        int totalFullWidth = mapFullWidth * constants.mapCountX;
+        int totalFullHeight = mapFullHeight * constants.mapCountY;
 
-        MapDebugDisplay debugDisplay = FindObjectOfType<MapDebugDisplay>();
-        switch (drawMode) {
-            case DrawMode.NoiseMap:
-                if (debugDisplay != null) {
-                    debugDisplay.DrawTexture(textureGenerator.TextureFromNoiseMap(noiseMap));
-                    debugDisplay.DrawTextures(textureGenerator.TextureFromNoiseMap(layoutNoiseMap), textureGenerator.TextureFromNoiseMap(groundFeaturesNoiseMap));
-                }                
-                break;
-            case DrawMode.ColorMap:
-                if(debugDisplay != null) {
+        float[,] groundFeaturesNoiseMap = GenerateGroundFeaturesMap(totalFullWidth, totalFullHeight);
+        float[,] mountainFeaturesNoiseMap = GenerateMountainFeaturesMap(totalFullWidth, totalFullHeight);
 
-                    debugDisplay.DrawTexture(textureGenerator.TextureFromColorMap(CreateColorMap(noiseMap), noiseMap.GetLength(0), noiseMap.GetLength(1)));
-                    debugDisplay.DrawTextures(textureGenerator.TextureFromColorMap(CreateColorMap(layoutNoiseMap), layoutNoiseMap.GetLength(0), layoutNoiseMap.GetLength(1)),
-                        textureGenerator.TextureFromColorMap(CreateColorMap(groundFeaturesNoiseMap), groundFeaturesNoiseMap.GetLength(0), groundFeaturesNoiseMap.GetLength(1))
-                        );
-                }
-                break;
-            case DrawMode.Mesh:
-                mapContainer.setMap(map, false);
+        float[,] finalNoiseMap = CreateMapWithFeatures(layoutNoiseMap, groundFeaturesNoiseMap, mountainFeaturesNoiseMap, terrainMap);
 
-                if(debugDisplay != null) {
-                        debugDisplay.DrawMeshes(MeshGenerator.GenerateTerrainMesh(layoutNoiseMap, 1), textureGenerator.TextureFromColorMap(CreateColorMap(layoutNoiseMap), layoutNoiseMap.GetLength(0), layoutNoiseMap.GetLength(1)),
-                        MeshGenerator.GenerateTerrainMesh(groundFeaturesNoiseMap, 1), textureGenerator.TextureFromColorMap(CreateColorMap(groundFeaturesNoiseMap), groundFeaturesNoiseMap.GetLength(0), groundFeaturesNoiseMap.GetLength(1))
-                        );
-                }
-                break;
+        NoiseGenerator.NormalizeMap(finalNoiseMap);
+
+        // Setup world
+        LayoutCoordinate spawnCoordinate = new LayoutCoordinate(0, 0, mapsManager.mapContainers[0]);
+        foreach(MapContainer container in mapsManager.mapContainers) {
+            int startXLayout = container.mapX * mapLayoutWidth;
+            int startYLayout = container.mapY * mapLayoutHeight;
+
+            if(spawnCoordX >= startXLayout && spawnCoordX < startXLayout + mapLayoutWidth && spawnCoordY >= startYLayout && spawnCoordY < startYLayout + mapLayoutHeight) {
+                spawnCoordinate = new LayoutCoordinate(spawnCoordX - startXLayout, spawnCoordY - startYLayout, container);
+            }
+
+            //int xOffset = (container.mapX == 0 ? 0 : 1);
+            //int yOffset = (container.mapY == 0 ? 0 : 1);
+
+            float[,] mapLayoutNoise = RangeSubset(layoutNoiseMap, startXLayout, startYLayout, mapLayoutWidth, mapLayoutHeight);
+            TerrainType[,] mapTerrainData = RangeSubset(terrainMap, startXLayout, startYLayout, mapLayoutWidth, mapLayoutHeight);
+
+            int startXFull = startXLayout * constants.featuresPerLayoutPerAxis;
+            int startYFull = startYLayout * constants.featuresPerLayoutPerAxis;
+
+            float[,] mapGroundFeatures = RangeSubset(groundFeaturesNoiseMap, startXFull, startYFull, mapFullWidth, mapFullHeight);
+            float[,] mapMountainFeatures = RangeSubset(mountainFeaturesNoiseMap, startXFull, startYFull, mapFullWidth, mapFullHeight);
+            float[,] mapFinalNoiseMap = RangeSubset(finalNoiseMap, startXFull, startYFull, mapFullWidth, mapFullHeight);
+
+            //int noiseMapWidth = groundFeaturesNoiseMap.GetLength(0);
+            //int noiseMapHeight = groundFeaturesNoiseMap.GetLength(1);
+
+            Map map = new Map(mapTerrainData, mapFinalNoiseMap, mapLayoutNoise, mapGroundFeatures, mapMountainFeatures,
+                MeshGenerator.GenerateTerrainMesh(mapFinalNoiseMap));
+
+            container.setMap(map);
         }
-       
-        return map;
+
+        // Second pass to fill in overhang
+        foreach(MapContainer container in mapsManager.mapContainers) {
+            container.UpdateMapOverhang();
+        }
+
+        return spawnCoordinate;
     }
+
+    /*
+     * Map Modification
+     * */
 
     public float[,] TerraformHeightMap(float[,] layoutNoiseMap, float[,] groundFeaturesNoiseMap, float[,] mountainFeaturesNoiseMap, TerrainType[,] terrainMap, float currentLayoutHeight, LayoutCoordinate coordinate) {
         // TODO More interesting interpolations to mimic mining
@@ -157,9 +228,37 @@ public class MapGenerator : MonoBehaviour {
         return noiseMap;
     }
 
-    // PRIVATE
+    /*
+     * Map (2d array) Creation
+     * */
 
-    private float[,] CreateMapWithFeatures(float[,] layoutMap, float[,] groundFeaturesMap, float[,] mountainFeaturesMap, TerrainType[,] terrainMap) {
+    // Returns a 2d array of terrainTypes
+    public TerrainType[,] PlateauMap(float[,] map) {
+        int mapWidth = map.GetLength(0);
+        int mapHeight = map.GetLength(1);
+
+        TerrainType[,] terrainMap = new TerrainType[map.GetLength(0), map.GetLength(1)];
+        TerrainManager terrainManager = Script.Get<TerrainManager>();
+
+        for(int y = 0; y < mapHeight; y++) {
+            for(int x = 0; x < mapWidth; x++) {
+
+                RegionType region = terrainManager.RegionTypeForValue(map[x, y]);
+
+                terrainMap[x, y] = terrainManager.TerrainTypeForRegion(region, x, y);
+                map[x, y] = (region.plateauAtBase ? region.noiseBase + 0.001f : region.noiseMax - 0.001f);
+            }
+        }
+
+        return terrainMap;
+    }
+
+
+    // Given arrays for our layouts, features and terrain types, create a final height map
+    public float[,] CreateMapWithFeatures(float[,] layoutMap, float[,] groundFeaturesMap, float[,] mountainFeaturesMap, TerrainType[,] terrainMap) {
+        Constants constants = Script.Get<Constants>();
+        int featuresPerLayoutPerAxis = constants.featuresPerLayoutPerAxis;
+
         int featuresWidth = groundFeaturesMap.GetLength(0);
         int featuresHeight = groundFeaturesMap.GetLength(1);
 
@@ -246,7 +345,11 @@ public class MapGenerator : MonoBehaviour {
         return fullMap;
     }
 
+    // Sampling at an index for CreateMapWithFeatures
     private float SampleAtXY(int x, int y, float[,] layoutMap, float[,] groundFeaturesMap, float[,] mountainFeaturesMap, TerrainType[,] terrainMap) {
+        Constants constants = Script.Get<Constants>();
+        int featuresPerLayoutPerAxis = constants.featuresPerLayoutPerAxis;
+
         int sampleX = x / featuresPerLayoutPerAxis;
         int sampleY = y / featuresPerLayoutPerAxis;
 
@@ -262,7 +365,9 @@ public class MapGenerator : MonoBehaviour {
         return 0;
     }
 
-    // TEXTURES
+    /*
+     * Creating color maps from finished noise maps 
+     * */
 
     private Color[] CreateColorMap(float[,] noiseMap) {
 
@@ -285,6 +390,8 @@ public class MapGenerator : MonoBehaviour {
     }
 
     private Color[] CreateColorMapWithTerrain(float[,] noiseMap, TerrainType[,] terrainTypeMap, MapContainer mapContainer) {
+        Constants constants = Script.Get<Constants>();
+        int featuresPerLayoutPerAxis = constants.featuresPerLayoutPerAxis;
 
         int noiseMapWidth = noiseMap.GetLength(0);
         int noiseMapHeight = noiseMap.GetLength(1);
@@ -312,13 +419,13 @@ public class MapGenerator : MonoBehaviour {
 
                     if((boundedX + 1) % featuresPerLayoutPerAxis == 0 || (boundedY + 1) % featuresPerLayoutPerAxis == 0) {
                         // If the next terrain is higher, use that color index instead
-                        if((boundedX + 1) % featuresPerLayoutPerAxis == 0 && (finalSampleX + 1) < layoutMapHeight - 1) {
+                        if((boundedX + 1) % featuresPerLayoutPerAxis == 0 && (finalSampleX + 1) < terrainTypeMap.GetLength(1) - 1) {
                             if(terrainTypeMap[finalSampleX + 1, finalSampleY].priority > terrainTypeMap[finalSampleX, finalSampleY].priority) {
                                 colorAtIndex = terrainTypeMap[finalSampleX + 1, finalSampleY].color;
                             }
                         }
 
-                        if ((boundedY + 1) % featuresPerLayoutPerAxis == 0 && (finalSampleY + 1) < layoutMapHeight - 1) {
+                        if ((boundedY + 1) % featuresPerLayoutPerAxis == 0 && (finalSampleY + 1) < terrainTypeMap.GetLength(1) - 1) {
                             if (terrainTypeMap[finalSampleX, finalSampleY + 1].priority > terrainTypeMap[finalSampleX, finalSampleY].priority) {
                                 colorAtIndex = terrainTypeMap[finalSampleX, finalSampleY + 1].color;
                             }
@@ -335,61 +442,39 @@ public class MapGenerator : MonoBehaviour {
         return colorMap;
     }
 
-    // Returns a Map of terrainTypes
-    private TerrainType[,] PlateauMap(float[,] map) {
-        int mapWidth = map.GetLength(0);
-        int mapHeight = map.GetLength(1);
+    /*
+     * Debug
+     * */
 
-        TerrainType[,] terrainMap = new TerrainType[map.GetLength(0), map.GetLength(1)];
-        TerrainManager terrainManager = Script.Get<TerrainManager>();
+    public void DisplayDebugMap(Map map) {
+        /* MapDebugDisplay debugDisplay = FindObjectOfType<MapDebugDisplay>();
+         TextureGenerator textureGenerator = Script.Get<TextureGenerator>();
 
-        //TerrainType[] regions = Script.Get<TerrainManager>().terrainTypes;
-        //TerrainMutator[] mutatableRegions = Script.Get<TerrainManager>().mutatableRegions;
+         switch(drawMode) {
+             case DrawMode.NoiseMap:
+                 if(debugDisplay != null) {
+                     debugDisplay.DrawTexture(textureGenerator.TextureFromNoiseMap(map.noiseMap));
+                     debugDisplay.DrawTextures(textureGenerator.TextureFromNoiseMap(layoutNoiseMap), textureGenerator.TextureFromNoiseMap(groundFeaturesNoiseMap));
+                 }
+                 break;
+             case DrawMode.ColorMap:
+                 if(debugDisplay != null) {
 
-        int landMutateCount = 0;
+                     debugDisplay.DrawTexture(textureGenerator.TextureFromColorMap(CreateColorMap(noiseMap), noiseMap.GetLength(0), noiseMap.GetLength(1)));
+                     debugDisplay.DrawTextures(textureGenerator.TextureFromColorMap(CreateColorMap(layoutNoiseMap), layoutNoiseMap.GetLength(0), layoutNoiseMap.GetLength(1)),
+                         textureGenerator.TextureFromColorMap(CreateColorMap(groundFeaturesNoiseMap), groundFeaturesNoiseMap.GetLength(0), groundFeaturesNoiseMap.GetLength(1))
+                         );
+                 }
+                 break;
+             case DrawMode.Mesh:
+                 mapContainer.setMap(map, false);
 
-        for(int y = 0; y < mapHeight; y++) {
-            for(int x = 0; x < mapWidth; x++) {
-
-                RegionType region = terrainManager.RegionTypeForValue(map[x, y]);
-
-                terrainMap[x, y] = terrainManager.TerrainTypeForRegion(region, x, y);
-                map[x, y] = (region.plateauAtBase ? region.noiseBase + 0.001f : region.noiseMax - 0.001f);
-
-                /*for(int i = 0; i < regions.Length; i++) {
-                    if(regions[i].plateau && regions[i].ValueIsMember(map[x, y])) {
-
-                        map[x, y] = (regions[i].plateauAtBase ? regions[i].noiseBase + 0.001f : regions[i].noiseMax - 0.001f);
-                        RegionType regionType = regions[i].regionType;
-                        terrainMap[x, y] = regions[i];
-
-                        foreach(TerrainMutator mutator in mutatableRegions) {
-                            float mutatorValue = 0;
-
-                            if(mutator.regionType == RegionType.Land) {
-                                mutatorValue = groundMutatorMap[x, y];
-                            } else if(mutator.regionType == RegionType.Mountain) {
-                                mutatorValue = mountainMutatorMap[x, y];
-                            }
-
-                            if (mutator.regionType == regionType && mutator.ValueIsMember(mutatorValue)) {
-                                terrainMap[x, y] = TerrainType.Mutate(terrainMap[x, y], mutator);
-
-                                if(regionType == RegionType.Land) {
-                                    print("Mutate Land");
-                                    landMutateCount++;
-                                }
-
-                                break;
-                            }
-                        }
-                        
-                        break;
-                    }
-                }*/
-            }
-        }
-
-        return terrainMap;
+                 if(debugDisplay != null) {
+                     debugDisplay.DrawMeshes(MeshGenerator.GenerateTerrainMesh(layoutNoiseMap, 1), textureGenerator.TextureFromColorMap(CreateColorMap(layoutNoiseMap), layoutNoiseMap.GetLength(0), layoutNoiseMap.GetLength(1)),
+                     MeshGenerator.GenerateTerrainMesh(groundFeaturesNoiseMap, 1), textureGenerator.TextureFromColorMap(CreateColorMap(groundFeaturesNoiseMap), groundFeaturesNoiseMap.GetLength(0), groundFeaturesNoiseMap.GetLength(1))
+                     );
+                 }
+                 break;
+         }*/
     }
 }

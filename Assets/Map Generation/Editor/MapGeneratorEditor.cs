@@ -19,12 +19,13 @@ public class MapGeneratorEditor : Editor {
     }
 
     private void Generate(MapGenerator mapGen) {
-        Constants constants = Script.Get<Constants>();
+        /*Constants constants = Script.Get<Constants>();
 
         int mapWidth = constants.layoutMapWidth;
         int mapHeight = constants.layoutMapHeight;
 
         float[,] layoutNoiseMap = mapGen.GenerateLayoutMap(mapWidth, mapHeight);
+        TerrainType[,] terrainMap = mapGen.PlateauMap(layoutNoiseMap);
 
         float[,] groundMutatorMap = mapGen.GenerateGroundMutatorMap(mapWidth, mapHeight);
         float[,] mountainMutatorMap = mapGen.GenerateMountainMutatorMap(mapWidth, mapHeight);
@@ -36,7 +37,7 @@ public class MapGeneratorEditor : Editor {
         float[,] groundFeaturesNoiseMap = mapGen.GenerateGroundFeaturesMap(mapWidth * constants.featuresPerLayoutPerAxis, mapHeight * constants.featuresPerLayoutPerAxis);
         float[,] mountainFeaturesNoiseMap = mapGen.GenerateMountainFeaturesMap(mapWidth * constants.featuresPerLayoutPerAxis, mapHeight * constants.featuresPerLayoutPerAxis);
 
-        mapGen.GenerateMap(mapGen.demoMapContainer, layoutNoiseMap, groundFeaturesNoiseMap, mountainFeaturesNoiseMap);
-        mapGen.demoMapContainer.SetupMaterialShader();
+        mapGen.GenerateMap(mapGen.demoMapContainer, terrainMap, layoutNoiseMap, groundFeaturesNoiseMap, mountainFeaturesNoiseMap);
+        mapGen.demoMapContainer.SetupMaterialShader();*/
     }
 }

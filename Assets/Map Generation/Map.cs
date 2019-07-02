@@ -26,7 +26,7 @@ public class Map : ActionableItem  {
     // Map Width + Height in Map Coordinates (Not Layout Coordinates)
     public int mapWidth;
     public int mapHeight;
-    public Vector2 textureMapSize;
+    //public Vector2 textureMapSize;
 
     public MeshData meshData;
     public Texture2D meshTexture;
@@ -48,15 +48,15 @@ public class Map : ActionableItem  {
 
     public string description => "The World? What should go here";
 
-    public Map(float[,] finalHeightMap, float[,] layoutNoiseMap, float[,] groundFeaturesNoiseMap, float[,] mountainFeaturesNoiseMap,
-        int featuresPerLayoutPerAxis, MeshData meshData, Texture2D meshTexture, TerrainType[,] terrainData) {
+    public Map(TerrainType[,] terrainData, float[,] finalHeightMap, float[,] layoutNoiseMap, float[,] groundFeaturesNoiseMap, float[,] mountainFeaturesNoiseMap, MeshData meshData) {
+        Constants constants = Script.Get<Constants>();
+        featuresPerLayoutPerAxis = constants.featuresPerLayoutPerAxis;
 
         mapWidth = finalHeightMap.GetLength(0);
         mapHeight = finalHeightMap.GetLength(1);
 
-        this.textureMapSize = new Vector2(mapWidth, mapHeight);
+        //this.textureMapSize = new Vector2(mapWidth, mapHeight);
 
-        this.featuresPerLayoutPerAxis = featuresPerLayoutPerAxis;
 
         this.finalHeightMap = finalHeightMap;
 

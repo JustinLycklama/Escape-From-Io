@@ -4,14 +4,16 @@ using UnityEngine;
 
 public static class MeshGenerator {   
 
-    public static MeshData GenerateTerrainMesh(float[,] heightMap, int featuresPerLayoutPerAxis) {
+    public static MeshData GenerateTerrainMesh(float[,] heightMap) {
+        Constants constants = Script.Get<Constants>();
+
         int width = heightMap.GetLength(0) + 2;
         int height = heightMap.GetLength(1) + 2;
 
         float topLeftX = (width - 1) / -2f;
         float topLeftZ = (height - 1) / 2f;
 
-        MeshData meshData = new MeshData(width, height, featuresPerLayoutPerAxis);
+        MeshData meshData = new MeshData(width, height, constants.featuresPerLayoutPerAxis);
 
         for (int y = 0; y < height; y++) {
 
@@ -20,7 +22,7 @@ public static class MeshGenerator {
             //    DoAllXFor(y, topLeftX, topLeftZ, width, height, heightMap, meshData, featuresPerLayoutPerAxis, false);
             //}
 
-            DoAllXFor(y, topLeftX, topLeftZ, width, height, heightMap, meshData, featuresPerLayoutPerAxis, true);
+            DoAllXFor(y, topLeftX, topLeftZ, width, height, heightMap, meshData, constants.featuresPerLayoutPerAxis, true);
         }
 
         return meshData;
@@ -150,7 +152,7 @@ public static class MeshGenerator {
                 MapCoordinate coordinate = new MapCoordinate(neibours.bottomLeftMap.map.mapWidth - 1, 0, neibours.bottomLeftMap);
                 finalSampleHeight = neibours.bottomLeftMap.map.getHeightAt(coordinate);
             }
-
+       
             meshData.EditHeight(finalSampleHeight, x, y);
         }
 

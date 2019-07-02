@@ -20,7 +20,7 @@ public class ActionsList : MonoBehaviour {
             ActionItemCell cell = actionCellList[i];
 
             UserAction action = null;
-            if(i < actions.Length) {
+            if(actions != null && i < actions.Length) {
                 action = actions[i];
             }
 

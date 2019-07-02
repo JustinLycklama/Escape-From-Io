@@ -346,11 +346,11 @@ MonoBehaviour:
     color: {r: 0, g: 0.40038538, b: 1, a: 0}
   - type: 1
     noiseBase: 0.3
-    noiseMax: 0.55
-    plateauAtBase: 1
+    noiseMax: 0.5
+    plateauAtBase: 0
     color: {r: 0.30635053, g: 0.764151, b: 0.032440357, a: 0}
   - type: 2
-    noiseBase: 0.55
+    noiseBase: 0.5
     noiseMax: 1
     plateauAtBase: 0
     color: {r: 0.2264151, g: 0.17835529, b: 0.17835529, a: 0}
@@ -371,7 +371,7 @@ MonoBehaviour:
     type: 1
     regionType: 0
     mutatorNoiseBase: 0
-    mutatorNoiseMax: 0.5
+    mutatorNoiseMax: 0.25
     walkable: 1
     buildable: 1
     walkSpeedMultiplier: 0.8
@@ -381,7 +381,7 @@ MonoBehaviour:
   - name: Grass
     type: 2
     regionType: 0
-    mutatorNoiseBase: 0.5
+    mutatorNoiseBase: 0.25
     mutatorNoiseMax: 0.75
     walkable: 1
     buildable: 0
