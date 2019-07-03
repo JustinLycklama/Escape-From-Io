@@ -85,10 +85,6 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
         unitStatusTooltip.DisplayPercentageBar(false);
     }
 
-    //private void Start() {
-
-    //}
-
     private void OnDestroy() {
         Script.Get<MapsManager>().RemoveTerrainUpdateDelegate(this);
     }
