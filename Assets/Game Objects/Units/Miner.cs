@@ -25,6 +25,6 @@ public class Miner : Unit {
                 break;
         }
 
-        return 0.1f;
+        return 0.5f;
     }
 }

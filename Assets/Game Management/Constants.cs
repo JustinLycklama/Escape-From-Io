@@ -29,6 +29,7 @@ public class Tag {
     public static Tag Narrator { get { return new Tag("Narrator"); } }
     //public static Tag Map { get { return new Tag("Map"); } }
     public static Tag MapsManager { get { return new Tag("MapsManager"); } }
+    public static Tag UnitManager { get { return new Tag("UnitManager"); } }
     public static Tag MapGenerator { get { return new Tag("MapGenerator"); } }
     public static Tag AStar { get { return new Tag("AStar"); } }
     public static Tag UIManager { get { return new Tag("UIManager"); } }
@@ -66,7 +67,7 @@ public class Script {
     public static Script PathfindingGrid { get { return new Script(Tag.AStar, typeof(PathfindingGrid)); } }
     public static Script UIOverlayPanel { get { return new Script(Tag.UIOverlayPanel, typeof(RectTransform)); } }
     public static Script SelectionManager { get { return new Script(Tag.Narrator, typeof(SelectionManager)); } }
-    public static Script UnitManager { get { return new Script(Tag.Narrator, typeof(UnitManager)); } }
+    public static Script UnitManager { get { return new Script(Tag.UnitManager, typeof(UnitManager)); } }
     public static Script TextureGenerator { get { return new Script(Tag.MapGenerator, typeof(TextureGenerator)); } }
     public static Script TerrainManager { get { return new Script(Tag.MapGenerator, typeof(TerrainManager)); } }
 

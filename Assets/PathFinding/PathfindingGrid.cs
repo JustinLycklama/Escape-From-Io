@@ -73,7 +73,7 @@ public class PathfindingGrid : MonoBehaviour {
                 LayoutCoordinate layoutCoordinate = new LayoutCoordinate(mapCoordinate);                
                 TerrainType terrain = Script.Get<MapsManager>().GetTerrainAt(layoutCoordinate);
 
-                int penalty = Mathf.FloorToInt((1 - terrain.walkSpeedMultiplier) * 10);
+                int penalty = Mathf.FloorToInt((1 - terrain.walkSpeedMultiplier) * 100);
 
                 grid[x, y] = new Node(terrain.walkable, worldPosition, x, y, penalty);
             }

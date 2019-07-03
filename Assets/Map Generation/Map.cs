@@ -280,6 +280,8 @@ public class Map : ActionableItem  {
             // Update the terrain type at this location
             terrainData[terraformTarget.coordinate.x, terraformTarget.coordinate.y] = terraformTarget.terrainTypeTarget;
 
+            TerraformHeightMap(terraformTarget);
+
             // Update the BoxCollider Height
             mapContainer.ResizeBoxColliderAt(terraformTarget.coordinate);
 
@@ -311,9 +313,9 @@ public class Map : ActionableItem  {
             terraformTargetCoordinateMap[coordinate.x, coordinate.y] = null;
             UpdateUserActionsAt(terraformTarget.coordinate);
             mapContainer.UpdateShaderTerrainTextures();
+        } else {
+            TerraformHeightMap(terraformTarget);
         }
-
-        TerraformHeightMap(terraformTarget);
 
         return terraformTarget.percentage;
     }

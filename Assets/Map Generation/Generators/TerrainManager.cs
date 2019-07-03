@@ -120,8 +120,6 @@ public class TerrainManager : MonoBehaviour {
         Map map = coordinate.mapContainer.map;
 
         TerrainType terrainType = map.GetTerrainAt(coordinate);
-        MapCoordinate mapCoordinate = new MapCoordinate(coordinate);
-        WorldPosition worldPosition = new WorldPosition(mapCoordinate);
 
         List<UserAction> actionList = new List<UserAction>();
 
@@ -139,11 +137,14 @@ public class TerrainManager : MonoBehaviour {
                     action.performAction = (LayoutCoordinate layoutCoordinate) => {
                         TaskQueueManager queue = Script.Get<TaskQueueManager>();
 
-                        GameTask miningTask = new GameTask("Mining", worldPosition, GameTask.ActionType.FlattenPath, layoutCoordinate.mapContainer.map, PathRequestTargetType.World);
-                        MasterGameTask masterMiningTask = new MasterGameTask(MasterGameTask.ActionType.Move, "Mine at location " + layoutCoordinate.description, new GameTask[] { miningTask });
+                        MapCoordinate mapCoordinate = new MapCoordinate(layoutCoordinate);
+                        WorldPosition worldPosition = new WorldPosition(mapCoordinate);
 
-                        queue.QueueTask(masterMiningTask);
-                        map.AssociateTask(masterMiningTask, layoutCoordinate);
+                        GameTask cleaningTask = new GameTask("Cleaning", worldPosition, GameTask.ActionType.FlattenPath, layoutCoordinate.mapContainer.map, PathRequestTargetType.Layout);
+                        MasterGameTask masterCleaningTask = new MasterGameTask(MasterGameTask.ActionType.Mine, "Clean location " + layoutCoordinate.description, new GameTask[] { cleaningTask });
+
+                        queue.QueueTask(masterCleaningTask);
+                        map.AssociateTask(masterCleaningTask, layoutCoordinate);
                     };
 
                     actionList.Add(action);
@@ -170,6 +171,9 @@ public class TerrainManager : MonoBehaviour {
 
                     action.performAction = (LayoutCoordinate layoutCoordinate) => {
                         TaskQueueManager queue = Script.Get<TaskQueueManager>();
+
+                        MapCoordinate mapCoordinate = new MapCoordinate(layoutCoordinate);
+                        WorldPosition worldPosition = new WorldPosition(mapCoordinate);
 
                         GameTask miningTask = new GameTask("Mining", worldPosition, GameTask.ActionType.Mine, layoutCoordinate.mapContainer.map, PathRequestTargetType.Layout);
                         MasterGameTask masterMiningTask = new MasterGameTask(MasterGameTask.ActionType.Mine, "Mine at location " + layoutCoordinate.description, new GameTask[] { miningTask });

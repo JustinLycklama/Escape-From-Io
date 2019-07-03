@@ -18,21 +18,24 @@ public class UnitStatusTooltip : TrackingUIElement { //TaskStatusUpdateDelegate
         this.title.text = title;
     }
 
-    public void SetTask(MasterGameTask task) {
+    public void SetTask(GameTask task) {
         if (task == null) {
-            taskDescription.text = "Idle...";
+            taskDescription.text = "Idle";
         } else {
-            switch(task.actionType) {
-                case MasterGameTask.ActionType.Mine:
-                    taskDescription.text = "Mining";
-                    break;
-                case MasterGameTask.ActionType.Build:
-                    taskDescription.text = "Building";
-                    break;
-                case MasterGameTask.ActionType.Move:
-                    taskDescription.text = "Gathering";
-                    break;
-            }
+
+            taskDescription.text = task.description;
+
+            //switch(task.action) {
+            //    case GameTask.ActionType.Mine:
+            //        taskDescription.text = "Mining";
+            //        break;
+            //    case MasterGameTask.ActionType.Build:
+            //        taskDescription.text = "Building";
+            //        break;
+            //    case MasterGameTask.ActionType.Move:
+            //        taskDescription.text = "Gathering";
+            //        break;
+            //}
         }
     }
 

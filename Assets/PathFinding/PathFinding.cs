@@ -153,7 +153,7 @@ public class PathFinding : MonoBehaviour {
             
             if (currentNode == targetNode) {
                 sw.Stop();
-                print("Path Took " + sw.ElapsedMilliseconds + " Miliseconds");
+                //print("Path Took " + sw.ElapsedMilliseconds + " Miliseconds");
 
                 finalPath = RetracePath(targetNode).ToArray();
                 success = true;

@@ -74,9 +74,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
 
         gameTasksQueue = new Queue<GameTask>();
         refuseTaskSet = new HashSet<int>();
-    }
 
-    private void Start() {
         unitStatusTooltip = Instantiate(Resources.Load("UI/UnitStatusPanel", typeof(UnitStatusTooltip))) as UnitStatusTooltip;
         unitStatusTooltip.transform.SetParent(Script.UIOverlayPanel.GetFromObject<RectTransform>());
 
@@ -86,6 +84,10 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
         unitStatusTooltip.SetTask(null);
         unitStatusTooltip.DisplayPercentageBar(false);
     }
+
+    //private void Start() {
+
+    //}
 
     private void OnDestroy() {
         Script.Get<MapsManager>().RemoveTerrainUpdateDelegate(this);
@@ -101,7 +103,6 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
         };
 
         completedPath = (pathComplete) => {
-            print("Do Action for Task" + currentMasterTask.taskNumber);
             navigatingToTask = false;
             unitStatusTooltip.DisplayPercentageBar(true);
             StartCoroutine(PerformTaskAction(completedTaskAction));
@@ -110,9 +111,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
         foundWaypoints = (waypoints, actionableItem, success) => {
             StopAllCoroutines();
 
-            if(success) {
-                print("Follow Path for Task" + currentMasterTask.taskNumber);
-              
+            if(success) {                              
                 // When requesting a path for an unknown resource (like ore) we will get the closest resource back as an actionable item
                 if(actionableItem != null) {
                     currentGameTask.actionItem = actionableItem;
@@ -128,6 +127,15 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
                 Path path = new Path(waypoints, transform.position, turnDistance, stoppingDistance, currentGameTask.target);
                 pathToDraw = path;
 
+
+                WorldPosition worldPos = currentGameTask.target;
+                MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(worldPos);
+
+                LayoutCoordinate layoutCoordinate = new LayoutCoordinate(mapCoordinate);
+
+                print("Target At: " + layoutCoordinate.description);
+
+
                 StartCoroutine(FollowPath(path, completedPath));
             } else {
                 // There is no path to task, we cannot do this.
@@ -141,7 +149,8 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
             }
         };
 
-        StartCoroutine(FindTask());
+        ResetTaskState();
+        //StartCoroutine(FindTask());
     }
 
     public void CancelTask() {
@@ -165,8 +174,6 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
         currentMasterTask = task;
         currentMasterTask.assignedUnit = this;
 
-        unitStatusTooltip.SetTask(currentMasterTask);
-
         gameTasksQueue.Clear();
 
         //navigatingToTask = true;
@@ -181,11 +188,10 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
 
         if (gameTasksQueue.Count > 0) {
             currentGameTask = gameTasksQueue.Dequeue();
-        
+            unitStatusTooltip.SetTask(currentGameTask);
+
             PathRequestManager.RequestPathForTask(transform.position, currentGameTask, foundWaypoints);
         } else {
-            print("Complpete Task" + currentMasterTask.taskNumber);
-
             currentMasterTask.MarkTaskFinished();
             ResetTaskState();
         }
@@ -204,24 +210,31 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
         unitStatusTooltip.SetTask(null);
         unitStatusTooltip.DisplayPercentageBar(false);
 
-        StartCoroutine(FindTask());
+
+        taskQueueManager.RequestNextDoableTask(this, (masterGameTask) => {
+            DoTask(masterGameTask);
+        }, refuseTaskSet);
+
+        //StartCoroutine(FindTask());
     }
+
+
 
     /*
      * Task Coroutines
      * */
 
-    IEnumerator FindTask() {
-        MasterGameTask masterGameTask = null;
+    //IEnumerator FindTask() {
+    //    MasterGameTask masterGameTask = null;
 
-        while(masterGameTask == null) {
-            yield return new WaitForSeconds(0.25f);
+    //    while(masterGameTask == null) {
+    //        yield return new WaitForSeconds(0.25f);
 
-            masterGameTask = taskQueueManager.GetNextDoableTask(this, refuseTaskSet);            
-        }
+    //        masterGameTask = taskQueueManager.GetNextDoableTask(this, refuseTaskSet);            
+    //    }
 
-        DoTask(masterGameTask);
-    }
+    //    DoTask(masterGameTask);
+    //}
 
     protected abstract void Animate();
 
@@ -276,13 +289,20 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
         while(followingPath) {
             Vector2 position2D = transform.position.ToVector2();
             while(path.turnBoundaries[pathIndex].HasCrossedLine(position2D)) {
-                print("Crossed Path Boundaries");
+                //print("Crossed Path Boundaries");
 
                 if(pathIndex == path.finishLineIndex) {
                     followingPath = false;
                     break;
                 } else {
                     pathIndex++;
+
+                    WorldPosition worldPos = path.lookPoints[pathIndex];
+                    MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(worldPos);
+
+                    LayoutCoordinate layoutCoordinate = new LayoutCoordinate(mapCoordinate);
+
+                    //print("New Lookpoint at: " + worldPos.description + ", " + mapCoordinate.description + ", " + layoutCoordinate.description);
                 }
             }
 
@@ -291,16 +311,19 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
                     speedPercent = Mathf.Clamp(path.turnBoundaries[path.finishLineIndex].DistanceFromPoint(position2D) / stoppingDistance, 0.15f, 1);
                 }               
 
-                WorldPosition worldPos = path.lookPoints[pathIndex];
-                MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(worldPos);
+                WorldPosition lookPointWorldPos = path.lookPoints[pathIndex];
+                MapCoordinate lookPointMapCoordinate = MapCoordinate.FromWorldPosition(lookPointWorldPos);
 
-                LayoutCoordinate layoutCoordinate = new LayoutCoordinate(mapCoordinate);
-                TerrainType currentTerrain = layoutCoordinate.mapContainer.map.GetTerrainAt(layoutCoordinate);
+                WorldPosition playerWorldPos = new WorldPosition(transform.position);
+                MapCoordinate playerMapCoordinate = MapCoordinate.FromWorldPosition(playerWorldPos);
+
+                LayoutCoordinate playerLayoutCoordinate = new LayoutCoordinate(playerMapCoordinate);
+                TerrainType currentTerrain = playerLayoutCoordinate.mapContainer.map.GetTerrainAt(playerLayoutCoordinate);
 
                 float localSpeed = currentTerrain.walkSpeedMultiplier * speed;
 
-                float height = Script.Get<MapsManager>().GetHeightAt(mapCoordinate) * mapCoordinate.mapContainer.transform.lossyScale.y; //  + (0.5f * transform.localScale.y)
-                Vector3 lookPoint = new Vector3(worldPos.vector3.x, height, worldPos.vector3.z);
+                float height = Script.Get<MapsManager>().GetHeightAt(lookPointMapCoordinate) * lookPointMapCoordinate.mapContainer.transform.lossyScale.y; //  + (0.5f * transform.localScale.y)
+                Vector3 lookPoint = new Vector3(lookPointWorldPos.vector3.x, height, lookPointWorldPos.vector3.z);
 
                 targetRotation = Quaternion.LookRotation(lookPoint - transform.position);
                 transform.rotation =  Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * followPathTurnSpeed);

@@ -43,5 +43,6 @@ public class Narrator : MonoBehaviour
         }
 
         Camera.main.transform.position = new WorldPosition(new MapCoordinate(spawnCoordinate)).vector3 + new Vector3(0, 250, -400);
+
     }
 }
