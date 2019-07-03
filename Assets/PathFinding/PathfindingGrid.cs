@@ -193,9 +193,9 @@ public class PathfindingGrid : MonoBehaviour {
         Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();
 
         float cubeDiameter = constants.layoutMapWidth / 3.5f;
-        if(Script.Get<MapsManager>().mapContainers.Count > 0 && grid != null && displayGridGizmos) {
+        if(grid != null && displayGridGizmos && Script.Get<MapsManager>().mapContainers.Count > 0) {
 
-            Vector3 mapScale = Script.Get<MapsManager>().mapContainers[0].transform.localScale;
+            Vector3 mapScale = Script.Get<MapsManager>().mapContainers[0].transform.lossyScale;
 
             Transform mapsManagerPosition = Script.Get<MapsManager>().transform;
             Gizmos.DrawWireCube(mapsManagerPosition.position, new Vector3(gridSizeX * mapScale.x, 1 * mapScale.y, gridSizeY * mapScale.z));

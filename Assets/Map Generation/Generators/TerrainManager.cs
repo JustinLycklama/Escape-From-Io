@@ -125,21 +125,21 @@ public class TerrainManager : MonoBehaviour {
 
         List<UserAction> actionList = new List<UserAction>();
 
-        UserAction action = new UserAction();
-
         TerrainType? terraformable = CanTerriformTo(terrainType);
 
         switch(terrainType.regionType) {
             case RegionType.Type.Land:
 
                 if (terraformable != null) {
+                    UserAction action = new UserAction();
+
                     action.description = "Clean";
                     action.layoutCoordinate = coordinate;
 
                     action.performAction = (LayoutCoordinate layoutCoordinate) => {
                         TaskQueueManager queue = Script.Get<TaskQueueManager>();
 
-                        GameTask miningTask = new GameTask("Mining", worldPosition, GameTask.ActionType.FlattenPath, map, PathRequestTargetType.Layout);
+                        GameTask miningTask = new GameTask("Mining", worldPosition, GameTask.ActionType.FlattenPath, layoutCoordinate.mapContainer.map, PathRequestTargetType.World);
                         MasterGameTask masterMiningTask = new MasterGameTask(MasterGameTask.ActionType.Move, "Mine at location " + layoutCoordinate.description, new GameTask[] { miningTask });
 
                         queue.QueueTask(masterMiningTask);
@@ -149,17 +149,29 @@ public class TerrainManager : MonoBehaviour {
                     actionList.Add(action);
                 }
 
+                if (terrainType.buildable) {
+                    UserAction action = new UserAction();
+                    action.description = "Building";
+                    action.layoutCoordinate = coordinate;
+
+                    action.blueprintList = new ConstructionBlueprint[] { Building.Blueprint.Tower, Building.Blueprint.Refinery };
+
+                    actionList.Add(action);
+                }
+
                 break;
             case RegionType.Type.Mountain:
 
                 if(terraformable != null) {
+                    UserAction action = new UserAction();
+
                     action.description = "Mine Wall";
                     action.layoutCoordinate = coordinate;
 
                     action.performAction = (LayoutCoordinate layoutCoordinate) => {
                         TaskQueueManager queue = Script.Get<TaskQueueManager>();
 
-                        GameTask miningTask = new GameTask("Mining", worldPosition, GameTask.ActionType.Mine, map, PathRequestTargetType.Layout);
+                        GameTask miningTask = new GameTask("Mining", worldPosition, GameTask.ActionType.Mine, layoutCoordinate.mapContainer.map, PathRequestTargetType.Layout);
                         MasterGameTask masterMiningTask = new MasterGameTask(MasterGameTask.ActionType.Mine, "Mine at location " + layoutCoordinate.description, new GameTask[] { miningTask });
 
                         queue.QueueTask(masterMiningTask);

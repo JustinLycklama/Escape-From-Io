@@ -166,7 +166,7 @@ public abstract class Building : ActionableItem, Selectable {
             Building building = UnityEngine.Object.Instantiate(resource) as Building;
             building.cost = cost;
 
-            worldPosition.y += 0.5f * building.transform.localScale.y;
+            worldPosition.y += 0.5f * building.transform.lossyScale.y;
             building.transform.position = worldPosition.vector3;
 
             TaskQueueManager queue = Script.Get<TaskQueueManager>();
@@ -176,7 +176,7 @@ public abstract class Building : ActionableItem, Selectable {
                 return GameResourceManager.sharedInstance.AnyOreAvailable();
             };
 
-            GameTask dropTask = new GameTask("Deposit Ore", worldPosition, GameTask.ActionType.DropOff, building);
+            GameTask dropTask = new GameTask("Deposit Ore", worldPosition, GameTask.ActionType.DropOff, layoutCoordinate.mapContainer.map);
 
             GameTask buildTask = new GameTask("Construction", worldPosition, GameTask.ActionType.Build, building);
 

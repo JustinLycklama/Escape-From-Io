@@ -81,7 +81,7 @@ public class UIManager : MonoBehaviour
 
         //cube.AddComponent<Building>();
 
-        //cube.transform.localScale = new Vector3(25, 25, 25);
+        //cube.transform.lossyScale = new Vector3(25, 25, 25);
 
         //TaskQueueManager queue = Script.Get<TaskQueueManager>();
         //queue.QueueTask(new MasterGameTask(worldPosition, MasterGameTask.ActionType.Build, cube.GetComponent<Building>()));

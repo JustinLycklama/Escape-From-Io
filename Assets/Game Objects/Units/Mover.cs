@@ -15,6 +15,8 @@ public class Mover : Unit {
                 return 0.25f;
             case GameTask.ActionType.DropOff:
                 return 0.5f;
+            case GameTask.ActionType.FlattenPath:
+                return 0.45f;
         }
 
         return 0.1f;

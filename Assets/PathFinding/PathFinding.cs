@@ -59,7 +59,6 @@ public class PathFinding : MonoBehaviour {
         PathGridCoordinate sample;
 
         int middleCoordinate = Mathf.FloorToInt(constants.nodesPerLayoutPerAxis / 2f);
-        print(middleCoordinate);
 
         // Left Side
         sample = pathGridCoordinatesOfLayout[0][middleCoordinate];
@@ -100,8 +99,6 @@ public class PathFinding : MonoBehaviour {
 
         foreach (PathGridCoordinate gridCoordinate in gridCoordinatesSurroundingLayoutCoordinate) {
             MapCoordinate mapCoordinate = MapCoordinate.FromGridCoordinate(gridCoordinate);
-            print(mapCoordinate.description);
-
             WorldPosition worldPos = new WorldPosition(mapCoordinate);
 
             StartCoroutine(FindPath(startPos, worldPos.vector3, (path, success) => {

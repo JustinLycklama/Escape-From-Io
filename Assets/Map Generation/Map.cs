@@ -48,7 +48,7 @@ public class Map : ActionableItem  {
 
     public string description => "The World? What should go here";
 
-    public Map(TerrainType[,] terrainData, float[,] finalHeightMap, float[,] layoutNoiseMap, float[,] groundFeaturesNoiseMap, float[,] mountainFeaturesNoiseMap, MeshData meshData) {
+    public void InitMap(TerrainType[,] terrainData, float[,] finalHeightMap, float[,] layoutNoiseMap, float[,] groundFeaturesNoiseMap, float[,] mountainFeaturesNoiseMap, MeshData meshData) {
         Constants constants = Script.Get<Constants>();
         featuresPerLayoutPerAxis = constants.featuresPerLayoutPerAxis;
 
@@ -175,15 +175,15 @@ public class Map : ActionableItem  {
             // Build?
         }
 
-        if (GetTerrainAt(coordinate).buildable) {
+        //if (GetTerrainAt(coordinate).buildable) {
 
-            UserAction action = new UserAction();
-            action.description = "Building";
-            action.layoutCoordinate = coordinate;
+        //    UserAction action = new UserAction();
+        //    action.description = "Building";
+        //    action.layoutCoordinate = coordinate;
 
-            action.blueprintList = new ConstructionBlueprint[] { Building.Blueprint.Tower, Building.Blueprint.Refinery };
+        //    action.blueprintList = new ConstructionBlueprint[] { Building.Blueprint.Tower, Building.Blueprint.Refinery };
 
-            actionList.Add(action);
+        //    actionList.Add(action);
 
             //foreach (Building.Blueprint blueprint in Building.Blueprints()) {
             //    actionList.Add(blueprint.ConstructionAction(worldPosition));
@@ -206,7 +206,7 @@ public class Map : ActionableItem  {
 
             //actionList.Add(action);
             //}
-        } 
+        //} 
         // We cannot build but we are a land, lets terraform to buildable
         //else if (false) {
 
@@ -386,8 +386,6 @@ public class Map : ActionableItem  {
     /*
      * Map Version Of TaskStatusNotifiable Interface
      * */
-
-
 
     public void RegisterForTaskStatusNotifications(TaskStatusUpdateDelegate notificationDelegate, LayoutCoordinate layoutCoordinate) {
         taskUpdateDelegateMap[layoutCoordinate.x, layoutCoordinate.y].Add(notificationDelegate);

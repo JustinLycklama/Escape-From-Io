@@ -199,7 +199,10 @@ public class MapGenerator : MonoBehaviour {
             //int noiseMapWidth = groundFeaturesNoiseMap.GetLength(0);
             //int noiseMapHeight = groundFeaturesNoiseMap.GetLength(1);
 
-            Map map = new Map(mapTerrainData, mapFinalNoiseMap, mapLayoutNoise, mapGroundFeatures, mapMountainFeatures,
+            GameObject mapOject = new GameObject("Map of " + container.name);
+            Map map = mapOject.AddComponent<Map>();
+
+            map.InitMap(mapTerrainData, mapFinalNoiseMap, mapLayoutNoise, mapGroundFeatures, mapMountainFeatures,                
                 MeshGenerator.GenerateTerrainMesh(mapFinalNoiseMap));
 
             container.setMap(map);

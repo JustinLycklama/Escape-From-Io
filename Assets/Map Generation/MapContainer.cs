@@ -54,6 +54,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate
         }
 
         SetupMaterialShader();
+        map.transform.SetParent(this.transform, true);
     }
 
     public void DrawMesh() {
@@ -343,8 +344,8 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate
 
     //    foreach (BoxCollider boxCollider in boxColliderArray) {
 
-    //        float boxSizeX = map.featuresPerLayoutPerAxis * transform.localScale.x;
-    //        float boxSizeZ = map.featuresPerLayoutPerAxis * transform.localScale.z;
+    //        float boxSizeX = map.featuresPerLayoutPerAxis * transform.lossyScale.x;
+    //        float boxSizeZ = map.featuresPerLayoutPerAxis * transform.lossyScale.z;
 
     //        Gizmos.color = Color.cyan;
     //        Gizmos.DrawCube(boxCollider.center, boxCollider.size);

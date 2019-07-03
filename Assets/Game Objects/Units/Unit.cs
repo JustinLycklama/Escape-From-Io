@@ -255,6 +255,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
 
         float totalTurnDistance = 0;
         float degreesToTurn = (targetRotation.eulerAngles - originalRotation.eulerAngles).magnitude;
+        print("Turn Degrees Magnitude " + degreesToTurn);
 
         while(turningToStart) {           
             if(totalTurnDistance == 1) {
@@ -275,6 +276,8 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
         while(followingPath) {
             Vector2 position2D = transform.position.ToVector2();
             while(path.turnBoundaries[pathIndex].HasCrossedLine(position2D)) {
+                print("Crossed Path Boundaries");
+
                 if(pathIndex == path.finishLineIndex) {
                     followingPath = false;
                     break;
@@ -296,7 +299,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
 
                 float localSpeed = currentTerrain.walkSpeedMultiplier * speed;
 
-                float height = Script.Get<MapsManager>().GetHeightAt(mapCoordinate) * mapCoordinate.mapContainer.transform.localScale.y; //  + (0.5f * transform.localScale.y)
+                float height = Script.Get<MapsManager>().GetHeightAt(mapCoordinate) * mapCoordinate.mapContainer.transform.lossyScale.y; //  + (0.5f * transform.localScale.y)
                 Vector3 lookPoint = new Vector3(worldPos.vector3.x, height, worldPos.vector3.z);
 
                 targetRotation = Quaternion.LookRotation(lookPoint - transform.position);

@@ -97,7 +97,9 @@ public class MasterGameTask {
 
     private void UpdateAllGameTasksActionItemsWith(MasterGameTask masterGameTask) {
         foreach(GameTask gameTask in childGameTasks) {
-            gameTask.actionItem.UpdateMasterTaskByGameTask(gameTask, masterGameTask);
+            if (gameTask.actionItem != null) {
+                gameTask.actionItem.UpdateMasterTaskByGameTask(gameTask, masterGameTask);
+            }            
         }
     }
 

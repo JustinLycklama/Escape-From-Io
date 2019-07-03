@@ -69,7 +69,7 @@ public class MapsManager : MonoBehaviour {
                 Vector2 mapPoint = new Vector2(mapEdgeX + (mapWidth * x), mapEdgeY + (mapHeight * (verticalMaps - 1 - y)));
                 Rect mapRect = new Rect(mapPoint, new Vector2(mapWidth, mapHeight));
 
-                GameObject mapContainerObject = new GameObject();
+                GameObject mapContainerObject = new GameObject("Map Container " + x + ", " + y);
                 MapContainer mapContainer = mapContainerObject.AddComponent<MapContainer>();
 
                 MeshRenderer renderer = mapContainerObject.AddComponent<MeshRenderer>();
@@ -82,6 +82,8 @@ public class MapsManager : MonoBehaviour {
                 Vector3 MapsManagerSpacePosition = new Vector3(mapPoint.x + (mapWidth / 2f), 0, mapPoint.y + (mapHeight / 2f));
                 mapContainerObject.transform.position = transform.TransformPoint(MapsManagerSpacePosition);
                 mapContainerObject.transform.localScale = transform.localScale;
+
+                mapContainerObject.transform.SetParent(this.transform, true);
 
                 mapContainer2d[x, y] = mapContainer;
                 mapContainer.gameObject.SetActive(false);
