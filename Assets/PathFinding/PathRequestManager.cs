@@ -12,7 +12,7 @@ struct PathRequest {
 
     public PathGridCoordinate? pathEndGrid;
     public LayoutCoordinate? pathEndLayout;
-    public GameResourceManager.GatherType? pathEndGoal;
+    public MineralType? pathEndGoal;
 
     public Vector3 pathStart;
 
@@ -50,7 +50,7 @@ struct PathRequest {
         pathEndGoal = null;
     }
 
-    public PathRequest(Vector3 _start, GameResourceManager.GatherType goalGatherType, Action<WorldPosition[], ActionableItem, bool> _callback) {
+    public PathRequest(Vector3 _start, MineralType goalGatherType, Action<WorldPosition[], ActionableItem, bool> _callback) {
         pathStart = _start;
         pathEndGoal = goalGatherType;
         callback = _callback;

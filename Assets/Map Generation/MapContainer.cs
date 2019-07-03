@@ -46,6 +46,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate
         map.mapContainer = this;
 
         map.CreateAllActionableItemOverrides();
+        Script.Get<GameResourceManager>().RegisterMapForMinerals(map);
 
         DrawMesh();
 

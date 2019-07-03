@@ -214,6 +214,11 @@ public struct RegionType {
 }
 
 [System.Serializable]
+public enum Chance {
+    Abysmal, Low, Medium, High, AlmostGuarenteed
+}
+
+[System.Serializable]
 public struct TerrainType {
     public string name;
 
@@ -236,6 +241,14 @@ public struct TerrainType {
 
     public Texture2D texture;
     public float textureScale;
+
+    [System.Serializable]
+    public struct MineralChance {
+        public Chance chance;
+        public MineralType type;
+    }
+
+    public MineralChance[] mineralChances;
 
     [HideInInspector]
     public int priority {
@@ -285,5 +298,22 @@ static class EnumExtensions {
             default:
                 return 0;
         }
+    }
+
+    public static float GetPercentage(this Chance chance) {
+        switch(chance) {
+            case Chance.Abysmal:
+                return 0.1f;
+            case Chance.Low:
+                return 0.3f;
+            case Chance.Medium:
+                return 0.5f;
+            case Chance.High:
+                return 0.7f;
+            case Chance.AlmostGuarenteed:
+                return 0.9f;
+        }
+
+        return 0;
     }
 }

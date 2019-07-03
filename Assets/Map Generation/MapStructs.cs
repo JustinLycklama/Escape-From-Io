@@ -43,11 +43,13 @@ public struct LayoutCoordinate {
         var hashCode = 499445682;
         hashCode = hashCode * -1521134295 + x.GetHashCode();
         hashCode = hashCode * -1521134295 + y.GetHashCode();
+        hashCode = hashCode * -1521134295 + mapContainer.GetHashCode();
+
         return hashCode;
     }
 
     public static bool operator ==(LayoutCoordinate a, LayoutCoordinate b) {
-        return a.x == b.x && a.y == b.y;
+        return a.x == b.x && a.y == b.y && a.mapContainer == b.mapContainer;
     }
 
     public static bool operator !=(LayoutCoordinate a, LayoutCoordinate b) {
@@ -181,26 +183,28 @@ public struct MapCoordinate {
 
         var coordinate = (MapCoordinate)obj;
         return x == coordinate.x &&
-               y == coordinate.y;
+               y == coordinate.y &&
+               mapContainer == coordinate.mapContainer;
     }
 
     public override int GetHashCode() {
         var hashCode = 1502939027;
         hashCode = hashCode * -1521134295 + x.GetHashCode();
         hashCode = hashCode * -1521134295 + y.GetHashCode();
+        hashCode = hashCode * -1521134295 + mapContainer.GetHashCode();
         return hashCode;
     }
 
     public static bool operator ==(LayoutCoordinate a, MapCoordinate coordinate) {
         LayoutCoordinate b = new LayoutCoordinate(coordinate);
 
-        return a.x == b.x && a.y == b.y;
+        return a.x == b.x && a.y == b.y && a.mapContainer == b.mapContainer;
     }
 
     public static bool operator ==(MapCoordinate coordinate, LayoutCoordinate b) {
         LayoutCoordinate a = new LayoutCoordinate(coordinate);
 
-        return a.x == b.x && a.y == b.y;
+        return a.x == b.x && a.y == b.y && a.mapContainer == b.mapContainer;
     }
 
     public static bool operator !=(LayoutCoordinate a, MapCoordinate b) {

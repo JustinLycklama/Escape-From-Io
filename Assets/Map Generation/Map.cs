@@ -303,11 +303,19 @@ public class Map : ActionableItem  {
 
             Vector3[] positions = new Vector3[] { position1, position2, position3 };
 
-            int rInt = Random.Range(1, 3); 
+            //int rInt = Random.Range(1, 3);
 
-            for (int i = 0; i < rInt; i++) {
-                Ore ore = GameResourceManager.sharedInstance.CreateOre();
-                ore.transform.position = positions[i];
+            GameResourceManager resourceManager = Script.Get<GameResourceManager>();
+
+            Dictionary<MineralType, int> mineralLists = resourceManager.MineralListForCoordinate(coordinate);
+
+            int positionIndex = 0;
+            foreach (MineralType mineralType in mineralLists.Keys) {
+                int count = mineralLists[mineralType];
+
+                Ore ore = resourceManager.CreateMineral(mineralType);
+                ore.transform.position = positions[positionIndex];
+                positionIndex++;
             }
 
             terraformTargetCoordinateMap[coordinate.x, coordinate.y] = null;

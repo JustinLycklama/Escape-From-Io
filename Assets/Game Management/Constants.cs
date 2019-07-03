@@ -35,6 +35,7 @@ public class Tag {
     public static Tag UIManager { get { return new Tag("UIManager"); } }
     public static Tag UIOverlayPanel { get { return new Tag("UIOverlayPanel"); } }
     public static Tag UIArea { get { return new Tag("UIArea"); } }
+    public static Tag ResourceManager { get { return new Tag("ResourceManager"); } }
 
     public GameObject GetGameObject() {
         GameObject cachedObject;
@@ -55,7 +56,8 @@ public class Script {
     private Tag tag { get; set; }
     private Type type { get; set; }
 
-    private static Dictionary<Script, Component> objectCache = new Dictionary<Script, Component>();
+    private static Dictionary<Type, Script> scriptCache = new Dictionary<Type, Script>();
+    private static Dictionary<Script, Component> componentCache = new Dictionary<Script, Component>();
 
     public static Script Constants { get { return new Script(Tag.Narrator, typeof(Constants)); } }
     public static Script PlayerBehaviour { get { return new Script(Tag.Narrator, typeof(PlayerBehaviour)); } }
@@ -70,14 +72,22 @@ public class Script {
     public static Script UnitManager { get { return new Script(Tag.UnitManager, typeof(UnitManager)); } }
     public static Script TextureGenerator { get { return new Script(Tag.MapGenerator, typeof(TextureGenerator)); } }
     public static Script TerrainManager { get { return new Script(Tag.MapGenerator, typeof(TerrainManager)); } }
+    public static Script ResourceManager { get { return new Script(Tag.ResourceManager, typeof(GameResourceManager)); } }
 
-    public static Script[] allScripts = new Script[] { Constants, PlayerBehaviour, MapsManager, UIManager, TaskQueue, MapGenerator, PathfindingGrid, SelectionManager, UnitManager, TextureGenerator, TerrainManager }; 
+    public static Script[] allScripts = new Script[] { Constants, PlayerBehaviour, MapsManager, UIManager, TaskQueue, MapGenerator, PathfindingGrid, SelectionManager, UnitManager, TextureGenerator, TerrainManager, ResourceManager }; 
 
     public static T Get<T> () where T : Component {
 
-        foreach (Script script in allScripts) {
-            if (script.type == typeof(T)) {
-                return script.GetFromObject<T>();
+        Type type = typeof(T);
+
+        if(scriptCache.ContainsKey(type)) {
+            return scriptCache[type].GetFromObject<T>();
+        } else {
+            foreach(Script script in allScripts) {
+                if(script.type == type) {
+                    scriptCache[type] = script;
+                    return script.GetFromObject<T>();
+                }
             }
         }
 
@@ -88,11 +98,11 @@ public class Script {
         GameObject gameObject = tag.GetGameObject();
 
         Component component;
-        if (objectCache.ContainsKey(this)) {
-            component = objectCache[this];
+        if (componentCache.ContainsKey(this)) {
+            component = componentCache[this];
         } else {  
             component = gameObject.GetComponent<T>();
-            objectCache[this] = component;
+            componentCache[this] = component;
         }
 
         return (T)component;
@@ -115,6 +125,12 @@ public abstract class PrefabBlueprint {
     public UnityEngine.Object Instantiate() {
         return UnityEngine.Object.Instantiate(resource);
     }
+}
+
+struct BlueprintCost {
+
+
+
 }
 
 public abstract class ConstructionBlueprint : PrefabBlueprint {

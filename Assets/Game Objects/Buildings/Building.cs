@@ -130,7 +130,7 @@ public abstract class Building : ActionableItem, Selectable {
                 if (percentPerTask[task] >= 1) {
                     percentPerTask.Remove(task);
 
-                    if(GameResourceManager.sharedInstance.ConsumeInBuilding(unit, this)) {
+                    if(Script.Get<GameResourceManager>().ConsumeInBuilding(unit, this)) {
                         percentageBar.IncrementRequired();                        
                     }
 
@@ -171,9 +171,9 @@ public abstract class Building : ActionableItem, Selectable {
 
             TaskQueueManager queue = Script.Get<TaskQueueManager>();
 
-            GameTask oreTask = new GameTask("Find Ore", GameResourceManager.GatherType.Ore, GameTask.ActionType.PickUp, null);
+            GameTask oreTask = new GameTask("Find Ore", MineralType.Ore, GameTask.ActionType.PickUp, null);
             oreTask.SatisfiesStartRequirements = () => {
-                return GameResourceManager.sharedInstance.AnyOreAvailable();
+                return Script.Get<GameResourceManager>().AnyMineralAvailable(MineralType.Ore);
             };
 
             GameTask dropTask = new GameTask("Deposit Ore", worldPosition, GameTask.ActionType.DropOff, layoutCoordinate.mapContainer.map);

@@ -13,7 +13,7 @@ public class GameTask {
     public PathRequestTargetType pathRequestTargetType;
 
     // Target for Gather Action
-    public GameResourceManager.GatherType gatherType = GameResourceManager.GatherType.Ore;
+    public MineralType gatherType = MineralType.Ore;
 
     public ActionType action;
     public ActionableItem actionItem;
@@ -27,7 +27,7 @@ public class GameTask {
         Init(description, action, actionItem, targetType);
     }
 
-    public GameTask(string description, GameResourceManager.GatherType gatherGoal, ActionType action, ActionableItem actionItem) {
+    public GameTask(string description, MineralType gatherGoal, ActionType action, ActionableItem actionItem) {
         this.gatherType = gatherGoal;
         Init(description, action, actionItem, PathRequestTargetType.Unknown);
     }
