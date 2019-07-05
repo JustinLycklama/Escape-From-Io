@@ -655,12 +655,12 @@ MonoBehaviour:
     texture: {fileID: 2800000, guid: e1d041952447aa74f81ba1b7d3de6f6a, type: 3}
     textureScale: 100
     mineralChances:
-    - chance: 3
-      type: 0
-    - chance: 2
-      type: 1
-    - chance: 1
-      type: 2
+    - type: 0
+      chance: 3
+    - type: 1
+      chance: 2
+    - type: 2
+      chance: 1
   - name: Rock
     type: 5
     regionType: 0
@@ -672,7 +672,13 @@ MonoBehaviour:
     modificationSpeedModifier: 0.75
     texture: {fileID: 2800000, guid: 9ff4ba87728c0714e88bd9eb9aae792a, type: 3}
     textureScale: 100
-    mineralChances: []
+    mineralChances:
+    - type: 0
+      chance: 3
+    - type: 1
+      chance: 2
+    - type: 2
+      chance: 2
   - name: Hard Rock
     type: 6
     regionType: 0
@@ -1246,7 +1252,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 839257594}
   m_LocalRotation: {x: 0.08501945, y: 0.9017883, z: 0.36943054, w: -0.20753486}
-  m_LocalPosition: {x: -44.265053, y: -85.96495, z: 263.23874}
+  m_LocalPosition: {x: -92.8784, y: -31.744911, z: 239.65312}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}

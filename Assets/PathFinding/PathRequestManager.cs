@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public enum PathRequestTargetType { Unknown, World, Layout }
+public enum PathRequestTargetType { Unknown, World, Layout, PathGrid }
 
 struct PathRequest {
     public PathRequestTargetType targetType;
@@ -39,12 +39,12 @@ struct PathRequest {
     //    pathEndLayout = null;
     //}
 
-    public PathRequest(Vector3 _start, LayoutCoordinate _end, Action<WorldPosition[], ActionableItem, bool> _callback) {
+    public PathRequest(Vector3 _start, LayoutCoordinate _end, Action<WorldPosition[], ActionableItem, bool> _callback, PathRequestTargetType targetType) {
         pathStart = _start;
         pathEndLayout = _end;
         callback = _callback;
 
-        targetType = PathRequestTargetType.Layout;
+        this.targetType = targetType;
         pathEndWorld = null;
         pathEndGrid = null;
         pathEndGoal = null;
@@ -84,7 +84,7 @@ public class PathRequestManager : MonoBehaviour {
     //    instance.TryProcessNext();
     //}
 
-    public static void RequestPathForTask(Vector3 position, GameTask task, System.Action<WorldPosition[], ActionableItem, bool> callback) {
+    public static void RequestPathForTask(Vector3 position, GameTask task, Action<WorldPosition[], ActionableItem, bool> callback) {
 
         PathRequest? request = null;
 
@@ -93,9 +93,10 @@ public class PathRequestManager : MonoBehaviour {
                 request = new PathRequest(position, task.target.vector3, callback);
                 break;
             case PathRequestTargetType.Layout:
+            case PathRequestTargetType.PathGrid:
                 MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(task.target);
                 LayoutCoordinate layoutCoordinate = new LayoutCoordinate(mapCoordinate);
-                request = new PathRequest(position, layoutCoordinate, callback);
+                request = new PathRequest(position, layoutCoordinate, callback, task.pathRequestTargetType);
                 break;
             case PathRequestTargetType.Unknown:
                 request = new PathRequest(position, task.gatherType, callback);
@@ -138,7 +139,15 @@ public class PathRequestManager : MonoBehaviour {
 
                     break;
                 case PathRequestTargetType.Layout:
-                    pathFinding.FindSimplifiedPathToAnySurrounding(currentPathRequest.pathStart, currentPathRequest.pathEndLayout.Value, (path, success) => {
+                    pathFinding.FindSimplifiedPathForLayout(currentPathRequest.pathStart, currentPathRequest.pathEndLayout.Value, (path, success) => {
+                        currentPathRequest.callback(path, null, success);
+                        isProcessingPath = false;
+
+                        TryProcessNext();
+                    });
+                    break;
+                case PathRequestTargetType.PathGrid:
+                    pathFinding.FindSimplifiedPathForPathGrid(currentPathRequest.pathStart, currentPathRequest.pathEndLayout.Value, (path, success) => {
                         currentPathRequest.callback(path, null, success);
                         isProcessingPath = false;
 

@@ -13,7 +13,7 @@ public class GameTask {
     public PathRequestTargetType pathRequestTargetType;
 
     // Target for Gather Action
-    public MineralType gatherType = MineralType.Ore;
+    public MineralType gatherType;
 
     public ActionType action;
     public ActionableItem actionItem;
@@ -22,13 +22,14 @@ public class GameTask {
 
     public System.Func<bool> SatisfiesStartRequirements;
 
-    public GameTask(string description, WorldPosition target, ActionType action, ActionableItem actionItem, PathRequestTargetType targetType = PathRequestTargetType.World) {
+    public GameTask(string description, WorldPosition target, ActionType action, ActionableItem actionItem, PathRequestTargetType targetType = PathRequestTargetType.World, MineralType gatherGoal = MineralType.Ore) {
         this.target = target;
+        gatherType = gatherGoal;
         Init(description, action, actionItem, targetType);
     }
 
     public GameTask(string description, MineralType gatherGoal, ActionType action, ActionableItem actionItem) {
-        this.gatherType = gatherGoal;
+        gatherType = gatherGoal;
         Init(description, action, actionItem, PathRequestTargetType.Unknown);
     }
 
@@ -44,7 +45,7 @@ public class GameTask {
     }
 
     public GameTask Clone() {
-        GameTask newTask = new GameTask(description, target, action, actionItem, pathRequestTargetType);
+        GameTask newTask = new GameTask(description, target, action, actionItem, pathRequestTargetType, gatherType);
 
         return newTask;
     }
@@ -62,7 +63,7 @@ public class MasterGameTask {
 
     public int taskNumber;
 
-    public MasterGameTask blockerTask;
+    public List<MasterGameTask> blockerTasks;
     public MasterGameTask taskBlockedByThis;
 
     public List<GameTask> childGameTasks;
@@ -74,7 +75,7 @@ public class MasterGameTask {
     public List<MasterGameTask> childMasterTasks;
     MasterGameTask parentMasterTask;
 
-    public MasterGameTask(ActionType actionType, string description, GameTask[] childTasks, MasterGameTask blocker = null) {
+    public MasterGameTask(ActionType actionType, string description, GameTask[] childTasks, List<MasterGameTask> blockers = null) {
 
         taskNumber = gameTaskCounter;
         gameTaskCounter++;
@@ -89,9 +90,13 @@ public class MasterGameTask {
             task.parentTask = this;
         }
 
-        if (blocker != null) {
-            blockerTask = blocker;
-            blockerTask.taskBlockedByThis = this;
+        if(blockers == null) {
+            blockerTasks = new List<MasterGameTask>();
+        } else {
+            blockerTasks = blockers;
+            foreach(MasterGameTask blocker in blockers) {
+                blocker.taskBlockedByThis = this;
+            }
         }
     }
 
@@ -165,13 +170,11 @@ public class MasterGameTask {
     }
 
     public void UnblockTask(MasterGameTask blockerTask) {
-        if (this.blockerTask == blockerTask) {
-            this.blockerTask = null;
-        }        
+        blockerTasks.Remove(blockerTask);       
     }
 
     public bool SatisfiesStartRequirements() {
-        if (blockerTask != null) {
+        if (blockerTasks.Count > 0) {
             return false;
         }
 

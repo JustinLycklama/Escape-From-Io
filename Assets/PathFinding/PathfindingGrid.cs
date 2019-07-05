@@ -59,6 +59,7 @@ public class PathfindingGrid : MonoBehaviour {
         }
     }
 
+    const int maxPenalty = 100;
     public void createGrid() {
         grid = new Node[gridSizeX, gridSizeY];
 
@@ -73,7 +74,11 @@ public class PathfindingGrid : MonoBehaviour {
                 LayoutCoordinate layoutCoordinate = new LayoutCoordinate(mapCoordinate);                
                 TerrainType terrain = Script.Get<MapsManager>().GetTerrainAt(layoutCoordinate);
 
-                int penalty = Mathf.FloorToInt((1 - terrain.walkSpeedMultiplier) * 100);
+                int penalty = Mathf.FloorToInt(maxPenalty + (maxPenalty / 2.0f));
+
+                if(terrain.walkable) {
+                    penalty = Mathf.FloorToInt((1 - terrain.walkSpeedMultiplier) * maxPenalty);
+                }              
 
                 grid[x, y] = new Node(terrain.walkable, worldPosition, x, y, penalty);
             }

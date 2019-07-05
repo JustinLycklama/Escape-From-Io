@@ -192,7 +192,7 @@ public class TaskQueueManager : MonoBehaviour
                         // Exhaust
                         doExhaust = true;
                         exhaustedTaskNumbers.Add(masterTask.taskNumber);
-                        taskListMap[givingTask.actionType].Remove(givingTask);
+                        taskListMap[masterTask.actionType].Remove(masterTask);
                     }
                 }
 

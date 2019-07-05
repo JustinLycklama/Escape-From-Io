@@ -5,7 +5,11 @@ using UnityEngine;
 public abstract class ActionableItem : MonoBehaviour, TaskStatusNotifiable {
     string description;
 
-    private MasterGameTask associatedTask;
+    // taskAlreadyDictated is used when a task is about to be assoctaed with this object, 
+     // but has not quite been associated, to let everybody know that this is taken
+    public bool taskAlreadyDictated = false; 
+    public MasterGameTask associatedTask { get; private set; }
+
     //private MasterGameTask[,] associatedTasksCoordinateMap;
 
     //protected void SetuoCoordinateArrays(int ) {
@@ -20,6 +24,7 @@ public abstract class ActionableItem : MonoBehaviour, TaskStatusNotifiable {
 
     public virtual void AssociateTask(MasterGameTask task) {
         associatedTask = task;
+        taskAlreadyDictated = false;
 
         NotifyAllTaskStatus();
     }

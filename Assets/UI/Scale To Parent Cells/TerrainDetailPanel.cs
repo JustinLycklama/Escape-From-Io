@@ -6,23 +6,35 @@ public class TerrainDetailPanel : MonoBehaviour {
 
     public MasterAndGameTaskCell masterAndGameTaskCell;
 
-    public TypeValueCell oreTypeValue;
+    public TypeValueCell[] mineralTypeValues;
+
+    MineralType[] mineralTypes;
+
+    private void Start() {
+
+        mineralTypes = new MineralType[] { MineralType.Ore, MineralType.Silver, MineralType.Gold };
+       
+        for(int i = 0; i < mineralTypes.Length; i++) {
+            MineralType mineralType = mineralTypes[i];
+
+            mineralTypeValues[i].type.text = mineralType.ToString();
+        }
+    }
 
     public void SetTerrain(LayoutCoordinate layoutCoordinate) {
         GameResourceManager gameResourceManager = Script.Get<GameResourceManager>();
 
         Dictionary<MineralType, int> mineralTypeCount = gameResourceManager.MineralListForCoordinate(layoutCoordinate);
 
-        oreTypeValue.type.text = "Ore";
+        for(int i = 0; i < mineralTypes.Length; i++) {
+            MineralType mineralType = mineralTypes[i];
+            TypeValueCell cell = mineralTypeValues[i];
 
-        if (mineralTypeCount.ContainsKey(MineralType.Ore)) {
-            oreTypeValue.value.text = mineralTypeCount[MineralType.Ore].ToString();
-
-        } else {
-            oreTypeValue.value.text = "None";
+            if(mineralTypeCount.ContainsKey(mineralType)) {
+                cell.value.text = mineralTypeCount[mineralType].ToString();
+            } else {
+                cell.value.text = "None";
+            }
         }
-
     }
-
-
 }

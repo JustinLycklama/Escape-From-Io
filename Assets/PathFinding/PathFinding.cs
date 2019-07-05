@@ -10,6 +10,8 @@ public class PathFinding : MonoBehaviour {
 
     PathfindingGrid grid;
 
+
+
     private void Awake() {
         grid = GetComponent<PathfindingGrid>();
     }
@@ -40,6 +42,10 @@ public class PathFinding : MonoBehaviour {
 
                 if(completedCalls == allOreInGame.Length) {
                     bool anyPathSuccess = (foundPath != null && foundPath.Length > 0);
+
+                    // Give the found object the flag that a task will soon be assiated
+                    foundObject.taskAlreadyDictated = true;
+
                     callback(anyPathSuccess ? SimplifyPath(foundPath) : null, foundObject, anyPathSuccess);
                 }
             }));
@@ -48,7 +54,25 @@ public class PathFinding : MonoBehaviour {
 
     //public static List<PathGridCoordinate> staticGridCoordinatesSurroundingLayoutCoordinate;
 
-    public void FindSimplifiedPathToAnySurrounding(Vector3 startPos, LayoutCoordinate layoutCoordinate, Action<WorldPosition[], bool> callback) {
+    // For PathRequestTargetType NodeCoordiante 
+    public void FindSimplifiedPathForPathGrid(Vector3 startPos, LayoutCoordinate layoutCoordinate, Action<WorldPosition[], bool> callback) {
+        Constants constants = Script.Get<Constants>();
+
+        PathGridCoordinate[][] pathGridCoordinatesOfLayout = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(layoutCoordinate);
+        List<PathGridCoordinate> pathGridCoordinates = new List<PathGridCoordinate>();
+
+        int middleCoordinate = Mathf.FloorToInt(constants.nodesPerLayoutPerAxis / 2f);        
+
+        pathGridCoordinates.Add(pathGridCoordinatesOfLayout[0][middleCoordinate]);
+        pathGridCoordinates.Add(pathGridCoordinatesOfLayout[middleCoordinate][0]);
+        pathGridCoordinates.Add(pathGridCoordinatesOfLayout[constants.nodesPerLayoutPerAxis - 1][middleCoordinate]);
+        pathGridCoordinates.Add(pathGridCoordinatesOfLayout[middleCoordinate][constants.nodesPerLayoutPerAxis - 1]);
+
+        FindSimplifiedPathToAnyIncluding(pathGridCoordinates, startPos, callback);
+    }
+
+    // For PathRequestTargetType layout 
+    public void FindSimplifiedPathForLayout(Vector3 startPos, LayoutCoordinate layoutCoordinate, Action<WorldPosition[], bool> callback) {
         Constants constants = Script.Get<Constants>();
 
         PathGridCoordinate[][] pathGridCoordinatesOfLayout = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(layoutCoordinate);
@@ -85,36 +109,33 @@ public class PathFinding : MonoBehaviour {
             gridCoordinatesSurroundingLayoutCoordinate.Add(new PathGridCoordinate(sample.xLowSample, sample.yLowSample + 1));
         }
 
-        //staticGridCoordinatesSurroundingLayoutCoordinate = gridCoordinatesSurroundingLayoutCoordinate;
+        FindSimplifiedPathToAnyIncluding(gridCoordinatesSurroundingLayoutCoordinate, startPos, callback);
+    }
+
+    private void FindSimplifiedPathToAnyIncluding(List<PathGridCoordinate> pathGridCoordinates, Vector3 startPos, Action<WorldPosition[], bool> callback) {
 
         int lowestLength = int.MaxValue;
         Node[] foundPath = null;
 
         int completedCalls = 0;
 
-        //MonoBehaviour.print("Four Corners");
-
-        //foreach(PathGridCoordinate anyGridCoordinate in gridCoordinatesSurroundingLayoutCoordinate) {
-        //    MonoBehaviour.print("Corner: " + anyGridCoordinate.description);            
-        //}
-
-        foreach (PathGridCoordinate gridCoordinate in gridCoordinatesSurroundingLayoutCoordinate) {
+        foreach(PathGridCoordinate gridCoordinate in pathGridCoordinates) {
             MapCoordinate mapCoordinate = MapCoordinate.FromGridCoordinate(gridCoordinate);
             WorldPosition worldPos = new WorldPosition(mapCoordinate);
 
             StartCoroutine(FindPath(startPos, worldPos.vector3, (path, success) => {
                 completedCalls++;
 
-                if (success && path.Length < lowestLength) {
+                if(success && path.Length < lowestLength) {
                     foundPath = path;
                     lowestLength = path.Length;
                 }
 
-                if (completedCalls == gridCoordinatesSurroundingLayoutCoordinate.Count) {
+                if(completedCalls == pathGridCoordinates.Count) {
                     bool anyPathSuccess = (foundPath != null && foundPath.Length > 0);
                     callback(anyPathSuccess ? SimplifyPath(foundPath) : null, anyPathSuccess);
                 }
-            }));            
+            }));
         }
     }
 

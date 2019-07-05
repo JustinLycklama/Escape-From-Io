@@ -140,7 +140,7 @@ public class TerrainManager : MonoBehaviour {
                         MapCoordinate mapCoordinate = new MapCoordinate(layoutCoordinate);
                         WorldPosition worldPosition = new WorldPosition(mapCoordinate);
 
-                        GameTask cleaningTask = new GameTask("Cleaning", worldPosition, GameTask.ActionType.FlattenPath, layoutCoordinate.mapContainer.map, PathRequestTargetType.Layout);
+                        GameTask cleaningTask = new GameTask("Cleaning", worldPosition, GameTask.ActionType.FlattenPath, layoutCoordinate.mapContainer.map, PathRequestTargetType.PathGrid);
                         MasterGameTask masterCleaningTask = new MasterGameTask(MasterGameTask.ActionType.Mine, "Clean location " + layoutCoordinate.description, new GameTask[] { cleaningTask });
 
                         queue.QueueTask(masterCleaningTask);
@@ -244,8 +244,8 @@ public struct TerrainType {
 
     [System.Serializable]
     public struct MineralChance {
-        public Chance chance;
         public MineralType type;
+        public Chance chance;
     }
 
     public MineralChance[] mineralChances;

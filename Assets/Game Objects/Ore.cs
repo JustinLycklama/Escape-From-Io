@@ -10,13 +10,8 @@ public class Ore : ActionableItem {
 
     float actionPercent = 0;
 
-    
-    //public Unit associatedUnit;
-    public GameTask associatedTask;
-    //public override void AssociateTask(GameTask task) {
-    //    associatedTask = task;
-    //}
-
+    public MineralType mineralType = MineralType.Ore;
+   
     public override float performAction(GameTask task, float rate, Unit unit) {
         switch(task.action) {
 
@@ -27,11 +22,10 @@ public class Ore : ActionableItem {
                     actionPercent = 1;
 
                     // The associatedTask is over
-                    associatedTask = null;
+                    AssociateTask(null);                    
 
                     GameResourceManager resourceManager = Script.Get<GameResourceManager>();
                     resourceManager.GiveToUnit(this, unit);
-                    this.transform.SetParent(unit.transform, true);
 
                     actionPercent = 0;
 

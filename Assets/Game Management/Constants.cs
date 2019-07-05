@@ -127,19 +127,33 @@ public abstract class PrefabBlueprint {
     }
 }
 
-struct BlueprintCost {
+public struct BlueprintCost {
+    public Dictionary<MineralType, int> costMap;
 
+    public BlueprintCost(int ore, int silver, int gold) {
+        costMap = new Dictionary<MineralType, int>();
 
+        if (ore > 0) {
+            costMap[MineralType.Ore] = ore;
+        }
 
+        if (silver > 0) {
+            costMap[MineralType.Silver] = silver;
+        }
+
+        if(gold > 0) {
+            costMap[MineralType.Gold] = gold;
+        }
+    }
 }
 
 public abstract class ConstructionBlueprint : PrefabBlueprint {
-    public ConstructionBlueprint(string fileName, Type type, string label, int cost) : base(fileName, type) {
+    public ConstructionBlueprint(string fileName, Type type, string label, BlueprintCost cost) : base(fileName, type) {
         this.label = label;
         this.cost = cost;
     }
 
-    public int cost;
+    public BlueprintCost cost;
     public string label;
 
     public abstract void ConstructAt(LayoutCoordinate layoutCoordinate);

@@ -27,6 +27,9 @@ public class GameResourceManager : MonoBehaviour {
         private static string folder = "Ore/";
 
         public static Blueprint Basic = new Blueprint("Ore", typeof(Ore));
+        public static Blueprint Silver = new Blueprint("Silver", typeof(Ore));
+        public static Blueprint Gold = new Blueprint("Gold", typeof(Ore));
+
 
         private Blueprint(string fileName, Type type) : base(folder + fileName, type) { }
     }
@@ -92,8 +95,22 @@ public class GameResourceManager : MonoBehaviour {
     }
 
     public Ore CreateMineral(MineralType type) {
-        Ore ore = Blueprint.Basic.Instantiate() as Ore;
-        ore.name = "Ore #" + oreCount;
+        Ore ore = null;
+
+        switch(type) {
+            case MineralType.Ore:
+                ore = Blueprint.Basic.Instantiate() as Ore;
+                break;
+            case MineralType.Silver:
+                ore = Blueprint.Silver.Instantiate() as Ore;
+                break;
+            case MineralType.Gold:
+                ore = Blueprint.Gold.Instantiate() as Ore;
+                break;
+        }
+
+        ore.name = type.ToString() + " #" + oreCount;
+        ore.mineralType = type;
         oreCount++;
 
         ore.transform.SetParent(transform, true);
@@ -104,7 +121,7 @@ public class GameResourceManager : MonoBehaviour {
     }
 
     public Ore[] GetAllAvailableOfType(MineralType gatherType) {
-        return globalOreList.Where(ore => ore.associatedTask == null).ToArray();
+        return globalOreList.Where(ore => ore.associatedTask == null && ore.taskAlreadyDictated == false && ore.mineralType == gatherType).ToArray();
     }
 
     //public void AddOreToStorage(Ore ore, Refinery refinery) {
@@ -125,15 +142,24 @@ public class GameResourceManager : MonoBehaviour {
 
         unitOreDistribution[oreHolder].Remove(anyOre);
 
-        GameObject.DestroyImmediate(anyOre.gameObject);
+        DestroyImmediate(anyOre.gameObject);
 
         return true;
     }
 
     public void GiveToUnit(Ore ore, Unit unit) {
+
+        if (!globalOreList.Contains(ore)) {
+            // This ore cannot be given
+            return;
+        }
+
+
         if(!unitOreDistribution.ContainsKey(unit)) {
             unitOreDistribution.Add(unit, new List<Ore>());
         }
+
+        ore.transform.SetParent(unit.transform, true);
 
         List<Ore> oreList = unitOreDistribution[unit];
         globalOreList.Remove(ore);
