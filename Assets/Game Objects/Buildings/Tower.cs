@@ -12,7 +12,7 @@ public class Tower : Building {
     Shader originalShader;
     Shader buildableShader;
 
-    Dictionary<MeshRenderer, bool> revertDictionary = new Dictionary<MeshRenderer, bool>();
+    //Dictionary<MeshRenderer, bool> revertDictionary = new Dictionary<MeshRenderer, bool>();
 
     private void Start() {
         buildableShader = Shader.Find("Custom/Buildable");
@@ -21,9 +21,9 @@ public class Tower : Building {
         baseRenderer.material.shader = buildableShader;
         topRenderer.material.shader = buildableShader;
 
-        foreach(MeshRenderer renderer in new MeshRenderer[] {baseRenderer, topRenderer} ) {
-            revertDictionary[renderer] = false;
-        }
+        //foreach(MeshRenderer renderer in new MeshRenderer[] {baseRenderer, topRenderer} ) {
+        //    revertDictionary[renderer] = false;
+        //}
     }
 
     protected override void UpdateCompletionPercent(float percent) {
@@ -33,13 +33,21 @@ public class Tower : Building {
             topRenderer.material.SetFloat("percentComplete", Mathf.InverseLerp(0.5f, 1, percent));
         }
 
-        if (percent > 0.5 && revertDictionary[baseRenderer] == false) {
-            baseRenderer.material.SetFloat("percentComplete", 1);
-            baseRenderer.material.shader = originalShader;
-        }
+        //if (percent > 0.5 && revertDictionary[baseRenderer] == false) {
+        //    baseRenderer.material.SetFloat("percentComplete", 1);
+        //    baseRenderer.material.shader = originalShader;
+        //}
 
-        if (percent == 1 && revertDictionary[topRenderer] == false) {
-            topRenderer.material.shader = originalShader;
-        }
+        //if (percent == 1 && revertDictionary[topRenderer] == false) {
+        //    topRenderer.material.shader = originalShader;
+        //}
+    }
+
+    protected override void CompleteBuilding() {
+        baseRenderer.material.SetFloat("percentComplete", 1);
+        topRenderer.material.SetFloat("percentComplete", 1);
+
+        baseRenderer.material.shader = originalShader;
+        topRenderer.material.shader = originalShader;
     }
 }

@@ -47,10 +47,13 @@ public abstract class Building : ActionableItem, Selectable {
 
     //StatusDelegate statusDelegate;
 
-    PercentageBar percentageBar;
+    //PercentageBar percentageBar;
+
+
+    CostPanelTooltip costPanel;
     public Transform statusLocation;
 
-    public BlueprintCost cost;
+    private BlueprintCost cost;
 
     //protected static abstract int Cost { get; }
 
@@ -62,10 +65,6 @@ public abstract class Building : ActionableItem, Selectable {
         title = "Building #" + buildingCount;
         buildingCount++;
 
-        percentageBar = UIManager.Blueprint.PercentageBar.Instantiate() as PercentageBar;
-        percentageBar.transform.SetParent(Script.UIOverlayPanel.GetFromObject<RectTransform>());
-
-        percentageBar.SetFollower(statusLocation);
         //percentageBar.SetRequired(cost, "Ore");
 
         percentPerTask = new Dictionary<GameTask, float>();
@@ -84,11 +83,21 @@ public abstract class Building : ActionableItem, Selectable {
     }
 
     // Update is called once per frame
-    void Update() {
-        //materialColor.a = Mathf.Clamp(percentComplete, 0.10f, 1f);
-        //buildingRenderer.material.color = materialColor;
-    }
+    //void Update() {
+    //materialColor.a = Mathf.Clamp(percentComplete, 0.10f, 1f);
+    //buildingRenderer.material.color = materialColor;
+    //}
 
+    public void SetCost(BlueprintCost cost) {
+        this.cost = cost;
+
+        costPanel = UIManager.Blueprint.CostPanel.Instantiate() as CostPanelTooltip;
+        costPanel.transform.SetParent(Script.UIOverlayPanel.GetFromObject<RectTransform>());
+        costPanel.toFollow = statusLocation;
+
+        costPanel.SetCost(cost);
+        costPanel.SetTallyMode(true);
+    }
 
     // MARK: Selectable Interface
     public void SetSelected(bool selected) {
@@ -107,6 +116,9 @@ public abstract class Building : ActionableItem, Selectable {
 
     protected abstract void UpdateCompletionPercent(float percent);
 
+    protected abstract void CompleteBuilding();
+
+
 
     // Returns the percent to completion the action is
     public override float performAction(GameTask task, float rate, Unit unit) {
@@ -118,12 +130,13 @@ public abstract class Building : ActionableItem, Selectable {
 
                 if(percentComplete > 1) {
                     percentComplete = 1;
+                    CompleteBuilding();
+                } else {
+                    if(Mathf.FloorToInt(previousPercent * 100) < Mathf.FloorToInt(percentComplete * 100)) {
+                        UpdateCompletionPercent(percentComplete);
+                    }
                 }
               
-                if(Mathf.FloorToInt(previousPercent * 100) < Mathf.FloorToInt(percentComplete * 100)) {
-                    UpdateCompletionPercent(percentComplete);
-                }
-
                 return percentComplete;                       
             case GameTask.ActionType.DropOff:
 
@@ -136,9 +149,8 @@ public abstract class Building : ActionableItem, Selectable {
                 if(percentPerTask[task] >= 1) {
                     percentPerTask.Remove(task);
 
-                    if(Script.Get<GameResourceManager>().ConsumeInBuilding(unit, this)) {
-                        percentageBar.IncrementRequired();                        
-                    }
+                    MineralType mineralType = Script.Get<GameResourceManager>().ConsumeInBuilding(unit, this);
+                    costPanel.TallyMineralType(mineralType);
 
                     return 1;
                 }
@@ -170,7 +182,7 @@ public abstract class Building : ActionableItem, Selectable {
             WorldPosition worldPosition = new WorldPosition(new MapCoordinate(layoutCoordinate));
 
             Building building = UnityEngine.Object.Instantiate(resource) as Building;
-            building.cost = cost;
+            building.SetCost(cost);
 ;
             building.transform.position = worldPosition.vector3;
 

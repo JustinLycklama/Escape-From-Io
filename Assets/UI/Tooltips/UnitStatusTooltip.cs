@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
-public class UnitStatusTooltip : TrackingUIElement { //TaskStatusUpdateDelegate
+public class UnitStatusTooltip : MonoBehaviour, TrackingUIInterface { //TaskStatusUpdateDelegate
 
     public Text title;
     public Text taskDescription;
@@ -12,7 +12,14 @@ public class UnitStatusTooltip : TrackingUIElement { //TaskStatusUpdateDelegate
     private RectTransform targetCanvas;
     private RectTransform rectTransform;
 
+    // TrackingUIInterface
+    public Transform toFollow { get; set; }
+
     //private Unit unit;
+
+    private void Update() {
+        this.UpdateTrackingPosition();
+    }
 
     public void SetTitle(string title) {
         this.title.text = title;

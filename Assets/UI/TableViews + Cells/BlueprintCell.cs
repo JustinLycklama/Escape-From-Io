@@ -8,14 +8,14 @@ public class BlueprintCell : MonoBehaviour, IPointerClickHandler {
 
     public Image icon;
     public Text labelText;
-    public Text costText;
+    public CostPanel costPanel;
 
     private ConstructionBlueprint blueprint;
     private LayoutCoordinate blueprintLayoutCoordinate;
 
     public void SetBlueprint(ConstructionBlueprint blueprint, LayoutCoordinate blueprintLayoutCoordinate) {
         labelText.text = blueprint.label;
-        costText.text = blueprint.cost.ToString();
+        costPanel.SetCost(blueprint.cost);
 
         this.blueprint = blueprint;
         this.blueprintLayoutCoordinate = blueprintLayoutCoordinate;

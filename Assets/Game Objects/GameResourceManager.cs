@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using System;
+using UnityEngine.UI;
 
 public enum MineralType { Ore, Silver, Gold }
 
 public class GameResourceManager : MonoBehaviour {
     private int oreCount = 0;
 
+    public Mesh[] mineralMeshList;
 
+    public Sprite oreImage;
 
     //public struct MineralTypeCount {
     //    public int count;
@@ -94,6 +97,7 @@ public class GameResourceManager : MonoBehaviour {
         return new Dictionary<MineralType, int>(); 
     }
 
+
     public Ore CreateMineral(MineralType type) {
         Ore ore = null;
 
@@ -112,6 +116,11 @@ public class GameResourceManager : MonoBehaviour {
         ore.name = type.ToString() + " #" + oreCount;
         ore.mineralType = type;
         oreCount++;
+
+        System.Random rnd = new System.Random(Guid.NewGuid().GetHashCode());
+        int index = rnd.Next(0, mineralMeshList.Length);
+
+        ore.GetComponentInChildren<MeshFilter>().mesh = mineralMeshList[index];
 
         ore.transform.SetParent(transform, true);
 
@@ -132,21 +141,23 @@ public class GameResourceManager : MonoBehaviour {
 
     //}
 
-    public bool ConsumeInBuilding(Unit oreHolder, Building building) {
+    public MineralType ConsumeInBuilding(Unit oreHolder, Building building) {
 
         if(!unitOreDistribution.ContainsKey(oreHolder) || unitOreDistribution[oreHolder].Count == 0) {
-            return false;
+            throw new Exception();
         }
 
+        
         Ore anyOre = unitOreDistribution[oreHolder][0];
 
-        unitOreDistribution[oreHolder].Remove(anyOre);
+        MineralType mineralType = anyOre.mineralType;
 
+        unitOreDistribution[oreHolder].Remove(anyOre);
         DestroyImmediate(anyOre.gameObject);
 
-        return true;
+        return mineralType;
     }
-
+    
     public void GiveToUnit(Ore ore, Unit unit) {
 
         if (!globalOreList.Contains(ore)) {
