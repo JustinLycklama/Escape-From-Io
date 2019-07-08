@@ -7,6 +7,11 @@ using UnityEngine.UI;
 
 public enum MineralType { Ore, Silver, Gold }
 
+public interface OreUpdateDelegate {
+    void NewOreCreated(Ore ore);
+    void OreRemoved(Ore ore);
+}
+
 public class GameResourceManager : MonoBehaviour {
     private int oreCount = 0;
 
@@ -37,14 +42,19 @@ public class GameResourceManager : MonoBehaviour {
         private Blueprint(string fileName, Type type) : base(folder + fileName, type) { }
     }
 
-    List<Ore> globalOreList;
+    // List of all unclaimedOre
+    List<Ore> availableOreList;
+
+    // List of all ore currently on the map, both in a units possession or not
+    public List<Ore> globalOreList;
+
 
     Dictionary<Refinery, Ore[]> refineryOreDistribution;
     Dictionary<Unit, List<Ore>> unitOreDistribution;
 
     private GameResourceManager() {
 
-        globalOreList = new List<Ore>();
+        availableOreList = new List<Ore>();
 
         refineryOreDistribution = new Dictionary<Refinery, Ore[]>();
         unitOreDistribution = new Dictionary<Unit, List<Ore>>();
@@ -124,13 +134,14 @@ public class GameResourceManager : MonoBehaviour {
 
         ore.transform.SetParent(transform, true);
 
+        availableOreList.Add(ore);
         globalOreList.Add(ore);
 
         return ore;
     }
 
     public Ore[] GetAllAvailableOfType(MineralType gatherType) {
-        return globalOreList.Where(ore => ore.associatedTask == null && ore.taskAlreadyDictated == false && ore.mineralType == gatherType).ToArray();
+        return availableOreList.Where(ore => ore.associatedTask == null && ore.taskAlreadyDictated == false && ore.mineralType == gatherType).ToArray();
     }
 
     //public void AddOreToStorage(Ore ore, Refinery refinery) {
@@ -153,6 +164,8 @@ public class GameResourceManager : MonoBehaviour {
         MineralType mineralType = anyOre.mineralType;
 
         unitOreDistribution[oreHolder].Remove(anyOre);
+        globalOreList.Remove(anyOre);
+
         DestroyImmediate(anyOre.gameObject);
 
         return mineralType;
@@ -160,11 +173,10 @@ public class GameResourceManager : MonoBehaviour {
     
     public void GiveToUnit(Ore ore, Unit unit) {
 
-        if (!globalOreList.Contains(ore)) {
+        if (!availableOreList.Contains(ore)) {
             // This ore cannot be given
             return;
         }
-
 
         if(!unitOreDistribution.ContainsKey(unit)) {
             unitOreDistribution.Add(unit, new List<Ore>());
@@ -173,7 +185,28 @@ public class GameResourceManager : MonoBehaviour {
         ore.transform.SetParent(unit.transform, true);
 
         List<Ore> oreList = unitOreDistribution[unit];
-        globalOreList.Remove(ore);
+        availableOreList.Remove(ore);
         oreList.Add(ore);
+    }
+
+    public List<OreUpdateDelegate> oreUpdateDelegateList = new List<OreUpdateDelegate>();
+
+    public void RegisterFoOreNotifications(OreUpdateDelegate notificationDelegate) {
+        oreUpdateDelegateList.Add(notificationDelegate);
+    }
+
+    public void EndOreNotifications(OreUpdateDelegate notificationDelegate) {
+        oreUpdateDelegateList.Remove(notificationDelegate);
+    }
+
+    public void NotifyAllOreUpdate(Ore ore, bool isNew) {
+        foreach(OreUpdateDelegate updateDelegate in oreUpdateDelegateList) {
+            if (isNew) {
+                updateDelegate.NewOreCreated(ore);
+            } else {
+                updateDelegate.OreRemoved(ore);
+            }
+            
+        }
     }
 }

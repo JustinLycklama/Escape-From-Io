@@ -36,6 +36,7 @@ public class Tag {
     public static Tag UIOverlayPanel { get { return new Tag("UIOverlayPanel"); } }
     public static Tag UIArea { get { return new Tag("UIArea"); } }
     public static Tag ResourceManager { get { return new Tag("ResourceManager"); } }
+    public static Tag MiniMap { get { return new Tag("MiniMap"); } }
 
     public GameObject GetGameObject() {
         GameObject cachedObject;
@@ -73,8 +74,9 @@ public class Script {
     public static Script TextureGenerator { get { return new Script(Tag.MapGenerator, typeof(TextureGenerator)); } }
     public static Script TerrainManager { get { return new Script(Tag.MapGenerator, typeof(TerrainManager)); } }
     public static Script ResourceManager { get { return new Script(Tag.ResourceManager, typeof(GameResourceManager)); } }
+    public static Script MiniMap { get { return new Script(Tag.MiniMap, typeof(MiniMap)); } }
 
-    public static Script[] allScripts = new Script[] { Constants, PlayerBehaviour, MapsManager, UIManager, TaskQueue, MapGenerator, PathfindingGrid, SelectionManager, UnitManager, TextureGenerator, TerrainManager, ResourceManager }; 
+    public static Script[] allScripts = new Script[] { Constants, PlayerBehaviour, MapsManager, UIManager, TaskQueue, MapGenerator, PathfindingGrid, SelectionManager, UnitManager, TextureGenerator, TerrainManager, ResourceManager, MiniMap }; 
 
     public static T Get<T> () where T : Component {
 

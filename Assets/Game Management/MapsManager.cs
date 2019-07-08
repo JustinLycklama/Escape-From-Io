@@ -10,7 +10,7 @@ public class MapsManager : MonoBehaviour {
     int horizontalMapCount;
     int verticalMapCount;
 
-    Rect mapsBoundaries;
+    public Rect mapsBoundaries;
 
     public List<MapContainer> mapContainers;
     public MapContainer[,] mapContainer2d;

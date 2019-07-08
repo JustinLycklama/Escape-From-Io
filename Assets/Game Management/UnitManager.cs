@@ -21,6 +21,10 @@ public class UnitManager : MonoBehaviour {
         }
     }
 
+    public Unit[] GetUnitsOfType(MasterGameTask.ActionType type) {
+        return unitListMap[type].ToArray();
+    }
+
     public void RegisterForNotifications(UnitManagerDelegate notificationDelegate, MasterGameTask.ActionType ofType) {
         delegateListMap[ofType].Add(notificationDelegate);
 
