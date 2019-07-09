@@ -17,9 +17,12 @@ public class CostPanel : MonoBehaviour
     //private int
 
     private void Awake() {
-        copperCell.image.overrideSprite = Script.Get<GameResourceManager>().oreImage;
+        //copperCell.image.overrideSprite = Script.Get<GameResourceManager>().oreImage;
 
-        imageValueDictionary = new Dictionary<MineralType, ImageValueCell>() { { MineralType.Ore, copperCell }, { MineralType.Silver, silverCell }, { MineralType.Gold, goldCell } };
+
+
+
+        imageValueDictionary = new Dictionary<MineralType, ImageValueCell>() { { MineralType.Copper, copperCell }, { MineralType.Silver, silverCell }, { MineralType.Gold, goldCell } };
 
         foreach(MineralType mineralType in imageValueDictionary.Keys) {
             if(!tallyCountDictionary.ContainsKey(mineralType)) {
@@ -31,6 +34,25 @@ public class CostPanel : MonoBehaviour
     }
 
     public void SetCost(BlueprintCost cost) {
+
+        if (cost.costMap.ContainsKey(MineralType.RefinedCopper)) {
+            copperCell.image.overrideSprite = Script.Get<GameResourceManager>().refinedCopperImage;
+        } else {
+            copperCell.image.overrideSprite = Script.Get<GameResourceManager>().rawCopperImage;
+        }
+
+        if(cost.costMap.ContainsKey(MineralType.RefinedSilver)) {
+            silverCell.image.overrideSprite = Script.Get<GameResourceManager>().refinedSilverImage;
+        } else {
+            silverCell.image.overrideSprite = Script.Get<GameResourceManager>().rawSilverImage;
+        }
+
+        if(cost.costMap.ContainsKey(MineralType.RefinedGold)) {
+            goldCell.image.overrideSprite = Script.Get<GameResourceManager>().refinedGoldImage;           
+        } else {
+            goldCell.image.overrideSprite = Script.Get<GameResourceManager>().rawGoldImage;
+        }
+
         this.cost = cost;
         Display();
     }

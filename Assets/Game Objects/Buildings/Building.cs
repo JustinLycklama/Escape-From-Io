@@ -131,6 +131,10 @@ public abstract class Building : ActionableItem, Selectable {
                 if(percentComplete > 1) {
                     percentComplete = 1;
                     CompleteBuilding();
+
+                    BuildingManager buildingManager = Script.Get<BuildingManager>();
+                    buildingManager.CompleteBuilding(this);
+
                 } else {
                     if(Mathf.FloorToInt(previousPercent * 100) < Mathf.FloorToInt(percentComplete * 100)) {
                         UpdateCompletionPercent(percentComplete);
@@ -179,36 +183,10 @@ public abstract class Building : ActionableItem, Selectable {
         public Blueprint(string fileName, Type type, string label, BlueprintCost cost) : base(folder+fileName, type, label, cost) {}
 
         public override void ConstructAt(LayoutCoordinate layoutCoordinate) {
-            WorldPosition worldPosition = new WorldPosition(new MapCoordinate(layoutCoordinate));
+            BuildingManager buildingManager = Script.Get<BuildingManager>();
 
             Building building = UnityEngine.Object.Instantiate(resource) as Building;
-            building.SetCost(cost);
-;
-            building.transform.position = worldPosition.vector3;
-
-            TaskQueueManager queue = Script.Get<TaskQueueManager>();
-            List<MasterGameTask> blockingBuildTasks = new List<MasterGameTask>();
-
-            foreach(MineralType mineralType in cost.costMap.Keys) {
-
-                GameTask oreTask = new GameTask("Find Ore", mineralType, GameTask.ActionType.PickUp, null);
-                oreTask.SatisfiesStartRequirements = () => {
-                    return Script.Get<GameResourceManager>().AnyMineralAvailable(mineralType);
-                };
-
-                GameTask dropTask = new GameTask("Deposit Ore", worldPosition, GameTask.ActionType.DropOff, building, PathRequestTargetType.PathGrid);
-
-                MasterGameTask masterCollectTask = new MasterGameTask(MasterGameTask.ActionType.Mine, "Collect Ore " + mineralType.ToString(), new GameTask[] { oreTask, dropTask });
-                masterCollectTask.repeatCount = cost.costMap[mineralType];
-
-                queue.QueueTask(masterCollectTask);
-                blockingBuildTasks.Add(masterCollectTask);
-            }            
-
-            GameTask buildTask = new GameTask("Construction", worldPosition, GameTask.ActionType.Build, building, PathRequestTargetType.PathGrid);
-            MasterGameTask masterBuildTask = new MasterGameTask(MasterGameTask.ActionType.Mine, "Build Building " + building.description, new GameTask[] { buildTask }, blockingBuildTasks);
-
-            queue.QueueTask(masterBuildTask);                
+            buildingManager.BuildAt(building, layoutCoordinate, cost);
         }
     }
 

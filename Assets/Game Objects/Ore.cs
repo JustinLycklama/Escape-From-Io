@@ -10,7 +10,7 @@ public class Ore : ActionableItem {
 
     float actionPercent = 0;
 
-    public MineralType mineralType = MineralType.Ore;
+    public MineralType mineralType = MineralType.Copper;
    
     public override float performAction(GameTask task, float rate, Unit unit) {
         switch(task.action) {

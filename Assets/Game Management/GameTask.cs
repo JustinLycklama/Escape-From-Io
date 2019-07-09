@@ -22,7 +22,7 @@ public class GameTask {
 
     public System.Func<bool> SatisfiesStartRequirements;
 
-    public GameTask(string description, WorldPosition target, ActionType action, ActionableItem actionItem, PathRequestTargetType targetType = PathRequestTargetType.World, MineralType gatherGoal = MineralType.Ore) {
+    public GameTask(string description, WorldPosition target, ActionType action, ActionableItem actionItem, PathRequestTargetType targetType = PathRequestTargetType.World, MineralType gatherGoal = MineralType.Copper) {
         this.target = target;
         gatherType = gatherGoal;
         Init(description, action, actionItem, targetType);

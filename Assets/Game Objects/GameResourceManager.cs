@@ -5,7 +5,7 @@ using System.Linq;
 using System;
 using UnityEngine.UI;
 
-public enum MineralType { Ore, Silver, Gold }
+public enum MineralType { Copper, Silver, Gold, RefinedCopper, RefinedSilver, RefinedGold }
 
 public interface OreUpdateDelegate {
     void NewOreCreated(Ore ore);
@@ -17,7 +17,15 @@ public class GameResourceManager : MonoBehaviour {
 
     public Mesh[] mineralMeshList;
 
-    public Sprite oreImage;
+    public Sprite rawCopperImage;
+    public Sprite rawSilverImage;
+    public Sprite rawGoldImage;
+
+    public Sprite refinedCopperImage;
+    public Sprite refinedSilverImage;
+    public Sprite refinedGoldImage;
+
+
 
     //public struct MineralTypeCount {
     //    public int count;
@@ -112,7 +120,7 @@ public class GameResourceManager : MonoBehaviour {
         Ore ore = null;
 
         switch(type) {
-            case MineralType.Ore:
+            case MineralType.Copper:
                 ore = Blueprint.Basic.Instantiate() as Ore;
                 break;
             case MineralType.Silver:

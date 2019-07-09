@@ -12,7 +12,7 @@ public class TerrainDetailPanel : MonoBehaviour {
 
     private void Start() {
 
-        mineralTypes = new MineralType[] { MineralType.Ore, MineralType.Silver, MineralType.Gold };
+        mineralTypes = new MineralType[] { MineralType.Copper, MineralType.Silver, MineralType.Gold };
        
         for(int i = 0; i < mineralTypes.Length; i++) {
             MineralType mineralType = mineralTypes[i];

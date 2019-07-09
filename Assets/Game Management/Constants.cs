@@ -37,6 +37,7 @@ public class Tag {
     public static Tag UIArea { get { return new Tag("UIArea"); } }
     public static Tag ResourceManager { get { return new Tag("ResourceManager"); } }
     public static Tag MiniMap { get { return new Tag("MiniMap"); } }
+    public static Tag BuildingManager { get { return new Tag("BuildingManager"); } }
 
     public GameObject GetGameObject() {
         GameObject cachedObject;
@@ -75,8 +76,9 @@ public class Script {
     public static Script TerrainManager { get { return new Script(Tag.MapGenerator, typeof(TerrainManager)); } }
     public static Script ResourceManager { get { return new Script(Tag.ResourceManager, typeof(GameResourceManager)); } }
     public static Script MiniMap { get { return new Script(Tag.MiniMap, typeof(MiniMap)); } }
+    public static Script BuildingManager { get { return new Script(Tag.BuildingManager, typeof(BuildingManager)); } }
 
-    public static Script[] allScripts = new Script[] { Constants, PlayerBehaviour, MapsManager, UIManager, TaskQueue, MapGenerator, PathfindingGrid, SelectionManager, UnitManager, TextureGenerator, TerrainManager, ResourceManager, MiniMap }; 
+    public static Script[] allScripts = new Script[] { Constants, PlayerBehaviour, MapsManager, UIManager, TaskQueue, MapGenerator, PathfindingGrid, SelectionManager, UnitManager, TextureGenerator, TerrainManager, ResourceManager, MiniMap, BuildingManager }; 
 
     public static T Get<T> () where T : Component {
 
@@ -136,7 +138,7 @@ public struct BlueprintCost {
         costMap = new Dictionary<MineralType, int>();
 
         if (ore > 0) {
-            costMap[MineralType.Ore] = ore;
+            costMap[MineralType.Copper] = ore;
         }
 
         if (silver > 0) {

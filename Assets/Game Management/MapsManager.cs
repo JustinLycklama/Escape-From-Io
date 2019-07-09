@@ -7,12 +7,18 @@ public interface TerrainUpdateDelegate {
 }
 
 public class MapsManager : MonoBehaviour {
-    int horizontalMapCount;
-    int verticalMapCount;
+    [HideInInspector]
+    public int horizontalMapCount;
+    [HideInInspector]
+    public int verticalMapCount;
 
+    [HideInInspector]
     public Rect mapsBoundaries;
 
+    [HideInInspector]
     public List<MapContainer> mapContainers;
+
+    [HideInInspector]
     public MapContainer[,] mapContainer2d;
 
     private List<MapContainer> activeContainers;

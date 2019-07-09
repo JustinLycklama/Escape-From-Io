@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class MiniMap : MonoBehaviour {
+public class MiniMap : MonoBehaviour, BuildingsUpdateDelegate {
 
     public RectTransform rectTransform;
 
@@ -15,12 +15,13 @@ public class MiniMap : MonoBehaviour {
     public Image silverIcon;
     public Image goldIcon;
 
-
+    public Image lightTowerIcon;
 
     MapsManager mapsManager;
 
-
     Dictionary<Behaviour, Image> objectToIconMap = new Dictionary<Behaviour, Image>();
+    Dictionary<Behaviour, Image> staticObjectToIconMap = new Dictionary<Behaviour, Image>();
+
     HashSet<Behaviour> remainingKeys = new HashSet<Behaviour>();
 
     public void Initialize() {
@@ -29,16 +30,21 @@ public class MiniMap : MonoBehaviour {
         objectToIconMap[Camera.main] = mainCameraImage;
 
         builderUnitImage.gameObject.SetActive(false);
+
         copperIcon.gameObject.SetActive(false);
         silverIcon.gameObject.SetActive(false);
         goldIcon.gameObject.SetActive(false);
 
+        lightTowerIcon.gameObject.SetActive(false);
+
+        BuildingManager buildingManager = Script.Get<BuildingManager>();
+        buildingManager.RegisterFoBuildingNotifications(this);
+
         StartCoroutine(UpdateMap());   
     }
 
-
     private enum ObjectType {
-        Camera, Builder, Copper, Silver, Gold
+        Camera, Builder, Copper, Silver, Gold, LightTower
     }
 
     private Image ImageBaseFromObjectType(ObjectType objectType) {
@@ -53,7 +59,8 @@ public class MiniMap : MonoBehaviour {
                 return silverIcon;
             case ObjectType.Gold:
                 return goldIcon;
-
+            case ObjectType.LightTower:
+                return lightTowerIcon;
         }
 
         return null;
@@ -76,7 +83,7 @@ public class MiniMap : MonoBehaviour {
             GameResourceManager gameResourceManager = Script.Get<GameResourceManager>();
             List<Ore> oreList = gameResourceManager.globalOreList;
 
-            Ore[] copperList = oreList.Where(ore => ore.mineralType == MineralType.Ore).ToArray();
+            Ore[] copperList = oreList.Where(ore => ore.mineralType == MineralType.Copper).ToArray();
 
             foreach(Ore copper in copperList) {
                 DoUpdate(copper, ObjectType.Copper);
@@ -107,28 +114,57 @@ public class MiniMap : MonoBehaviour {
         }
     }
 
-    private void DoUpdate(Behaviour gameObject, ObjectType type) {
+    private Image DoUpdate(Behaviour gameObject, ObjectType type, Dictionary<Behaviour, Image> fromList = null) {
+
+        if (fromList == null) {
+            fromList = objectToIconMap;
+        }
+
         Vector3 localPosition = mapsManager.transform.InverseTransformPoint(gameObject.transform.position);
         Vector2 localPoint = new Vector2(localPosition.x, localPosition.z);
 
         float percentX = (localPoint.x + (mapsManager.mapsBoundaries.width / 2f)) / mapsManager.mapsBoundaries.width; 
         float percentY = (localPoint.y + (mapsManager.mapsBoundaries.height / 2f)) / mapsManager.mapsBoundaries.height;
 
-        if(!objectToIconMap.ContainsKey(gameObject)) {
+        if(!fromList.ContainsKey(gameObject)) {
             Image newImage = Image.Instantiate<Image>(ImageBaseFromObjectType(type));
             newImage.rectTransform.localPosition = Vector3.zero;
 
             newImage.transform.SetParent(transform, false);
-            newImage.gameObject.SetActive(true);            
+            newImage.gameObject.SetActive(true);
 
-            objectToIconMap[gameObject] = newImage;
+            fromList[gameObject] = newImage;
         }
 
-        Image icon = objectToIconMap[gameObject];
+        Image icon = fromList[gameObject];
 
         icon.rectTransform.anchorMin = new Vector2(percentX, percentY);
         icon.rectTransform.anchorMax = new Vector2(percentX, percentY);
 
         remainingKeys.Remove(gameObject);
+
+        return icon;
+    }
+
+    /*
+     * BuildingsUpdateDelegate Interface
+     * */
+
+
+
+    public void NewBuildingStarted(Building building) {
+        Image icon = DoUpdate(building, ObjectType.LightTower, staticObjectToIconMap);
+
+        Color color = icon.color;
+        color.a = 0.5f;
+        icon.color = color;
+    }
+
+    public void BuildingFinished(Building building) {
+        Image icon = DoUpdate(building, ObjectType.LightTower, staticObjectToIconMap);
+
+        Color color = icon.color;
+        color.a = 1f;
+        icon.color = color;
     }
 }
