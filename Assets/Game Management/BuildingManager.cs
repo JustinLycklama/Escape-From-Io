@@ -23,8 +23,6 @@ public class BuildingManager : MonoBehaviour {
         MapsManager mapsManager = Script.Get<MapsManager>();
         Constants constants = Script.Get<Constants>();
 
-
-
         statusMap = new LayoutCoordinateStatus[constants.layoutMapWidth * mapsManager.horizontalMapCount, constants.layoutMapHeight * mapsManager.verticalMapCount];
     }
 
@@ -48,7 +46,7 @@ public class BuildingManager : MonoBehaviour {
 
             GameTask dropTask = new GameTask("Deposit Ore", worldPosition, GameTask.ActionType.DropOff, building, PathRequestTargetType.PathGrid);
 
-            MasterGameTask masterCollectTask = new MasterGameTask(MasterGameTask.ActionType.Mine, "Collect Ore " + mineralType.ToString(), new GameTask[] { oreTask, dropTask });
+            MasterGameTask masterCollectTask = new MasterGameTask(MasterGameTask.ActionType.Move, "Collect Ore " + mineralType.ToString(), new GameTask[] { oreTask, dropTask });
             masterCollectTask.repeatCount = cost.costMap[mineralType];
 
             queue.QueueTask(masterCollectTask);
@@ -56,7 +54,7 @@ public class BuildingManager : MonoBehaviour {
         }
 
         GameTask buildTask = new GameTask("Construction", worldPosition, GameTask.ActionType.Build, building, PathRequestTargetType.PathGrid);
-        MasterGameTask masterBuildTask = new MasterGameTask(MasterGameTask.ActionType.Mine, "Build Building " + building.description, new GameTask[] { buildTask }, blockingBuildTasks);
+        MasterGameTask masterBuildTask = new MasterGameTask(MasterGameTask.ActionType.Build, "Build Building " + building.description, new GameTask[] { buildTask }, blockingBuildTasks);
 
         queue.QueueTask(masterBuildTask);
 

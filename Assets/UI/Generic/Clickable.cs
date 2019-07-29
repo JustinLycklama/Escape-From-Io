@@ -8,10 +8,10 @@ public abstract class Clickable : MonoBehaviour, IPointerEnterHandler, IPointerE
     public Sprite mouseOver;
     public Sprite click;
 
-    private Image image;
-    private Sprite original;
+    protected Image image;
+    protected Sprite original;
 
-    private void Start() {
+    protected virtual void Awake() {
         image = GetComponent<Image>();
         original = image.sprite;
     }
@@ -23,7 +23,6 @@ public abstract class Clickable : MonoBehaviour, IPointerEnterHandler, IPointerE
     public void OnPointerExit(PointerEventData eventData) {
         image.sprite = original;
     }
-
    
     public void OnPointerDown(PointerEventData eventData) {
         image.sprite = click;

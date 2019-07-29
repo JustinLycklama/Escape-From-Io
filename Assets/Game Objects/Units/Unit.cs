@@ -382,8 +382,8 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
 
     public void SetSelected(bool selected) {
 
-        Color tintColor = selected ? Color.cyan : Color.white;
-        gameObject.GetComponent<MeshRenderer>().material.color = tintColor;
+        //Color tintColor = selected ? Color.cyan : Color.white;
+        //gameObject.GetComponent<MeshRenderer>().material.color = tintColor;
     }
 
     /*

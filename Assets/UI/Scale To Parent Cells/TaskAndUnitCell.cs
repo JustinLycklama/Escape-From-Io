@@ -43,7 +43,7 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
      * TaskQueueDelegate Interface
      * */
 
-    public void NotifyUpdateTaskList(MasterGameTask[] taskList, MasterGameTask.ActionType actionType) {
+    public void NotifyUpdateTaskList(MasterGameTask[] taskList, MasterGameTask.ActionType actionType, TaskQueueManager.ListState listState) {
         taskText.text = taskList.Length + " " + actionType.ToString() + " Task" + ((taskList.Length == 1)? "" : "s");
     }
 

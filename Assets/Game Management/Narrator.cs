@@ -14,7 +14,6 @@ public class Narrator : MonoBehaviour
 
     LayoutCoordinate spawnCoordinate;
 
-
     void Start() {
         grid = Tag.AStar.GetGameObject().GetComponent<PathfindingGrid>();
         mapGenerator = Tag.MapGenerator.GetGameObject().GetComponent<MapGenerator>();
@@ -26,7 +25,7 @@ public class Narrator : MonoBehaviour
         grid.gameObject.transform.position = mapsManager.transform.position;
 
         grid.createGrid();
-        grid.BlurPenaltyMap(4);
+        //grid.BlurPenaltyMap(4);
 
         //unit.GetComponent<Unit>().BeginQueueing();
 

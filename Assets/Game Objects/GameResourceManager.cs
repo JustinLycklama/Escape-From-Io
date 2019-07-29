@@ -143,6 +143,8 @@ public class GameResourceManager : MonoBehaviour {
         ore.transform.SetParent(transform, true);
 
         availableOreList.Add(ore);
+        NotifyAllOreUpdate(ore, true);
+
         globalOreList.Add(ore);
 
         return ore;
@@ -194,6 +196,8 @@ public class GameResourceManager : MonoBehaviour {
 
         List<Ore> oreList = unitOreDistribution[unit];
         availableOreList.Remove(ore);
+        NotifyAllOreUpdate(ore, false);
+
         oreList.Add(ore);
     }
 

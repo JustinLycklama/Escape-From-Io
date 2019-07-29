@@ -58,7 +58,7 @@ public class MasterGameTask {
     public Unit assignedUnit;
 
     // Don't know if we need a type on the master...
-    public enum ActionType { Mine, Build, Move};
+    public enum ActionType { Mine, Build, Move };
     public ActionType actionType;
 
     public int taskNumber;

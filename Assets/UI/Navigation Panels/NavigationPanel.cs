@@ -12,7 +12,7 @@ public class NavigationPanel : MonoBehaviour
 
     GameObject backButtonObject;
 
-    private void Awake() {
+    protected virtual void Awake() {
         positionParent = Tag.UIArea.GetGameObject().transform;
 
         backButtonObject = new GameObject("BackButton");
@@ -41,7 +41,7 @@ public class NavigationPanel : MonoBehaviour
     }
 
     private void OnEnable() {
-        if (backTrace == null) {
+        if (backTrace == null && backButtonObject != null ) {
             backButtonObject.SetActive(false);
         }
     }

@@ -3,16 +3,26 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TaskAndUnitDetailPanel : NavigationPanel, TaskQueueDelegate, TableViewDelegate {
+public class TaskAndUnitDetailPanel : NavigationPanel, TaskQueueDelegate, TableViewDelegate, ButtonDelegate {
     private MasterGameTask.ActionType actionType;
 
     private MasterGameTask[] taskList = new MasterGameTask[0];
+
+    public Toggle lockTaskListButton;
+    public Text TaskListStateLabel;
 
     public Text taskListTitle;
     public TableView tasksQueueTableView;
 
     public Text unitListTitle;
     public TableView unitListTableView;
+
+    protected override void Awake() {
+        base.Awake();
+
+        lockTaskListButton.buttonDelegate = this;
+        lockTaskListButton.SetState(Script.Get<TaskQueueManager>().GetTaskListLockStatus(actionType));
+    }
 
     public void SetActionType(MasterGameTask.ActionType actionType) {
         this.actionType = actionType;
@@ -26,12 +36,26 @@ public class TaskAndUnitDetailPanel : NavigationPanel, TaskQueueDelegate, TableV
     }
 
     /*
+     * ButtonDelegate Interface
+     * */
+
+    public void ButtonDidClick(GameButton button) {    
+        if (button == lockTaskListButton) {
+            lockTaskListButton.SetState(!lockTaskListButton.state);
+
+            Script.Get<TaskQueueManager>().SetTaskListLocked(actionType, lockTaskListButton.state);
+        }
+    }
+
+    /*
      * TaskQueueDelegate Interface
      * */
 
-    public void NotifyUpdateTaskList(MasterGameTask[] taskList, MasterGameTask.ActionType actionType) {
+    public void NotifyUpdateTaskList(MasterGameTask[] taskList, MasterGameTask.ActionType actionType, TaskQueueManager.ListState listState) {
         this.taskList = taskList;
         tasksQueueTableView.ReloadData();
+
+        TaskListStateLabel.text = listState.decription();
     }
 
     /*

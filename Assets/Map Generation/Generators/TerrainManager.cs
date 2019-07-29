@@ -141,7 +141,7 @@ public class TerrainManager : MonoBehaviour {
                         WorldPosition worldPosition = new WorldPosition(mapCoordinate);
 
                         GameTask cleaningTask = new GameTask("Cleaning", worldPosition, GameTask.ActionType.FlattenPath, layoutCoordinate.mapContainer.map, PathRequestTargetType.PathGrid);
-                        MasterGameTask masterCleaningTask = new MasterGameTask(MasterGameTask.ActionType.Mine, "Clean location " + layoutCoordinate.description, new GameTask[] { cleaningTask });
+                        MasterGameTask masterCleaningTask = new MasterGameTask(MasterGameTask.ActionType.Move, "Clean location " + layoutCoordinate.description, new GameTask[] { cleaningTask });
 
                         queue.QueueTask(masterCleaningTask);
                         map.AssociateTask(masterCleaningTask, layoutCoordinate);

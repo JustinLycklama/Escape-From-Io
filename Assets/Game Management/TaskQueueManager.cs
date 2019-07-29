@@ -4,17 +4,44 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public interface TaskQueueDelegate {
-    void NotifyUpdateTaskList(MasterGameTask[] taskList, MasterGameTask.ActionType actionType);
+    void NotifyUpdateTaskList(MasterGameTask[] taskList, MasterGameTask.ActionType actionType, TaskQueueManager.ListState listState);
 }
 
-public class TaskQueueManager : MonoBehaviour
-{
+public static class ListStateExtensions {
+    public static string decription(this TaskQueueManager.ListState listState) {
+        switch(listState) {
+            case TaskQueueManager.ListState.Empty:
+                return "Empty";
+            case TaskQueueManager.ListState.Blocked:
+                return "Blocked";
+            case TaskQueueManager.ListState.Smooth:
+                return "Smooth";
+            case TaskQueueManager.ListState.Inefficient:
+                return "Inefficient";
+        }
+
+        return "???";
+    }
+}
+
+public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
+    public enum ListState {
+        Empty, Blocked, Smooth, Inefficient 
+    }
+
     //List<MasterGameTask> taskList;
     //UIManager uiManager;
 
     //List<MasterGameTask> mineTaskList;
     //List<MasterGameTask> moveTaskList;
     //List<MasterGameTask> buildTaskList;
+
+    // Whether if a task list is Locked or not
+    Dictionary<MasterGameTask.ActionType, bool> taskListLockMap;
+
+    // The current state of each list
+    Dictionary<MasterGameTask.ActionType, ListState> taskListStateMap;
+
 
     Dictionary<MasterGameTask.ActionType, List<MasterGameTask>> taskListMap;
     Dictionary<MasterGameTask.ActionType, List<TaskQueueDelegate>> delegateListMap;
@@ -28,20 +55,36 @@ public class TaskQueueManager : MonoBehaviour
         taskListMap = new Dictionary<MasterGameTask.ActionType, List<MasterGameTask>>();
         delegateListMap = new Dictionary<MasterGameTask.ActionType, List<TaskQueueDelegate>>();
 
+        taskListLockMap = new Dictionary<MasterGameTask.ActionType, bool>();
+        taskListStateMap = new Dictionary<MasterGameTask.ActionType, ListState>();
+
         foreach(MasterGameTask.ActionType actionType in new MasterGameTask.ActionType[] { MasterGameTask.ActionType.Build, MasterGameTask.ActionType.Mine, MasterGameTask.ActionType.Move }) {
             taskListMap[actionType] = new List<MasterGameTask>();
             delegateListMap[actionType] = new List<TaskQueueDelegate>();
+
+            taskListLockMap[actionType] = true;
+            taskListStateMap[actionType] = ListState.Empty;
         }
     }
 
     private void Start() {
         StartCoroutine(DishOutTasks());
+
+        Script.Get<UnitManager>().RegisterForNotifications(this, MasterGameTask.ActionType.Build);
+        Script.Get<UnitManager>().RegisterForNotifications(this, MasterGameTask.ActionType.Mine);
+        Script.Get<UnitManager>().RegisterForNotifications(this, MasterGameTask.ActionType.Move);
+    }
+
+    private void OnDestroy() {
+        Script.Get<UnitManager>().EndNotifications(this, MasterGameTask.ActionType.Build);
+        Script.Get<UnitManager>().EndNotifications(this, MasterGameTask.ActionType.Mine);
+        Script.Get<UnitManager>().EndNotifications(this, MasterGameTask.ActionType.Move);
     }
 
     public void RegisterForNotifications(TaskQueueDelegate notificationDelegate, MasterGameTask.ActionType ofType) {
         delegateListMap[ofType].Add(notificationDelegate);
 
-        notificationDelegate.NotifyUpdateTaskList(taskListMap[ofType].ToArray(), ofType);
+        notificationDelegate.NotifyUpdateTaskList(taskListMap[ofType].ToArray(), ofType, taskListStateMap[ofType]);
     }
 
     public void EndNotifications(TaskQueueDelegate notificationDelegate, MasterGameTask.ActionType forType) {
@@ -56,9 +99,61 @@ public class TaskQueueManager : MonoBehaviour
 
     private void NotifyDelegates(MasterGameTask.ActionType forType) {
         foreach(TaskQueueDelegate notificationDelegate in delegateListMap[forType]) {
-            notificationDelegate.NotifyUpdateTaskList(taskListMap[forType].ToArray(), forType);
+            notificationDelegate.NotifyUpdateTaskList(taskListMap[forType].ToArray(), forType, taskListStateMap[forType]);
         }              
     }
+
+    /*
+     * Task List Lock Status
+     * */
+
+    public void SetTaskListLocked(MasterGameTask.ActionType actionType, bool locked) {
+        taskListLockMap[actionType] = locked;
+        RecalculateState(actionType);
+    }
+
+    public bool GetTaskListLockStatus(MasterGameTask.ActionType actionType) {
+        return taskListLockMap[actionType];
+    }
+
+    /*
+     * Task List State
+     * */
+
+    private void RecalculateState(MasterGameTask.ActionType actionType) {
+
+        UnitManager unitManager = Script.Get<UnitManager>();
+        ListState newState = ListState.Empty;
+
+        // TODO: Better state calculation. I want state to change as wrong robots pick up this type of task
+        if (taskListMap[actionType].Count > 0) {
+            if (taskListLockMap[actionType] == false) {
+                newState = ListState.Inefficient;
+            } else if (unitManager.GetUnitsOfType(actionType).Length == 0) {
+                newState = ListState.Blocked;                
+            } else {
+                newState = ListState.Smooth;
+            }
+        }
+
+        if (newState != taskListStateMap[actionType]) {
+            taskListStateMap[actionType] = newState;
+            NotifyDelegates(actionType);
+        }
+    }
+
+    /*
+     * UnitManagerDelegate Interface
+     * */
+
+    public void NotifyUpdateUnitList(Unit[] unitList, MasterGameTask.ActionType actionType) {
+        RecalculateState(actionType);
+    }
+
+    /*
+     * Task Handling
+     * */
+
 
     // If a unit cannot handle a task, he can put it back
     public void PutBackTask(MasterGameTask task) {
@@ -161,6 +256,21 @@ public class TaskQueueManager : MonoBehaviour
 
                 List<DistanceAndTask> taskDistances = geAvailableTaskDistancesFromList(taskListMap[unit.primaryActionType], unit, refuseTaskList);
                 
+                // There are no tasks available to us from our designated list, check all other open lists
+                if (taskDistances.Count == 0) {
+                    foreach(MasterGameTask.ActionType actionType in new List<MasterGameTask.ActionType>() { MasterGameTask.ActionType.Move, MasterGameTask.ActionType.Build, MasterGameTask.ActionType.Mine }) {
+                        if (actionType == unit.primaryActionType || taskListLockMap[actionType] == true) {
+                            continue;
+                        }
+
+                        taskDistances = geAvailableTaskDistancesFromList(taskListMap[actionType], unit, refuseTaskList);
+
+                        if (taskDistances.Count > 0) {
+                            break;
+                        }
+                    }                  
+                }
+
                 // Don't even bother if this unit can't do anything
                 if (taskDistances.Count > 0) {
                     unitDistanceListList.Add(new UnitsDistanceList(unitAndRefused, taskDistances, taskDistances[0].distance));

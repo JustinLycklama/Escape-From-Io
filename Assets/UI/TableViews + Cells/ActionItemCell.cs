@@ -21,7 +21,9 @@ public class ActionItemCell : Clickable {
 
     const string defaultText = " - ";
 
-    private void Awake() {
+    protected override void Awake() {
+        base.Awake();
+
         actionItemTitle.text = defaultText;
     }
 

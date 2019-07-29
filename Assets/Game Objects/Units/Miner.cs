@@ -18,7 +18,7 @@ public class Miner : Unit {
             case GameTask.ActionType.Build:
                 break;
             case GameTask.ActionType.Mine:
-                return 0.5f;
+                return 0.3f;
             case GameTask.ActionType.PickUp:
                 break;
             case GameTask.ActionType.DropOff:
