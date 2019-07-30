@@ -201,6 +201,43 @@ public class GameResourceManager : MonoBehaviour {
         oreList.Add(ore);
     }
 
+
+    /*
+     * Task Queue Methods
+     * */
+
+    public void CueueGatherTasksForCost(BlueprintCost cost, WorldPosition depositPosition, ActionableItem actionableItem) {
+
+        TaskQueueManager queue = Script.Get<TaskQueueManager>();
+        List<MasterGameTask> blockingBuildTasks = new List<MasterGameTask>();
+
+        foreach(MineralType mineralType in cost.costMap.Keys) {
+
+            GameTask oreTask = new GameTask("Find Ore", mineralType, GameTask.ActionType.PickUp, null);
+            oreTask.SatisfiesStartRequirements = () => {
+                return Script.Get<GameResourceManager>().AnyMineralAvailable(mineralType);
+            };
+
+            GameTask dropTask = new GameTask("Deposit Ore", depositPosition, GameTask.ActionType.DropOff, actionableItem, PathRequestTargetType.PathGrid);
+
+            MasterGameTask masterCollectTask = new MasterGameTask(MasterGameTask.ActionType.Move, "Collect Ore " + mineralType.ToString(), new GameTask[] { oreTask, dropTask });
+            masterCollectTask.repeatCount = cost.costMap[mineralType];
+
+            queue.QueueTask(masterCollectTask);
+            blockingBuildTasks.Add(masterCollectTask);
+        }
+
+        GameTask buildTask = new GameTask("Construction", depositPosition, GameTask.ActionType.Build, actionableItem, PathRequestTargetType.PathGrid);
+        MasterGameTask masterBuildTask = new MasterGameTask(MasterGameTask.ActionType.Build, "Build " + actionableItem.description, new GameTask[] { buildTask }, blockingBuildTasks);
+
+        queue.QueueTask(masterBuildTask);
+    }
+
+
+    /*
+     * OreUpdateDelegate Methods
+     * */
+
     public List<OreUpdateDelegate> oreUpdateDelegateList = new List<OreUpdateDelegate>();
 
     public void RegisterFoOreNotifications(OreUpdateDelegate notificationDelegate) {

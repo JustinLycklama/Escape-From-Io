@@ -25,6 +25,13 @@ public class Toggle : GameButton {
     }    
 
     public void SetState(bool toggled) {
+
+        state = toggled;
+
+        if (image == null) {
+            return;
+        }
+
         if (toggled) {
             original = originalSprite;
             mouseOver = originalMouseOver;
@@ -35,7 +42,6 @@ public class Toggle : GameButton {
             click = offClick;
         }
 
-        state = toggled;
-        image.sprite = click;
+        image.sprite = click;           
     }
 }

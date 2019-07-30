@@ -400,7 +400,14 @@ public class Map : ActionableItem  {
     public void RegisterForTaskStatusNotifications(TaskStatusUpdateDelegate notificationDelegate, LayoutCoordinate layoutCoordinate) {
         taskUpdateDelegateMap[layoutCoordinate.x, layoutCoordinate.y].Add(notificationDelegate);
 
-        notificationDelegate.NowPerformingTask(associatedTasksCoordinateMap[layoutCoordinate.x, layoutCoordinate.y], null);
+        MasterGameTask associatedTask = associatedTasksCoordinateMap[layoutCoordinate.x, layoutCoordinate.y];
+        Unit unit = null;
+
+        if(associatedTask != null) {
+            unit = associatedTask.assignedUnit;
+        }
+
+        notificationDelegate.NowPerformingTask(unit, associatedTask, null);
     }
 
     public void EndTaskStatusNotifications(TaskStatusUpdateDelegate notificationDelegate, LayoutCoordinate layoutCoordinate) {
@@ -409,7 +416,14 @@ public class Map : ActionableItem  {
 
     protected void NotifyAllTaskStatus(LayoutCoordinate coordinate) {
         foreach(TaskStatusUpdateDelegate updateDelegate in taskUpdateDelegateMap[coordinate.x, coordinate.y]) {
-            updateDelegate.NowPerformingTask(associatedTasksCoordinateMap[coordinate.x, coordinate.y], null);
+            MasterGameTask associatedTask = associatedTasksCoordinateMap[coordinate.x, coordinate.y];
+            Unit unit = null;
+
+            if (associatedTask != null) {
+                unit = associatedTask.assignedUnit;
+            }
+
+            updateDelegate.NowPerformingTask(unit, associatedTask, null);
         }
     }
 

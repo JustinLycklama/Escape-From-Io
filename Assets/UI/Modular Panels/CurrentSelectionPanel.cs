@@ -97,7 +97,7 @@ public class CurrentSelectionPanel : MonoBehaviour, SelectionManagerDelegate, Ta
      * */
     private MasterAndGameTaskCell currentGameAndTaskCell;
 
-    public void NowPerformingTask(MasterGameTask masterGameTask, GameTask gameTask) {
+    public void NowPerformingTask(Unit unit, MasterGameTask masterGameTask, GameTask gameTask) {
         if (currentGameAndTaskCell != null) {
             currentGameAndTaskCell.SetTask(masterGameTask, gameTask);
         }

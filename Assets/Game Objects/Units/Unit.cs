@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,7 +9,7 @@ public interface TaskStatusNotifiable {
 }
 
 public interface TaskStatusUpdateDelegate {
-    void NowPerformingTask(MasterGameTask masterGameTask, GameTask gameTask);
+    void NowPerformingTask(Unit unit, MasterGameTask masterGameTask, GameTask gameTask);
 }
 
 public interface UserActionNotifiable {
@@ -20,7 +21,40 @@ public interface UserActionUpdateDelegate {
     void UpdateUserActionsAvailable(UserAction[] userActions);
 }
 
-public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
+public static class UnitStateExtensions {
+    public static string decription(this Unit.UnitState unitState) {
+        switch(unitState) {
+            case Unit.UnitState.Idle:
+                return "Idle";
+            case Unit.UnitState.Efficient:
+                return "Efficient";
+            case Unit.UnitState.Inefficient:
+                return "Inefficient";
+        }
+
+        return "???";
+    }
+
+    public static int ranking(this Unit.UnitState unitState) {
+        switch(unitState) {
+            case Unit.UnitState.Idle:
+                return 0;
+            case Unit.UnitState.Inefficient:
+                return 1;
+            case Unit.UnitState.Efficient:
+                return 2;
+        }
+
+        return -1;
+    }
+}
+
+// Unit is an actionable item when it is being built, other units can take actions on it by dropping resources and building it.
+public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate {
+
+    public enum UnitState {
+        Idle, Efficient, Inefficient
+    }
 
     public static int unitCount = 0;
 
@@ -43,7 +77,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
     UnitStatusTooltip unitStatusTooltip;
 
     // Tasks
-    MasterGameTask currentMasterTask;
+    public MasterGameTask currentMasterTask { get; private set; }
 
     // The queue of all tasks to do for the current Master Task
     Queue<GameTask> gameTasksQueue;
@@ -394,7 +428,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
         taskStatusDelegateList.Add(notificationDelegate);
 
         // Let the subscriber know our status immediately
-        notificationDelegate.NowPerformingTask(currentMasterTask, currentGameTask);
+        notificationDelegate.NowPerformingTask(this, currentMasterTask, currentGameTask);
     }
 
     public void EndTaskStatusNotifications(TaskStatusUpdateDelegate notificationDelegate) {
@@ -403,7 +437,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
 
     public void NotifyAllTaskStatus() {
         foreach(TaskStatusUpdateDelegate updateDelegate in taskStatusDelegateList) {
-            updateDelegate.NowPerformingTask(currentMasterTask, currentGameTask);
+            updateDelegate.NowPerformingTask(this, currentMasterTask, currentGameTask);
         }
     }
 
@@ -427,4 +461,48 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
             updateDelegate.UpdateUserActionsAvailable(null);
         }
     }
+
+
+    /*
+     * Blueprints
+     * */
+
+    public class Blueprint : ConstructionBlueprint {
+        private static string folder = "Units/";
+
+        public static Blueprint Miner = new Blueprint("Miner", typeof(Miner), "Miner", new BlueprintCost(1, 1, 1));
+        public static Blueprint Mover = new Blueprint("Mover", typeof(Refinery), "Mover", new BlueprintCost(1, 1, 1));
+        public static Blueprint Builder = new Blueprint("Builder", typeof(Refinery), "Builder", new BlueprintCost(1, 1, 1));
+
+        public Blueprint(string fileName, Type type, string label, BlueprintCost cost) : base(folder + fileName, type, label, cost) { }
+
+        public override void ConstructAt(LayoutCoordinate layoutCoordinate) {
+            UnitManager unitManager = Script.Get<UnitManager>();
+
+            Unit unit = UnityEngine.Object.Instantiate(resource) as Unit;
+            unitManager.BuildAt(unit, layoutCoordinate, cost);
+        }
+    }
+
+    /*
+     * Actionable Item Methods. When a unit is in the construction phase it is actionable
+     * */
+
+    public void SetCost(BlueprintCost cost) {
+        //this.cost = cost;
+
+        //costPanel = UIManager.Blueprint.CostPanel.Instantiate() as CostPanelTooltip;
+        //costPanel.transform.SetParent(Script.UIOverlayPanel.GetFromObject<RectTransform>());
+        //costPanel.toFollow = statusLocation;
+
+        //costPanel.SetCost(cost);
+        //costPanel.SetTallyMode(true);
+    }
+
+
+    public override float performAction(GameTask task, float rate, Unit unit) {
+        throw new System.NotImplementedException();
+    }
+
+
 }

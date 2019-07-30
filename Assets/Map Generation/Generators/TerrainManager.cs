@@ -151,13 +151,21 @@ public class TerrainManager : MonoBehaviour {
                 }
 
                 if (terrainType.buildable) {
-                    UserAction action = new UserAction();
-                    action.description = "Building";
-                    action.layoutCoordinate = coordinate;
+                    UserAction unitAction = new UserAction();
+                    unitAction.description = "Unit";
+                    unitAction.layoutCoordinate = coordinate;
 
-                    action.blueprintList = new ConstructionBlueprint[] { Building.Blueprint.Tower, Building.Blueprint.Refinery };
+                    unitAction.blueprintList = new ConstructionBlueprint[] { Unit.Blueprint.Miner, Unit.Blueprint.Mover, Unit.Blueprint.Builder };
 
-                    actionList.Add(action);
+                    actionList.Add(unitAction);
+
+                    UserAction buildingAction = new UserAction();
+                    buildingAction.description = "Building";
+                    buildingAction.layoutCoordinate = coordinate;
+
+                    buildingAction.blueprintList = new ConstructionBlueprint[] { Building.Blueprint.Tower, Building.Blueprint.Refinery };
+
+                    actionList.Add(buildingAction);
                 }
 
                 break;

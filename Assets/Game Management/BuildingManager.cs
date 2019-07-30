@@ -31,32 +31,9 @@ public class BuildingManager : MonoBehaviour {
         WorldPosition worldPosition = new WorldPosition(new MapCoordinate(layoutCoordinate));
 
         building.SetCost(cost);
-
         building.transform.position = worldPosition.vector3;
 
-        TaskQueueManager queue = Script.Get<TaskQueueManager>();
-        List<MasterGameTask> blockingBuildTasks = new List<MasterGameTask>();
-
-        foreach(MineralType mineralType in cost.costMap.Keys) {
-
-            GameTask oreTask = new GameTask("Find Ore", mineralType, GameTask.ActionType.PickUp, null);
-            oreTask.SatisfiesStartRequirements = () => {
-                return Script.Get<GameResourceManager>().AnyMineralAvailable(mineralType);
-            };
-
-            GameTask dropTask = new GameTask("Deposit Ore", worldPosition, GameTask.ActionType.DropOff, building, PathRequestTargetType.PathGrid);
-
-            MasterGameTask masterCollectTask = new MasterGameTask(MasterGameTask.ActionType.Move, "Collect Ore " + mineralType.ToString(), new GameTask[] { oreTask, dropTask });
-            masterCollectTask.repeatCount = cost.costMap[mineralType];
-
-            queue.QueueTask(masterCollectTask);
-            blockingBuildTasks.Add(masterCollectTask);
-        }
-
-        GameTask buildTask = new GameTask("Construction", worldPosition, GameTask.ActionType.Build, building, PathRequestTargetType.PathGrid);
-        MasterGameTask masterBuildTask = new MasterGameTask(MasterGameTask.ActionType.Build, "Build Building " + building.description, new GameTask[] { buildTask }, blockingBuildTasks);
-
-        queue.QueueTask(masterBuildTask);
+        Script.Get<GameResourceManager>().CueueGatherTasksForCost(cost, worldPosition, building);
 
         NotifyBuildingUpdate(building, true);
     }

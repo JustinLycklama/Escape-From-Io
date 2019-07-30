@@ -21,14 +21,16 @@ public class TaskAndUnitDetailPanel : NavigationPanel, TaskQueueDelegate, TableV
         base.Awake();
 
         lockTaskListButton.buttonDelegate = this;
-        lockTaskListButton.SetState(Script.Get<TaskQueueManager>().GetTaskListLockStatus(actionType));
     }
 
     public void SetActionType(MasterGameTask.ActionType actionType) {
         this.actionType = actionType;
 
+        TaskQueueManager taskQueueManager = Script.Get<TaskQueueManager>();
+
         tasksQueueTableView.dataDelegate = this;
-        Script.Get<TaskQueueManager>().RegisterForNotifications(this, actionType);
+        taskQueueManager.RegisterForNotifications(this, actionType);
+        lockTaskListButton.SetState(taskQueueManager.GetTaskListLockStatus(actionType));
     }
 
     private void OnDestroy() {

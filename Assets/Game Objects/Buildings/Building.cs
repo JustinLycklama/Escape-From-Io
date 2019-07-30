@@ -175,7 +175,7 @@ public abstract class Building : ActionableItem, Selectable {
     // STATIC
 
     public class Blueprint : ConstructionBlueprint {
-        private static String folder = "Buildings/";
+        private static string folder = "Buildings/";
 
         public static Blueprint Tower = new Blueprint("Tower", typeof(Tower), "Light Tower", new BlueprintCost(3, 2, 1));
         public static Blueprint Refinery = new Blueprint("Refinery", typeof(Refinery), "Refinery", new BlueprintCost(1, 1, 1));

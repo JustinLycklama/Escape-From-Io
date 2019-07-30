@@ -109,7 +109,11 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
 
     public void SetTaskListLocked(MasterGameTask.ActionType actionType, bool locked) {
         taskListLockMap[actionType] = locked;
-        RecalculateState(actionType);
+
+        bool notified = RecalculateState(actionType);
+        if (!notified) {
+            NotifyDelegates(actionType);
+        }
     }
 
     public bool GetTaskListLockStatus(MasterGameTask.ActionType actionType) {
@@ -120,7 +124,8 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
      * Task List State
      * */
 
-    private void RecalculateState(MasterGameTask.ActionType actionType) {
+    // Returns true if notified
+    private bool RecalculateState(MasterGameTask.ActionType actionType) {
 
         UnitManager unitManager = Script.Get<UnitManager>();
         ListState newState = ListState.Empty;
@@ -139,14 +144,17 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
         if (newState != taskListStateMap[actionType]) {
             taskListStateMap[actionType] = newState;
             NotifyDelegates(actionType);
+            return true;
         }
+
+        return false;
     }
 
     /*
      * UnitManagerDelegate Interface
      * */
 
-    public void NotifyUpdateUnitList(Unit[] unitList, MasterGameTask.ActionType actionType) {
+    public void NotifyUpdateUnitList(Unit[] unitList, MasterGameTask.ActionType actionType, Unit.UnitState unitListState) {
         RecalculateState(actionType);
     }
 

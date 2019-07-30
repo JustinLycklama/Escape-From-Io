@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public abstract class ActionableItem : MonoBehaviour, TaskStatusNotifiable {
-    string description;
+    public string description;
 
     // taskAlreadyDictated is used when a task is about to be assoctaed with this object, 
      // but has not quite been associated, to let everybody know that this is taken
@@ -45,7 +45,7 @@ public abstract class ActionableItem : MonoBehaviour, TaskStatusNotifiable {
         taskStatusDelegateList.Add(notificationDelegate);
 
         // Let the subscriber know our status immediately
-        notificationDelegate.NowPerformingTask(associatedTask, null);
+        notificationDelegate.NowPerformingTask(associatedTask.assignedUnit, associatedTask, null);
     }
 
     public virtual void EndTaskStatusNotifications(TaskStatusUpdateDelegate notificationDelegate) {
@@ -54,7 +54,7 @@ public abstract class ActionableItem : MonoBehaviour, TaskStatusNotifiable {
 
     protected virtual void NotifyAllTaskStatus() {
         foreach(TaskStatusUpdateDelegate updateDelegate in taskStatusDelegateList) {
-            updateDelegate.NowPerformingTask(associatedTask, null);
+            updateDelegate.NowPerformingTask(associatedTask.assignedUnit, associatedTask, null);
         }
     }
 }

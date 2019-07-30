@@ -4,30 +4,43 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDelegate, UnitManagerDelegate {
+public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDelegate, UnitManagerDelegate, ButtonDelegate {
 
     public Text title;
 
-    public Text unitText;
-    public Text taskText;
+    public Text unitCountText;
+    public Text unitStatusText;
+    public Text unitDurationText; // todo: bar
 
-    public Image unitTypeImage;
-    public Image currentStatusImage;
+    public Text taskCountText;
+    public Toggle taskListLocked;
 
     public MasterGameTask.ActionType actionType;
 
     private void Start() {
         title.text = actionType.ToString();
-        unitText.text = "";
+
+        taskListLocked.buttonDelegate = this;
 
         Script.Get<TaskQueueManager>().RegisterForNotifications(this, actionType);
-        Script.Get<UnitManager>().RegisterForNotifications(this, actionType);
-
+        Script.Get<UnitManager>().RegisterForNotifications(this, actionType);     
     }
 
     private void OnDestroy() {
         Script.Get<TaskQueueManager>().EndNotifications(this, actionType);
         Script.Get<UnitManager>().EndNotifications(this, actionType);
+    }
+
+    /*
+     * ButtonDelegate Interface
+     * */
+
+    public void ButtonDidClick(GameButton button) {
+        if (button == taskListLocked) {
+            taskListLocked.SetState(!taskListLocked.state);
+
+            Script.Get<TaskQueueManager>().SetTaskListLocked(actionType, taskListLocked.state);
+        }
     }
 
     /*
@@ -44,14 +57,17 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
      * */
 
     public void NotifyUpdateTaskList(MasterGameTask[] taskList, MasterGameTask.ActionType actionType, TaskQueueManager.ListState listState) {
-        taskText.text = taskList.Length + " " + actionType.ToString() + " Task" + ((taskList.Length == 1)? "" : "s");
+        taskCountText.text = taskList.Length + " " + actionType.ToString() + " Task" + ((taskList.Length == 1)? "" : "s");
+
+        taskListLocked.SetState(Script.Get<TaskQueueManager>().GetTaskListLockStatus(actionType));
     }
 
     /*
      * UnitManagerDelegate Interface
      * */
 
-    public void NotifyUpdateUnitList(Unit[] unitList, MasterGameTask.ActionType actionType) {
-        unitText.text = unitList.Length + " Unit" + ((unitList.Length == 1) ? "" : "s");
+    public void NotifyUpdateUnitList(Unit[] unitList, MasterGameTask.ActionType actionType, Unit.UnitState unitListState) {
+        unitCountText.text = unitList.Length + " Unit" + ((unitList.Length == 1) ? "" : "s");
+        unitStatusText.text = unitListState.decription();
     }
 }
