@@ -179,12 +179,13 @@ public class TerrainManager : MonoBehaviour {
 
                     action.performAction = (LayoutCoordinate layoutCoordinate) => {
                         TaskQueueManager queue = Script.Get<TaskQueueManager>();
+                        Map layoutCoordinateMap = layoutCoordinate.mapContainer.map;
 
                         MapCoordinate mapCoordinate = new MapCoordinate(layoutCoordinate);
                         WorldPosition worldPosition = new WorldPosition(mapCoordinate);
 
-                        GameTask miningTask = new GameTask("Mining", worldPosition, GameTask.ActionType.Mine, layoutCoordinate.mapContainer.map, PathRequestTargetType.Layout);
-                        MasterGameTask masterMiningTask = new MasterGameTask(MasterGameTask.ActionType.Mine, "Mine at location " + layoutCoordinate.description, new GameTask[] { miningTask });
+                        GameTask miningTask = new GameTask("Mining", worldPosition, GameTask.ActionType.Mine, layoutCoordinateMap, PathRequestTargetType.Layout);
+                        MasterGameTask masterMiningTask = new MasterGameTask(MasterGameTask.ActionType.Mine, "Mine " + layoutCoordinateMap.GetTerrainAt(layoutCoordinate).name, new GameTask[] { miningTask });
 
                         queue.QueueTask(masterMiningTask);
                         map.AssociateTask(masterMiningTask, layoutCoordinate);

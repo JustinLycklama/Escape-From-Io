@@ -103,4 +103,34 @@ public class PlayerBehaviour : MonoBehaviour {
             }
         }
     }
+
+
+    /*
+     * Public
+     * */
+
+    public void JumpCameraToTask(MasterGameTask masterGameTask) {
+        GameTask firsGameTaskWithActionItem = null;
+        
+        foreach(GameTask gameTask in masterGameTask.childGameTasks) {
+            if (gameTask.actionItem != null) {
+                firsGameTaskWithActionItem = gameTask;
+                break;
+            }
+        } 
+
+        if (firsGameTaskWithActionItem != null) {
+            JumpCameraToTarget(firsGameTaskWithActionItem.target.vector3);            
+        }
+    }
+
+    public void JumpCameraToUnit(Unit unit) {
+        if (unit != null) {
+            JumpCameraToTarget(unit.transform.position);
+        }
+    }
+
+    private void JumpCameraToTarget(Vector3 target) {
+        Camera.main.transform.position = target + new Vector3(0, 250, -400);
+    }
 }

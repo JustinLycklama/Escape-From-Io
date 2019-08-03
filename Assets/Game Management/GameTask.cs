@@ -51,6 +51,34 @@ public class GameTask {
     }
 }
 
+public static class GameTaskActionTypeExtensions {
+    public static string Title(this MasterGameTask.ActionType actionType) {
+        switch(actionType) {
+            case MasterGameTask.ActionType.Mine:
+                return "Mine";
+            case MasterGameTask.ActionType.Build:
+                return "Build";
+            case MasterGameTask.ActionType.Move:
+                return "Move";
+        }
+
+        return "???";
+    }
+
+    public static string TitleAsNoun(this MasterGameTask.ActionType actionType) {
+        switch(actionType) {
+            case MasterGameTask.ActionType.Mine:
+                return "Miner";
+            case MasterGameTask.ActionType.Build:
+                return "Builder";
+            case MasterGameTask.ActionType.Move:
+                return "Mover";
+        }
+
+        return "???";
+    }
+}
+
 public class MasterGameTask {
 
     private static int gameTaskCounter = 0;

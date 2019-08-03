@@ -32,7 +32,6 @@ public abstract class Clickable : MonoBehaviour, IPointerEnterHandler, IPointerE
         image.sprite = original;
     }
 
-
     protected abstract void DidClick();
 
     public void OnPointerClick(PointerEventData eventData) {

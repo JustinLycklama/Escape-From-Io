@@ -436,7 +436,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate {
     }
 
     public void NotifyAllTaskStatus() {
-        foreach(TaskStatusUpdateDelegate updateDelegate in taskStatusDelegateList) {
+        foreach(TaskStatusUpdateDelegate updateDelegate in taskStatusDelegateList.ToArray()) {
             updateDelegate.NowPerformingTask(this, currentMasterTask, currentGameTask);
         }
     }
@@ -500,6 +500,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate {
     }
 
 
+    // TODO: maybe we don't need Unit to be an actionable item? We can use the building component on the Unit?
     public override float performAction(GameTask task, float rate, Unit unit) {
         throw new System.NotImplementedException();
     }
