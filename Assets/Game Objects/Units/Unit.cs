@@ -50,13 +50,17 @@ public static class UnitStateExtensions {
 }
 
 // Unit is an actionable item when it is being built, other units can take actions on it by dropping resources and building it.
-public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate {
+public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
 
     public enum UnitState {
         Idle, Efficient, Inefficient
     }
 
     public static int unitCount = 0;
+
+    // Initialization
+    [HideInInspector]
+    public bool initialized { get; private set; }
 
     // TaskQueue Reference
     TaskQueueManager taskQueueManager;
@@ -88,6 +92,8 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate {
 
     abstract public float SpeedForTask(GameTask task);
 
+    public UnitBuilding buildableComponent;
+
     /*
      * Selectable Interface Properties
      * */
@@ -102,7 +108,9 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate {
      * Lifecycle
      * */ 
 
-    private void Awake() { 
+    private void Awake() {
+        initialized = false;
+
         title = "Unit #" + unitCount;
         unitCount++;
 
@@ -124,6 +132,10 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate {
     }
 
     public void Initialize() {
+        initialized = true;
+
+        Script.Get<UnitManager>().RegisterUnit(this);
+
         taskQueueManager = Script.Get<TaskQueueManager>();
         Script.Get<MapsManager>().AddTerrainUpdateDelegate(this);
 
@@ -416,8 +428,16 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate {
 
     public void SetSelected(bool selected) {
 
-        //Color tintColor = selected ? Color.cyan : Color.white;
-        //gameObject.GetComponent<MeshRenderer>().material.color = tintColor;
+        Color color = Color.white;
+        if(selected) {
+            color = PlayerBehaviour.tintColor;
+        }
+
+        foreach(Building.MeshBuildingTier meshTier in buildableComponent.meshTiers) {
+            foreach(MeshRenderer renderer in meshTier.meshRenderes) {
+                renderer.material.SetColor("_Color", color);
+            }
+        }
     }
 
     /*
@@ -435,7 +455,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate {
         taskStatusDelegateList.Remove(notificationDelegate);
     }
 
-    public void NotifyAllTaskStatus() {
+    private void NotifyAllTaskStatus() {
         foreach(TaskStatusUpdateDelegate updateDelegate in taskStatusDelegateList.ToArray()) {
             updateDelegate.NowPerformingTask(this, currentMasterTask, currentGameTask);
         }
@@ -471,16 +491,18 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate {
         private static string folder = "Units/";
 
         public static Blueprint Miner = new Blueprint("Miner", typeof(Miner), "Miner", new BlueprintCost(1, 1, 1));
-        public static Blueprint Mover = new Blueprint("Mover", typeof(Refinery), "Mover", new BlueprintCost(1, 1, 1));
-        public static Blueprint Builder = new Blueprint("Builder", typeof(Refinery), "Builder", new BlueprintCost(1, 1, 1));
+        public static Blueprint Mover = new Blueprint("Mover", typeof(Mover), "Mover", new BlueprintCost(1, 1, 1));
+        public static Blueprint Builder = new Blueprint("Builder", typeof(Builder), "Builder", new BlueprintCost(1, 1, 1));
 
         public Blueprint(string fileName, Type type, string label, BlueprintCost cost) : base(folder + fileName, type, label, cost) { }
 
         public override void ConstructAt(LayoutCoordinate layoutCoordinate) {
             UnitManager unitManager = Script.Get<UnitManager>();
-
             Unit unit = UnityEngine.Object.Instantiate(resource) as Unit;
-            unitManager.BuildAt(unit, layoutCoordinate, cost);
+
+            UnitBuilding unitBuilding = unit.GetComponent<UnitBuilding>();
+
+            unitManager.BuildAt(unitBuilding, layoutCoordinate, cost);
         }
     }
 
@@ -501,9 +523,9 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate {
 
 
     // TODO: maybe we don't need Unit to be an actionable item? We can use the building component on the Unit?
-    public override float performAction(GameTask task, float rate, Unit unit) {
-        throw new System.NotImplementedException();
-    }
+    //public override float performAction(GameTask task, float rate, Unit unit) {
+    //    throw new System.NotImplementedException();
+    //}
 
 
 }

@@ -90,10 +90,9 @@ public class SelectionManager : MonoBehaviour {
         selection.selectionType = Selection.SelectionType.Selectable;
         selection.selection = selectable;
 
-        selectable.SetSelected(true);
-        //selectable.SetStatusDelegate(Script.Get<UIManager>());
-
         UpdateSelection(selection);
+        selectable.SetSelected(true);
+
         return selection;
     }
 

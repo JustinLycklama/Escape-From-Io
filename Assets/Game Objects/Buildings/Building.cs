@@ -32,61 +32,58 @@ using UnityEngine;
 //    }
 //}
 
-
 public abstract class Building : ActionableItem, Selectable {
-    float percentComplete = 0;
 
-    Dictionary<GameTask, float> percentPerTask;
+    [Serializable]
+    public class MeshBuildingTier {
+        public MeshRenderer[] meshRenderes;
+
+        [Range(0, 1)]
+        public float aproximateTopPercentage;
+    }
+
+    public MeshBuildingTier[] meshTiers;
+
+    public Transform statusLocation;
+
+    private float percentComplete = 0;
+    private Dictionary<GameTask, float> percentPerTask;
 
     Color materialColor;
     Color baseColor;
 
-    //Renderer buildingRenderer;
-
-    //public Material material;
-
-    //StatusDelegate statusDelegate;
-
-    //PercentageBar percentageBar;
-
-
-    CostPanelTooltip costPanel;
-    public Transform statusLocation;
-
     private BlueprintCost cost;
+    private CostPanelTooltip costPanel;   
 
-    //protected static abstract int Cost { get; }
+    private Shader transparencyShader;
+    private Shader tintableShader;
 
-    //protected abstract int requiredOre {
-    //    get;
-    //}
+    //private Dictionary<MeshRenderer, Shader> originalShaderMap;
+
+    public List<UserActionUpdateDelegate> userActionDelegateList = new List<UserActionUpdateDelegate>();
 
     private void Awake() {
         title = "Building #" + buildingCount;
         buildingCount++;
 
-        //percentageBar.SetRequired(cost, "Ore");
-
         percentPerTask = new Dictionary<GameTask, float>();
     }
 
     // Start is called before the first frame update
-    void Start()
-    {
-        //buildingRenderer = GetComponent<Renderer>();
-        //buildingRenderer.material.shader = Shader.Find("Transparent/Diffuse");
+    void Start() {
+        // Set transparent shader for all objects in the MeshRenderTier
+        transparencyShader = Shader.Find("Custom/Buildable");
+        tintableShader = Shader.Find("Custom/Tintable");
 
-        //baseColor = buildingRenderer.material.color;
-        //materialColor = baseColor;
+        //originalShaderMap = new Dictionary<MeshRenderer, Shader>();        
 
-        //UpdateGUI();
+        foreach(MeshBuildingTier tier in meshTiers) {
+            foreach(MeshRenderer meshRenderer in tier.meshRenderes) {
+                //originalShaderMap[meshRenderer] = meshRenderer.material.shader;
+                meshRenderer.material.shader = transparencyShader;
+            }           
+        }
     }
-
-    // Update is called once per frame
-    //void Update() {
-    //materialColor.a = Mathf.Clamp(percentComplete, 0.10f, 1f);
-    //buildingRenderer.material.color = materialColor;
-    //}
 
     public void SetCost(BlueprintCost cost) {
         this.cost = cost;
@@ -101,8 +98,16 @@ public abstract class Building : ActionableItem, Selectable {
 
     // MARK: Selectable Interface
     public void SetSelected(bool selected) {
-        Color tintColor = selected ? Color.cyan : baseColor;
-        materialColor = tintColor;
+        Color color = Color.white;
+        if(selected) {
+            color = PlayerBehaviour.tintColor;
+        }
+
+        foreach(Building.MeshBuildingTier meshTier in meshTiers) {
+            foreach(MeshRenderer renderer in meshTier.meshRenderes) {
+                renderer.material.SetColor("_Color", color);
+            }
+        }
     }
 
     //public void SetStatusDelegate(StatusDelegate statusDelegate) {
@@ -114,11 +119,48 @@ public abstract class Building : ActionableItem, Selectable {
 
     //public override void AssociateTask(GameTask task) { }
 
+    private void ProceedToUpdateCompletePercent(float percent) {
+
+        // Update our Mesh Renderer Tiers
+        float tierBase = 0f;
+        
+        foreach(MeshBuildingTier tier in meshTiers) {
+            if (percent > tierBase && percent <= tier.aproximateTopPercentage) {
+                foreach(MeshRenderer meshRenderer in tier.meshRenderes) {
+                    meshRenderer.material.SetFloat("percentComplete", Mathf.InverseLerp(tierBase, tier.aproximateTopPercentage, percent));
+                }                
+            }
+
+            tierBase = tier.aproximateTopPercentage;
+        }
+  
+        UpdateCompletionPercent(percent);
+    }
+
     protected abstract void UpdateCompletionPercent(float percent);
 
+    public void ProceedToCompleteBuilding() {
+
+        // Reset each renderer to its original shader
+        foreach(MeshBuildingTier tier in meshTiers) {
+            foreach(MeshRenderer meshRenderer in tier.meshRenderes) {
+                meshRenderer.material.SetFloat("percentComplete", 1);
+                meshRenderer.material.shader = tintableShader;
+            }
+        }
+
+        if (costPanel != null && costPanel.isActiveAndEnabled) {
+            costPanel.gameObject.SetActive(false);
+            costPanel.transform.SetParent(null);
+        }        
+
+        CompleteBuilding();
+
+        BuildingManager buildingManager = Script.Get<BuildingManager>();
+        buildingManager.CompleteBuilding(this);
+    }
+
     protected abstract void CompleteBuilding();
-
-
 
     // Returns the percent to completion the action is
     public override float performAction(GameTask task, float rate, Unit unit) {
@@ -130,14 +172,11 @@ public abstract class Building : ActionableItem, Selectable {
 
                 if(percentComplete > 1) {
                     percentComplete = 1;
-                    CompleteBuilding();
 
-                    BuildingManager buildingManager = Script.Get<BuildingManager>();
-                    buildingManager.CompleteBuilding(this);
-
+                    ProceedToCompleteBuilding();
                 } else {
                     if(Mathf.FloorToInt(previousPercent * 100) < Mathf.FloorToInt(percentComplete * 100)) {
-                        UpdateCompletionPercent(percentComplete);
+                        ProceedToUpdateCompletePercent(percentComplete);
                     }
                 }
               
@@ -194,19 +233,24 @@ public abstract class Building : ActionableItem, Selectable {
         return new Blueprint[] { Blueprint.Tower, Blueprint.Refinery };
     }
 
-    public void RegisterForTaskStatusNotifications(TaskStatusUpdateDelegate notificationDelegate) {
-        throw new NotImplementedException();
-    }
-
-    public void EndTaskStatusNotifications(TaskStatusUpdateDelegate notificationDelegate) {
-        throw new NotImplementedException();
-    }
+    /*
+     * UserActionNotifiable Interface
+     * */
 
     public void RegisterForUserActionNotifications(UserActionUpdateDelegate notificationDelegate) {
-        throw new NotImplementedException();
+        userActionDelegateList.Add(notificationDelegate);
+
+        // Let the subscriber know our status immediately
+        notificationDelegate.UpdateUserActionsAvailable(null);
     }
 
     public void EndUserActionNotifications(UserActionUpdateDelegate notificationDelegate) {
-        throw new NotImplementedException();
+        userActionDelegateList.Remove(notificationDelegate);
+    }
+
+    public void NotifyAllUserActionsUpdate() {
+        foreach(UserActionUpdateDelegate updateDelegate in userActionDelegateList) {
+            updateDelegate.UpdateUserActionsAvailable(null);
+        }
     }
 }

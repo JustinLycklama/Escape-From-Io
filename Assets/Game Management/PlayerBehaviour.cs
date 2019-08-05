@@ -7,6 +7,8 @@ public class PlayerBehaviour : MonoBehaviour {
 
     Rect UIRect;
 
+    public static Color tintColor = new Color(0, 1, 1);
+
     private void Start() {
         RectTransform localRect = Tag.UIArea.GetGameObject().GetComponent<RectTransform>();
 
@@ -76,6 +78,7 @@ public class PlayerBehaviour : MonoBehaviour {
                 lastHit = hit;
 
                 GameObject objectHit = hit.transform.gameObject;
+                SelectionManager selectionManager = Script.Get<SelectionManager>();
 
                 // Select a Terrain Selection
                 if(objectHit.GetComponent<MapContainer>() != null) {
@@ -86,19 +89,21 @@ public class PlayerBehaviour : MonoBehaviour {
                     MapCoordinate selectedCoordinate = MapCoordinate.FromWorldPosition(new WorldPosition(worldPosition));
                     LayoutCoordinate coordinate = new LayoutCoordinate(selectedCoordinate);
 
-                    Script.Get<SelectionManager>().SelectTerrain(coordinate);
+                    selectionManager.SelectTerrain(coordinate);
                 }
 
                 // Select a unit
                 Unit unit = objectHit.GetComponent<Unit>();
-                if (unit != null) {
-                    Script.Get<SelectionManager>().SelectSelectable(unit);              
-                }
-
-                // Select a Building
                 Building building = objectHit.GetComponent<Building>();
-                if(building != null) {
-                    Script.Get<SelectionManager>().SelectSelectable(building);                    
+
+                if(unit != null) {
+                    if (!unit.initialized && building != null) {
+                        selectionManager.SelectSelectable(building);
+                    } else {
+                        selectionManager.SelectSelectable(unit);
+                    }                   
+                } else if(building != null) {
+                    selectionManager.SelectSelectable(building);                    
                 }
             }
         }

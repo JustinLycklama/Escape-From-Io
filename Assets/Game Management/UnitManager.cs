@@ -73,15 +73,15 @@ public class UnitManager : MonoBehaviour, TaskStatusUpdateDelegate {
         NotifyDelegates(actionType);
     }
 
-    public void BuildAt(Unit unit, LayoutCoordinate layoutCoordinate, BlueprintCost cost) {
+    public void BuildAt(UnitBuilding unitBuilding, LayoutCoordinate layoutCoordinate, BlueprintCost cost) {
         WorldPosition worldPosition = new WorldPosition(new MapCoordinate(layoutCoordinate));
 
-        unit.SetCost(cost);
-        unit.transform.position = worldPosition.vector3;
+        unitBuilding.SetCost(cost);
+        unitBuilding.transform.position = worldPosition.vector3;
 
-        Script.Get<GameResourceManager>().CueueGatherTasksForCost(cost, worldPosition, unit);
+        Script.Get<GameResourceManager>().CueueGatherTasksForCost(cost, worldPosition, unitBuilding);
 
-        NotifyDelegates(unit.primaryActionType);
+        NotifyDelegates(unitBuilding.associatedUnit.primaryActionType);
     }
 
     /*

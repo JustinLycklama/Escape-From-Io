@@ -37,8 +37,13 @@ public class Narrator : MonoBehaviour
             unit.transform.position = worldPos.vector3;
             i++;
 
-            Script.Get<UnitManager>().RegisterUnit(unit);
-            unit.Initialize();
+            UnitBuilding unitBuilding = unit.GetComponent<UnitBuilding>();
+
+            if (unitBuilding != null) {
+                unitBuilding.ProceedToCompleteBuilding();
+            } else {
+                unit.Initialize();
+            }            
         }
 
         Camera.main.transform.position = new WorldPosition(new MapCoordinate(spawnCoordinate)).vector3 + new Vector3(0, 250, -400);

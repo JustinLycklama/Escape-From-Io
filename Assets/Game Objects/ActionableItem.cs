@@ -6,7 +6,9 @@ public abstract class ActionableItem : MonoBehaviour, TaskStatusNotifiable {
     public string description;
 
     // taskAlreadyDictated is used when a task is about to be assoctaed with this object, 
-     // but has not quite been associated, to let everybody know that this is taken
+    // but has not quite been associated, to let everybody know that this is taken
+
+    [HideInInspector]
     public bool taskAlreadyDictated = false; 
     public MasterGameTask associatedTask { get; private set; }
 
