@@ -23,17 +23,23 @@ public class Narrator : MonoBehaviour
         spawnCoordinate = mapGenerator.GenerateWorld(constants.mapCountX, constants.mapCountY);
 
         grid.gameObject.transform.position = mapsManager.transform.position;
-
         grid.createGrid();
-        //grid.BlurPenaltyMap(4);
+        //grid.BlurPenaltyMap(4); // No blurr today!        
 
-        //unit.GetComponent<Unit>().BeginQueueing();
+        Script.Get<BuildingManager>().Initialize();
+
 
         PathGridCoordinate[][] coordinatesForSpawnCoordinate = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(spawnCoordinate);
 
         int i = 0;
         foreach (Unit unit in startingUnits) {
-            WorldPosition worldPos = new WorldPosition(MapCoordinate.FromGridCoordinate(coordinatesForSpawnCoordinate[1][i]));
+
+            int horizontalComponent = 1;
+            if (i == 1) {
+                horizontalComponent = 0;
+            }
+
+            WorldPosition worldPos = new WorldPosition(MapCoordinate.FromGridCoordinate(coordinatesForSpawnCoordinate[horizontalComponent][i]));
             unit.transform.position = worldPos.vector3;
             i++;
 
@@ -46,7 +52,15 @@ public class Narrator : MonoBehaviour
             }            
         }
 
-        Camera.main.transform.position = new WorldPosition(new MapCoordinate(spawnCoordinate)).vector3 + new Vector3(0, 250, -400);
+        WorldPosition spawnWorldPosition = new WorldPosition(new MapCoordinate(spawnCoordinate));
+
+        Building building = Instantiate(Building.Blueprint.Tower.resource) as Building;
+        building.transform.position = spawnWorldPosition.vector3;
+
+        //buildingManager.BuildAt(building, spawnCoordinate, new BlueprintCost(1, 1, 1));
+        building.ProceedToCompleteBuilding();
+
+        Camera.main.transform.position = spawnWorldPosition.vector3 + new Vector3(0, 250, -400);
 
         Script.Get<MiniMap>().Initialize();
     }

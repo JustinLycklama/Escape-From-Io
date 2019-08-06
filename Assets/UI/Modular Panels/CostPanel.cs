@@ -76,7 +76,11 @@ public class CostPanel : MonoBehaviour
         foreach(MineralType mineralType in imageValueDictionary.Keys) {
             ImageValueCell cell = imageValueDictionary[mineralType];
 
-            string total = cost.costMap[mineralType].ToString();
+            string total = "0";
+                
+            if (cost.costMap.ContainsKey(mineralType)) {
+                total = cost.costMap[mineralType].ToString();
+            }                
 
             if(tallyMode) {
                 string tally = tallyCountDictionary[mineralType].ToString();

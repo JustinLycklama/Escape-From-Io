@@ -8,7 +8,7 @@ public class MapContainerNeighbours {
 }
 
 
-public class MapContainer : MonoBehaviour, SelectionManagerDelegate
+public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffectUpdateDelegate
 {
     public Map map;
 
@@ -19,6 +19,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate
     public MeshRenderer meshRenderer;
 
     BoxCollider[,] boxColliderArray;
+    GameObject[,] fogOfWarMap;
 
     public MapContainerNeighbours neighbours = new MapContainerNeighbours();
 
@@ -34,6 +35,8 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate
         this.mapX = mapX;
         this.mapY = mapY;
         this.mapRect = mapRect;
+
+        Script.Get<BuildingManager>().RegisterForStatusEffectNotifications(this);
     }
 
     public void setMap(Map map, bool withColliders = true) {
@@ -54,7 +57,9 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate
             AddBoxColliders();
         }
 
+        SetupFogOfWar();
         SetupMaterialShader();
+
         map.transform.SetParent(this.transform, true);
     }
 
@@ -74,6 +79,10 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate
         UpdateMaterialOverhangTextures();
         DrawMesh();
     }
+
+    /*
+     * Box Colliders
+     * */
 
     private void RemoveBoxColliders() {
         if(boxColliderArray != null) {
@@ -132,6 +141,64 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate
 
         boxCollider.size = new Vector3(boxSizeX, map.getHeightAt(mapCoordinate) * 2, boxSizeZ);
     }
+
+    /*
+     * Fog of War
+     * */
+
+    private void SetupFogOfWar() {
+        Shader transparencyShader = Shader.Find("Custom/Buildable");
+
+        Constants constants = Script.Get<Constants>();
+
+        int width = constants.layoutMapWidth;
+        int height = constants.layoutMapHeight;
+
+        fogOfWarMap = new GameObject[width, height];
+
+        float boxSizeX = constants.featuresPerLayoutPerAxis;
+        float boxSizeZ = constants.featuresPerLayoutPerAxis;
+
+        float halfTotalWidth = boxSizeX * width / 2f;
+        float halfTotalHeight = boxSizeZ * height / 2f;
+
+        for(int x = 0; x < width; x++) {
+            for(int y = 0; y < height; y++) {
+
+                if (fogOfWarMap[x, y] == null) {
+                    GameObject newCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+
+                    //newCube.GetComponent<MeshRenderer>().material.shader = transparencyShader;
+                    newCube.GetComponent<MeshRenderer>().material.color = Color.black;
+                    newCube.GetComponent<MeshRenderer>().material.SetFloat("_Metallic", 1);
+                    newCube.GetComponent<MeshRenderer>().material.SetFloat("_Glossiness", 0);
+
+                    newCube.GetComponent<MeshRenderer>().material.SetFloat("_SpecularHighlights", 0);
+                    newCube.GetComponent<MeshRenderer>().material.SetFloat("_GlossyReflections", 0);
+                    
+
+                    fogOfWarMap[x, y] = newCube;
+                }
+
+                GameObject cube = fogOfWarMap[x, y];
+
+                LayoutCoordinate layoutCoordinate = new LayoutCoordinate(x, y, this); // height - 1 - y
+                MapCoordinate mapCoordinate = new MapCoordinate(layoutCoordinate);
+                WorldPosition worldPosition = new WorldPosition(mapCoordinate);
+
+                Vector3 cubePosition = worldPosition.vector3;
+                cubePosition = new Vector3(cubePosition.x, 1.2f, cubePosition.z);
+
+                cube.transform.position = cubePosition;// new Vector3((x * boxSizeX - halfTotalWidth) + boxSizeX / 2f, 0, (y * boxSizeZ - halfTotalHeight) + boxSizeZ / 2f);
+
+                cube.transform.localScale = new Vector3(boxSizeX * 11,  200, boxSizeZ * 11);
+            }
+        }
+    }
+
+    /*
+     * Textures and Overhang Updates
+     * */
 
     private void UpdateMaterialOverhangTextures() {
         Constants constants = Script.Get<Constants>();
@@ -337,6 +404,42 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate
         }
     }
 
+    /*
+     * StatusEffectUpdateDelegate Interface
+     * */
+
+    public void StatusEffectMapUpdated(BuildingEffectStatus[,] statusMap) {
+
+        Constants constants = Script.Get<Constants>();
+
+        int width = constants.layoutMapWidth;
+        int height = constants.layoutMapHeight;
+
+        float boxSizeX = constants.featuresPerLayoutPerAxis;
+        float boxSizeZ = constants.featuresPerLayoutPerAxis;
+
+        float halfTotalWidth = boxSizeX * width / 2f;
+        float halfTotalHeight = boxSizeZ * height / 2f;
+
+        for(int x = 0; x < width; x++) {
+            for(int y = 0; y < height; y++) {
+
+                int sampleX = x + mapX * width;
+                int sampleY = y + mapY * height;
+
+                if ((statusMap[sampleX, sampleY] & BuildingEffectStatus.Light) == BuildingEffectStatus.Light && fogOfWarMap[x, y].activeSelf) {
+                    fogOfWarMap[x, y].SetActive(false);
+                    print("--");
+                    print("Activate x " + x + " y " + y + " of map " + mapX + ", " + mapY);
+                    print("From x " + sampleX + " y " + sampleY);
+                    print("--");
+
+                }
+
+
+            }
+        }
+    }
 
     //private void OnDrawGizmos() {
     //    if (boxColliderArray == null) {

@@ -46,15 +46,19 @@ public abstract class Building : ActionableItem, Selectable {
 
     public Transform statusLocation;
 
+    public static int buildingCount = 0;
+
+    string title;
+    public string description => title;
+
+    // Building status
     private float percentComplete = 0;
     private Dictionary<GameTask, float> percentPerTask;
-
-    Color materialColor;
-    Color baseColor;
 
     private BlueprintCost cost;
     private CostPanelTooltip costPanel;   
 
+    // Building Shaders
     private Shader transparencyShader;
     private Shader tintableShader;
 
@@ -67,10 +71,7 @@ public abstract class Building : ActionableItem, Selectable {
         buildingCount++;
 
         percentPerTask = new Dictionary<GameTask, float>();
-    }
 
-    // Start is called before the first frame update
-    void Start() {
         // Set transparent shader for all objects in the MeshRenderTier
         transparencyShader = Shader.Find("Custom/Buildable");
         tintableShader = Shader.Find("Custom/Tintable");
@@ -81,7 +82,7 @@ public abstract class Building : ActionableItem, Selectable {
             foreach(MeshRenderer meshRenderer in tier.meshRenderes) {
                 //originalShaderMap[meshRenderer] = meshRenderer.material.shader;
                 meshRenderer.material.shader = transparencyShader;
-            }           
+            }
         }
     }
 
@@ -96,7 +97,22 @@ public abstract class Building : ActionableItem, Selectable {
         costPanel.SetTallyMode(true);
     }
 
-    // MARK: Selectable Interface
+    /*
+     * Building Status Effects
+     * */
+
+    public virtual BuildingEffectStatus BuildingStatusEffects() {
+        return BuildingEffectStatus.None;
+    }
+
+    public virtual int BuildingStatusRange() {
+        return 0;
+    }
+
+    /*
+     * Selectable Interface
+     * */
+
     public void SetSelected(bool selected) {
         Color color = Color.white;
         if(selected) {
@@ -110,14 +126,9 @@ public abstract class Building : ActionableItem, Selectable {
         }
     }
 
-    //public void SetStatusDelegate(StatusDelegate statusDelegate) {
-    //    this.statusDelegate = statusDelegate;
-    //}
-
-    // Actionable Item
-
-
-    //public override void AssociateTask(GameTask task) { }
+    /*
+    * Building Process Workflow
+    * */
 
     private void ProceedToUpdateCompletePercent(float percent) {
 
@@ -162,7 +173,10 @@ public abstract class Building : ActionableItem, Selectable {
 
     protected abstract void CompleteBuilding();
 
-    // Returns the percent to completion the action is
+    /*
+     * ActionableItem Interface
+     * */
+
     public override float performAction(GameTask task, float rate, Unit unit) {
 
         switch(task.action) {
@@ -206,33 +220,6 @@ public abstract class Building : ActionableItem, Selectable {
         }
     }
 
-    public static int buildingCount = 0;
-
-    string title;
-    public string description => title;
-
-    // STATIC
-
-    public class Blueprint : ConstructionBlueprint {
-        private static string folder = "Buildings/";
-
-        public static Blueprint Tower = new Blueprint("Tower", typeof(Tower), "Light Tower", new BlueprintCost(3, 2, 1));
-        public static Blueprint Refinery = new Blueprint("Refinery", typeof(Refinery), "Refinery", new BlueprintCost(1, 1, 1));
-
-        public Blueprint(string fileName, Type type, string label, BlueprintCost cost) : base(folder+fileName, type, label, cost) {}
-
-        public override void ConstructAt(LayoutCoordinate layoutCoordinate) {
-            BuildingManager buildingManager = Script.Get<BuildingManager>();
-
-            Building building = UnityEngine.Object.Instantiate(resource) as Building;
-            buildingManager.BuildAt(building, layoutCoordinate, cost);
-        }
-    }
-
-    public static Blueprint[] Blueprints() {
-        return new Blueprint[] { Blueprint.Tower, Blueprint.Refinery };
-    }
-
     /*
      * UserActionNotifiable Interface
      * */
@@ -252,5 +239,29 @@ public abstract class Building : ActionableItem, Selectable {
         foreach(UserActionUpdateDelegate updateDelegate in userActionDelegateList) {
             updateDelegate.UpdateUserActionsAvailable(null);
         }
+    }
+
+    /*
+     * Blueprints
+     * */
+
+    public class Blueprint : ConstructionBlueprint {
+        private static string folder = "Buildings/";
+
+        public static Blueprint Tower = new Blueprint("Tower", typeof(Tower), "Light Tower", new BlueprintCost(1, 1, 0));
+        public static Blueprint Refinery = new Blueprint("Refinery", typeof(Refinery), "Refinery", new BlueprintCost(1, 1, 1));
+
+        public Blueprint(string fileName, Type type, string label, BlueprintCost cost) : base(folder+fileName, type, label, cost) {}
+
+        public override void ConstructAt(LayoutCoordinate layoutCoordinate) {
+            BuildingManager buildingManager = Script.Get<BuildingManager>();
+
+            Building building = UnityEngine.Object.Instantiate(resource) as Building;
+            buildingManager.BuildAt(building, layoutCoordinate, cost);
+        }
+    }
+
+    public static Blueprint[] Blueprints() {
+        return new Blueprint[] { Blueprint.Tower, Blueprint.Refinery };
     }
 }

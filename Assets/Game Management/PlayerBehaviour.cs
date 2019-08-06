@@ -80,6 +80,9 @@ public class PlayerBehaviour : MonoBehaviour {
                 GameObject objectHit = hit.transform.gameObject;
                 SelectionManager selectionManager = Script.Get<SelectionManager>();
 
+                Unit unit = objectHit.GetComponent<Unit>();
+                Building building = objectHit.GetComponent<Building>();
+
                 // Select a Terrain Selection
                 if(objectHit.GetComponent<MapContainer>() != null) {
                     BoxCollider boxCollider = hit.collider as BoxCollider;
@@ -93,10 +96,7 @@ public class PlayerBehaviour : MonoBehaviour {
                 }
 
                 // Select a unit
-                Unit unit = objectHit.GetComponent<Unit>();
-                Building building = objectHit.GetComponent<Building>();
-
-                if(unit != null) {
+                else if(unit != null) {
                     if (!unit.initialized && building != null) {
                         selectionManager.SelectSelectable(building);
                     } else {
@@ -104,6 +104,11 @@ public class PlayerBehaviour : MonoBehaviour {
                     }                   
                 } else if(building != null) {
                     selectionManager.SelectSelectable(building);                    
+                }
+
+                // Deselect everything
+                else {
+                    selectionManager.RemoveSelection();
                 }
             }
         }

@@ -47,7 +47,7 @@ public abstract class ActionableItem : MonoBehaviour, TaskStatusNotifiable {
         taskStatusDelegateList.Add(notificationDelegate);
 
         // Let the subscriber know our status immediately
-        notificationDelegate.NowPerformingTask(associatedTask.assignedUnit, associatedTask, null);
+        notificationDelegate.NowPerformingTask(null, associatedTask, null);
     }
 
     public virtual void EndTaskStatusNotifications(TaskStatusUpdateDelegate notificationDelegate) {
@@ -56,7 +56,7 @@ public abstract class ActionableItem : MonoBehaviour, TaskStatusNotifiable {
 
     protected virtual void NotifyAllTaskStatus() {
         foreach(TaskStatusUpdateDelegate updateDelegate in taskStatusDelegateList) {
-            updateDelegate.NowPerformingTask(associatedTask.assignedUnit, associatedTask, null);
+            updateDelegate.NowPerformingTask(null, associatedTask, null);
         }
     }
 }

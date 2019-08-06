@@ -3,6 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Tower : Building {
+
+
+    public override BuildingEffectStatus BuildingStatusEffects() {
+        return BuildingEffectStatus.Light;
+    }
+
+    public override int BuildingStatusRange() {
+        return 2;
+    }
+
     //protected override int requiredOre => 3;
 
     //public MeshRenderer baseRenderer;
