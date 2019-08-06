@@ -47,6 +47,21 @@ public static class UnitStateExtensions {
 
         return -1;
     }
+
+    public static Color ColorForState(this Unit.UnitState unitState) {
+        //new Color(0.2f, 0.2f, 0.2f)
+
+        switch(unitState) {
+            case Unit.UnitState.Idle:
+                return Color.red;
+            case Unit.UnitState.Efficient:
+                return Color.white;
+            case Unit.UnitState.Inefficient:
+                return Color.yellow;
+        }    
+
+        return Color.white;
+    }
 }
 
 // Unit is an actionable item when it is being built, other units can take actions on it by dropping resources and building it.
@@ -123,7 +138,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
         unitStatusTooltip.toFollow = statusLocation;
 
         unitStatusTooltip.SetTitle(title);
-        unitStatusTooltip.SetTask(null);
+        unitStatusTooltip.SetTask(this, null);
         unitStatusTooltip.DisplayPercentageBar(false);
     }
 
@@ -195,6 +210,20 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
         //StartCoroutine(FindTask());
     }
 
+    public UnitState GetUnitState() {
+        Unit.UnitState unitState = Unit.UnitState.Idle;
+
+        if(currentMasterTask != null) {
+            if(currentMasterTask.actionType == primaryActionType) {
+                unitState = Unit.UnitState.Efficient;
+            } else {
+                unitState = Unit.UnitState.Inefficient;
+            }
+        }
+
+        return unitState;
+    }
+
     public void CancelTask() {
         if (currentMasterTask == null) {
             return;
@@ -230,7 +259,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
 
         if (gameTasksQueue.Count > 0) {
             currentGameTask = gameTasksQueue.Dequeue();
-            unitStatusTooltip.SetTask(currentGameTask);
+            unitStatusTooltip.SetTask(this, currentGameTask);
 
             PathRequestManager.RequestPathForTask(transform.position, currentGameTask, foundWaypoints);
         } else {
@@ -249,7 +278,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
         gameTasksQueue.Clear();
 
         NotifyAllTaskStatus();
-        unitStatusTooltip.SetTask(null);
+        unitStatusTooltip.SetTask(this, null);
         unitStatusTooltip.DisplayPercentageBar(false);
 
 
@@ -505,27 +534,4 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
             unitManager.BuildAt(unitBuilding, layoutCoordinate, cost);
         }
     }
-
-    /*
-     * Actionable Item Methods. When a unit is in the construction phase it is actionable
-     * */
-
-    public void SetCost(BlueprintCost cost) {
-        //this.cost = cost;
-
-        //costPanel = UIManager.Blueprint.CostPanel.Instantiate() as CostPanelTooltip;
-        //costPanel.transform.SetParent(Script.UIOverlayPanel.GetFromObject<RectTransform>());
-        //costPanel.toFollow = statusLocation;
-
-        //costPanel.SetCost(cost);
-        //costPanel.SetTallyMode(true);
-    }
-
-
-    // TODO: maybe we don't need Unit to be an actionable item? We can use the building component on the Unit?
-    //public override float performAction(GameTask task, float rate, Unit unit) {
-    //    throw new System.NotImplementedException();
-    //}
-
-
 }

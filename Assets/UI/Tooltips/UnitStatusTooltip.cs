@@ -5,9 +5,11 @@ public class UnitStatusTooltip : MonoBehaviour, TrackingUIInterface { //TaskStat
 
     public Text title;
     public Text taskDescription;
-    public Image taskEfficiencyImage;
+    //public Image taskEfficiencyImage;
 
     public PercentageBar percentageBar;
+
+    public Image backgroundSprite;
 
     private RectTransform targetCanvas;
     private RectTransform rectTransform;
@@ -25,25 +27,14 @@ public class UnitStatusTooltip : MonoBehaviour, TrackingUIInterface { //TaskStat
         this.title.text = title;
     }
 
-    public void SetTask(GameTask task) {
+    public void SetTask(Unit unit, GameTask task) {
         if (task == null) {
             taskDescription.text = "Idle";
         } else {
-
             taskDescription.text = task.description;
-
-            //switch(task.action) {
-            //    case GameTask.ActionType.Mine:
-            //        taskDescription.text = "Mining";
-            //        break;
-            //    case MasterGameTask.ActionType.Build:
-            //        taskDescription.text = "Building";
-            //        break;
-            //    case MasterGameTask.ActionType.Move:
-            //        taskDescription.text = "Gathering";
-            //        break;
-            //}
         }
+
+        backgroundSprite.color = unit.GetUnitState().ColorForState();
     }
 
     public void DisplayPercentageBar(bool display) {

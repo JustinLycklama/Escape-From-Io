@@ -17,6 +17,8 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
 
     public MasterGameTask.ActionType actionType;
 
+    public Image backgroundSprite;
+
     private void Start() {
         title.text = actionType.ToString();
 
@@ -69,5 +71,7 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
     public void NotifyUpdateUnitList(Unit[] unitList, MasterGameTask.ActionType actionType, Unit.UnitState unitListState) {
         unitCountText.text = unitList.Length + " Unit" + ((unitList.Length == 1) ? "" : "s");
         unitStatusText.text = unitListState.decription();
+
+        backgroundSprite.color = unitListState.ColorForState();
     }
 }

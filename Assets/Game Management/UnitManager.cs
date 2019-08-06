@@ -52,15 +52,7 @@ public class UnitManager : MonoBehaviour, TaskStatusUpdateDelegate {
             Unit.UnitState lowestUnitState = Unit.UnitState.Efficient;
 
             foreach(Unit unit in unitListMap[actionType]) {
-                Unit.UnitState unitState = Unit.UnitState.Idle;
-
-                if(unit.currentMasterTask != null) {
-                    if(unit.currentMasterTask.actionType == unit.primaryActionType) {
-                        unitState = Unit.UnitState.Efficient;
-                    } else {
-                        unitState = Unit.UnitState.Inefficient;
-                    }
-                }
+                Unit.UnitState unitState = unit.GetUnitState();
 
                 if(unitState.ranking() < lowestUnitState.ranking()) {
                     lowestUnitState = unitState;
