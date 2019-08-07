@@ -65,7 +65,7 @@ public static class UnitStateExtensions {
 }
 
 // Unit is an actionable item when it is being built, other units can take actions on it by dropping resources and building it.
-public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
+public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, Followable {
 
     public enum UnitState {
         Idle, Efficient, Inefficient
@@ -109,6 +109,9 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
 
     public UnitBuilding buildableComponent;
 
+    public List<TaskStatusUpdateDelegate> taskStatusDelegateList = new List<TaskStatusUpdateDelegate>();
+    public List<UserActionUpdateDelegate> userActionDelegateList = new List<UserActionUpdateDelegate>();
+
     /*
      * Selectable Interface Properties
      * */
@@ -116,8 +119,27 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate {
     private string title;
     public string description => title;
 
-    public List<TaskStatusUpdateDelegate> taskStatusDelegateList = new List<TaskStatusUpdateDelegate>();
-    public List<UserActionUpdateDelegate> userActionDelegateList = new List<UserActionUpdateDelegate>();
+    /*
+     * Followable Interface
+     * */
+    public Transform followCameraLocation;
+
+    public Transform followTransform {
+        get {
+            if (followCameraLocation != null) {
+                return followCameraLocation;
+            } else {
+                GameObject camerLocationObject = new GameObject();
+                camerLocationObject.transform.SetParent(transform);
+                camerLocationObject.transform.localPosition = new Vector3(0f, 1.5f, -1.5f);
+                camerLocationObject.transform.localRotation = Quaternion.identity;
+
+                return camerLocationObject.transform;
+            }            
+        }
+    }
+
+    public Transform lookAtTransform => statusLocation;
 
     /*
      * Lifecycle
