@@ -8,6 +8,7 @@ public class PercentageBar : MonoBehaviour, TrackingUIInterface {
 
     public Slider sliderBar;
     public Text detailText;
+    public Image fillColorImage;
 
     public enum DisplayType { Bar, Itemized }
     private DisplayType displayType;
@@ -44,13 +45,18 @@ public class PercentageBar : MonoBehaviour, TrackingUIInterface {
         }
     }
 
-    public void SetPercent(float percent) {
+    public void SetPercent(float percent, string value = null) {
         if (displayType != DisplayType.Bar) {
             SetDisplayType(DisplayType.Bar);
         }
 
         sliderBar.value = percent;
-        detailText.text = "" + Mathf.RoundToInt(percent * 100) + "%";
+        if (value != null) {
+            detailText.text = value;
+        } else {
+            detailText.text = "" + Mathf.RoundToInt(percent * 100) + "%";
+        }
+        
     }
 
     public void SetRequired(int required, string unitOfMeasure) {

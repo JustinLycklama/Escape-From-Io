@@ -167,6 +167,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
 
                 if (fogOfWarMap[x, y] == null) {
                     GameObject newCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    newCube.name = "Fog " + x + ", " + y;
 
                     //newCube.GetComponent<MeshRenderer>().material.shader = transparencyShader;
                     newCube.GetComponent<MeshRenderer>().material.color = Color.black;
@@ -176,7 +177,6 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                     newCube.GetComponent<MeshRenderer>().material.SetFloat("_SpecularHighlights", 0);
                     newCube.GetComponent<MeshRenderer>().material.SetFloat("_GlossyReflections", 0);
                     
-
                     fogOfWarMap[x, y] = newCube;
                 }
 
@@ -192,6 +192,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                 cube.transform.position = cubePosition;// new Vector3((x * boxSizeX - halfTotalWidth) + boxSizeX / 2f, 0, (y * boxSizeZ - halfTotalHeight) + boxSizeZ / 2f);
 
                 cube.transform.localScale = new Vector3(boxSizeX * 11,  200, boxSizeZ * 11);
+                cube.transform.SetParent(this.transform, true);
             }
         }
     }

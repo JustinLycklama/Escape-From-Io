@@ -94,8 +94,6 @@ public class TaskAndUnitDetailPanel : NavigationPanel, TaskQueueDelegate, UnitMa
     }
 
     public void CellForRowAtIndex(TableView table, int row, GameObject cell) {
-        print("call");
-
         if(table == tasksQueueTableView) {
             TaskDisplayCell taskCell = cell.GetComponent<TaskDisplayCell>();
 

@@ -103,6 +103,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
     GameTask currentGameTask; // The current Game Task we are working on to complete the Master Task
     private HashSet<int> refuseTaskSet; // Set of tasks we aready know we cannot perform
 
+    abstract public int duration { get; }
     abstract public MasterGameTask.ActionType primaryActionType { get; }
 
     abstract public float SpeedForTask(GameTask task);
@@ -171,10 +172,32 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
     public void Initialize() {
         initialized = true;
 
+        // Register
         Script.Get<UnitManager>().RegisterUnit(this);
-
-        taskQueueManager = Script.Get<TaskQueueManager>();
         Script.Get<MapsManager>().AddTerrainUpdateDelegate(this);
+
+        // Name
+        Name name = NameSingleton.sharedInstance.GenerateName();
+        title = name.fullName;      
+        unitStatusTooltip.SetTitle(name.shortform);
+
+        NotificationPanel notificationManager = Script.Get<NotificationPanel>();
+        notificationManager.AddNotification(new NotificationItem(title));
+
+        // Duration
+        unitStatusTooltip.SetRemainingDuration(duration, 0f);
+        Action<int, float> durationUpdateBlock = (remainingTime, percentComplete) => {
+            unitStatusTooltip.SetRemainingDuration(remainingTime, percentComplete);
+        };
+
+        Action durationCompletionBlock = () => {
+
+        };
+
+        Script.Get<TimeManager>().AddNewTimer(duration, durationUpdateBlock, durationCompletionBlock);
+        
+        // Setup Task Pipeline
+        taskQueueManager = Script.Get<TaskQueueManager>();
 
         completedTaskAction = (pathComplete) => {
             unitStatusTooltip.DisplayPercentageBar(false);

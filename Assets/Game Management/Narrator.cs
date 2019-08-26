@@ -63,5 +63,17 @@ public class Narrator : MonoBehaviour
         Camera.main.transform.position = spawnWorldPosition.vector3 + new Vector3(0, 250, -400);
 
         Script.Get<MiniMap>().Initialize();
+
+
+        NotificationPanel notificationManager = Script.Get<NotificationPanel>();
+
+        TimeManager timeManager = Script.Get<TimeManager>();
+
+        System.Action<int, float> createNotificationBlock = (seconds, percent) => {
+            NotificationItem notificationItem = new NotificationItem(seconds.ToString());
+            notificationManager.AddNotification(notificationItem);
+        };
+
+        timeManager.AddNewTimer(20, createNotificationBlock, null);
     }
 }

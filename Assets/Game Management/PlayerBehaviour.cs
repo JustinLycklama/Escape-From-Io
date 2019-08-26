@@ -23,7 +23,11 @@ public class PlayerBehaviour : MonoBehaviour {
         Vector2 mousePos = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
         if(!UIRect.Contains(mousePos)) {
             SelectGameObject();
-        }       
+        }
+
+        if(Input.GetKey("escape")) {
+            Application.Quit();
+        }
     }
 
     void MoveCamera() {
@@ -66,8 +70,8 @@ public class PlayerBehaviour : MonoBehaviour {
 
         if (lastHit != null) {
             Debug.DrawRay(lastHit.Value.point, Vector3.up * 1000, Color.red);
-        }
-        
+        }       
+
         if(Input.GetMouseButtonDown(0)) {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hit;
