@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 2036555233002008035}
   - component: {fileID: 7888020732770434357}
   - component: {fileID: 5791152613091736351}
+  - component: {fileID: 8578498939309492341}
   m_Layer: 5
   m_Name: NotificationItemCell
   m_TagString: Untagged
@@ -91,6 +92,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   canvasGroup: {fileID: 5791152613091736351}
   text: {fileID: 8301374645173286463}
+  gameButton: {fileID: 8578498939309492341}
 --- !u!225 &5791152613091736351
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -103,6 +105,20 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!114 &8578498939309492341
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 248369150004385555}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: feb1dac1dfe99b74097423bf31a298df, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mouseOver: {fileID: 21300000, guid: ba3c21a0742fe64439464b3be82fdf76, type: 3}
+  click: {fileID: 21300000, guid: 3c755eaf22cdebd44a2bb0ee6869aa3d, type: 3}
 --- !u!1 &2846136685031687221
 GameObject:
   m_ObjectHideFlags: 0

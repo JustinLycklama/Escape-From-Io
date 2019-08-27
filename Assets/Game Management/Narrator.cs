@@ -65,15 +65,15 @@ public class Narrator : MonoBehaviour
         Script.Get<MiniMap>().Initialize();
 
 
-        NotificationPanel notificationManager = Script.Get<NotificationPanel>();
+        //NotificationPanel notificationManager = Script.Get<NotificationPanel>();
 
-        TimeManager timeManager = Script.Get<TimeManager>();
+        //TimeManager timeManager = Script.Get<TimeManager>();
 
-        System.Action<int, float> createNotificationBlock = (seconds, percent) => {
-            NotificationItem notificationItem = new NotificationItem(seconds.ToString());
-            notificationManager.AddNotification(notificationItem);
-        };
+        //System.Action<int, float> createNotificationBlock = (seconds, percent) => {
+        //    NotificationItem notificationItem = new NotificationItem(seconds.ToString(), null);
+        //    notificationManager.AddNotification(notificationItem);
+        //};
 
-        timeManager.AddNewTimer(20, createNotificationBlock, null);
+        //timeManager.AddNewTimer(20, createNotificationBlock, null);
     }
 }

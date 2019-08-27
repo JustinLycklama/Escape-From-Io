@@ -40,6 +40,9 @@ public class UnitManager : MonoBehaviour, TaskStatusUpdateDelegate {
     }
 
     public void DisableUnit(Unit unit) {
+        unitListMap[unit.primaryActionType].Remove(unit);
+        NotifyDelegates(unit.primaryActionType);
+
         unit.EndTaskStatusNotifications(this);
     }
 

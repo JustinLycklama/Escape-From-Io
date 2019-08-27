@@ -62,8 +62,6 @@ public abstract class Building : ActionableItem, Selectable {
     private Shader transparencyShader;
     private Shader tintableShader;
 
-    //private Dictionary<MeshRenderer, Shader> originalShaderMap;
-
     public List<UserActionUpdateDelegate> userActionDelegateList = new List<UserActionUpdateDelegate>();
 
     private void Awake() {
@@ -76,14 +74,7 @@ public abstract class Building : ActionableItem, Selectable {
         transparencyShader = Shader.Find("Custom/Buildable");
         tintableShader = Shader.Find("Custom/Tintable");
 
-        //originalShaderMap = new Dictionary<MeshRenderer, Shader>();        
-
-        foreach(MeshBuildingTier tier in meshTiers) {
-            foreach(MeshRenderer meshRenderer in tier.meshRenderes) {
-                //originalShaderMap[meshRenderer] = meshRenderer.material.shader;
-                meshRenderer.material.shader = transparencyShader;
-            }
-        }
+        SetTransparentShaders();
     }
 
     public void SetCost(BlueprintCost cost) {
@@ -127,24 +118,57 @@ public abstract class Building : ActionableItem, Selectable {
     }
 
     /*
-    * Building Process Workflow
-    * */
+     * Shader and Alpha 
+     * */
 
-    private void ProceedToUpdateCompletePercent(float percent) {
+    public void SetTransparentShaders() {
+        SetShaders(transparencyShader);
+    }
 
+    public void SetTintableShaders() {
+        SetAlphaPercentage(1);
+        SetShaders(tintableShader);
+    }
+
+    private void SetShaders(Shader shader) {
+        foreach(MeshBuildingTier tier in meshTiers) {
+            foreach(MeshRenderer meshRenderer in tier.meshRenderes) {
+                meshRenderer.material.shader = shader;
+            }
+        }
+    }
+
+    public void SetAlphaPercentage(float percent) {
+        
         // Update our Mesh Renderer Tiers
         float tierBase = 0f;
-        
+
         foreach(MeshBuildingTier tier in meshTiers) {
-            if (percent > tierBase && percent <= tier.aproximateTopPercentage) {
+            if(percent > tierBase && percent <= tier.aproximateTopPercentage) {
                 foreach(MeshRenderer meshRenderer in tier.meshRenderes) {
                     meshRenderer.material.SetFloat("percentComplete", Mathf.InverseLerp(tierBase, tier.aproximateTopPercentage, percent));
-                }                
+                }
             }
 
             tierBase = tier.aproximateTopPercentage;
         }
-  
+    }
+
+    public void SetAlphaSolid() {
+        foreach(MeshBuildingTier tier in meshTiers) {           
+            foreach(MeshRenderer meshRenderer in tier.meshRenderes) {
+
+                meshRenderer.material.SetFloat("percentComplete", 1);
+            }            
+        }
+    }
+
+    /*
+    * Building Process Workflow
+    * */
+
+    private void ProceedToUpdateCompletePercent(float percent) {
+        SetAlphaPercentage(percent);
         UpdateCompletionPercent(percent);
     }
 
@@ -152,13 +176,7 @@ public abstract class Building : ActionableItem, Selectable {
 
     public void ProceedToCompleteBuilding() {
 
-        // Reset each renderer to its original shader
-        foreach(MeshBuildingTier tier in meshTiers) {
-            foreach(MeshRenderer meshRenderer in tier.meshRenderes) {
-                meshRenderer.material.SetFloat("percentComplete", 1);
-                meshRenderer.material.shader = tintableShader;
-            }
-        }
+        SetTintableShaders();
 
         if (costPanel != null && costPanel.isActiveAndEnabled) {
             costPanel.gameObject.SetActive(false);

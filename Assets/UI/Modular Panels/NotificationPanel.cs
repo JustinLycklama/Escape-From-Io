@@ -5,16 +5,20 @@ using UnityEngine;
 
 public class NotificationItem {
     public string text;
+    public Transform notificationPosition;
 
-    public NotificationItem(string text) {
+    public NotificationItem(string text, Transform notificationPosition) {
         this.text = text;
+        this.notificationPosition = notificationPosition;
     }
 }
 
 public class NotificationPanel : MonoBehaviour, TableViewDelegate {
 
-    static int notificationDuration = 2;
-    static int fadeDuration = 2;
+    public static int unitDurationWarning = 30;
+
+    static int notificationDuration = 5;
+    static int fadeDuration = 2;    
 
     public TableView tableView;
 
@@ -67,7 +71,7 @@ public class NotificationPanel : MonoBehaviour, TableViewDelegate {
         NotificationItem notificationItem = notificationItems[row];
         NotificationItemCell notificationCell = cell.GetComponent<NotificationItemCell>();
 
-        notificationCell.text.text = notificationItem.text;
+        notificationCell.SetNotification(notificationItem);
         cellForNotification.Remove(notificationItem);
 
         if(fadingNotifications.Contains(notificationItem)) {

@@ -71,7 +71,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
         Idle, Efficient, Inefficient
     }
 
-    public static int unitCount = 0;
+    public static Dictionary<MasterGameTask.ActionType, int> unitCount = new Dictionary<MasterGameTask.ActionType, int>();
 
     // Initialization
     [HideInInspector]
@@ -149,8 +149,12 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
     private void Awake() {
         initialized = false;
 
-        title = "Unit #" + unitCount;
-        unitCount++;
+        unitCount[MasterGameTask.ActionType.Build] = 0;
+        unitCount[MasterGameTask.ActionType.Mine] = 0;
+        unitCount[MasterGameTask.ActionType.Move] = 0;
+
+        title = primaryActionType.TitleAsNoun() + " #" + unitCount[primaryActionType].ToString();
+        unitCount[primaryActionType]++;
 
         gameTasksQueue = new Queue<GameTask>();
         refuseTaskSet = new HashSet<int>();
@@ -173,25 +177,35 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
         initialized = true;
 
         // Register
-        Script.Get<UnitManager>().RegisterUnit(this);
+        UnitManager unitManager = Script.Get<UnitManager>();
+        unitManager.RegisterUnit(this);
         Script.Get<MapsManager>().AddTerrainUpdateDelegate(this);
 
         // Name
         Name name = NameSingleton.sharedInstance.GenerateName();
-        title = name.fullName;      
-        unitStatusTooltip.SetTitle(name.shortform);
 
         NotificationPanel notificationManager = Script.Get<NotificationPanel>();
-        notificationManager.AddNotification(new NotificationItem(title));
+        notificationManager.AddNotification(new NotificationItem(title + " initialized and named: " + name.fullName, transform));
+
+        unitStatusTooltip.SetTitle(name.shortform);
+        title = name.fullName;      
 
         // Duration
         unitStatusTooltip.SetRemainingDuration(duration, 0f);
         Action<int, float> durationUpdateBlock = (remainingTime, percentComplete) => {
             unitStatusTooltip.SetRemainingDuration(remainingTime, percentComplete);
+
+            if (remainingTime == NotificationPanel.unitDurationWarning) {
+                Script.Get<NotificationPanel>().AddNotification(new NotificationItem(name.shortform + " only has " + NotificationPanel.unitDurationWarning.ToString() + "s remaining.", transform));
+            }
         };
 
+        // Shutdown
         Action durationCompletionBlock = () => {
+            Script.Get<NotificationPanel>().AddNotification(new NotificationItem(name.shortform + " has run out of power", transform));
 
+            unitManager.DisableUnit(this);
+            Shutdown();
         };
 
         Script.Get<TimeManager>().AddNewTimer(duration, durationUpdateBlock, durationCompletionBlock);
@@ -269,13 +283,15 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
         return unitState;
     }
 
-    public void CancelTask() {
+    public void CancelTask(bool continueRunning = true) {
         if (currentMasterTask == null) {
             return;
         }
 
         StopAllCoroutines();
-        ResetTaskState();
+        if (continueRunning) {
+            ResetTaskState();
+        }        
     }
 
     /*
@@ -326,31 +342,34 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
         unitStatusTooltip.SetTask(this, null);
         unitStatusTooltip.DisplayPercentageBar(false);
 
-
         taskQueueManager.RequestNextDoableTask(this, (masterGameTask) => {
             DoTask(masterGameTask);
         }, refuseTaskSet);
-
-        //StartCoroutine(FindTask());
     }
 
+    private void Shutdown() {
+        taskQueueManager.RestractTaskRequest(this);
+        CancelTask(false);
 
+        buildableComponent.SetTransparentShaders();
+        buildableComponent.SetAlphaSolid();
+
+        Action<int, float> fadeOutBlock = (seconds, percent) => {
+            buildableComponent.SetAlphaPercentage(1 - percent);
+        };
+
+        Action destroyBlock = () => {
+            transform.SetParent(null);
+            Destroy(unitStatusTooltip.gameObject);
+            Destroy(gameObject);
+        };
+
+        Script.Get<TimeManager>().AddNewTimer(5, fadeOutBlock, destroyBlock, 2);
+    }
 
     /*
      * Task Coroutines
      * */
-
-    //IEnumerator FindTask() {
-    //    MasterGameTask masterGameTask = null;
-
-    //    while(masterGameTask == null) {
-    //        yield return new WaitForSeconds(0.25f);
-
-    //        masterGameTask = taskQueueManager.GetNextDoableTask(this, refuseTaskSet);            
-    //    }
-
-    //    DoTask(masterGameTask);
-    //}
 
     protected abstract void Animate();
 
@@ -448,7 +467,6 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
 
             yield return null;
         }
-
 
         bool lookingAtTarget = true;
 

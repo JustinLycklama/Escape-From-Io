@@ -227,22 +227,16 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
     List<UnitAndRefused> unitsRequestingTasks = new List<UnitAndRefused>();
 
     public void RequestNextDoableTask(Unit unit, Action<MasterGameTask> callback, HashSet<int> refuseTaskList = null) {
-
-
         unitsRequestingTasks.Add(new UnitAndRefused(unit, refuseTaskList, callback));
+    }
 
-        //return getNextAvailableFromList(taskListMap[unit.primaryActionType], unit, refuseTaskList);
-
-        //switch(unit.primaryActionType) {
-        //    case MasterGameTask.ActionType.Mine:
-        //        return getNextAvailableFromList(mineTaskList, unit);
-        //    case MasterGameTask.ActionType.Build:
-        //        return getNextAvailableFromList(buildTaskList, unit);
-        //    case MasterGameTask.ActionType.Move:
-        //        return getNextAvailableFromList(moveTaskList, unit);
-        //}
-
-        //return null;
+    public void RestractTaskRequest(Unit unit) {
+        foreach(UnitAndRefused unitAndRefused in unitsRequestingTasks.ToArray()) {
+            if (unitAndRefused.unit == unit) {
+                unitsRequestingTasks.Remove(unitAndRefused);
+                return;
+            }
+        }        
     }
 
     IEnumerator DishOutTasks() {

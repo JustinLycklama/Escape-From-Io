@@ -134,17 +134,17 @@ public class PlayerBehaviour : MonoBehaviour {
         } 
 
         if (firsGameTaskWithActionItem != null) {
-            JumpCameraToTarget(firsGameTaskWithActionItem.target.vector3);            
+            JumpCameraToPosition(firsGameTaskWithActionItem.target.vector3);            
         }
     }
 
     public void JumpCameraToUnit(Unit unit) {
         if (unit != null) {
-            JumpCameraToTarget(unit.transform.position);
+            JumpCameraToPosition(unit.transform.position);
         }
     }
 
-    private void JumpCameraToTarget(Vector3 target) {
-        Camera.main.transform.position = target + new Vector3(0, 250, -400);
+    public void JumpCameraToPosition(Vector3 position) {
+        Camera.main.transform.position = position + new Vector3(0, 250, -400);
     }
 }
