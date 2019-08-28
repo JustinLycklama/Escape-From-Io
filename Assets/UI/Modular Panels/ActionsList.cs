@@ -12,6 +12,7 @@ public class ActionsList : MonoBehaviour {
 
     private void Awake() {
         actionCellList = new ActionItemCell[] { actionCell1, actionCell2, actionCell3, actionCell4 };
+        SetActions(new UserAction[] { });
     }
 
     public void SetActions(UserAction[] actions) {
@@ -22,6 +23,11 @@ public class ActionsList : MonoBehaviour {
             UserAction action = null;
             if(actions != null && i < actions.Length) {
                 action = actions[i];
+            }
+
+            bool enabled = action != null;
+            if(cell.buttonEnabled != enabled) {
+                cell.SetEnabled(enabled);
             }
 
             cell.SetAction(action);

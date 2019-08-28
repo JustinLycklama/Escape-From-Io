@@ -9,6 +9,8 @@ public class CurrentSelectionPanel : MonoBehaviour, SelectionManagerDelegate, Ta
 
     const string noSelectionText = "None";
     public Text title;
+    public PercentageBar percentageBar;
+
 
     //public MasterAndGameTaskCell taskItemCell;
 
@@ -22,8 +24,9 @@ public class CurrentSelectionPanel : MonoBehaviour, SelectionManagerDelegate, Ta
         title.text = noSelectionText;
         Script.Get<SelectionManager>().RegisterForNotifications(this);
 
-        unitDetailPanel.gameObject.SetActive(false);
-        terrainDetailPanel.gameObject.SetActive(false);
+        NotifyUpdateSelection(null);
+
+        unitDetailPanel.durationBar = percentageBar;
     }
 
     private void OnDestroy() {
@@ -66,11 +69,14 @@ public class CurrentSelectionPanel : MonoBehaviour, SelectionManagerDelegate, Ta
             }
         }
 
+        bool activatePercentBar = false;
+
         if (nextSelection != null) {
             title.text = nextSelection.Title();
               
             if (nextSelection.selection is Unit) {
                 SetActiveDetail(unitDetailPanel);
+                activatePercentBar = true;
 
                 unitDetailPanel.SetUnit(nextSelection.selection as Unit);
                 currentGameAndTaskCell = unitDetailPanel.masterAndGameTaskCell;
@@ -93,6 +99,10 @@ public class CurrentSelectionPanel : MonoBehaviour, SelectionManagerDelegate, Ta
             currentGameAndTaskCell = null;
         }
 
+        if (percentageBar.gameObject.activeSelf != activatePercentBar) {
+            percentageBar.gameObject.SetActive(activatePercentBar);
+        }
+        
         currentSelection = nextSelection;
     }
 

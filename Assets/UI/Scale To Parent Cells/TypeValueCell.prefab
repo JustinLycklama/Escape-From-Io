@@ -66,7 +66,7 @@ MonoBehaviour:
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
-    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+    m_Font: {fileID: 12800000, guid: 9c3ada2040c5ce4479e4c97640683e16, type: 3}
     m_FontSize: 14
     m_FontStyle: 0
     m_BestFit: 1
@@ -89,8 +89,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1720375631266329829}
   - component: {fileID: 2216124024342296991}
-  - component: {fileID: 486863705940396661}
   - component: {fileID: 9188442669381440805}
+  - component: {fileID: 7487709130524106490}
   m_Layer: 5
   m_Name: TypeValueCell
   m_TagString: Untagged
@@ -105,7 +105,7 @@ RectTransform:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4614866302910071827}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
@@ -127,7 +127,21 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4614866302910071827}
   m_CullTransparentMesh: 0
---- !u!114 &486863705940396661
+--- !u!114 &9188442669381440805
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4614866302910071827}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 942caa4ae42ad48458ccd17d5ce4af3a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  type: {fileID: 3149082503346534257}
+  value: {fileID: 5403250868097269565}
+--- !u!114 &7487709130524106490
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -152,20 +166,6 @@ MonoBehaviour:
   m_ChildControlHeight: 1
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
---- !u!114 &9188442669381440805
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4614866302910071827}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 942caa4ae42ad48458ccd17d5ce4af3a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  type: {fileID: 3149082503346534257}
-  value: {fileID: 5403250868097269565}
 --- !u!1 &4811092760803851688
 GameObject:
   m_ObjectHideFlags: 0
@@ -264,8 +264,8 @@ RectTransform:
   m_Father: {fileID: 2494195831147747675}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
+  m_AnchorMin: {x: 0.1, y: 0.1}
+  m_AnchorMax: {x: 0.9, y: 0.9}
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
@@ -276,7 +276,7 @@ CanvasRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6018439848491901528}
-  m_CullTransparentMesh: 0
+  m_CullTransparentMesh: 1
 --- !u!114 &3149082503346534257
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -298,7 +298,7 @@ MonoBehaviour:
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
   m_FontData:
-    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+    m_Font: {fileID: 12800000, guid: f8c675a4b4797cb4191f14ed5b31d2ed, type: 3}
     m_FontSize: 14
     m_FontStyle: 0
     m_BestFit: 1
@@ -321,6 +321,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2494195831147747675}
   - component: {fileID: 157439139747428091}
+  - component: {fileID: 6836282637328712149}
   m_Layer: 5
   m_Name: Type Panel
   m_TagString: Untagged
@@ -356,3 +357,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7787663128315925475}
   m_CullTransparentMesh: 0
+--- !u!114 &6836282637328712149
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7787663128315925475}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 1679637790, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_IgnoreLayout: 0
+  m_MinWidth: -1
+  m_MinHeight: -1
+  m_PreferredWidth: -1
+  m_PreferredHeight: -1
+  m_FlexibleWidth: -1
+  m_FlexibleHeight: 2
+  m_LayoutPriority: 1

@@ -200,6 +200,10 @@ public class TerrainManager : MonoBehaviour {
 
         return actionList.ToArray();
     }
+
+    public static Chance ChanceFromPercent(float percent) {
+
+    }
 }
 
 [System.Serializable]
@@ -325,4 +329,6 @@ static class EnumExtensions {
 
         return 0;
     }
+
+
 }

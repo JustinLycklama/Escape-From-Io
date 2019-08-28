@@ -105,8 +105,6 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
                 int remainingDuration = soonToExpireUnits[i].remainingDuration;
                 float percentComplete = (float) remainingDuration / (float)Unit.maxUnitUduration;
 
-                print(remainingDuration);
-
                 bar.SetPercent(percentComplete);
                 bar.fillColorImage.color = ColorSingleton.sharedInstance.GreenToRedByPercent(percentComplete);
             }

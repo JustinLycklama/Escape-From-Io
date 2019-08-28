@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ColorSingleton : MonoBehaviour {
+public class ColorSingleton {
 
     private static ColorSingleton backingInstance;
 
