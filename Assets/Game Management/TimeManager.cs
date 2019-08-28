@@ -3,6 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+public interface TimeUpdateDelegate {
+    void SecondUpdated();
+}
+
+
 public class TimeManager : MonoBehaviour {
 
     class TimeUpdateObject {
@@ -15,34 +20,32 @@ public class TimeManager : MonoBehaviour {
         public Action completionBlock;
     }
 
+    // Update Blocks
     HashSet<TimeUpdateObject> timeObjects = new HashSet<TimeUpdateObject>();
 
-    //void Start() {
-    //    StartCoroutine(UpdateTimers());
-    //}
+    // Interface Delegates
+    List<TimeUpdateDelegate> delegateList = new List<TimeUpdateDelegate>();
+    float globalTimer;
 
-    //IEnumerator UpdateTimers() {
-    //    while(true) {
-    //        foreach(TimeUpdateObject timeObject in new HashSet<TimeUpdateObject>(timeObjects)) {
 
-    //            int oldTime = Mathf.FloorToInt(timeObject.currentTime);
-    //            timeObject.currentTime += Time.deltaTime;
-
-    //            int newTime = Mathf.FloorToInt(timeObject.currentTime);
-
-    //            if(newTime > timeObject.totalDuration) {
-    //                timeObject.completionBlock();
-    //                timeObjects.Remove(timeObject);
-    //            } else if(oldTime != newTime) {
-    //                timeObject.updateBlock((timeObject.totalDuration - newTime), (timeObject.currentTime / (float)timeObject.totalDuration));
-    //            }
-    //        }
-
-    //        yield return new WaitForSeconds(0.75f);
-    //    }      
-    //}
+    private void Start() {
+        globalTimer = Time.time;
+    }
 
     void Update() {
+
+        // Interface Updates
+        int oldGlobalComparison = Mathf.FloorToInt(globalTimer);
+        globalTimer += Time.deltaTime;
+        int newGlobalComparison = Mathf.FloorToInt(globalTimer);
+
+        if (oldGlobalComparison != newGlobalComparison) {
+            foreach(TimeUpdateDelegate updateDelegate in delegateList) {
+                updateDelegate.SecondUpdated();
+            }
+        }        
+
+        // Update Blocks
         foreach(TimeUpdateObject timeObject in new HashSet<TimeUpdateObject>(timeObjects)) {
 
             float powerMultiplier = Mathf.Pow(10f, timeObject.updateFrequencyComparatorPower);
@@ -77,4 +80,22 @@ public class TimeManager : MonoBehaviour {
 
         timeObjects.Add(newObject);
     }
+
+    /*
+     * TimeUpdateDelegate Methods
+     * */
+
+    public void RegisterForTimeUpdateNotifications(TimeUpdateDelegate updateDelegate) {
+        delegateList.Add(updateDelegate);        
+    }
+
+    public void EndTimeUpdateNotifications(TimeUpdateDelegate updateDelegate) {
+        delegateList.Remove(updateDelegate);
+    }
+
+    //public void NotifyAllTimeUpdates() {
+    //    foreach(TimeUpdateDelegate updateDelegate in delegateList) {
+    //        updateDelegate.UpdateUserActionsAvailable(null);
+    //    }
+    //}
 }

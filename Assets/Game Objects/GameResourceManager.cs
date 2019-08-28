@@ -8,7 +8,7 @@ using UnityEngine.UI;
 public enum MineralType { Copper, Silver, Gold, RefinedCopper, RefinedSilver, RefinedGold }
 
 public interface OreUpdateDelegate {
-    void NewOreCreated(Ore ore);
+    void OreAdded(Ore ore);
     void OreRemoved(Ore ore);
 }
 
@@ -103,10 +103,6 @@ public class GameResourceManager : MonoBehaviour {
         }
     }
 
-    public void CompleteMineralRegistration() {
-
-    }
-
     public Dictionary<MineralType, int> MineralListForCoordinate(LayoutCoordinate layoutCoordinate) {
         if (mineralsForLayoutCoordinate.ContainsKey(layoutCoordinate)) {
             return mineralsForLayoutCoordinate[layoutCoordinate];
@@ -154,14 +150,6 @@ public class GameResourceManager : MonoBehaviour {
         return availableOreList.Where(ore => ore.associatedTask == null && ore.taskAlreadyDictated == false && ore.mineralType == gatherType).ToArray();
     }
 
-    //public void AddOreToStorage(Ore ore, Refinery refinery) {
-
-    //}
-
-    //public Ore TakeOreFromStorage(Refinery refinery) {
-
-    //}
-
     public MineralType ConsumeInBuilding(Unit oreHolder, Building building) {
 
         if(!unitOreDistribution.ContainsKey(oreHolder) || unitOreDistribution[oreHolder].Count == 0) {
@@ -201,6 +189,23 @@ public class GameResourceManager : MonoBehaviour {
         oreList.Add(ore);
     }
 
+    public void ReturnAllToEnvironment(Unit unit) {
+        if (!unitOreDistribution.ContainsKey(unit)) {
+            // This unit never had any ore
+            return;
+        }
+
+        List<Ore> oreList = unitOreDistribution[unit];
+
+        foreach(Ore ore in oreList) {
+            ore.transform.SetParent(transform, true);
+
+            oreList.Remove(ore);
+            availableOreList.Add(ore);
+
+            NotifyAllOreUpdate(ore, true);
+        }        
+    }
 
     /*
      * Task Queue Methods
@@ -248,10 +253,10 @@ public class GameResourceManager : MonoBehaviour {
         oreUpdateDelegateList.Remove(notificationDelegate);
     }
 
-    public void NotifyAllOreUpdate(Ore ore, bool isNew) {
+    public void NotifyAllOreUpdate(Ore ore, bool isAdded) {
         foreach(OreUpdateDelegate updateDelegate in oreUpdateDelegateList) {
-            if (isNew) {
-                updateDelegate.NewOreCreated(ore);
+            if (isAdded) {
+                updateDelegate.OreAdded(ore);
             } else {
                 updateDelegate.OreRemoved(ore);
             }

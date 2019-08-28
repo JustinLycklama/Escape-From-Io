@@ -28,7 +28,7 @@ public class ResourcesPanel : MonoBehaviour, OreUpdateDelegate {
         Script.Get<GameResourceManager>().RegisterFoOreNotifications(this);
     }
 
-    public void NewOreCreated(Ore ore) {
+    public void OreAdded(Ore ore) {
         mineralTypeToValueCell[ore.mineralType].Increment();
     }
 

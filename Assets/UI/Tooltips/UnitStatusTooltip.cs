@@ -3,9 +3,6 @@ using UnityEngine.UI;
 
 public class UnitStatusTooltip : MonoBehaviour, TrackingUIInterface { //TaskStatusUpdateDelegate
 
-    private static Color startDurationColor = new Color(0, 1, 0.572549f);
-    private static Color endDurationColor = new Color(1, 0.08551968f, 0);
-
     public Text title;
     public Text taskDescription;
     //public Image taskEfficiencyImage;
@@ -46,7 +43,7 @@ public class UnitStatusTooltip : MonoBehaviour, TrackingUIInterface { //TaskStat
     }
 
     public void SetRemainingDuration(int duration, float percent) {
-        durationBar.fillColorImage.color = Color.Lerp(endDurationColor, startDurationColor, 1 - percent);
-        durationBar.SetPercent(1 - percent, duration.ToString());
+        durationBar.fillColorImage.color = ColorSingleton.sharedInstance.GreenToRedByPercent(percent);
+        durationBar.SetPercent(percent, duration.ToString());
     }
 }

@@ -103,7 +103,9 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
     GameTask currentGameTask; // The current Game Task we are working on to complete the Master Task
     private HashSet<int> refuseTaskSet; // Set of tasks we aready know we cannot perform
 
+    public static int maxUnitUduration = 180;
     abstract public int duration { get; }
+    public int remainingDuration = maxUnitUduration;
     abstract public MasterGameTask.ActionType primaryActionType { get; }
 
     abstract public float SpeedForTask(GameTask task);
@@ -112,6 +114,8 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
 
     public List<TaskStatusUpdateDelegate> taskStatusDelegateList = new List<TaskStatusUpdateDelegate>();
     public List<UserActionUpdateDelegate> userActionDelegateList = new List<UserActionUpdateDelegate>();
+
+    [HideInInspector]
 
     /*
      * Selectable Interface Properties
@@ -154,7 +158,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
         unitCount[MasterGameTask.ActionType.Move] = 0;
 
         title = primaryActionType.TitleAsNoun() + " #" + unitCount[primaryActionType].ToString();
-        unitCount[primaryActionType]++;
+        unitCount[primaryActionType] = unitCount[primaryActionType] + 1;
 
         gameTasksQueue = new Queue<GameTask>();
         refuseTaskSet = new HashSet<int>();
@@ -167,6 +171,8 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
         unitStatusTooltip.SetTitle(title);
         unitStatusTooltip.SetTask(this, null);
         unitStatusTooltip.DisplayPercentageBar(false);
+        unitStatusTooltip.SetRemainingDuration(duration, (float) duration / (float) maxUnitUduration);
+
     }
 
     private void OnDestroy() {
@@ -188,12 +194,16 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
         notificationManager.AddNotification(new NotificationItem(title + " initialized and named: " + name.fullName, transform));
 
         unitStatusTooltip.SetTitle(name.shortform);
-        title = name.fullName;      
+        title = name.fullName;
 
         // Duration
-        unitStatusTooltip.SetRemainingDuration(duration, 0f);
+        this.remainingDuration = duration;
+        unitStatusTooltip.SetRemainingDuration(duration, 100f);
         Action<int, float> durationUpdateBlock = (remainingTime, percentComplete) => {
-            unitStatusTooltip.SetRemainingDuration(remainingTime, percentComplete);
+            this.remainingDuration = remainingTime;
+            float percentOfMaxUnitTime = (float) remainingTime / (float) maxUnitUduration;
+
+            unitStatusTooltip.SetRemainingDuration(remainingTime, percentOfMaxUnitTime);
 
             if (remainingTime == NotificationPanel.unitDurationWarning) {
                 Script.Get<NotificationPanel>().AddNotification(new NotificationItem(name.shortform + " only has " + NotificationPanel.unitDurationWarning.ToString() + "s remaining.", transform));
@@ -283,15 +293,15 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
         return unitState;
     }
 
-    public void CancelTask(bool continueRunning = true) {
+    public void CancelTask() {
         if (currentMasterTask == null) {
             return;
         }
 
+        Script.Get<GameResourceManager>().ReturnAllToEnvironment(this);
+
         StopAllCoroutines();
-        if (continueRunning) {
-            ResetTaskState();
-        }        
+        ResetTaskState();               
     }
 
     /*
@@ -349,7 +359,14 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
 
     private void Shutdown() {
         taskQueueManager.RestractTaskRequest(this);
-        CancelTask(false);
+        StopAllCoroutines();
+
+        // Put back current task
+        if (currentMasterTask != null) {
+            taskQueueManager.PutBackTask(currentMasterTask);
+        }
+
+        Script.Get<GameResourceManager>().ReturnAllToEnvironment(this);
 
         buildableComponent.SetTransparentShaders();
         buildableComponent.SetAlphaSolid();
@@ -364,7 +381,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
             Destroy(gameObject);
         };
 
-        Script.Get<TimeManager>().AddNewTimer(5, fadeOutBlock, destroyBlock, 2);
+        Script.Get<TimeManager>().AddNewTimer(3, fadeOutBlock, destroyBlock, 2);
     }
 
     /*
