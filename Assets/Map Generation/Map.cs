@@ -368,6 +368,10 @@ public class Map : ActionableItem  {
      * */
 
     public override void AssociateTask(MasterGameTask task) {
+        if (task == null) {
+            return;
+        }
+
         foreach(GameTask gameTask in task.childGameTasks) {
             UpdateMasterTaskByGameTask(gameTask, task);
         }

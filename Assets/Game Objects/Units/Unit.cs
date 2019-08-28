@@ -293,17 +293,6 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
         return unitState;
     }
 
-    public void CancelTask() {
-        if (currentMasterTask == null) {
-            return;
-        }
-
-        Script.Get<GameResourceManager>().ReturnAllToEnvironment(this);
-
-        StopAllCoroutines();
-        ResetTaskState();               
-    }
-
     /*
      * Task Pipeline
      * */
@@ -342,31 +331,24 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
         NotifyAllTaskStatus();
     }
 
-    private void ResetTaskState() {
-        currentMasterTask = null;
-        currentGameTask = null;
+    public void CancelTask() {
+        if(currentMasterTask == null) {
+            return;
+        }
 
-        gameTasksQueue.Clear();
-
-        NotifyAllTaskStatus();
-        unitStatusTooltip.SetTask(this, null);
-        unitStatusTooltip.DisplayPercentageBar(false);
-
-        taskQueueManager.RequestNextDoableTask(this, (masterGameTask) => {
-            DoTask(masterGameTask);
-        }, refuseTaskSet);
+        InterruptInProgressActions();
+        ResetTaskState();
     }
 
     private void Shutdown() {
         taskQueueManager.RestractTaskRequest(this);
-        StopAllCoroutines();
+        InterruptInProgressActions();
 
         // Put back current task
-        if (currentMasterTask != null) {
+        if(currentMasterTask != null) {
             taskQueueManager.PutBackTask(currentMasterTask);
         }
 
-        Script.Get<GameResourceManager>().ReturnAllToEnvironment(this);
 
         buildableComponent.SetTransparentShaders();
         buildableComponent.SetAlphaSolid();
@@ -382,6 +364,35 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
         };
 
         Script.Get<TimeManager>().AddNewTimer(3, fadeOutBlock, destroyBlock, 2);
+    }
+
+    // Pipeline Helpers
+
+    private void ResetTaskState() {
+        currentMasterTask = null;
+        currentGameTask = null;
+
+        gameTasksQueue.Clear();
+
+        NotifyAllTaskStatus();
+        unitStatusTooltip.SetTask(this, null);
+        unitStatusTooltip.DisplayPercentageBar(false);
+
+        taskQueueManager.RequestNextDoableTask(this, (masterGameTask) => {
+            DoTask(masterGameTask);
+        }, refuseTaskSet);
+    }
+
+    private void InterruptInProgressActions() {
+        StopAllCoroutines();
+
+        // Our current task no longer has an associated action
+        if(currentGameTask != null && currentGameTask.actionItem != null) {
+            currentGameTask.actionItem.AssociateTask(null);
+        }
+
+        // All resources we are carrying get put back
+        Script.Get<GameResourceManager>().ReturnAllToEnvironment(this);
     }
 
     /*
