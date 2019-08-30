@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public abstract class ActionableItem : MonoBehaviour, TaskStatusNotifiable {
-    public string description;
+    public abstract string description { get; }
 
     // taskAlreadyDictated is used when a task is about to be assoctaed with this object, 
     // but has not quite been associated, to let everybody know that this is taken

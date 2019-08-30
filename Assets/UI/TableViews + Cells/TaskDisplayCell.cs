@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TaskDisplayCell : MonoBehaviour, ButtonDelegate {
+public class TaskDisplayCell : MonoBehaviour, ButtonDelegate, MasterTaskUpdateDelegate {
 
     private MasterGameTask task;
 
@@ -11,6 +11,8 @@ public class TaskDisplayCell : MonoBehaviour, ButtonDelegate {
     public GameButton cancelTaskButton;
 
     public Text taskDescription;
+    public Text taskRepeatText;
+
 
     public void Awake() {
         linkToTaskButton.buttonDelegate = this;
@@ -18,10 +20,15 @@ public class TaskDisplayCell : MonoBehaviour, ButtonDelegate {
     }
 
     public void SetTask(MasterGameTask task) {
+        if(this.task != null) {
+            task.EndTaskStatusNotifications(this);
+        }
+
         this.task = task;
 
         if(task != null) {
             taskDescription.text = task.description;
+            task.RegisterForTaskStatusNotifications(this);
         } else {
             taskDescription.text = " - ";
         }
@@ -43,5 +50,19 @@ public class TaskDisplayCell : MonoBehaviour, ButtonDelegate {
 
             //taskQueueManager.DeQueueTask(task);
         }
+    }
+
+    /*
+    * MasterTaskUpdateDelegate Interface
+    * */
+
+    public void RepeatCountUpdated(MasterGameTask masterGameTask, int count) {
+        bool enabled = count > 1;        
+
+        if (taskRepeatText.gameObject.activeSelf != enabled) {
+            taskRepeatText.gameObject.SetActive(enabled);
+        }
+
+        taskRepeatText.text = "(x" + count + ")";
     }
 }

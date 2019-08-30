@@ -1,5 +1,10 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.EventSystems;
+
+public interface PlayerBehaviourUpdateDelegate {
+    void PauseStateUpdated(bool paused);
+}
 
 public class PlayerBehaviour : MonoBehaviour {
     float cameraMovementSpeed = 200;
@@ -8,6 +13,10 @@ public class PlayerBehaviour : MonoBehaviour {
     Rect UIRect;
 
     public static Color tintColor = new Color(0, 1, 1);
+
+    public bool gamePaused { get; private set; }
+
+    List<PlayerBehaviourUpdateDelegate> delegateList = new List<PlayerBehaviourUpdateDelegate>();
 
     private void Start() {
         RectTransform localRect = Tag.UIArea.GetGameObject().GetComponent<RectTransform>();
@@ -146,5 +155,34 @@ public class PlayerBehaviour : MonoBehaviour {
 
     public void JumpCameraToPosition(Vector3 position) {
         Camera.main.transform.position = position + new Vector3(0, 250, -400);
+    }
+
+    public void SetPauseState(bool paused) {
+        bool oldPausedState = gamePaused;
+        gamePaused = paused;
+
+        if (oldPausedState != gamePaused) {
+            NotifyAllPlayerBehaviourUpdate();
+        }
+    }
+
+    /*
+     PlayerBehaviourUpdateDelegate Interface
+    * */
+
+    public void RegisterForPlayerBehaviourNotifications(PlayerBehaviourUpdateDelegate notificationDelegate) {
+        delegateList.Add(notificationDelegate);
+
+        notificationDelegate.PauseStateUpdated(gamePaused);
+    }
+
+    public void EndPlayerBehaviourNotifications(PlayerBehaviourUpdateDelegate notificationDelegate) {
+        delegateList.Remove(notificationDelegate);
+    }
+
+    public void NotifyAllPlayerBehaviourUpdate() {
+        foreach(PlayerBehaviourUpdateDelegate updateDelegate in delegateList) {
+            updateDelegate.PauseStateUpdated(gamePaused);
+        }
     }
 }

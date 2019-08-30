@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 
 public class Ore : ActionableItem {
-    public string description => throw new NotImplementedException();
+    public override string description => mineralType.ToString();
 
     public Unit currentCarrier;
 

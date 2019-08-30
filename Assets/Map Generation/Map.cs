@@ -46,7 +46,7 @@ public class Map : ActionableItem  {
 
     TerraformTarget[,] terraformTargetCoordinateMap;
 
-    public string description => "The World? What should go here";
+    public override string description => "Terrain";
 
     public void InitMap(TerrainType[,] terrainData, float[,] finalHeightMap, float[,] layoutNoiseMap, float[,] groundFeaturesNoiseMap, float[,] mountainFeaturesNoiseMap, MeshData meshData) {
         Constants constants = Script.Get<Constants>();

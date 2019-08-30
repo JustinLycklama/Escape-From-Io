@@ -3,8 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class MasterAndGameTaskCell : MonoBehaviour
-{
+public class MasterAndGameTaskCell : MonoBehaviour {
     public Text taskDescription;
     //public Text unitAsigneeText;
 
@@ -31,7 +30,7 @@ public class MasterAndGameTaskCell : MonoBehaviour
             }
 
             if (gameTask != null) {
-                description += (description.Length > 0) ? " - " : "" + gameTask.description;
+                description += (description.Length > 0 && gameTask.description.Length > 0) ? " - " : "" + gameTask.description;
             }
 
             taskDescription.text = description;

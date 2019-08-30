@@ -79,6 +79,10 @@ public static class GameTaskActionTypeExtensions {
     }
 }
 
+public interface MasterTaskUpdateDelegate {
+    void RepeatCountUpdated(MasterGameTask masterGameTask, int count);
+}
+
 public class MasterGameTask {
 
     private static int gameTaskCounter = 0;
@@ -105,6 +109,8 @@ public class MasterGameTask {
 
     // If the task is set to always perform last, units will only choose this task when no others are available
     public bool alwaysPerformLast = false;
+
+    public List<MasterTaskUpdateDelegate> delegateList = new List<MasterTaskUpdateDelegate>();
 
     public MasterGameTask(ActionType actionType, string description, GameTask[] childTasks, List<MasterGameTask> blockers = null, bool alwaysPerformLast = false) {
 
@@ -221,5 +227,26 @@ public class MasterGameTask {
         }
 
         return true;
+    }
+
+    /*
+    * MasterTaskUpdateDelegate Interface
+    * */
+
+    public void RegisterForTaskStatusNotifications(MasterTaskUpdateDelegate updateDelegate) {
+        delegateList.Add(updateDelegate);
+
+        // Let the subscriber know our status immediately
+        updateDelegate.RepeatCountUpdated(this, repeatCount);
+    }
+
+    public void EndTaskStatusNotifications(MasterTaskUpdateDelegate updateDelegate) {
+        delegateList.Remove(updateDelegate);
+    }
+
+    private void NotifyAllTaskStatus() {
+        foreach(MasterTaskUpdateDelegate updateDelegate in delegateList.ToArray()) {
+            updateDelegate.RepeatCountUpdated(this, repeatCount);
+        }
     }
 }

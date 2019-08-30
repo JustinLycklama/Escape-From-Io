@@ -57,8 +57,9 @@ GameObject:
   - component: {fileID: 1831638004482001059}
   - component: {fileID: 505177442054078540}
   - component: {fileID: 4453089951655190269}
+  - component: {fileID: 1889026974231545403}
   m_Layer: 5
-  m_Name: Image
+  m_Name: PlayButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -134,6 +135,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_AspectMode: 3
   m_AspectRatio: 1
+--- !u!114 &1889026974231545403
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2527519432742803366}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: feb1dac1dfe99b74097423bf31a298df, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mouseOver: {fileID: 21300000, guid: a059fbbbdbb902f46b7d893ec53f0f3a, type: 3}
+  click: {fileID: 21300000, guid: 1a4be052c2289b34cb9183e17ae894d0, type: 3}
 --- !u!1 &4111891790033526255
 GameObject:
   m_ObjectHideFlags: 0
@@ -236,8 +251,9 @@ GameObject:
   - component: {fileID: 8142693040120494503}
   - component: {fileID: 8960581720683309746}
   - component: {fileID: 3613893969990591527}
+  - component: {fileID: 3472370149615567}
   m_Layer: 5
-  m_Name: Image
+  m_Name: SettingsButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -314,6 +330,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_AspectMode: 3
   m_AspectRatio: 1
+--- !u!114 &3472370149615567
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5031206651072399602}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: feb1dac1dfe99b74097423bf31a298df, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mouseOver: {fileID: 21300000, guid: 8237f7e1e9922d74b9cd6061f4a7e373, type: 3}
+  click: {fileID: 21300000, guid: ab3ed9fe5aa2617469576c99109ec9ca, type: 3}
 --- !u!1 &5106829036716717901
 GameObject:
   m_ObjectHideFlags: 0
@@ -326,8 +356,9 @@ GameObject:
   - component: {fileID: 6474443097967189976}
   - component: {fileID: 8617346512817351826}
   - component: {fileID: 4404188528875828421}
+  - component: {fileID: 1042396761359739416}
   m_Layer: 5
-  m_Name: Image
+  m_Name: PauseButton
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -403,6 +434,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_AspectMode: 3
   m_AspectRatio: 1
+--- !u!114 &1042396761359739416
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5106829036716717901}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: feb1dac1dfe99b74097423bf31a298df, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mouseOver: {fileID: 21300000, guid: fec94012d0843c24ebbea5f99c3058e0, type: 3}
+  click: {fileID: 21300000, guid: b1ceb9d50024dc145a220ec9aeedc343, type: 3}
 --- !u!1 &5784319653642869049
 GameObject:
   m_ObjectHideFlags: 0
@@ -503,6 +548,7 @@ GameObject:
   - component: {fileID: 9009620829887083262}
   - component: {fileID: 3266099420528752635}
   - component: {fileID: 3151789478520697162}
+  - component: {fileID: 1830315026837589242}
   m_Layer: 5
   m_Name: SettingsPanel
   m_TagString: Untagged
@@ -565,3 +611,18 @@ MonoBehaviour:
   m_ChildControlHeight: 1
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
+--- !u!114 &1830315026837589242
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7631752410298263697}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0eda5389d552a57489993743bcb2e6a7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  settingsButton: {fileID: 3472370149615567}
+  playButton: {fileID: 1889026974231545403}
+  pauseButton: {fileID: 1042396761359739416}

@@ -8,7 +8,7 @@ public interface TimeUpdateDelegate {
 }
 
 
-public class TimeManager : MonoBehaviour {
+public class TimeManager : MonoBehaviour, PlayerBehaviourUpdateDelegate {
 
     class TimeUpdateObject {
         public int totalDuration;
@@ -27,12 +27,22 @@ public class TimeManager : MonoBehaviour {
     List<TimeUpdateDelegate> delegateList = new List<TimeUpdateDelegate>();
     float globalTimer;
 
+    private bool skipTimeUpdate = false;
 
     private void Start() {
         globalTimer = Time.time;
+        Script.Get<PlayerBehaviour>().RegisterForPlayerBehaviourNotifications(this);
+    }
+
+    private void OnDestroy() {
+        Script.Get<PlayerBehaviour>().EndPlayerBehaviourNotifications(this);
     }
 
     void Update() {
+
+        if (skipTimeUpdate) {
+            return;
+        }
 
         // Interface Updates
         int oldGlobalComparison = Mathf.FloorToInt(globalTimer);
@@ -93,9 +103,11 @@ public class TimeManager : MonoBehaviour {
         delegateList.Remove(updateDelegate);
     }
 
-    //public void NotifyAllTimeUpdates() {
-    //    foreach(TimeUpdateDelegate updateDelegate in delegateList) {
-    //        updateDelegate.UpdateUserActionsAvailable(null);
-    //    }
-    //}
+    /*
+     * PlayerBehaviourUpdateDelegate Interface
+     * */
+
+    public void PauseStateUpdated(bool paused) {
+        skipTimeUpdate = paused;
+    }    
 }

@@ -77,8 +77,9 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
     [HideInInspector]
     public bool initialized { get; private set; }
 
-    // TaskQueue Reference
+    // Manager References
     TaskQueueManager taskQueueManager;
+    PlayerBehaviour playerBehaviour;
 
     // Pathfinding
     public float speed;
@@ -121,7 +122,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
      * Selectable Interface Properties
      * */
 
-    private string title;
+    public string title { get; private set; }
     public string description => title;
 
     /*
@@ -185,7 +186,8 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
         // Register
         UnitManager unitManager = Script.Get<UnitManager>();
         unitManager.RegisterUnit(this);
-        Script.Get<MapsManager>().AddTerrainUpdateDelegate(this);
+        Script.Get<MapsManager>().AddTerrainUpdateDelegate(this);    
+        playerBehaviour = Script.Get<PlayerBehaviour>();
 
         // Name
         Name name = NameSingleton.sharedInstance.GenerateName();
@@ -297,9 +299,9 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
      * Task Pipeline
      * */
 
-    System.Action<bool> completedTaskAction;
-    System.Action<bool> completedPath;
-    System.Action<WorldPosition[], ActionableItem, bool> foundWaypoints;
+    Action<bool> completedTaskAction;
+    Action<bool> completedPath;
+    Action<WorldPosition[], ActionableItem, bool> foundWaypoints;
 
     private void DoTask(MasterGameTask task) {
         currentMasterTask = task;
@@ -406,6 +408,13 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
         float speed = SpeedForTask(currentMasterTask.actionType);
 
         while (true) {
+
+            // Don't perform on pause
+            if(playerBehaviour.gamePaused) {
+                yield return null;
+                continue;
+            }
+
             float completion = currentGameTask.actionItem.performAction(currentGameTask, Time.deltaTime * speed, this);
             unitStatusTooltip.percentageBar.SetPercent(completion);
 
@@ -433,7 +442,14 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
         float degreesToTurn = (targetRotation.eulerAngles - originalRotation.eulerAngles).magnitude;
         print("Turn Degrees Magnitude " + degreesToTurn);
 
-        while(turningToStart) {           
+        while(turningToStart) {
+
+            // Don't move on pause
+            if(playerBehaviour.gamePaused) {
+                yield return null;
+                continue;
+            }
+
             if(totalTurnDistance == 1) {
                 turningToStart = false;
             } else {
@@ -450,6 +466,13 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
         float speedPercent = 1;
 
         while(followingPath) {
+
+            // Don't move on pause
+            if(playerBehaviour.gamePaused) {
+                yield return null;
+                continue;
+            }
+
             Vector2 position2D = transform.position.ToVector2();
             while(path.turnBoundaries[pathIndex].HasCrossedLine(position2D)) {
                 //print("Crossed Path Boundaries");
@@ -509,6 +532,12 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
 
 
         while(lookingAtTarget) {
+            // Don't move on pause
+            if(playerBehaviour.gamePaused) {
+                yield return null;
+                continue;
+            }
+
             if(totalTurnDistance == 1) {
                 lookingAtTarget = false;
 
@@ -601,7 +630,6 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
             updateDelegate.UpdateUserActionsAvailable(null);
         }
     }
-
 
     /*
      * Blueprints

@@ -49,7 +49,7 @@ public abstract class Building : ActionableItem, Selectable {
     public static int buildingCount = 0;
 
     string title;
-    public string description => title;
+    public override string description => title;
 
     // Building status
     private float percentComplete = 0;

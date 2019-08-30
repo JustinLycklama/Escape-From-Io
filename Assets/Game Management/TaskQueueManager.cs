@@ -29,6 +29,8 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
         Empty, Blocked, Smooth, Inefficient 
     }
 
+    PlayerBehaviour playerBehaviour;
+
     //List<MasterGameTask> taskList;
     //UIManager uiManager;
 
@@ -68,7 +70,9 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
     }
 
     private void Start() {
-        StartCoroutine(DishOutTasks());
+        playerBehaviour = Script.Get<PlayerBehaviour>();
+
+        StartCoroutine(DishOutTasks());        
 
         Script.Get<UnitManager>().RegisterForNotifications(this, MasterGameTask.ActionType.Build);
         Script.Get<UnitManager>().RegisterForNotifications(this, MasterGameTask.ActionType.Mine);
@@ -269,6 +273,13 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
         List<UnitsDistanceList> unitDistanceListList = new List<UnitsDistanceList>();
 
         while(true) {
+
+            // Don't perform on pause
+            if(playerBehaviour.gamePaused) {
+                yield return null;
+                continue;
+            }
+
             yield return new WaitForSeconds(0.5f);
 
             //float shortestDistance = float.MaxValue;

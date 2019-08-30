@@ -5,6 +5,7 @@ using UnityEngine;
 public class UnitBuilding : Building
 {
     public Unit associatedUnit;
+    public override string description => associatedUnit.title;
 
     protected override void CompleteBuilding() {
         associatedUnit.Initialize();
@@ -12,5 +13,5 @@ public class UnitBuilding : Building
 
     protected override void UpdateCompletionPercent(float percent) {
        
-    }
+    }    
 }

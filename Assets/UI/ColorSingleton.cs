@@ -21,6 +21,8 @@ public class ColorSingleton {
     public Color startDurationColor = new Color(0, 1, 0.572549f);
     public Color endDurationColor = new Color(1, 0.08551968f, 0);
 
+    public Color disabledRedColor = new Color(1, 0.1686274f, 0.0431372f);
+
     public Color GreenToRedByPercent(float percent) {
         return Color.Lerp(endDurationColor, startDurationColor, percent);
     }

@@ -12,6 +12,8 @@ public abstract class Clickable : MonoBehaviour, IPointerEnterHandler, IPointerE
     protected Sprite original;
 
     public bool buttonEnabled { get; private set; }
+    public bool hoverLock { get; private set; }
+
     private CanvasGroup canvasGroup;
 
     protected virtual void Awake() {
@@ -20,6 +22,7 @@ public abstract class Clickable : MonoBehaviour, IPointerEnterHandler, IPointerE
 
         canvasGroup = gameObject.AddComponent<CanvasGroup>();
         SetEnabled(enabled);
+        SetHoverLock(hoverLock);
     }
 
     public void SetEnabled(bool enabled) {
@@ -31,24 +34,30 @@ public abstract class Clickable : MonoBehaviour, IPointerEnterHandler, IPointerE
         }        
     }
 
+    public void SetHoverLock(bool hoverLock) {
+        this.hoverLock = hoverLock;
+
+        image.sprite = hoverLock ? mouseOver : original;
+    }
+
     public void OnPointerEnter(PointerEventData eventData) {
         if (!buttonEnabled) { return; }
         image.sprite = mouseOver;
     }
 
-    public void OnPointerExit(PointerEventData eventData) {
-        if(!buttonEnabled) { return; }
-        image.sprite = original;
-    }
-   
     public void OnPointerDown(PointerEventData eventData) {
         if(!buttonEnabled) { return; }
         image.sprite = click;
     }
 
+    public void OnPointerExit(PointerEventData eventData) {
+        if(!buttonEnabled) { return; }
+        image.sprite = hoverLock ? mouseOver : original;
+    }   
+
     public void OnPointerUp(PointerEventData eventData) {
         if(!buttonEnabled) { return; }
-        image.sprite = original;
+        image.sprite = hoverLock ? mouseOver : original; ;
     }
 
     protected abstract void DidClick();
