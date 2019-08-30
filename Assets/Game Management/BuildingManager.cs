@@ -31,13 +31,13 @@ public class BuildingManager : MonoBehaviour {
     }
 
 
-    public void BuildAt(Building building, LayoutCoordinate layoutCoordinate, BlueprintCost cost) {
+    public void BuildAt(Building building, LayoutCoordinate layoutCoordinate, BlueprintCost cost, bool asLastPriority) {
         WorldPosition worldPosition = new WorldPosition(new MapCoordinate(layoutCoordinate));
 
         building.SetCost(cost);
         building.transform.position = worldPosition.vector3;
 
-        Script.Get<GameResourceManager>().CueueGatherTasksForCost(cost, worldPosition, building);
+        Script.Get<GameResourceManager>().CueueGatherTasksForCost(cost, worldPosition, building, asLastPriority);
 
         NotifyBuildingUpdate(building, true);
     }

@@ -197,7 +197,7 @@ public class GameResourceManager : MonoBehaviour {
 
         List<Ore> oreList = unitOreDistribution[unit];
 
-        foreach(Ore ore in oreList) {
+        foreach(Ore ore in oreList.ToArray()) {
             ore.transform.SetParent(transform, true);
 
             oreList.Remove(ore);
@@ -211,7 +211,7 @@ public class GameResourceManager : MonoBehaviour {
      * Task Queue Methods
      * */
 
-    public void CueueGatherTasksForCost(BlueprintCost cost, WorldPosition depositPosition, ActionableItem actionableItem) {
+    public void CueueGatherTasksForCost(BlueprintCost cost, WorldPosition depositPosition, ActionableItem actionableItem, bool asLastPriority = false) {
 
         TaskQueueManager queue = Script.Get<TaskQueueManager>();
         List<MasterGameTask> blockingBuildTasks = new List<MasterGameTask>();
@@ -225,7 +225,7 @@ public class GameResourceManager : MonoBehaviour {
 
             GameTask dropTask = new GameTask("Deposit Ore", depositPosition, GameTask.ActionType.DropOff, actionableItem, PathRequestTargetType.PathGrid);
 
-            MasterGameTask masterCollectTask = new MasterGameTask(MasterGameTask.ActionType.Move, "Collect Ore " + mineralType.ToString(), new GameTask[] { oreTask, dropTask });
+            MasterGameTask masterCollectTask = new MasterGameTask(MasterGameTask.ActionType.Move, "Collect Ore " + mineralType.ToString(), new GameTask[] { oreTask, dropTask }, null, asLastPriority);
             masterCollectTask.repeatCount = cost.costMap[mineralType];
 
             queue.QueueTask(masterCollectTask);
@@ -233,7 +233,7 @@ public class GameResourceManager : MonoBehaviour {
         }
 
         GameTask buildTask = new GameTask("Construction", depositPosition, GameTask.ActionType.Build, actionableItem, PathRequestTargetType.PathGrid);
-        MasterGameTask masterBuildTask = new MasterGameTask(MasterGameTask.ActionType.Build, "Build " + actionableItem.description, new GameTask[] { buildTask }, blockingBuildTasks);
+        MasterGameTask masterBuildTask = new MasterGameTask(MasterGameTask.ActionType.Build, "Build " + actionableItem.description, new GameTask[] { buildTask }, blockingBuildTasks, asLastPriority);
 
         queue.QueueTask(masterBuildTask);
     }

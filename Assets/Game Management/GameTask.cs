@@ -103,7 +103,10 @@ public class MasterGameTask {
     public List<MasterGameTask> childMasterTasks;
     MasterGameTask parentMasterTask;
 
-    public MasterGameTask(ActionType actionType, string description, GameTask[] childTasks, List<MasterGameTask> blockers = null) {
+    // If the task is set to always perform last, units will only choose this task when no others are available
+    public bool alwaysPerformLast = false;
+
+    public MasterGameTask(ActionType actionType, string description, GameTask[] childTasks, List<MasterGameTask> blockers = null, bool alwaysPerformLast = false) {
 
         taskNumber = gameTaskCounter;
         gameTaskCounter++;
@@ -112,6 +115,7 @@ public class MasterGameTask {
         this.description = description;
         this.childGameTasks = new List<GameTask>();
         this.childMasterTasks = new List<MasterGameTask>();
+        this.alwaysPerformLast = alwaysPerformLast;
 
         foreach(GameTask task in childTasks) {
             this.childGameTasks.Add(task);

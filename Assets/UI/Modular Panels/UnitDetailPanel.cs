@@ -11,16 +11,16 @@ public class UnitDetailPanel : MonoBehaviour, TimeUpdateDelegate {
 
     public MasterAndGameTaskCell masterAndGameTaskCell;
 
-    TypeValueCell mineInfo;
-    TypeValueCell moveInfo;
-    TypeValueCell buildneInfo;
+    public TypeValueCell mineInfo;
+    public TypeValueCell moveInfo;
+    public TypeValueCell buildInfo;
 
     private Unit unit;
 
     private void Awake() {
         mineInfo.type.text = "Mine Speed";
-        mineInfo.type.text = "Move Speed";
-        mineInfo.type.text = "Build Speed";
+        moveInfo.type.text = "Move Speed";
+        buildInfo.type.text = "Build Speed";
     }
 
     private void Start() {
@@ -36,7 +36,9 @@ public class UnitDetailPanel : MonoBehaviour, TimeUpdateDelegate {
 
         unitTypeText.text = unit.primaryActionType.TitleAsNoun();
 
-        mineInfo.value = 
+        mineInfo.value.text = ChanceFactory.shardInstance.ChanceFromPercent(unit.SpeedForTask(MasterGameTask.ActionType.Mine)).NameAsSkill();
+        moveInfo.value.text = ChanceFactory.shardInstance.ChanceFromPercent(unit.SpeedForTask(MasterGameTask.ActionType.Move)).NameAsSkill();
+        buildInfo.value.text = ChanceFactory.shardInstance.ChanceFromPercent(unit.SpeedForTask(MasterGameTask.ActionType.Build)).NameAsSkill();
 
         UpdatePercentBar();
     }   

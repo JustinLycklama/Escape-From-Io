@@ -163,7 +163,7 @@ public class TerrainManager : MonoBehaviour {
                     buildingAction.description = "Building";
                     buildingAction.layoutCoordinate = coordinate;
 
-                    buildingAction.blueprintList = new ConstructionBlueprint[] { Building.Blueprint.Tower, Building.Blueprint.Refinery };
+                    buildingAction.blueprintList = new ConstructionBlueprint[] { Building.Blueprint.Tower, Building.Blueprint.Refinery, Building.Blueprint.StationShip };
 
                     actionList.Add(buildingAction);
                 }
@@ -174,7 +174,7 @@ public class TerrainManager : MonoBehaviour {
                 if(terraformable != null) {
                     UserAction action = new UserAction();
 
-                    action.description = "Mine Wall";
+                    action.description = "Mine " + coordinate.mapContainer.map.GetTerrainAt(coordinate).name;
                     action.layoutCoordinate = coordinate;
 
                     action.performAction = (LayoutCoordinate layoutCoordinate) => {
@@ -200,10 +200,6 @@ public class TerrainManager : MonoBehaviour {
 
         return actionList.ToArray();
     }
-
-    public static Chance ChanceFromPercent(float percent) {
-
-    }
 }
 
 [System.Serializable]
@@ -228,7 +224,50 @@ public struct RegionType {
 
 [System.Serializable]
 public enum Chance {
-    Abysmal, Low, Medium, High, AlmostGuarenteed
+    Abysmal, Low, Medium, High, VeryHigh
+}
+
+public struct ChanceTier {
+    public Vector2 valueRange;
+    public float estimatedValue;
+
+    public ChanceTier(Vector2 valueRange, float estimatedValue) {
+        this.valueRange = valueRange;
+        this.estimatedValue = estimatedValue;
+    }
+}
+
+
+public class ChanceFactory {
+
+    public static ChanceFactory shardInstance = new ChanceFactory();
+
+    public Dictionary<Chance, ChanceTier> tierMap = new Dictionary<Chance, ChanceTier>();
+
+    private ChanceFactory() {        
+        List<Chance> chanceList = System.Enum.GetValues(typeof(Chance)).Cast<Chance>().ToList();
+
+        float interval = 1f / chanceList.Count;
+        float baseline = 0;
+
+        for(int i = 0; i < chanceList.Count; i++) {
+            float tierCeil = baseline + interval;
+            tierMap.Add(chanceList[i], new ChanceTier(new Vector2(baseline, tierCeil), baseline + (interval / 2f)));
+
+            baseline = tierCeil;
+        }
+    }
+
+    public Chance ChanceFromPercent(float percent) {
+        foreach(Chance chance in tierMap.Keys) {
+            ChanceTier tier = tierMap[chance];
+            if (percent >= tier.valueRange.x && percent < tier.valueRange.y) {
+                return chance;
+            }
+        }
+
+        return Chance.VeryHigh;
+    }
 }
 
 [System.Serializable]
@@ -313,22 +352,41 @@ static class EnumExtensions {
         }
     }
 
-    public static float GetPercentage(this Chance chance) {
-        switch(chance) {
-            case Chance.Abysmal:
-                return 0.1f;
-            case Chance.Low:
-                return 0.3f;
-            case Chance.Medium:
-                return 0.5f;
-            case Chance.High:
-                return 0.7f;
-            case Chance.AlmostGuarenteed:
-                return 0.9f;
-        }
-
-        return 0;
+    public static float GetPercentage(this Chance chance) {        
+        return ChanceFactory.shardInstance.tierMap[chance].estimatedValue;
     }
 
+    public static string NameAsDifficulty(this Chance chance) {
+        switch(chance) {
+            case Chance.Abysmal:
+                return "Very Easy";
+            case Chance.Low:
+                return "Easy";
+            case Chance.Medium:
+                return "Mediocre";
+            case Chance.High:
+                return "Difficult";
+            case Chance.VeryHigh:
+                return "Very Difficult";
+        }
 
+        return "";
+    }
+
+    public static string NameAsSkill(this Chance chance) {
+        switch(chance) {
+            case Chance.Abysmal:
+                return "Very Slow";
+            case Chance.Low:
+                return "Slow";
+            case Chance.Medium:
+                return "Decent";
+            case Chance.High:
+                return "Fast";
+            case Chance.VeryHigh:
+                return "Very Fast";
+        }
+
+        return "";
+    }
 }

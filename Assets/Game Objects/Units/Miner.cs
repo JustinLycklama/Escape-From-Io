@@ -14,18 +14,16 @@ public class Miner : Unit {
         }
     }
 
-    public override float SpeedForTask(GameTask gameTask) {
-        switch(gameTask.action) {
-            case GameTask.ActionType.Build:
-                break;
-            case GameTask.ActionType.Mine:
+    public override float SpeedForTask(MasterGameTask.ActionType actionType) {
+        switch(actionType) {
+            case MasterGameTask.ActionType.Mine:
+                return 0.75f;
+            case MasterGameTask.ActionType.Build:
                 return 0.3f;
-            case GameTask.ActionType.PickUp:
-                break;
-            case GameTask.ActionType.DropOff:
-                break;
+            case MasterGameTask.ActionType.Move:
+                return 0.3f;
         }
 
-        return 0.5f;
+        return 0.1f;
     }
 }

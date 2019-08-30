@@ -269,17 +269,21 @@ public abstract class Building : ActionableItem, Selectable {
         public static Blueprint Tower = new Blueprint("Tower", typeof(Tower), "Light Tower", new BlueprintCost(1, 1, 0));
         public static Blueprint Refinery = new Blueprint("Refinery", typeof(Refinery), "Refinery", new BlueprintCost(1, 1, 1));
 
-        public Blueprint(string fileName, Type type, string label, BlueprintCost cost) : base(folder+fileName, type, label, cost) {}
+        public static Blueprint StationShip = new Blueprint("StationShip", typeof(StationShip), "Interplanetary Ship", new BlueprintCost(50, 50, 25), true);
+
+        private bool asLastPriority;
+
+        public Blueprint(string fileName, Type type, string label, BlueprintCost cost, bool asLastPriority = false) : base(folder+fileName, type, label, cost) { this.asLastPriority = asLastPriority; }
 
         public override void ConstructAt(LayoutCoordinate layoutCoordinate) {
             BuildingManager buildingManager = Script.Get<BuildingManager>();
 
             Building building = UnityEngine.Object.Instantiate(resource) as Building;
-            buildingManager.BuildAt(building, layoutCoordinate, cost);
+            buildingManager.BuildAt(building, layoutCoordinate, cost, asLastPriority);
         }
     }
 
     public static Blueprint[] Blueprints() {
-        return new Blueprint[] { Blueprint.Tower, Blueprint.Refinery };
+        return new Blueprint[] { Blueprint.Tower, Blueprint.Refinery, Blueprint.StationShip };
     }
 }

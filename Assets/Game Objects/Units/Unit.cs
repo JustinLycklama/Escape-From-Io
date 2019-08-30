@@ -108,7 +108,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
     public int remainingDuration = maxUnitUduration;
     abstract public MasterGameTask.ActionType primaryActionType { get; }
 
-    abstract public float SpeedForTask(GameTask task);
+    abstract public float SpeedForTask(MasterGameTask.ActionType actionType);
 
     public UnitBuilding buildableComponent;
 
@@ -401,9 +401,9 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
 
     protected abstract void Animate();
 
-    IEnumerator PerformTaskAction(System.Action<bool> callBack) {
+    IEnumerator PerformTaskAction(Action<bool> callBack) {
 
-        float speed = SpeedForTask(currentGameTask);
+        float speed = SpeedForTask(currentMasterTask.actionType);
 
         while (true) {
             float completion = currentGameTask.actionItem.performAction(currentGameTask, Time.deltaTime * speed, this);

@@ -239,6 +239,31 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
         }        
     }
 
+    // if lastPriorityTasks is true, only look at tasks with alwaysPerformLast as true. Otherwise, ignore these tasks.
+    private List<DistanceAndTask> tasksAndDistancesForUnit(UnitAndRefused unitAndRefused, bool lastPriorityTasks) {
+        Unit unit = unitAndRefused.unit;
+        HashSet<int> refuseTaskList = unitAndRefused.refuseTaskList;
+
+        List<DistanceAndTask> taskDistances = geAvailableTaskDistancesFromList(taskListMap[unit.primaryActionType], unit, lastPriorityTasks, refuseTaskList);
+
+        // There are no tasks available to us from our designated list, check all other open lists
+        if(taskDistances.Count == 0) {
+            foreach(MasterGameTask.ActionType actionType in new List<MasterGameTask.ActionType>() { MasterGameTask.ActionType.Move, MasterGameTask.ActionType.Build, MasterGameTask.ActionType.Mine }) {
+                if(actionType == unit.primaryActionType || taskListLockMap[actionType] == true) {
+                    continue;
+                }
+
+                taskDistances = geAvailableTaskDistancesFromList(taskListMap[actionType], unit, lastPriorityTasks, refuseTaskList);
+
+                if(taskDistances.Count > 0) {
+                    break;
+                }
+            }
+        }
+
+        return taskDistances;
+    }
+
     IEnumerator DishOutTasks() {
         HashSet<int> exhaustedTaskNumbers = new HashSet<int>();
         List<UnitsDistanceList> unitDistanceListList = new List<UnitsDistanceList>();
@@ -253,24 +278,12 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
             unitDistanceListList.Clear();
 
             foreach(UnitAndRefused unitAndRefused in unitsRequestingTasks) {
-                Unit unit = unitAndRefused.unit;
-                HashSet<int> refuseTaskList = unitAndRefused.refuseTaskList;
 
-                List<DistanceAndTask> taskDistances = geAvailableTaskDistancesFromList(taskListMap[unit.primaryActionType], unit, refuseTaskList);
-                
-                // There are no tasks available to us from our designated list, check all other open lists
+                List<DistanceAndTask> taskDistances = tasksAndDistancesForUnit(unitAndRefused, false);
+
+                // If we can't find any tasks to do, check the low priority tasks from all Action Types
                 if (taskDistances.Count == 0) {
-                    foreach(MasterGameTask.ActionType actionType in new List<MasterGameTask.ActionType>() { MasterGameTask.ActionType.Move, MasterGameTask.ActionType.Build, MasterGameTask.ActionType.Mine }) {
-                        if (actionType == unit.primaryActionType || taskListLockMap[actionType] == true) {
-                            continue;
-                        }
-
-                        taskDistances = geAvailableTaskDistancesFromList(taskListMap[actionType], unit, refuseTaskList);
-
-                        if (taskDistances.Count > 0) {
-                            break;
-                        }
-                    }                  
+                    taskDistances = tasksAndDistancesForUnit(unitAndRefused, true);
                 }
 
                 // Don't even bother if this unit can't do anything
@@ -374,13 +387,18 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
         }
     }
 
-    private List<DistanceAndTask> geAvailableTaskDistancesFromList(List<MasterGameTask> taskList, Unit unit, HashSet<int> refuseTaskList = null) {
+    private List<DistanceAndTask> geAvailableTaskDistancesFromList(List<MasterGameTask> taskList, Unit unit, bool lastPriorityTasks, HashSet<int> refuseTaskList = null) {
         //float shortestDistance = float.MaxValue;
         //MasterGameTask shortestTask = null;
 
         List<DistanceAndTask> distanceAndTasks = new List<DistanceAndTask>();
 
         foreach(MasterGameTask masterTask in taskList) {
+
+            // Skip any tasks that are not in our priority filter
+            if (masterTask.alwaysPerformLast != lastPriorityTasks) {
+                continue;
+            }
 
             if (refuseTaskList != null && refuseTaskList.Contains(masterTask.taskNumber)) {
                 continue;
