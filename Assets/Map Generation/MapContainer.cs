@@ -430,14 +430,12 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
 
                 if ((statusMap[sampleX, sampleY] & BuildingEffectStatus.Light) == BuildingEffectStatus.Light && fogOfWarMap[x, y].activeSelf) {
                     fogOfWarMap[x, y].SetActive(false);
-                    print("--");
-                    print("Activate x " + x + " y " + y + " of map " + mapX + ", " + mapY);
-                    print("From x " + sampleX + " y " + sampleY);
-                    print("--");
+                    //print("--");
+                    //print("Activate x " + x + " y " + y + " of map " + mapX + ", " + mapY);
+                    //print("From x " + sampleX + " y " + sampleY);
+                    //print("--");
 
                 }
-
-
             }
         }
     }

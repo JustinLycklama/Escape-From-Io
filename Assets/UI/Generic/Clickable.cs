@@ -20,7 +20,11 @@ public abstract class Clickable : MonoBehaviour, IPointerEnterHandler, IPointerE
         image = GetComponent<Image>();
         original = image.sprite;
 
-        canvasGroup = gameObject.AddComponent<CanvasGroup>();
+        canvasGroup = gameObject.GetComponent<CanvasGroup>();
+        if (canvasGroup == null) {
+            canvasGroup = gameObject.AddComponent<CanvasGroup>();
+        }
+        
         SetEnabled(enabled);
         SetHoverLock(hoverLock);
     }
