@@ -9,6 +9,7 @@ public class TitleController : MonoBehaviour, ButtonDelegate, CanSceneChangeDele
     public GameButton leaderboard;
     public GameButton exit;
 
+    public LeaderboardPanel leaderboardPanel;
     public FadePanel fadePanel;
 
     bool ableToSwitchScene = false;
@@ -20,6 +21,7 @@ public class TitleController : MonoBehaviour, ButtonDelegate, CanSceneChangeDele
     }
 
     private void Start() {
+        leaderboardPanel.gameObject.SetActive(false);
         fadePanel.FadeOut(false, null);
     }
 
@@ -38,7 +40,8 @@ public class TitleController : MonoBehaviour, ButtonDelegate, CanSceneChangeDele
         } else if(button == newGame) {
 
         } else if(button == leaderboard) {
-
+            leaderboardPanel.gameObject.SetActive(true);
+            gameObject.SetActive(false);
         } else if(button == exit) {
 
         }

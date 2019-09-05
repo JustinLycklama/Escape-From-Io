@@ -11,7 +11,7 @@ public class ScoreObject {
     public string test;
 }
 
-public class Highscore : MonoBehaviour {     
+public class HighscoreController : MonoBehaviour {     
     void Start() {
         PNConfiguration pnConfiguration = new PNConfiguration();
         pnConfiguration.SubscribeKey = "sub-c-705a78cc-ce95-11e9-8b24-569e8a5c3af3";
