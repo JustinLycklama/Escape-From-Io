@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -10,60 +11,80 @@ public class Narrator : MonoBehaviour
 
     Constants constants;
 
-    public List<Unit> startingUnits;
+    public List<Unit> startingUnits;    
 
     LayoutCoordinate spawnCoordinate;
 
+    Queue<Action> initActionChunks;
+
+
     void Start() {
-        grid = Tag.AStar.GetGameObject().GetComponent<PathfindingGrid>();
-        mapGenerator = Tag.MapGenerator.GetGameObject().GetComponent<MapGenerator>();
-        mapsManager = Script.Get<MapsManager>();
-        constants = GetComponent<Constants>();
+        initActionChunks = new Queue<Action>();
 
-        spawnCoordinate = mapGenerator.GenerateWorld(constants.mapCountX, constants.mapCountY);
+        initActionChunks.Enqueue(() => {
+            grid = Tag.AStar.GetGameObject().GetComponent<PathfindingGrid>();
+            mapGenerator = Tag.MapGenerator.GetGameObject().GetComponent<MapGenerator>();
+            mapsManager = Script.Get<MapsManager>();
+            constants = GetComponent<Constants>();
 
-        grid.gameObject.transform.position = mapsManager.transform.position;
-        grid.createGrid();
-        //grid.BlurPenaltyMap(4); // No blurr today!        
-
-        Script.Get<BuildingManager>().Initialize();
+            spawnCoordinate = mapGenerator.GenerateWorld(constants.mapCountX, constants.mapCountY);
+        });
 
 
-        PathGridCoordinate[][] coordinatesForSpawnCoordinate = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(spawnCoordinate);
+        initActionChunks.Enqueue(() => {
+            grid.gameObject.transform.position = mapsManager.transform.position;
+            grid.createGrid();
+            //grid.BlurPenaltyMap(4); // No blurr today!        
+        });
 
-        int i = 0;
-        foreach (Unit unit in startingUnits) {
+        initActionChunks.Enqueue(() => {
+            Script.Get<BuildingManager>().Initialize();
+        });
 
-            int horizontalComponent = 1;
-            if (i == 1) {
-                horizontalComponent = 0;
+        initActionChunks.Enqueue(() => {
+            Script.Get<BuildingManager>().Initialize();
+            PathGridCoordinate[][] coordinatesForSpawnCoordinate = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(spawnCoordinate);
+
+            int i = 0;
+            foreach(Unit unit in startingUnits) {
+
+                int horizontalComponent = 1;
+                if(i == 1) {
+                    horizontalComponent = 0;
+                }
+
+                WorldPosition worldPos = new WorldPosition(MapCoordinate.FromGridCoordinate(coordinatesForSpawnCoordinate[horizontalComponent][i]));
+                unit.transform.position = worldPos.vector3;
+                i++;
+
+                UnitBuilding unitBuilding = unit.GetComponent<UnitBuilding>();
+
+                if(unitBuilding != null) {
+                    unitBuilding.ProceedToCompleteBuilding();
+                } else {
+                    unit.Initialize();
+                }
+
             }
+        });
 
-            WorldPosition worldPos = new WorldPosition(MapCoordinate.FromGridCoordinate(coordinatesForSpawnCoordinate[horizontalComponent][i]));
-            unit.transform.position = worldPos.vector3;
-            i++;
+        initActionChunks.Enqueue(() => {
+            WorldPosition spawnWorldPosition = new WorldPosition(new MapCoordinate(spawnCoordinate));
 
-            UnitBuilding unitBuilding = unit.GetComponent<UnitBuilding>();
+            Building building = Instantiate(Building.Blueprint.Tower.resource) as Building;
+            building.transform.position = spawnWorldPosition.vector3;
 
-            if (unitBuilding != null) {
-                unitBuilding.ProceedToCompleteBuilding();
-            } else {
-                unit.Initialize();
-            }            
-        }
+            //buildingManager.BuildAt(building, spawnCoordinate, new BlueprintCost(1, 1, 1));
+            building.ProceedToCompleteBuilding();
 
-        WorldPosition spawnWorldPosition = new WorldPosition(new MapCoordinate(spawnCoordinate));
+            Camera.main.transform.position = spawnWorldPosition.vector3 + new Vector3(0, 250, -400);
+        });
 
-        Building building = Instantiate(Building.Blueprint.Tower.resource) as Building;
-        building.transform.position = spawnWorldPosition.vector3;
+        initActionChunks.Enqueue(() => {
+            Script.Get<MiniMap>().Initialize();
+        });
 
-        //buildingManager.BuildAt(building, spawnCoordinate, new BlueprintCost(1, 1, 1));
-        building.ProceedToCompleteBuilding();
-
-        Camera.main.transform.position = spawnWorldPosition.vector3 + new Vector3(0, 250, -400);
-
-        Script.Get<MiniMap>().Initialize();
-
+        StartCoroutine(InitializeScene());
 
         //NotificationPanel notificationManager = Script.Get<NotificationPanel>();
 
@@ -75,5 +96,26 @@ public class Narrator : MonoBehaviour
         //};
 
         //timeManager.AddNewTimer(20, createNotificationBlock, null);
+    }
+
+    IEnumerator InitializeScene() {
+
+        FadePanel fadePanel = Script.Get<FadePanel>();
+        fadePanel.DisplayPercentBar(true);
+
+        float percent = 0;
+        fadePanel.SetPercent(percent);
+
+        float incrementalPercent = 1f / (float) initActionChunks.Count;
+
+        while(initActionChunks.Count > 0) {
+            Action initAction = initActionChunks.Dequeue();
+            initAction();
+
+            fadePanel.SetPercent(percent += incrementalPercent);
+            yield return null;
+        }
+
+        fadePanel.FadeOut(false, null);
     }
 }

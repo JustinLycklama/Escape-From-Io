@@ -17,7 +17,7 @@ public class RandomShipGenerator : MonoBehaviour {
     private const float speed = 450f;
     private const float rotationSpeed = 0.25f;
 
-    private List<bool> shouldRotate = new List<bool> { false, false, false, false, false, false, true, false, true, true, true, true, false };
+    private List<bool> shouldRotate = new List<bool> { false, false, false, false, false, false, false, false, false, true, true, true, false };
 
     void Awake() {
         random = new System.Random(Guid.NewGuid().GetHashCode());
@@ -62,8 +62,6 @@ public class RandomShipGenerator : MonoBehaviour {
 
             currentDemoShip.transform.Translate(distance, Space.Self);
             currentDemoShip.transform.Rotate(0, 0, rotationSpeed * (currentRotate ? 1 : 0));
-
-            print(distance);
 
             float newDistance = Vector3.Distance(currentDemoShip.transform.position, endPos.position);
 

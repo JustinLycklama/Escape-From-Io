@@ -39,6 +39,7 @@ public class Tag {
     public static Tag MiniMap { get { return new Tag("MiniMap"); } }
     public static Tag BuildingManager { get { return new Tag("BuildingManager"); } }
     public static Tag NotificationManager {  get { return new Tag("NotificationManager"); } }
+    public static Tag FadePanel { get { return new Tag("FadePanel"); } }
 
     public GameObject GetGameObject() {
         GameObject cachedObject;
@@ -80,10 +81,10 @@ public class Script {
     public static Script BuildingManager { get { return new Script(Tag.BuildingManager, typeof(BuildingManager)); } }
     public static Script TimeManager { get { return new Script(Tag.Narrator, typeof(TimeManager)); } }
     public static Script NotificationManager { get { return new Script(Tag.NotificationManager, typeof(NotificationPanel)); } }
-
+    public static Script FadePanel { get { return new Script(Tag.FadePanel, typeof(FadePanel)); } }
 
     public static Script[] allScripts = new Script[] { Constants, PlayerBehaviour, MapsManager, UIManager, TaskQueue, MapGenerator, PathfindingGrid,
-        SelectionManager, UnitManager, TextureGenerator, TerrainManager, ResourceManager, MiniMap, BuildingManager, TimeManager, NotificationManager}; 
+        SelectionManager, UnitManager, TextureGenerator, TerrainManager, ResourceManager, MiniMap, BuildingManager, TimeManager, NotificationManager, FadePanel}; 
 
     public static T Get<T> () where T : Component {
 

@@ -81,7 +81,7 @@ public class Highscore : MonoBehaviour {
 
         pubnub.SubscribeCallback += (sender, e) => {
 
-            print("callback");
+            //print("callback");
 
             SubscribeEventEventArgs mea = e as SubscribeEventEventArgs;
             if(mea.Status != null) {
