@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public interface TerrainUpdateDelegate {
-    void NotifyTerrainUpdate();
+    void NotifyTerrainUpdate(LayoutCoordinate layoutCoordinate);
 }
 
 public class MapsManager : MonoBehaviour {
@@ -143,10 +143,10 @@ public class MapsManager : MonoBehaviour {
         terrainUpdateDelegates.Remove(updateDelegate);
     }
 
-    public void NotifyTerrainUpdateDelegates() {
+    public void NotifyTerrainUpdateDelegates(LayoutCoordinate layoutCoordinate) {
         // Notify all users of path finding grid about ubdate
         foreach(TerrainUpdateDelegate updateDelegate in terrainUpdateDelegates) {
-            updateDelegate.NotifyTerrainUpdate();
+            updateDelegate.NotifyTerrainUpdate(layoutCoordinate);
         }
     }
 

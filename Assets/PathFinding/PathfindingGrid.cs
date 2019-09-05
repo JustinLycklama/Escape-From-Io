@@ -4,7 +4,7 @@ using UnityEngine;
 
 using UnityEditor; // handles
 
-public class PathfindingGrid : MonoBehaviour {
+public class PathfindingGrid : MonoBehaviour, TerrainUpdateDelegate {
 
     Constants constants;
 
@@ -43,6 +43,10 @@ public class PathfindingGrid : MonoBehaviour {
         //}       
     }
 
+    private void OnDestroy() {
+        Script.Get<MapsManager>().RemoveTerrainUpdateDelegate(this);
+    }
+
     public int maxSize {
         get {
             return gridSizeX * gridSizeY;
@@ -62,6 +66,7 @@ public class PathfindingGrid : MonoBehaviour {
     const int maxPenalty = 100;
     public void createGrid() {
         grid = new Node[gridSizeX, gridSizeY];
+        MapsManager mapsManager = Script.Get<MapsManager>();
 
         for(int x = 0; x < gridSizeX; x++) {
             for(int y = 0; y < gridSizeY; y++) {
@@ -72,7 +77,7 @@ public class PathfindingGrid : MonoBehaviour {
                 WorldPosition worldPosition = new WorldPosition(mapCoordinate);
 
                 LayoutCoordinate layoutCoordinate = new LayoutCoordinate(mapCoordinate);                
-                TerrainType terrain = Script.Get<MapsManager>().GetTerrainAt(layoutCoordinate);
+                TerrainType terrain = mapsManager.GetTerrainAt(layoutCoordinate);
 
                 int penalty = Mathf.FloorToInt(maxPenalty + (maxPenalty / 2.0f));
 
@@ -83,6 +88,8 @@ public class PathfindingGrid : MonoBehaviour {
                 grid[x, y] = new Node(terrain.walkable, worldPosition, x, y, penalty);
             }
         }
+
+        mapsManager.AddTerrainUpdateDelegate(this);
     }
 
     public void BlurPenaltyMap(int blurSize) {
@@ -237,6 +244,30 @@ public class PathfindingGrid : MonoBehaviour {
                 Gizmos.DrawCube(n.worldPosition.vector3, Vector3.one *cubeDiameter);
                 //Handles.Label(n.worldPosition.vector3, n.gridX + ", " + n.gridY);
                 //Handles.Label(n.worldPosition.vector3, "G: " + n.gCost + " H: " + n.hCost + "\n   F: " + n.fCost);
+            }
+        }
+    }
+
+    /*
+     * TerrainUpdateDelegate Interface
+     * */
+
+    public void NotifyTerrainUpdate(LayoutCoordinate layoutCoordinate) {
+        MapsManager mapsManager = Script.Get<MapsManager>();
+        TerrainType terrain = mapsManager.GetTerrainAt(layoutCoordinate);
+
+        int penalty = Mathf.FloorToInt(maxPenalty + (maxPenalty / 2.0f));
+
+        if(terrain.walkable) {
+            penalty = Mathf.FloorToInt((1 - terrain.walkSpeedMultiplier) * maxPenalty);
+        }
+
+        MapCoordinate mapCoordinate = new MapCoordinate(layoutCoordinate);
+        PathGridCoordinate[][] pathGridCoordinates = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(layoutCoordinate);
+
+        foreach(PathGridCoordinate[] coordinates in pathGridCoordinates) {
+            foreach(PathGridCoordinate coordinate in coordinates) {
+                grid[coordinate.xLowSample, coordinate.yLowSample].movementPenalty = penalty;
             }
         }
     }

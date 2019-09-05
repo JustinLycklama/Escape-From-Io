@@ -562,7 +562,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
      * TerrainUpdateDelegate Interface
      * */
 
-    public void NotifyTerrainUpdate() {
+    public void NotifyTerrainUpdate(LayoutCoordinate layoutCoordinate) {
         refuseTaskSet.Clear();
 
         if (currentMasterTask != null && navigatingToTask == true && currentGameTask.target.vector3 != this.transform.position) {

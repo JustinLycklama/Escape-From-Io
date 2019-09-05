@@ -289,7 +289,7 @@ public class Map : ActionableItem  {
             Script.Get<PathfindingGrid>().UpdateGrid(this, terraformTarget.coordinate);
 
             // Notify all users of path finding grid about ubdate
-            Script.Get<MapsManager>().NotifyTerrainUpdateDelegates();
+            Script.Get<MapsManager>().NotifyTerrainUpdateDelegates(coordinate);
 
             // Create Ore at location
 
