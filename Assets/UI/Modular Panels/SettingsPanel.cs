@@ -7,7 +7,11 @@ public class SettingsPanel : MonoBehaviour, PlayerBehaviourUpdateDelegate, Butto
     public GameButton playButton;
     public GameButton pauseButton;
 
+    public MenuWindow menuWindow;
+
     private PlayerBehaviour playerBehaviour;
+    private bool lastPausedState = false;
+
 
     private void Awake() {
         settingsButton.buttonDelegate = this;
@@ -20,10 +24,19 @@ public class SettingsPanel : MonoBehaviour, PlayerBehaviourUpdateDelegate, Butto
 
         playerBehaviour.RegisterForPlayerBehaviourNotifications(this);
         playerBehaviour.SetPauseState(false);
+
+        menuWindow.gameObject.SetActive(false);
     }
 
     private void OnDestroy() {
-        playerBehaviour.EndPlayerBehaviourNotifications(this);
+        try {
+            playerBehaviour.EndPlayerBehaviourNotifications(this);
+        } catch(System.NullReferenceException e) { }
+    }
+
+    public void CloseWindows() {
+        menuWindow.gameObject.SetActive(false);
+        playerBehaviour.SetPauseState(lastPausedState);
     }
 
     /*
@@ -32,7 +45,9 @@ public class SettingsPanel : MonoBehaviour, PlayerBehaviourUpdateDelegate, Butto
 
     public void ButtonDidClick(GameButton button) {
         if(button == settingsButton) {
-
+            lastPausedState = playerBehaviour.gamePaused;
+            playerBehaviour.SetPauseState(true);
+            menuWindow.gameObject.SetActive(true);
         } else if(button == playButton) {
             playerBehaviour.SetPauseState(false);
         } else if(button == pauseButton) {

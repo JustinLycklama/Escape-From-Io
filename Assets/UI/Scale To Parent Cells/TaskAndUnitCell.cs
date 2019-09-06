@@ -36,9 +36,11 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
     }
 
     private void OnDestroy() {
-        Script.Get<TaskQueueManager>().EndNotifications(this, actionType);
-        Script.Get<UnitManager>().EndNotifications(this, actionType);
-        Script.Get<TimeManager>().EndTimeUpdateNotifications(this);
+        try {
+            Script.Get<TaskQueueManager>().EndNotifications(this, actionType);
+            Script.Get<UnitManager>().EndNotifications(this, actionType);
+            Script.Get<TimeManager>().EndTimeUpdateNotifications(this);
+        } catch(System.NullReferenceException e) { }
     }
 
     /*

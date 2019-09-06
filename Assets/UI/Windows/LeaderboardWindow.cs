@@ -2,11 +2,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LeaderboardPanel : MonoBehaviour, ButtonDelegate {
+public class LeaderboardWindow : MonoBehaviour, ButtonDelegate {
     public GameButton closeButton;
     public GameButton replayButton;
 
-    public TitleController titleController;
+    public TitleWindow titleController;
 
     private void Awake() {
         closeButton.buttonDelegate = this;

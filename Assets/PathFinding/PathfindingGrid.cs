@@ -44,7 +44,9 @@ public class PathfindingGrid : MonoBehaviour, TerrainUpdateDelegate {
     }
 
     private void OnDestroy() {
-        Script.Get<MapsManager>().RemoveTerrainUpdateDelegate(this);
+        try {
+            Script.Get<MapsManager>().RemoveTerrainUpdateDelegate(this);
+        } catch(System.NullReferenceException e) { }
     }
 
     public int maxSize {

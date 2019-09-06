@@ -28,7 +28,9 @@ public class UnitDetailPanel : MonoBehaviour, TimeUpdateDelegate {
     }
 
     private void OnDestroy() {
-        Script.Get<TimeManager>().EndTimeUpdateNotifications(this);
+        try {
+            Script.Get<TimeManager>().EndTimeUpdateNotifications(this);
+        } catch(System.NullReferenceException e) { }
     }
 
     public void SetUnit(Unit unit) {

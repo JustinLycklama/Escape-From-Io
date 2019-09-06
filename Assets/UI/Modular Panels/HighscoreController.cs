@@ -87,7 +87,7 @@ public class HighscoreController : MonoBehaviour {
             if(mea.Status != null) {
             }
             if(mea.MessageResult != null) {
-                Dictionary<string, object> msg = mea.MessageResult.Payload as Dictionary<string, object>;
+               /* Dictionary<string, object> msg = mea.MessageResult.Payload as Dictionary<string, object>;
                 string[] strArr = msg["username"] as string[];
                 string[] strScores = msg["score"] as string[];
                 int usernamevar = 1;
@@ -103,7 +103,7 @@ public class HighscoreController : MonoBehaviour {
                     GameObject.Find(scoreobject).GetComponent<Text>().text = "Score: " + score.ToString();
                     scorevar++;
                     Debug.Log(score);
-                }
+                }*/
             }
             if(mea.PresenceEventResult != null) {
                 Debug.Log("In Example, SusbcribeCallback in presence" + mea.PresenceEventResult.Channel + mea.PresenceEventResult.Occupancy + mea.PresenceEventResult.Event);

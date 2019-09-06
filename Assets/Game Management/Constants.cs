@@ -52,6 +52,20 @@ public class Tag {
 
         return cachedObject;
     }
+
+    public static void ClearCache() {
+        objectCache.Clear();
+    }
+
+    public override int GetHashCode() {
+        if(Value == null) return 0;
+        return Value.GetHashCode();
+    }
+
+    public override bool Equals(object obj) {
+        Tag other = obj as Tag;
+        return other != null && other.Value == this.Value;
+    }
 }
 
 public class Script {
@@ -105,17 +119,34 @@ public class Script {
     }
 
     public T GetFromObject<T>() where T : Component {
-        GameObject gameObject = tag.GetGameObject();
 
         Component component;
         if (componentCache.ContainsKey(this)) {
             component = componentCache[this];
-        } else {  
+        } else {
+            GameObject gameObject = tag.GetGameObject();
+            if (gameObject == null) { return null;  }
+
             component = gameObject.GetComponent<T>();
             componentCache[this] = component;
         }
 
         return (T)component;
+    }
+
+    public static void ClearCache() {
+        scriptCache.Clear();
+        componentCache.Clear();
+    }
+
+    public override int GetHashCode() {
+        if(type == null) return 0;
+        return type.GetHashCode();
+    }
+
+    public override bool Equals(object obj) {
+        Script other = obj as Script;
+        return other != null && other.type == this.type;
     }
 }
 

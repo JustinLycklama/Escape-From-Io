@@ -8,11 +8,9 @@ public class TerrainDetailPanel : MonoBehaviour {
 
     public TypeValueCell[] mineralTypeValues;
 
-    MineralType[] mineralTypes;
+    MineralType[] mineralTypes = new MineralType[] { MineralType.Copper, MineralType.Silver, MineralType.Gold };
 
-    private void Start() {
-
-        mineralTypes = new MineralType[] { MineralType.Copper, MineralType.Silver, MineralType.Gold };
+    private void Start() {      
        
         for(int i = 0; i < mineralTypes.Length; i++) {
             MineralType mineralType = mineralTypes[i];

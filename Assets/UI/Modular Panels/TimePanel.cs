@@ -24,8 +24,10 @@ public class TimePanel : MonoBehaviour, TimeUpdateDelegate, PlayerBehaviourUpdat
     }
 
     private void OnDestroy() {
-        Script.Get<TimeManager>().EndTimeUpdateNotifications(this);
-        Script.Get<PlayerBehaviour>().EndPlayerBehaviourNotifications(this);
+        try {
+            Script.Get<TimeManager>().EndTimeUpdateNotifications(this);
+            Script.Get<PlayerBehaviour>().EndPlayerBehaviourNotifications(this);
+        } catch(System.NullReferenceException e) { }
     }
 
     private void DisplayTime() {

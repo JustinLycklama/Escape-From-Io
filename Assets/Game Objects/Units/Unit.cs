@@ -177,7 +177,9 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
     }
 
     private void OnDestroy() {
-        Script.Get<MapsManager>().RemoveTerrainUpdateDelegate(this);
+        try {
+            Script.Get<MapsManager>().RemoveTerrainUpdateDelegate(this);
+        } catch(System.NullReferenceException e) { }
     }
 
     public void Initialize() {

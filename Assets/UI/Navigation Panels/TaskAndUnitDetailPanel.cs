@@ -43,8 +43,10 @@ public class TaskAndUnitDetailPanel : NavigationPanel, TaskQueueDelegate, UnitMa
     }
 
     private void OnDestroy() {
-        Script.Get<TaskQueueManager>().EndNotifications(this, actionType);
-        Script.Get<UnitManager>().EndNotifications(this, actionType);
+        try {
+            Script.Get<TaskQueueManager>().EndNotifications(this, actionType);
+            Script.Get<UnitManager>().EndNotifications(this, actionType);
+        } catch(System.NullReferenceException e) { }    
     }
 
     /*

@@ -3,13 +3,13 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TitleController : MonoBehaviour, ButtonDelegate, CanSceneChangeDelegate {
+public class TitleWindow : MonoBehaviour, ButtonDelegate, CanSceneChangeDelegate {
     public GameButton tutorial;
     public GameButton newGame;
     public GameButton leaderboard;
     public GameButton exit;
 
-    public LeaderboardPanel leaderboardPanel;
+    public LeaderboardWindow leaderboardPanel;
     public FadePanel fadePanel;
 
     bool ableToSwitchScene = false;

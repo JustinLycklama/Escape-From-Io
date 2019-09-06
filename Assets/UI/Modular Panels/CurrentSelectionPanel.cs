@@ -30,7 +30,9 @@ public class CurrentSelectionPanel : MonoBehaviour, SelectionManagerDelegate, Ta
     }
 
     private void OnDestroy() {
-        Script.Get<SelectionManager>().EndNotifications(this);
+        try {
+            Script.Get<SelectionManager>().EndNotifications(this);
+        } catch(System.NullReferenceException e) { }
     }
 
     private void SetActiveDetail(MonoBehaviour activePanel) {

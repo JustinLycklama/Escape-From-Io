@@ -28,7 +28,9 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
     }
 
     private void OnDestroy() {
-        Script.Get<SelectionManager>().EndNotifications(this);
+        try {
+            Script.Get<SelectionManager>().EndNotifications(this);
+        } catch(System.NullReferenceException e) {}
     }
 
     public void SetMapPosition(int mapX, int mapY, Rect mapRect) {

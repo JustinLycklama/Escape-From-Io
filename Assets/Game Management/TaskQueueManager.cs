@@ -80,9 +80,11 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
     }
 
     private void OnDestroy() {
-        Script.Get<UnitManager>().EndNotifications(this, MasterGameTask.ActionType.Build);
-        Script.Get<UnitManager>().EndNotifications(this, MasterGameTask.ActionType.Mine);
-        Script.Get<UnitManager>().EndNotifications(this, MasterGameTask.ActionType.Move);
+        try {
+            Script.Get<UnitManager>().EndNotifications(this, MasterGameTask.ActionType.Build);
+            Script.Get<UnitManager>().EndNotifications(this, MasterGameTask.ActionType.Mine);
+            Script.Get<UnitManager>().EndNotifications(this, MasterGameTask.ActionType.Move);
+        } catch(System.NullReferenceException e) { }
     }
 
     public void RegisterForNotifications(TaskQueueDelegate notificationDelegate, MasterGameTask.ActionType ofType) {

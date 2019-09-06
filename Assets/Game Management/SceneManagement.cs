@@ -1,10 +1,15 @@
 ﻿using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public interface CanSceneChangeDelegate {
     bool CanWeSwitchScene();
+}
+
+public interface SceneChangeListener {
+    void WillSwitchScene();
 }
 
 public class SceneManagement {
@@ -26,6 +31,12 @@ public class SceneManagement {
     public State state { get; private set; } = State.Title;
     public TimeSpan? score { get; private set; } = null;
 
+    private List<SceneChangeListener> delegateList = new List<SceneChangeListener>();
+
+    SceneManagement() {
+        SceneManager.sceneUnloaded += OnSceneUnloaded;
+    }
+
     public void ChangeScene(State state, Action<float> percentUpdated, Action complete, CanSceneChangeDelegate canChangeDelegate, TimeSpan? score = null) {
         this.state = state;
         this.score = score;
@@ -44,6 +55,31 @@ public class SceneManagement {
         }
 
         SceneLoadHandler.sharedInstance.ChangeScene(scene, percentUpdated, complete, canChangeDelegate);
+    }
+
+    private void OnSceneUnloaded(Scene current) {
+        Tag.ClearCache();
+        Script.ClearCache();
+
+        NotifySceneListeners();
+    }
+
+    /*
+     * SceneChangeListener Interface
+     * */
+
+    public void RegisterForSceneUpdates(SceneChangeListener listenerDelegate) {
+        delegateList.Add(listenerDelegate);
+    }
+
+    public void EndSceneUpdates(SceneChangeListener listenerDelegate) {
+        delegateList.Remove(listenerDelegate);
+    }
+
+    public void NotifySceneListeners() {
+        foreach(SceneChangeListener listener in delegateList) {
+            listener.WillSwitchScene();
+        }
     }
 }
 
