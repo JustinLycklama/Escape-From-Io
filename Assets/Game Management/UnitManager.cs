@@ -14,7 +14,23 @@ public class UnitManager : MonoBehaviour, TaskStatusUpdateDelegate {
 
     Dictionary<MasterGameTask.ActionType, Unit.UnitState> unitListStateMap;
 
+    public static Dictionary<MasterGameTask.ActionType, int> backingUnitCount;
+    public static Dictionary<MasterGameTask.ActionType, int> unitCount {
+        get {
+            if (backingUnitCount == null) {
+                backingUnitCount = new Dictionary<MasterGameTask.ActionType, int>();
+
+                unitCount[MasterGameTask.ActionType.Build] = 0;
+                unitCount[MasterGameTask.ActionType.Mine] = 0;
+                unitCount[MasterGameTask.ActionType.Move] = 0;
+            }
+
+            return backingUnitCount;
+        }
+    }
+
     void Awake() {
+
         unitListMap = new Dictionary<MasterGameTask.ActionType, List<Unit>>();
         delegateListMap = new Dictionary<MasterGameTask.ActionType, List<UnitManagerDelegate>>();
 
@@ -26,6 +42,14 @@ public class UnitManager : MonoBehaviour, TaskStatusUpdateDelegate {
 
             unitListStateMap[actionType] = Unit.UnitState.Idle;
         }
+    }
+
+    private void Start() {
+        SceneManagement.sharedInstance.sceneChangeEvent += () => {
+            unitCount[MasterGameTask.ActionType.Build] = 0;
+            unitCount[MasterGameTask.ActionType.Mine] = 0;
+            unitCount[MasterGameTask.ActionType.Move] = 0;
+        };
     }
 
     public Unit[] GetUnitsOfType(MasterGameTask.ActionType type) {

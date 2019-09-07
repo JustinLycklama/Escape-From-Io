@@ -33,6 +33,9 @@ public class SceneManagement {
 
     private List<SceneChangeListener> delegateList = new List<SceneChangeListener>();
 
+    // Experimental Dup of SceneChangeListener
+    public UnityEngine.Events.UnityAction sceneChangeEvent;
+
     SceneManagement() {
         SceneManager.sceneUnloaded += OnSceneUnloaded;
     }
@@ -61,6 +64,7 @@ public class SceneManagement {
         Tag.ClearCache();
         Script.ClearCache();
 
+        sceneChangeEvent.Invoke();
         NotifySceneListeners();
     }
 

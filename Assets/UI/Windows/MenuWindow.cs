@@ -19,6 +19,8 @@ public class MenuWindow : MonoBehaviour, ButtonDelegate, CanSceneChangeDelegate 
         foreach(GameButton button in new GameButton[] { continueButton, restartButton, helpButton, quitButton }) {
             button.buttonDelegate = this;
         }
+
+        helpButton.SetEnabled(false);
     }
         
    /*

@@ -3,8 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Narrator : MonoBehaviour
-{
+public class Narrator : MonoBehaviour, CanSceneChangeDelegate {
     PathfindingGrid grid;
     MapGenerator mapGenerator;
     MapsManager mapsManager;
@@ -17,6 +16,7 @@ public class Narrator : MonoBehaviour
 
     Queue<Action> initActionChunks;
 
+    private bool canSceneChange = false;
 
     void Start() {
         initActionChunks = new Queue<Action>();
@@ -77,11 +77,12 @@ public class Narrator : MonoBehaviour
             //buildingManager.BuildAt(building, spawnCoordinate, new BlueprintCost(1, 1, 1));
             building.ProceedToCompleteBuilding();
 
-            Camera.main.transform.position = spawnWorldPosition.vector3 + new Vector3(0, 250, -400);
+            Script.Get<PlayerBehaviour>().JumpCameraToPosition(spawnWorldPosition.vector3);
         });
 
         initActionChunks.Enqueue(() => {
             Script.Get<MiniMap>().Initialize();
+            StartCoroutine(CheckForNoRobots());
         });
 
         StartCoroutine(InitializeScene());
@@ -96,6 +97,27 @@ public class Narrator : MonoBehaviour
         //};
 
         //timeManager.AddNewTimer(20, createNotificationBlock, null);
+    }
+
+    private void EndGameFailure() {
+        MessageWindow messageWindow = UIManager.Blueprint.MessageWindow.Instantiate() as MessageWindow;
+
+        Action okay = () => {
+            FadePanel panel = Tag.FadePanel.GetGameObject().GetComponent<FadePanel>();
+
+            Action completed = () => {
+                canSceneChange = true;
+            };
+
+            panel.FadeOut(true, completed);
+            SceneManagement.sharedInstance.ChangeScene(SceneManagement.State.GameFinish, null, null, this, null);
+        };
+
+
+        messageWindow.SetTitleAndText("GAME OVER", "No robots remain to fulfill your goals.\nYou remain trapped on Io...");
+        messageWindow.SetSingleAction(okay, "Continue");
+
+        messageWindow.Display();
     }
 
     IEnumerator InitializeScene() {
@@ -117,5 +139,33 @@ public class Narrator : MonoBehaviour
         }
 
         fadePanel.FadeOut(false, null);
+    }
+
+    IEnumerator CheckForNoRobots() {
+        UnitManager unitManager = Script.Get<UnitManager>();
+
+        while(true) {
+
+            if (unitManager.GetUnitsOfType(MasterGameTask.ActionType.Build).Length == 0 &&
+                unitManager.GetUnitsOfType(MasterGameTask.ActionType.Mine).Length == 0 &&
+                unitManager.GetUnitsOfType(MasterGameTask.ActionType.Move).Length == 0) {
+
+                Script.Get<PlayerBehaviour>().SetPauseState(true);
+                yield return new WaitForSeconds(2);
+
+                EndGameFailure();
+                yield break;
+            }
+
+            yield return new WaitForSeconds(1);
+        }
+    }
+
+    /*
+     * CanSceneChangeDelegate Interface
+     * */
+
+    public bool CanWeSwitchScene() {
+        return canSceneChange;
     }
 }

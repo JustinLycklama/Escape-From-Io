@@ -15,6 +15,7 @@ public class PlayerBehaviour : MonoBehaviour {
     public static Color tintColor = new Color(0, 1, 1);
 
     public bool gamePaused { get; private set; }
+    private bool lastPausedState = false;
 
     List<PlayerBehaviourUpdateDelegate> delegateList = new List<PlayerBehaviourUpdateDelegate>();
 
@@ -154,7 +155,16 @@ public class PlayerBehaviour : MonoBehaviour {
     }
 
     public void JumpCameraToPosition(Vector3 position) {
-        Camera.main.transform.position = position + new Vector3(0, 250, -400);
+        Camera.main.transform.position = position + new Vector3(0, 250, -250);
+    }
+
+    public void SetMenuPause(bool paused) {
+        if (paused) {
+            lastPausedState = gamePaused;
+            SetPauseState(true);
+        } else {
+            SetPauseState(lastPausedState);
+        }
     }
 
     public void SetPauseState(bool paused) {

@@ -23,6 +23,8 @@ public class TitleWindow : MonoBehaviour, ButtonDelegate, CanSceneChangeDelegate
     private void Start() {
         leaderboardPanel.gameObject.SetActive(false);
         fadePanel.FadeOut(false, null);
+
+        tutorial.SetEnabled(false);
     }
 
     /*
@@ -35,15 +37,15 @@ public class TitleWindow : MonoBehaviour, ButtonDelegate, CanSceneChangeDelegate
         };
 
         if(button == tutorial) {
+       
+        } else if(button == newGame) {
             fadePanel.FadeOut(true, completeTransition);
             SceneManagement.sharedInstance.ChangeScene(SceneManagement.State.Tutorial, null, null, this);
-        } else if(button == newGame) {
-
         } else if(button == leaderboard) {
             leaderboardPanel.gameObject.SetActive(true);
             gameObject.SetActive(false);
         } else if(button == exit) {
-
+            Application.Quit();
         }
     }
 

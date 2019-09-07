@@ -204,7 +204,9 @@ public class PathfindingGrid : MonoBehaviour, TerrainUpdateDelegate {
     }
 
     void OnDrawGizmos() {
-        Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();
+        Constants constants = Script.Get<Constants>();
+
+        if (constants == null) { return;  }
 
         float cubeDiameter = constants.layoutMapWidth / 3.5f;
         if(grid != null && displayGridGizmos && Script.Get<MapsManager>().mapContainers.Count > 0) {

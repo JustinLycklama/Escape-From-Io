@@ -71,8 +71,6 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
         Idle, Efficient, Inefficient
     }
 
-    public static Dictionary<MasterGameTask.ActionType, int> unitCount = new Dictionary<MasterGameTask.ActionType, int>();
-
     // Initialization
     [HideInInspector]
     public bool initialized { get; private set; }
@@ -154,12 +152,8 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
     private void Awake() {
         initialized = false;
 
-        unitCount[MasterGameTask.ActionType.Build] = 0;
-        unitCount[MasterGameTask.ActionType.Mine] = 0;
-        unitCount[MasterGameTask.ActionType.Move] = 0;
-
-        title = primaryActionType.TitleAsNoun() + " #" + unitCount[primaryActionType].ToString();
-        unitCount[primaryActionType] = unitCount[primaryActionType] + 1;
+        title = primaryActionType.TitleAsNoun() + " #" + UnitManager.unitCount[primaryActionType].ToString();
+        UnitManager.unitCount[primaryActionType]++;
 
         gameTasksQueue = new Queue<GameTask>();
         refuseTaskSet = new HashSet<int>();
@@ -202,7 +196,6 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
 
         // Duration
         this.remainingDuration = duration;
-        unitStatusTooltip.SetRemainingDuration(duration, 100f);
         Action<int, float> durationUpdateBlock = (remainingTime, percentComplete) => {
             this.remainingDuration = remainingTime;
             float percentOfMaxUnitTime = (float) remainingTime / (float) maxUnitUduration;
