@@ -1,10 +1,11 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Linq;
 
 public class TabController : MonoBehaviour, ButtonDelegate {
-
 
     public GameButton prototypeButton;
     //public Text prototypeText;
@@ -12,7 +13,7 @@ public class TabController : MonoBehaviour, ButtonDelegate {
     public GameObject detailPane;
     public HorizontalLayoutGroup tabButtonLayout;
 
-    public List<TabElement> tabs; 
+    public List<TabElement> tabs;    
 
     private Dictionary<GameButton, TabElement> tabButtonsMap;
 
@@ -21,6 +22,10 @@ public class TabController : MonoBehaviour, ButtonDelegate {
 
         GameButton first = null;
         foreach(TabElement tab in tabs) {
+            //obj.transform.SetParent(null);
+            tab.transform.SetParent(detailPane.transform, false);
+            tab.gameObject.SetActive(false);
+
             GameButton newButton = Instantiate(prototypeButton);
             Text newText = newButton.GetComponentInChildren<Text>();
 
@@ -32,7 +37,7 @@ public class TabController : MonoBehaviour, ButtonDelegate {
 
             tabButtonsMap[newButton] = tab;
 
-            if (first == null) {
+            if(first == null) {
                 first = newButton;
             }
         }
@@ -48,9 +53,13 @@ public class TabController : MonoBehaviour, ButtonDelegate {
     public void ButtonDidClick(GameButton selectedButton) {
         foreach(GameButton button in tabButtonsMap.Keys) {
             button.SetHoverLock(false);
+
+            if (tabButtonsMap[button].gameObject.activeSelf != false) {
+                tabButtonsMap[button].gameObject.SetActive(false);
+            }
         }
 
         selectedButton.SetHoverLock(true);
-
+        tabButtonsMap[selectedButton].gameObject.SetActive(true);
     }
 }

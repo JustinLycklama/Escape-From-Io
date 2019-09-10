@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MenuWindow : MonoBehaviour, ButtonDelegate, CanSceneChangeDelegate {
+public class MenuWindow : MonoBehaviour, ButtonDelegate, CanSceneChangeDelegate, HelpPresenter {
     public GameButton continueButton;
     public GameButton restartButton;
     public GameButton helpButton;
@@ -12,6 +12,7 @@ public class MenuWindow : MonoBehaviour, ButtonDelegate, CanSceneChangeDelegate 
     public FadePanel fadePanel;
     public SettingsPanel settingsPanel;
 
+    public HelpWindow helpWindow;
 
     private bool ableToSwitchScene = false;
 
@@ -20,7 +21,8 @@ public class MenuWindow : MonoBehaviour, ButtonDelegate, CanSceneChangeDelegate 
             button.buttonDelegate = this;
         }
 
-        helpButton.SetEnabled(false);
+        helpWindow.gameObject.SetActive(false);
+        helpWindow.presenter = this;
     }
         
    /*
@@ -40,7 +42,8 @@ public class MenuWindow : MonoBehaviour, ButtonDelegate, CanSceneChangeDelegate 
             fadePanel.FadeOut(true, completeTransition);
             SceneManagement.sharedInstance.ChangeScene(SceneManagement.State.NewGame, null, null, this);
         } else if(button == helpButton) {
-
+            gameObject.SetActive(false);
+            helpWindow.gameObject.SetActive(true);
         } else if(button == quitButton) {
             settingsPanel.CloseWindows();
             fadePanel.FadeOut(true, completeTransition);
@@ -54,5 +57,14 @@ public class MenuWindow : MonoBehaviour, ButtonDelegate, CanSceneChangeDelegate 
 
     public bool CanWeSwitchScene() {
         return ableToSwitchScene;
+    }
+
+    /*
+     * HelpPresenter Interface
+     * */
+
+    public void dismiss(HelpWindow window) {
+        gameObject.SetActive(true);
+        window.gameObject.SetActive(false);
     }
 }

@@ -1,17 +1,41 @@
-﻿using System.Collections;
+﻿using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
+using System.Collections.ObjectModel;
+
+using System.Linq;
 
 using PubNubAPI;
-using UnityEngine.UI;
+using System;
 
-public class ScoreObject {
-    public string username;
+public struct PubNubScoreObject {
     public string score;
-    public string test;
+
+    public string firstName;
+    public string lastName;
+
+    public string deviceId;
+
+    public PubNubScoreObject(string score, string firstName, string lastName, string deviceId) {
+        this.score = score;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.deviceId = deviceId;
+    }
 }
 
-public class HighscoreController : MonoBehaviour {     
+public struct LeaderboardRow {
+    
+}
+
+public class HighscoreController : MonoBehaviour {
+
+    private PubNub pubnub;
+    private const string channel = "leaderboard";
+
+    List<LeaderboardRow> leaderboardItems;
+    public event EventHandler<List<LeaderboardRow>> leaderboardCollectionUpdate;
+
     void Start() {
         PNConfiguration pnConfiguration = new PNConfiguration();
         pnConfiguration.SubscribeKey = "sub-c-705a78cc-ce95-11e9-8b24-569e8a5c3af3";
@@ -20,38 +44,36 @@ public class HighscoreController : MonoBehaviour {
         pnConfiguration.LogVerbosity = PNLogVerbosity.BODY;
         pnConfiguration.UUID = "PubNubUnityExample";
 
-        Dictionary<string, string> message = new Dictionary<string, string>();
-        message.Add("msg", "hello");
+        pubnub = new PubNub(pnConfiguration);
 
-        PubNub pubnub = new PubNub(pnConfiguration);
 
-        //pubnub.SubscribeCallback += (sender, e) => {
-        //    SubscribeEventEventArgs mea = e as SubscribeEventEventArgs;
+        /*pubnub.SubscribeCallback += (sender, e) => {
+            SubscribeEventEventArgs mea = e as SubscribeEventEventArgs;
 
-        //    if(mea.Status != null) {
-        //        if(mea.Status.Category.Equals(PNStatusCategory.PNConnectedCategory)) {
-        //            pubnub.Publish()
-        //                .Channel("my_channel")
-        //                .Message(message)
-        //                .Async((result, status) => {
-        //                    if(!status.Error) {
-        //                        Debug.Log(string.Format("DateTime {0}, In Publish Example, Timetoken: {1}", System.DateTime.UtcNow, result.Timetoken));
-        //                    } else {
-        //                        Debug.Log(status.Error);
-        //                        Debug.Log(status.ErrorData.Info);
-        //                    }
-        //                });
-        //        }
-        //    }
-        //    if(mea.MessageResult != null) {
-        //        Debug.Log("In Example, SubscribeCallback in message" + mea.MessageResult.Channel);
-        //        Dictionary<string, string> msg = mea.MessageResult.Payload as Dictionary<string, string>;
-        //        Debug.Log("msg: " + msg["msg"]);
-        //    }
-        //    if(mea.PresenceEventResult != null) {
-        //        Debug.Log("In Example, SubscribeCallback in presence" + mea.PresenceEventResult.Channel + mea.PresenceEventResult.Occupancy + mea.PresenceEventResult.Event);
-        //    }
-        //};
+            if(mea.Status != null) {
+                if(mea.Status.Category.Equals(PNStatusCategory.PNConnectedCategory)) {
+                    pubnub.Publish()
+                        .Channel(channel)
+                        .Message(message)
+                        .Async((result, status) => {
+                            if(!status.Error) {
+                                Debug.Log(string.Format("DateTime {0}, In Publish Example, Timetoken: {1}", System.DateTime.UtcNow, result.Timetoken));
+                            } else {
+                                Debug.Log(status.Error);
+                                Debug.Log(status.ErrorData.Info);
+                            }
+                        });
+                }
+            }
+            if(mea.MessageResult != null) {
+                //Debug.Log("In Example, SubscribeCallback in message" + mea.MessageResult.Channel);
+                //Dictionary<string, string> msg = mea.MessageResult.Payload as Dictionary<string, string>;
+                //Debug.Log("msg: " + msg["msg"]);
+            }
+            if(mea.PresenceEventResult != null) {
+                //Debug.Log("In Example, SubscribeCallback in presence" + mea.PresenceEventResult.Channel + mea.PresenceEventResult.Occupancy + mea.PresenceEventResult.Event);
+            }
+        };*/
 
         //pubnub.Subscribe()
         //    .Channels(new List<string>(){
@@ -60,12 +82,11 @@ public class HighscoreController : MonoBehaviour {
         //    .Execute();
 
 
-        const string channel = "leaderboard";
-
-        ScoreObject myFireObject = new ScoreObject();
-        myFireObject.test = "new user";
+        PubNubScoreObject myFireObject = new PubNubScoreObject();
+        //myFireObject.test = "new user";
         string fireobject = JsonUtility.ToJson(myFireObject);
 
+        // Get initial data
 
         pubnub.Fire()
           .Channel(channel)
@@ -79,37 +100,41 @@ public class HighscoreController : MonoBehaviour {
               }
           });
 
-        pubnub.SubscribeCallback += (sender, e) => {
+        // Subscribe to updates
 
-            //print("callback");
+        /*pubnub.SubscribeCallback += (sender, e) => {
 
-            SubscribeEventEventArgs mea = e as SubscribeEventEventArgs;
-            if(mea.Status != null) {
+            SubscribeEventEventArgs msg = e as SubscribeEventEventArgs;
+            if(msg.Status != null) {
             }
-            if(mea.MessageResult != null) {
-               /* Dictionary<string, object> msg = mea.MessageResult.Payload as Dictionary<string, object>;
-                string[] strArr = msg["username"] as string[];
-                string[] strScores = msg["score"] as string[];
-                int usernamevar = 1;
-                foreach(string username in strArr) {
-                    string usernameobject = "Line" + usernamevar;
-                    GameObject.Find(usernameobject).GetComponent<Text>().text = usernamevar.ToString() + ". " + username.ToString();
-                    usernamevar++;
-                    Debug.Log(username);
-                }
-                int scorevar = 1;
-                foreach(string score in strScores) {
-                    string scoreobject = "Score" + scorevar;
-                    GameObject.Find(scoreobject).GetComponent<Text>().text = "Score: " + score.ToString();
-                    scorevar++;
-                    Debug.Log(score);
-                }*/
-            }
-            if(mea.PresenceEventResult != null) {
-                Debug.Log("In Example, SusbcribeCallback in presence" + mea.PresenceEventResult.Channel + mea.PresenceEventResult.Occupancy + mea.PresenceEventResult.Event);
-            }
-        };
+            if(msg.MessageResult != null) {
 
+                print(msg);
+
+                //Dictionary<string, object> msg = mea.MessageResult.Payload as Dictionary<string, object>;
+                //string[] strArr = msg["username"] as string[];
+                //string[] strScores = msg["score"] as string[];
+                //int usernamevar = 1;
+                //foreach(string username in strArr) {
+                //    string usernameobject = "Line" + usernamevar;
+                //    GameObject.Find(usernameobject).GetComponent<Text>().text = usernamevar.ToString() + ". " + username.ToString();
+                //    usernamevar++;
+                //    Debug.Log(username);
+                //}
+                //int scorevar = 1;
+                //foreach(string score in strScores) {
+                //    string scoreobject = "Score" + scorevar;
+                //    GameObject.Find(scoreobject).GetComponent<Text>().text = "Score: " + score.ToString();
+                //    scorevar++;
+                //    Debug.Log(score);
+                //}
+            }
+            if(msg.PresenceEventResult != null) {
+                Debug.Log("In Example, SusbcribeCallback in presence" + msg.PresenceEventResult.Channel + msg.PresenceEventResult.Occupancy + msg.PresenceEventResult.Event);
+            }
+        };*/
+
+        // Subscribe to channels
 
         pubnub.Subscribe()
           .Channels(new List<string>() {
@@ -118,16 +143,13 @@ public class HighscoreController : MonoBehaviour {
           .WithPresence()
           .Execute();
 
+        SubmitScore(100, "justin", "l");
+    }
 
-
-
-
-        var usernametext = "Test";
-        var scoretext = "0";
-        ScoreObject newScoreObject = new ScoreObject();
-        newScoreObject.username = usernametext;
-        newScoreObject.score = scoretext;
+    public void SubmitScore(float score, string firstName, string lastName) {        
+        PubNubScoreObject newScoreObject = new PubNubScoreObject(score.ToString(), firstName, lastName, SystemInfo.deviceUniqueIdentifier);
         string json = JsonUtility.ToJson(newScoreObject);
+
         pubnub.Publish()
           .Channel(channel)
           .Message(json)
@@ -139,6 +161,5 @@ public class HighscoreController : MonoBehaviour {
                   Debug.Log(status.ErrorData.Info);
               }
           });
-
     }
 }

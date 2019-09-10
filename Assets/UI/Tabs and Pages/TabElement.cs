@@ -2,6 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class TaskAndUnitPanel : MonoBehaviour {
-
+public class TabElement : MonoBehaviour {
+    public string tabTitle;
 }

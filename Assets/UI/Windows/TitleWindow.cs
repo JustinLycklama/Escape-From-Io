@@ -3,13 +3,14 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TitleWindow : MonoBehaviour, ButtonDelegate, CanSceneChangeDelegate {
+public class TitleWindow : MonoBehaviour, ButtonDelegate, CanSceneChangeDelegate, HelpPresenter {
     public GameButton tutorial;
     public GameButton newGame;
     public GameButton leaderboard;
     public GameButton exit;
 
     public LeaderboardWindow leaderboardPanel;
+    public HelpWindow helpWindow;
     public FadePanel fadePanel;
 
     bool ableToSwitchScene = false;
@@ -22,9 +23,14 @@ public class TitleWindow : MonoBehaviour, ButtonDelegate, CanSceneChangeDelegate
 
     private void Start() {
         leaderboardPanel.gameObject.SetActive(false);
+        helpWindow.gameObject.SetActive(false);
         fadePanel.FadeOut(false, null);
 
-        tutorial.SetEnabled(false);
+        helpWindow.presenter = this;        
+
+        if (SceneManagement.sharedInstance.state == SceneManagement.State.GameFinish) {
+            ButtonDidClick(leaderboard);
+        }
     }
 
     /*
@@ -37,10 +43,11 @@ public class TitleWindow : MonoBehaviour, ButtonDelegate, CanSceneChangeDelegate
         };
 
         if(button == tutorial) {
-       
+            helpWindow.gameObject.SetActive(true);
+            gameObject.SetActive(false);
         } else if(button == newGame) {
             fadePanel.FadeOut(true, completeTransition);
-            SceneManagement.sharedInstance.ChangeScene(SceneManagement.State.Tutorial, null, null, this);
+            SceneManagement.sharedInstance.ChangeScene(SceneManagement.State.NewGame, null, null, this);
         } else if(button == leaderboard) {
             leaderboardPanel.gameObject.SetActive(true);
             gameObject.SetActive(false);
@@ -55,5 +62,14 @@ public class TitleWindow : MonoBehaviour, ButtonDelegate, CanSceneChangeDelegate
 
     public bool CanWeSwitchScene() {
         return ableToSwitchScene;
+    }
+
+    /*
+     * HelpPresenter Interface
+     * */
+
+    public void dismiss(HelpWindow window) {
+        gameObject.SetActive(true);
+        window.gameObject.SetActive(false);
     }
 }

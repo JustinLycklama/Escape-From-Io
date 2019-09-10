@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Miner : Unit {
-    public override int duration => 12;
+    public override int duration => 160;
     public override MasterGameTask.ActionType primaryActionType => MasterGameTask.ActionType.Mine;
 
     public MoenenGames.VoxelRobot.Weapon[] weaponSet; 

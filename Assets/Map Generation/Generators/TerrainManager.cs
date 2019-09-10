@@ -356,6 +356,23 @@ static class EnumExtensions {
         return ChanceFactory.shardInstance.tierMap[chance].estimatedValue;
     }
 
+    public static string NameAsRarity(this Chance chance) {
+        switch(chance) {
+            case Chance.Abysmal:
+                return "Very Rare";
+            case Chance.Low:
+                return "Rare";
+            case Chance.Medium:
+                return "Medium";
+            case Chance.High:
+                return "Common";
+            case Chance.VeryHigh:
+                return "Plentiful";
+        }
+
+        return "";
+    }
+
     public static string NameAsDifficulty(this Chance chance) {
         switch(chance) {
             case Chance.Abysmal:

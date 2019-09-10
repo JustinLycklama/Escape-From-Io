@@ -48,12 +48,12 @@ public static class UnitStateExtensions {
         return -1;
     }
 
-    public static Color ColorForState(this Unit.UnitState unitState) {
-        //new Color(0.2f, 0.2f, 0.2f)
+    static Color idleColor = new Color(0.4811321f, 0.388083f, 0.388083f);
+    public static Color ColorForState(this Unit.UnitState unitState) {        
 
         switch(unitState) {
             case Unit.UnitState.Idle:
-                return Color.red;
+                return idleColor;
             case Unit.UnitState.Efficient:
                 return Color.white;
             case Unit.UnitState.Inefficient:

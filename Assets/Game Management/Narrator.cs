@@ -113,7 +113,6 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate {
             SceneManagement.sharedInstance.ChangeScene(SceneManagement.State.GameFinish, null, null, this, null);
         };
 
-
         messageWindow.SetTitleAndText("GAME OVER", "No robots remain to fulfill your goals.\nYou remain trapped on Io...");
         messageWindow.SetSingleAction(okay, "Continue");
 

@@ -17,11 +17,6 @@ public class CostPanel : MonoBehaviour
     //private int
 
     private void Awake() {
-        //copperCell.image.overrideSprite = Script.Get<GameResourceManager>().oreImage;
-
-
-
-
         imageValueDictionary = new Dictionary<MineralType, ImageValueCell>() { { MineralType.Copper, copperCell }, { MineralType.Silver, silverCell }, { MineralType.Gold, goldCell } };
 
         foreach(MineralType mineralType in imageValueDictionary.Keys) {
@@ -76,11 +71,21 @@ public class CostPanel : MonoBehaviour
         foreach(MineralType mineralType in imageValueDictionary.Keys) {
             ImageValueCell cell = imageValueDictionary[mineralType];
 
-            string total = "0";
-                
+            int costValue = 0;
             if (cost.costMap.ContainsKey(mineralType)) {
-                total = cost.costMap[mineralType].ToString();
-            }                
+                costValue = cost.costMap[mineralType];
+            }
+
+            Color baseColor = cell.image.color;
+            if (costValue == 0) {
+                baseColor.a = 0.25f;
+            } else {
+                baseColor.a = 1f;
+            }
+
+            cell.image.color = baseColor;
+
+            string total = costValue.ToString();
 
             if(tallyMode) {
                 string tally = tallyCountDictionary[mineralType].ToString();

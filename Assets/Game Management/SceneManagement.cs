@@ -29,7 +29,7 @@ public class SceneManagement {
     public enum State { Title, GameFinish, NewGame, Tutorial }
 
     public State state { get; private set; } = State.Title;
-    public TimeSpan? score { get; private set; } = null;
+    public float? score { get; private set; } = null;
 
     private List<SceneChangeListener> delegateList = new List<SceneChangeListener>();
 
@@ -37,10 +37,11 @@ public class SceneManagement {
     public UnityEngine.Events.UnityAction sceneChangeEvent;
 
     SceneManagement() {
+        sceneChangeEvent = new UnityEngine.Events.UnityAction(SceneChange);
         SceneManager.sceneUnloaded += OnSceneUnloaded;
     }
 
-    public void ChangeScene(State state, Action<float> percentUpdated, Action complete, CanSceneChangeDelegate canChangeDelegate, TimeSpan? score = null) {
+    public void ChangeScene(State state, Action<float> percentUpdated, Action complete, CanSceneChangeDelegate canChangeDelegate, float? score = null) {
         this.state = state;
         this.score = score;
 
@@ -67,6 +68,8 @@ public class SceneManagement {
         sceneChangeEvent.Invoke();
         NotifySceneListeners();
     }
+
+    private void SceneChange() { }
 
     /*
      * SceneChangeListener Interface

@@ -20,12 +20,13 @@ public class TimeManager : MonoBehaviour, PlayerBehaviourUpdateDelegate {
         public Action completionBlock;
     }
 
+    public float globalTimer { get; private set; }
+
     // Update Blocks
     HashSet<TimeUpdateObject> timeObjects = new HashSet<TimeUpdateObject>();
 
     // Interface Delegates
     List<TimeUpdateDelegate> delegateList = new List<TimeUpdateDelegate>();
-    float globalTimer;
 
     private bool skipTimeUpdate = false;
 

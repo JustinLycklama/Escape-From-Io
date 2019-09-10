@@ -23,6 +23,10 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
     public List<PercentageBar> percentBars;
     private List<Unit> soonToExpireUnits = new List<Unit>();
 
+    private Unit[] unitList = new Unit[0];
+    private MasterGameTask[] taskList = new MasterGameTask[0];
+    private Unit.UnitState unitListState = Unit.UnitState.Idle;
+
     private void Start() {
         title.text = actionType.ToString();
 
@@ -41,6 +45,15 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
             Script.Get<UnitManager>().EndNotifications(this, actionType);
             Script.Get<TimeManager>().EndTimeUpdateNotifications(this);
         } catch(System.NullReferenceException e) { }
+    }
+
+
+    private void UpdateCellColor() {
+        if(unitList.Length == 0 && taskList.Length != 0) {
+            backgroundSprite.color = unitListState.ColorForState();
+        } else {
+            backgroundSprite.color = unitListState.ColorForState();
+        }           
     }
 
     /*
@@ -69,9 +82,12 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
      * */
 
     public void NotifyUpdateTaskList(MasterGameTask[] taskList, MasterGameTask.ActionType actionType, TaskQueueManager.ListState listState) {
+        this.taskList = taskList;
         taskCountText.text = taskList.Length + " Task" + ((taskList.Length == 1)? "" : "s");
 
         taskListLocked.SetState(Script.Get<TaskQueueManager>().GetTaskListLockStatus(actionType));
+
+        UpdateCellColor();
     }
 
     /*
@@ -79,10 +95,13 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
      * */
 
     public void NotifyUpdateUnitList(Unit[] unitList, MasterGameTask.ActionType actionType, Unit.UnitState unitListState) {
+        this.unitList = unitList;
+        this.unitListState = unitListState;
+
         unitCountText.text = unitList.Length + " Unit" + ((unitList.Length == 1) ? "" : "s");
         unitStatusText.text = unitListState.decription();
 
-        backgroundSprite.color = unitListState.ColorForState();
+        UpdateCellColor();
 
         soonToExpireUnits = unitList.OrderBy(unit => unit.remainingDuration).Take(percentBars.Count).ToList();        
     }
