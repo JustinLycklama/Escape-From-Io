@@ -31,7 +31,9 @@ public class BlueprintPanel : NavigationPanel, TableViewDelegate {
 
     public void CellForRowAtIndex(TableView table, int row, GameObject cell) {
         BlueprintCell blueprintCell = cell.GetComponent<BlueprintCell>();
+        ConstructionBlueprint blueprint = blueprints[row];
 
-        blueprintCell.SetBlueprint(blueprints[row], blueprintLayoutCoordinate);
+        blueprintCell.SetBlueprint(blueprint, blueprintLayoutCoordinate);
+        blueprintCell.icon.sprite = blueprint.iconImage;
     }
 }

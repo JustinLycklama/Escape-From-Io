@@ -189,9 +189,16 @@ public struct BlueprintCost {
 }
 
 public abstract class ConstructionBlueprint : PrefabBlueprint {
-    public ConstructionBlueprint(string fileName, Type type, string label, BlueprintCost cost) : base(fileName, type) {
+
+    public static string iconFolder = "UI/Icons/";
+
+    public Sprite iconImage;
+
+    public ConstructionBlueprint(string fileName, Type type, string iconName, string label, BlueprintCost cost) : base(fileName, type) {
         this.label = label;
         this.cost = cost;
+
+        iconImage = Resources.Load<Sprite>(iconFolder + iconName);
     }
 
     public BlueprintCost cost;

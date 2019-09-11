@@ -266,14 +266,14 @@ public abstract class Building : ActionableItem, Selectable {
     public class Blueprint : ConstructionBlueprint {
         private static string folder = "Buildings/";
 
-        public static Blueprint Tower = new Blueprint("Tower", typeof(Tower), "Light Tower", new BlueprintCost(1, 1, 0));
-        public static Blueprint Refinery = new Blueprint("Refinery", typeof(Refinery), "Refinery", new BlueprintCost(1, 1, 1));
+        public static Blueprint Tower = new Blueprint("Tower", typeof(Tower), "TowerIcon", "Light Tower", new BlueprintCost(1, 1, 0));
+        public static Blueprint Refinery = new Blueprint("Refinery", typeof(Refinery), "MinerIcon", "Refinery", new BlueprintCost(1, 1, 1));
 
-        public static Blueprint StationShip = new Blueprint("StationShip", typeof(StationShip), "Interplanetary Ship", new BlueprintCost(1, 0, 0), true);
+        public static Blueprint StationShip = new Blueprint("StationShip", typeof(StationShip), "ShipIcon", "Interplanetary Ship", new BlueprintCost(1, 0, 0), true);
 
         private bool asLastPriority;
 
-        public Blueprint(string fileName, Type type, string label, BlueprintCost cost, bool asLastPriority = false) : base(folder+fileName, type, label, cost) { this.asLastPriority = asLastPriority; }
+        public Blueprint(string fileName, Type type, string iconName, string label, BlueprintCost cost, bool asLastPriority = false) : base(folder+fileName, type, iconName, label, cost) { this.asLastPriority = asLastPriority; }
 
         public override void ConstructAt(LayoutCoordinate layoutCoordinate) {
             BuildingManager buildingManager = Script.Get<BuildingManager>();
