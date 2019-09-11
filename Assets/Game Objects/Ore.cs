@@ -9,6 +9,7 @@ public class Ore : ActionableItem {
     public Unit currentCarrier;
 
     float actionPercent = 0;
+    float actionModificationSpeed = 2f;
 
     public MineralType mineralType = MineralType.Copper;
    
@@ -16,7 +17,7 @@ public class Ore : ActionableItem {
         switch(task.action) {
 
             case GameTask.ActionType.PickUp:
-                actionPercent += rate;
+                actionPercent += rate * actionModificationSpeed;
 
                 if (actionPercent >= 1) {
                     actionPercent = 1;

@@ -112,6 +112,10 @@ public class TerrainManager : MonoBehaviour {
             return terrainTypeMap[TerrainType.Type.Sand];
         }
 
+        if (terrainType.type == TerrainType.Type.Sand) {
+            return terrainTypeMap[TerrainType.Type.Path];
+        }
+
         return null;
     }
 
@@ -129,31 +133,47 @@ public class TerrainManager : MonoBehaviour {
             case RegionType.Type.Land:
 
                 if (terraformable != null) {
-                    UserAction action = new UserAction();
+                    if (terraformable.Value.type == TerrainType.Type.Sand) {
 
-                    action.description = "Clean " + coordinate.mapContainer.map.GetTerrainAt(coordinate).name;
-                    action.layoutCoordinate = coordinate;
+                        UserAction action = new UserAction();
 
-                    action.performAction = (LayoutCoordinate layoutCoordinate) => {
-                        TaskQueueManager queue = Script.Get<TaskQueueManager>();
-                        Map layoutCoordinateMap = layoutCoordinate.mapContainer.map;
+                        action.description = "Clean " + coordinate.mapContainer.map.GetTerrainAt(coordinate).name;
+                        action.layoutCoordinate = coordinate;
 
-                        MapCoordinate mapCoordinate = new MapCoordinate(layoutCoordinate);
-                        WorldPosition worldPosition = new WorldPosition(mapCoordinate);
+                        action.performAction = (LayoutCoordinate layoutCoordinate) => {
+                            TaskQueueManager queue = Script.Get<TaskQueueManager>();
+                            Map layoutCoordinateMap = layoutCoordinate.mapContainer.map;
 
-                        GameTask cleaningTask = new GameTask("Cleaning", worldPosition, GameTask.ActionType.FlattenPath, layoutCoordinate.mapContainer.map, PathRequestTargetType.PathGrid);
-                        MasterGameTask masterCleaningTask = new MasterGameTask(MasterGameTask.ActionType.Build, "Clean " + layoutCoordinateMap.GetTerrainAt(layoutCoordinate).name, new GameTask[] { cleaningTask });
+                            MapCoordinate mapCoordinate = new MapCoordinate(layoutCoordinate);
+                            WorldPosition worldPosition = new WorldPosition(mapCoordinate);
 
-                        queue.QueueTask(masterCleaningTask);
-                        map.AssociateTask(masterCleaningTask, layoutCoordinate);
-                    };
+                            GameTask cleaningTask = new GameTask("Cleaning", worldPosition, GameTask.ActionType.FlattenPath, layoutCoordinate.mapContainer.map, PathRequestTargetType.PathGrid);
+                            MasterGameTask masterCleaningTask = new MasterGameTask(MasterGameTask.ActionType.Build, "Clean " + layoutCoordinateMap.GetTerrainAt(layoutCoordinate).name, new GameTask[] { cleaningTask });
 
-                    actionList.Add(action);
+                            queue.QueueTask(masterCleaningTask);
+                            map.AssociateTask(masterCleaningTask, layoutCoordinate);
+                        };
+
+                        actionList.Add(action);
+
+                    } else if (terraformable.Value.type == TerrainType.Type.Path) {
+
+                        UserAction action = new UserAction();
+
+                        action.description = "Create Path";
+                        action.layoutCoordinate = coordinate;
+
+                        action.performAction = (LayoutCoordinate layoutCoordinate) => {
+                            Building.Blueprint.PathBuilding.ConstructAt(layoutCoordinate);
+                        };
+
+                        actionList.Add(action);
+                    }
                 }
 
                 if (terrainType.buildable) {
                     UserAction unitAction = new UserAction();
-                    unitAction.description = "Unit";
+                    unitAction.description = "Build Unit";
                     unitAction.layoutCoordinate = coordinate;
 
                     unitAction.blueprintList = new ConstructionBlueprint[] { Unit.Blueprint.Miner, Unit.Blueprint.Mover, Unit.Blueprint.Builder };
@@ -161,7 +181,7 @@ public class TerrainManager : MonoBehaviour {
                     actionList.Add(unitAction);
 
                     UserAction buildingAction = new UserAction();
-                    buildingAction.description = "Building";
+                    buildingAction.description = "Build Building";
                     buildingAction.layoutCoordinate = coordinate;
 
                     buildingAction.blueprintList = new ConstructionBlueprint[] { Building.Blueprint.Tower, Building.Blueprint.StationShip }; //Building.Blueprint.Refinery,
@@ -275,7 +295,7 @@ public class ChanceFactory {
 public struct TerrainType {
     public string name;
 
-    public enum Type { Water, Sand, Grass, Mud, LooseRock, Rock, HardRock }
+    public enum Type { Water, Sand, Grass, Mud, Path, LooseRock, Rock, HardRock }
     public Type type;
 
     [HideInInspector]

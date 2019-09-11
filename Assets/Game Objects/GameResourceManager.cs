@@ -245,6 +245,11 @@ public class GameResourceManager : MonoBehaviour {
         MasterGameTask masterBuildTask = new MasterGameTask(MasterGameTask.ActionType.Build, "Build " + actionableItem.description, new GameTask[] { buildTask }, blockingBuildTasks, asLastPriority);
 
         queue.QueueTask(masterBuildTask);
+
+        MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(depositPosition);
+        LayoutCoordinate coordinate = new LayoutCoordinate(mapCoordinate);
+
+        coordinate.mapContainer.map.AssociateTask(masterBuildTask, coordinate);
     }
 
 

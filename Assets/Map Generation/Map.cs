@@ -277,19 +277,9 @@ public class Map : ActionableItem  {
 
             // Terraform complete
 
-            // Update the terrain type at this location
-            terrainData[terraformTarget.coordinate.x, terraformTarget.coordinate.y] = terraformTarget.terrainTypeTarget;
-
+            UpdateTerrainAtLocation(terraformTarget.coordinate, terraformTarget.terrainTypeTarget);
             TerraformHeightMap(terraformTarget);
-
-            // Update the BoxCollider Height
-            mapContainer.ResizeBoxColliderAt(terraformTarget.coordinate);
-
-            // Update pathfinding grid
-            Script.Get<PathfindingGrid>().UpdateGrid(this, terraformTarget.coordinate);
-
-            // Notify all users of path finding grid about ubdate
-            Script.Get<MapsManager>().NotifyTerrainUpdateDelegates(coordinate);
+            terraformTargetCoordinateMap[coordinate.x, coordinate.y] = null;
 
             // Create Ore at location
 
@@ -326,15 +316,29 @@ public class Map : ActionableItem  {
                     ore.transform.position = randomPosition;
                 }                              
             }
-
-            terraformTargetCoordinateMap[coordinate.x, coordinate.y] = null;
-            UpdateUserActionsAt(terraformTarget.coordinate);
-            mapContainer.UpdateShaderTerrainTextures();
         } else {
             TerraformHeightMap(terraformTarget);
         }
 
         return terraformTarget.percentage;
+    }
+
+    public void UpdateTerrainAtLocation(LayoutCoordinate layoutCoordinate, TerrainType terrainType) {
+        // Update the terrain type at this location
+        terrainData[layoutCoordinate.x, layoutCoordinate.y] = terrainType;
+
+
+        // Update the BoxCollider Height
+        mapContainer.ResizeBoxColliderAt(layoutCoordinate);
+
+        // Update pathfinding grid
+        Script.Get<PathfindingGrid>().UpdateGrid(this, layoutCoordinate);
+
+        // Notify all users of path finding grid about ubdate
+        Script.Get<MapsManager>().NotifyTerrainUpdateDelegates(layoutCoordinate);
+
+        UpdateUserActionsAt(layoutCoordinate);
+        mapContainer.UpdateShaderTerrainTextures();
     }
 
     private void TerraformHeightMap(TerraformTarget terraformTarget) {

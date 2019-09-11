@@ -48,8 +48,10 @@ public abstract class Building : ActionableItem, Selectable {
 
     public static int buildingCount = 0;
 
-    string title;
     public override string description => title;
+
+    protected abstract string title { get; }
+    protected abstract float constructionModifierSpeed { get; }
 
     // Building status
     private float percentComplete = 0;
@@ -65,7 +67,7 @@ public abstract class Building : ActionableItem, Selectable {
     public List<UserActionUpdateDelegate> userActionDelegateList = new List<UserActionUpdateDelegate>();
 
     private void Awake() {
-        title = "Building #" + buildingCount;
+        //title = "Building #" + buildingCount;
         buildingCount++;
 
         percentPerTask = new Dictionary<GameTask, float>();
@@ -200,7 +202,7 @@ public abstract class Building : ActionableItem, Selectable {
         switch(task.action) {
             case GameTask.ActionType.Build:
                 float previousPercent = percentComplete;
-                percentComplete += rate;
+                percentComplete += rate * constructionModifierSpeed;
 
                 if(percentComplete > 1) {
                     percentComplete = 1;
@@ -265,6 +267,8 @@ public abstract class Building : ActionableItem, Selectable {
 
     public class Blueprint : ConstructionBlueprint {
         private static string folder = "Buildings/";
+
+        public static Blueprint PathBuilding = new Blueprint("PathBuilding", typeof(PathBuilding), "TowerIcon", "Path", new BlueprintCost(1, 0, 0));
 
         public static Blueprint Tower = new Blueprint("Tower", typeof(Tower), "TowerIcon", "Light Tower", new BlueprintCost(3, 1, 0));
         public static Blueprint Refinery = new Blueprint("Refinery", typeof(Refinery), "MinerIcon", "Refinery", new BlueprintCost(1, 1, 1));
