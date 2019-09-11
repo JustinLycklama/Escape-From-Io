@@ -30,6 +30,36 @@ Transform:
   m_Father: {fileID: 4350705832465765117}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &1896941289754827436
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 6205181443579865116}
+  m_Layer: 0
+  m_Name: Ore Location
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &6205181443579865116
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1896941289754827436}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 1.052, z: 0.492}
+  m_LocalScale: {x: 0.1, y: 0.1, z: 0.1}
+  m_Children: []
+  m_Father: {fileID: 4350705832465765117}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &4350705832465765115
 GameObject:
   m_ObjectHideFlags: 0
@@ -64,6 +94,7 @@ Transform:
   - {fileID: 1991832154713867708}
   - {fileID: 4539342120279948449}
   - {fileID: 7933615684481901234}
+  - {fileID: 6205181443579865116}
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -97,6 +128,7 @@ MonoBehaviour:
   followPathTurnSpeed: 10
   turnDistance: 5
   stoppingDistance: 10
+  oreLocation: {fileID: 6205181443579865116}
   statusLocation: {fileID: 4539342120279948449}
   remainingDuration: 180
   buildableComponent: {fileID: 6599385650266042165}

@@ -86,6 +86,8 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
     public float turnDistance;
     public float stoppingDistance;
 
+    public Transform oreLocation;
+
     //Path path;
     Path pathToDraw;
     bool navigatingToTask;
