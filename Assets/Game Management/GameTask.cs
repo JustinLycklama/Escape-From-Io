@@ -166,6 +166,11 @@ public class MasterGameTask {
 
         childGameTasks.Clear();
         
+        // Cancel all clones of this task. e.g. Unit is heading to pick up resources for building
+        foreach(MasterGameTask childMasterTask in childMasterTasks.ToArray()) {
+            childMasterTask.CancelTask();
+        }
+
         // Cancel all tasks that are a prerequisite for this task
         foreach(MasterGameTask masterGameTask in blockerTasks.ToArray()) {
             masterGameTask.CancelTask();
