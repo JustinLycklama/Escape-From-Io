@@ -639,13 +639,15 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
 
         public Blueprint(string fileName, Type type, string iconName, string label, BlueprintCost cost) : base(folder + fileName, type, iconName, label, cost) { }
 
-        public override void ConstructAt(LayoutCoordinate layoutCoordinate) {
+        public override GameObject ConstructAt(LayoutCoordinate layoutCoordinate) {
             UnitManager unitManager = Script.Get<UnitManager>();
             Unit unit = UnityEngine.Object.Instantiate(resource) as Unit;
 
             UnitBuilding unitBuilding = unit.GetComponent<UnitBuilding>();
 
             unitManager.BuildAt(unitBuilding, layoutCoordinate, cost);
+
+            return unit.gameObject;
         }
     }
 }

@@ -81,6 +81,8 @@ public static class GameTaskActionTypeExtensions {
 
 public interface MasterTaskUpdateDelegate {
     void RepeatCountUpdated(MasterGameTask masterGameTask, int count);
+    void TaskCancelled(MasterGameTask masterGameTask);
+    void TaskFinished(MasterGameTask masterGameTask);
 }
 
 public class MasterGameTask {
@@ -88,6 +90,9 @@ public class MasterGameTask {
     private static int gameTaskCounter = 0;
 
     public Unit assignedUnit;
+
+    // This item cannot exist without the task
+    public ActionableItem itemContingentOnTask;
 
     // Don't know if we need a type on the master...
     public enum ActionType { Mine, Build, Move };
@@ -146,6 +151,9 @@ public class MasterGameTask {
         }
     }
 
+    // If we have a task that we block, we should not be cancellable from the UI
+    public bool CancellableByUI => taskBlockedByThis == null;
+
     public void CancelTask() {
         if(assignedUnit != null) {
             assignedUnit.CancelTask();
@@ -156,14 +164,24 @@ public class MasterGameTask {
         // Remove references to this gameTask
         UpdateAllGameTasksActionItemsWith(null);
 
-
-        // TODO?
         childGameTasks.Clear();
         
-        //if(taskBlockedByThis != null) {
-        //    taskBlockedByThis.UnblockTask(this);
-        //    taskBlockedByThis = null;
-        //}
+        // Cancel all tasks that are a prerequisite for this task
+        foreach(MasterGameTask masterGameTask in blockerTasks.ToArray()) {
+            masterGameTask.CancelTask();
+        }
+
+        // If any tasks are waiting on this task, unblock them
+        if(taskBlockedByThis != null) {
+            taskBlockedByThis.UnblockTask(this);
+            taskBlockedByThis = null;
+        }
+
+        foreach(MasterTaskUpdateDelegate updateDelegate in delegateList.ToArray()) {
+            updateDelegate.TaskCancelled(this);
+        }
+
+        itemContingentOnTask?.Destroy();
     }
 
     public void MarkTaskFinished() {
@@ -178,6 +196,10 @@ public class MasterGameTask {
 
         // Complete all children GameTask's ActionItems
         UpdateAllGameTasksActionItemsWith(null);
+
+        foreach(MasterTaskUpdateDelegate updateDelegate in delegateList.ToArray()) {
+            updateDelegate.TaskFinished(this);
+        }
     }
 
     public void MarkChildFinished(MasterGameTask childMasterTask) {

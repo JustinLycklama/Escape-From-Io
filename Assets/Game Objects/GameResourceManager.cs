@@ -244,6 +244,8 @@ public class GameResourceManager : MonoBehaviour {
         GameTask buildTask = new GameTask("Construction", depositPosition, GameTask.ActionType.Build, actionableItem, PathRequestTargetType.PathGrid);
         MasterGameTask masterBuildTask = new MasterGameTask(MasterGameTask.ActionType.Build, "Build " + actionableItem.description, new GameTask[] { buildTask }, blockingBuildTasks, asLastPriority);
 
+        masterBuildTask.itemContingentOnTask = actionableItem;
+
         queue.QueueTask(masterBuildTask);
 
         MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(depositPosition);

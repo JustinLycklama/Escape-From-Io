@@ -19,9 +19,9 @@ public enum BuildingEffectStatus {
 }
 
 public class BuildingManager : MonoBehaviour {
-
-    List<Building> buildingList = new List<Building>();
+    
     BuildingEffectStatus[,] statusMap;
+    Dictionary<LayoutCoordinate, Building> locationBuildingMap = new Dictionary<LayoutCoordinate, Building>();
 
     public void Initialize() {
         MapsManager mapsManager = Script.Get<MapsManager>();
@@ -30,6 +30,13 @@ public class BuildingManager : MonoBehaviour {
         statusMap = new BuildingEffectStatus[constants.layoutMapWidth * mapsManager.horizontalMapCount, constants.layoutMapHeight * mapsManager.verticalMapCount];
     }
 
+    public Building buildlingAtLocation(LayoutCoordinate layoutCoordinate) {
+        if (locationBuildingMap.ContainsKey(layoutCoordinate)) {
+            return locationBuildingMap[layoutCoordinate];
+        }
+
+        return null;
+    }
 
     public void BuildAt(Building building, LayoutCoordinate layoutCoordinate, BlueprintCost cost, bool asLastPriority) {
         WorldPosition worldPosition = new WorldPosition(new MapCoordinate(layoutCoordinate));
@@ -49,12 +56,21 @@ public class BuildingManager : MonoBehaviour {
         MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(worldPosition);
         LayoutCoordinate layoutCoordinate = new LayoutCoordinate(mapCoordinate);
 
+        locationBuildingMap[layoutCoordinate] = building;
+
         int x = layoutCoordinate.mapContainer.mapX * constants.layoutMapWidth + layoutCoordinate.x;
         int y = layoutCoordinate.mapContainer.mapY * constants.layoutMapHeight + layoutCoordinate.y;
 
         ModifyStatus(x, y, building.BuildingStatusEffects(), building.BuildingStatusRange());
 
         NotifyBuildingUpdate(building, false);
+    }
+
+    public void RemoveBuilding(Building buildling) {
+        WorldPosition worldPosition = new WorldPosition(buildling.transform.position);
+        MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(worldPosition);
+
+        locationBuildingMap.Remove(new LayoutCoordinate(mapCoordinate));
     }
 
     private void ModifyStatus(int centerX, int centerY, BuildingEffectStatus status, int radius) {

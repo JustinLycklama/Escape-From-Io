@@ -39,6 +39,8 @@ public abstract class ActionableItem : MonoBehaviour, TaskStatusNotifiable {
 
     public abstract float performAction(GameTask task, float rate, Unit unit);
 
+    public virtual void Destroy() { }
+
     /*
      * TaskStatusUpdateDelegate Interface
      * */

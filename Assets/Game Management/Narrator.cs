@@ -64,7 +64,6 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate {
                 } else {
                     unit.Initialize();
                 }
-
             }
         });
 
@@ -73,9 +72,10 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate {
 
             Building building = Instantiate(Building.Blueprint.Tower.resource) as Building;
             building.transform.position = spawnWorldPosition.vector3;
-
-            //buildingManager.BuildAt(building, spawnCoordinate, new BlueprintCost(1, 1, 1));
+            
             building.ProceedToCompleteBuilding();
+
+            spawnCoordinate.mapContainer.map.UpdateUserActionsAt(spawnCoordinate);
 
             Script.Get<PlayerBehaviour>().JumpCameraToPosition(spawnWorldPosition.vector3);
         });

@@ -204,5 +204,5 @@ public abstract class ConstructionBlueprint : PrefabBlueprint {
     public BlueprintCost cost;
     public string label;
 
-    public abstract void ConstructAt(LayoutCoordinate layoutCoordinate);
+    public abstract GameObject ConstructAt(LayoutCoordinate layoutCoordinate);
 }

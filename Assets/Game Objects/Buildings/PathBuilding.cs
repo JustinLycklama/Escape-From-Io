@@ -15,8 +15,7 @@ public class PathBuilding : Building {
 
         layoutCoordinate.mapContainer.map.UpdateTerrainAtLocation(layoutCoordinate, Script.Get<TerrainManager>().terrainTypeMap[TerrainType.Type.Path]);
 
-        transform.SetParent(null);
-        Destroy(gameObject);
+        Destroy();
     }
 
     protected override void UpdateCompletionPercent(float percent) {

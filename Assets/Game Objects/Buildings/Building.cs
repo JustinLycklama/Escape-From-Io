@@ -90,6 +90,18 @@ public abstract class Building : ActionableItem, Selectable {
         costPanel.SetTallyMode(true);
     }
 
+    public override void Destroy() {
+        if(costPanel != null && costPanel.isActiveAndEnabled) {
+            costPanel.transform.SetParent(null);
+            costPanel.gameObject.SetActive(false);        
+        }
+
+        Script.Get<BuildingManager>().RemoveBuilding(this);
+
+        transform.SetParent(null);
+        Destroy(gameObject);
+    }
+
     /*
      * Building Status Effects
      * */
@@ -279,11 +291,13 @@ public abstract class Building : ActionableItem, Selectable {
 
         public Blueprint(string fileName, Type type, string iconName, string label, BlueprintCost cost, bool asLastPriority = false) : base(folder+fileName, type, iconName, label, cost) { this.asLastPriority = asLastPriority; }
 
-        public override void ConstructAt(LayoutCoordinate layoutCoordinate) {
+        public override GameObject ConstructAt(LayoutCoordinate layoutCoordinate) {
             BuildingManager buildingManager = Script.Get<BuildingManager>();
 
             Building building = UnityEngine.Object.Instantiate(resource) as Building;
             buildingManager.BuildAt(building, layoutCoordinate, cost, asLastPriority);
+
+            return building.gameObject;
         }
     }
 

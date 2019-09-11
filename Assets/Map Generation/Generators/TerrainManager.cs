@@ -171,7 +171,7 @@ public class TerrainManager : MonoBehaviour {
                     }
                 }
 
-                if (terrainType.buildable) {
+                if (terrainType.buildable && Script.Get<BuildingManager>().buildlingAtLocation(coordinate) == null) {
                     UserAction unitAction = new UserAction();
                     unitAction.description = "Build Unit";
                     unitAction.layoutCoordinate = coordinate;

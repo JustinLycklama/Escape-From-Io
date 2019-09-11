@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Map : ActionableItem  {
+public class Map : ActionableItem, MasterTaskUpdateDelegate {
 
     class TerraformTarget {
         public LayoutCoordinate coordinate;
@@ -32,8 +32,6 @@ public class Map : ActionableItem  {
     public Texture2D meshTexture;
 
     private TerrainType[,] terrainData;
-    private Building[,] buildingData;
-
     public int featuresPerLayoutPerAxis;
 
     float[,] layoutNoiseMap;
@@ -71,7 +69,6 @@ public class Map : ActionableItem  {
         int terrainWidth = terrainData.GetLength(0);
         int terrainHeight = terrainData.GetLength(1);
 
-        buildingData = new Building[terrainWidth, terrainHeight];
         terraformTargetCoordinateMap = new TerraformTarget[terrainWidth, terrainHeight];
     }
 
@@ -81,10 +78,6 @@ public class Map : ActionableItem  {
         }
 
         return terrainData[layoutCoordinate.x, layoutCoordinate.y];
-    }
-
-    public Building GetBuildingAt(LayoutCoordinate layoutCoordinate) {
-        return buildingData[layoutCoordinate.x, layoutCoordinate.y];
     }
 
     // Returns the height in MAP COORDINATE position
@@ -140,7 +133,7 @@ public class Map : ActionableItem  {
         }
     }
 
-    private void UpdateUserActionsAt(LayoutCoordinate layoutCoordinate) {
+    public void UpdateUserActionsAt(LayoutCoordinate layoutCoordinate) {
         userActionCoordinateMap[layoutCoordinate.x, layoutCoordinate.y] = ActionsAvailableAt(layoutCoordinate);
 
         NotifyAllUserActionsUpdate(layoutCoordinate);
@@ -403,11 +396,44 @@ public class Map : ActionableItem  {
      * ActionableItem Components
      * */
 
+    Dictionary<MasterGameTask, LayoutCoordinate> gameTaskLocationMap = new Dictionary<MasterGameTask, LayoutCoordinate>();
+
     public void AssociateTask(MasterGameTask task, LayoutCoordinate coordinate) {
+
+        MasterGameTask oldTask = associatedTasksCoordinateMap[coordinate.x, coordinate.y];
+        if (oldTask != null) {
+            oldTask.EndTaskStatusNotifications(this);
+            gameTaskLocationMap.Remove(oldTask);
+        }
+
         associatedTasksCoordinateMap[coordinate.x, coordinate.y] = task;
+
+        if(task != null) {
+            task.RegisterForTaskStatusNotifications(this);
+            gameTaskLocationMap[task] = coordinate;
+        }      
 
         UpdateUserActionsAt(coordinate);
         NotifyAllTaskStatus(coordinate);
+    }
+
+    /*
+     * MasterTaskUpdateDelegate Interface
+     * */
+
+
+    public void RepeatCountUpdated(MasterGameTask masterGameTask, int count) { }
+
+    public void TaskCancelled(MasterGameTask masterGameTask) {
+        if (gameTaskLocationMap.ContainsKey(masterGameTask)) {
+            AssociateTask(null, gameTaskLocationMap[masterGameTask]);
+        }
+    }
+
+    public void TaskFinished(MasterGameTask masterGameTask) {
+        if(gameTaskLocationMap.ContainsKey(masterGameTask)) {
+            AssociateTask(null, gameTaskLocationMap[masterGameTask]);
+        }
     }
 
     /*

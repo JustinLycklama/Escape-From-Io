@@ -32,6 +32,8 @@ public class TaskDisplayCell : MonoBehaviour, GameButtonDelegate, MasterTaskUpda
         } else {
             taskDescription.text = " - ";
         }
+
+        cancelTaskButton.SetEnabled(task.CancellableByUI);
     }
 
     /*
@@ -65,4 +67,7 @@ public class TaskDisplayCell : MonoBehaviour, GameButtonDelegate, MasterTaskUpda
 
         taskRepeatText.text = "(x" + count + ")";
     }
+
+    public void TaskCancelled(MasterGameTask masterGameTask) { }
+    public void TaskFinished(MasterGameTask masterGameTask) { }
 }
