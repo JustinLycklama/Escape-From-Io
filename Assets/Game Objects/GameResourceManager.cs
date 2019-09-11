@@ -88,14 +88,22 @@ public class GameResourceManager : MonoBehaviour {
 
                 //terrainTypeCount[terrainType]++;
 
+                //Dictionary<MineralType, int> maxIterationForMineral = new Dictionary<MineralType, int>() { MineralType.Copper :  }
+
                 Dictionary<MineralType, int> mineralTypeCounts = new Dictionary<MineralType, int>();
                 foreach(TerrainType.MineralChance mineralChance in terrainType.mineralChances) {
-                    float coinToss = (rnd.Next(0, 100) / 100.0f);
-                    float threshold = (1 - mineralChance.chance.GetPercentage());
+                    int mineralCount = 0;
 
-                    if (coinToss > threshold) {
-                        mineralTypeCounts.Add(mineralChance.type, 1);
-                    } 
+                    for(int iteration = 0; iteration < mineralChance.maxNumberGenerated; iteration++) {
+                        float coinToss = (rnd.Next(0, 100) / 100.0f);
+                        float threshold = (1 - mineralChance.chance.GetPercentage());
+
+                        if(coinToss > threshold) {
+                            mineralCount++;
+                        }
+                    }
+
+                    mineralTypeCounts.Add(mineralChance.type, mineralCount);
                 }
 
                 mineralsForLayoutCoordinate[layoutCoordinate] = mineralTypeCounts;

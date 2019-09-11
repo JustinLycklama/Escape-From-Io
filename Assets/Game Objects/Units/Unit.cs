@@ -633,9 +633,9 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
     public class Blueprint : ConstructionBlueprint {
         private static string folder = "Units/";
 
-        public static Blueprint Miner = new Blueprint("Miner", typeof(Miner), "MinerIcon", "Miner", new BlueprintCost(1, 1, 1));
-        public static Blueprint Mover = new Blueprint("Mover", typeof(Mover), "MoverIcon", "Mover", new BlueprintCost(1, 1, 1));
-        public static Blueprint Builder = new Blueprint("Builder", typeof(Builder), "BuilderIcon", "Builder", new BlueprintCost(1, 1, 1));
+        public static Blueprint Miner = new Blueprint("Miner", typeof(Miner), "MinerIcon", "Miner", new BlueprintCost(5, 3, 1));
+        public static Blueprint Mover = new Blueprint("Mover", typeof(Mover), "MoverIcon", "Mover", new BlueprintCost(5, 3, 1));
+        public static Blueprint Builder = new Blueprint("Builder", typeof(Builder), "BuilderIcon", "Builder", new BlueprintCost(5, 3, 1));
 
         public Blueprint(string fileName, Type type, string iconName, string label, BlueprintCost cost) : base(folder + fileName, type, iconName, label, cost) { }
 

@@ -131,17 +131,18 @@ public class TerrainManager : MonoBehaviour {
                 if (terraformable != null) {
                     UserAction action = new UserAction();
 
-                    action.description = "Clean";
+                    action.description = "Clean " + coordinate.mapContainer.map.GetTerrainAt(coordinate).name;
                     action.layoutCoordinate = coordinate;
 
                     action.performAction = (LayoutCoordinate layoutCoordinate) => {
                         TaskQueueManager queue = Script.Get<TaskQueueManager>();
+                        Map layoutCoordinateMap = layoutCoordinate.mapContainer.map;
 
                         MapCoordinate mapCoordinate = new MapCoordinate(layoutCoordinate);
                         WorldPosition worldPosition = new WorldPosition(mapCoordinate);
 
                         GameTask cleaningTask = new GameTask("Cleaning", worldPosition, GameTask.ActionType.FlattenPath, layoutCoordinate.mapContainer.map, PathRequestTargetType.PathGrid);
-                        MasterGameTask masterCleaningTask = new MasterGameTask(MasterGameTask.ActionType.Move, "Clean location " + layoutCoordinate.description, new GameTask[] { cleaningTask });
+                        MasterGameTask masterCleaningTask = new MasterGameTask(MasterGameTask.ActionType.Build, "Clean " + layoutCoordinateMap.GetTerrainAt(layoutCoordinate).name, new GameTask[] { cleaningTask });
 
                         queue.QueueTask(masterCleaningTask);
                         map.AssociateTask(masterCleaningTask, layoutCoordinate);
@@ -163,7 +164,7 @@ public class TerrainManager : MonoBehaviour {
                     buildingAction.description = "Building";
                     buildingAction.layoutCoordinate = coordinate;
 
-                    buildingAction.blueprintList = new ConstructionBlueprint[] { Building.Blueprint.Tower, Building.Blueprint.Refinery, Building.Blueprint.StationShip };
+                    buildingAction.blueprintList = new ConstructionBlueprint[] { Building.Blueprint.Tower, Building.Blueprint.StationShip }; //Building.Blueprint.Refinery,
 
                     actionList.Add(buildingAction);
                 }
@@ -224,7 +225,7 @@ public struct RegionType {
 
 [System.Serializable]
 public enum Chance {
-    Abysmal, Low, Medium, High, VeryHigh
+    AlmostImpossible, Abysmal, Low, Medium, High, VeryHigh, AlmostGuarenteed
 }
 
 public struct ChanceTier {
@@ -298,6 +299,7 @@ public struct TerrainType {
     public struct MineralChance {
         public MineralType type;
         public Chance chance;
+        public int maxNumberGenerated;
     }
 
     public MineralChance[] mineralChances;
@@ -358,16 +360,20 @@ static class EnumExtensions {
 
     public static string NameAsRarity(this Chance chance) {
         switch(chance) {
+            case Chance.AlmostImpossible:
+                return "Almost Never";
             case Chance.Abysmal:
                 return "Very Rare";
             case Chance.Low:
                 return "Rare";
             case Chance.Medium:
-                return "Medium";
-            case Chance.High:
                 return "Common";
+            case Chance.High:
+                return "Very Common";
             case Chance.VeryHigh:
                 return "Plentiful";
+            case Chance.AlmostGuarenteed:
+                return "Bountiful";
         }
 
         return "";
@@ -375,6 +381,8 @@ static class EnumExtensions {
 
     public static string NameAsDifficulty(this Chance chance) {
         switch(chance) {
+            case Chance.AlmostImpossible:
+                return "Easiest";
             case Chance.Abysmal:
                 return "Very Easy";
             case Chance.Low:
@@ -385,6 +393,8 @@ static class EnumExtensions {
                 return "Difficult";
             case Chance.VeryHigh:
                 return "Very Difficult";
+            case Chance.AlmostGuarenteed:
+                return "Insanely Difficult";
         }
 
         return "";
@@ -392,6 +402,8 @@ static class EnumExtensions {
 
     public static string NameAsSkill(this Chance chance) {
         switch(chance) {
+            case Chance.AlmostImpossible:
+                return "Glacier Speed";
             case Chance.Abysmal:
                 return "Very Slow";
             case Chance.Low:
@@ -402,6 +414,8 @@ static class EnumExtensions {
                 return "Fast";
             case Chance.VeryHigh:
                 return "Very Fast";
+            case Chance.AlmostGuarenteed:
+                return "Lightning";
         }
 
         return "";

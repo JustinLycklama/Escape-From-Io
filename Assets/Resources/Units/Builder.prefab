@@ -121,12 +121,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9bc56efd5be8ea54b874012879da94dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 80
+  speed: 50
   turnSpeed: 3
   followPathTurnSpeed: 10
   turnDistance: 5
   stoppingDistance: 10
   statusLocation: {fileID: 4146627357876593413}
+  remainingDuration: 180
   buildableComponent: {fileID: 8754757265917881465}
   followCameraLocation: {fileID: 0}
 --- !u!114 &8754757265917881465
@@ -141,7 +142,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f382cb59fba3b80468fcc5959b82382b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: 
   taskAlreadyDictated: 0
   meshTiers:
   - meshRenderes:

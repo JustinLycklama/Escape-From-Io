@@ -300,22 +300,31 @@ public class Map : ActionableItem  {
             Vector3 position1 = position + new Vector3(offset, 0, 0);
             Vector3 position2 = position + new Vector3(0, 0, offset);
             Vector3 position3 = position + new Vector3(-offset, 0, 0);
+            Vector3 position4 = position + new Vector3(0, 0, -offset);
 
-            Vector3[] positions = new Vector3[] { position1, position2, position3 };
+            Vector3 position5 = position + new Vector3(offset, 0, offset);
+            Vector3 position6 = position + new Vector3(offset, 0, -offset);
+            Vector3 position7 = position + new Vector3(-offset, 0, offset);
+            Vector3 position8 = position + new Vector3(-offset, 0, -offset);
 
-            //int rInt = Random.Range(1, 3);
+            Vector3 position9 = position + new Vector3(0, 0, 0);
+
+            List<Vector3> positions = new List<Vector3> { position1, position2, position3, position4, position5, position6, position7, position8, position9 };
 
             GameResourceManager resourceManager = Script.Get<GameResourceManager>();
 
             Dictionary<MineralType, int> mineralLists = resourceManager.MineralListForCoordinate(coordinate);
-
-            int positionIndex = 0;
+            
             foreach (MineralType mineralType in mineralLists.Keys) {
-                int count = mineralLists[mineralType];
+                for(int i = 0; i < mineralLists[mineralType]; i++) {
+                    int rInt = Random.Range(0, positions.Count - 1);
 
-                Ore ore = resourceManager.CreateMineral(mineralType);
-                ore.transform.position = positions[positionIndex];
-                positionIndex++;
+                    Vector3 randomPosition = positions[rInt];
+                    positions.RemoveAt(rInt);
+
+                    Ore ore = resourceManager.CreateMineral(mineralType);
+                    ore.transform.position = randomPosition;
+                }                              
             }
 
             terraformTargetCoordinateMap[coordinate.x, coordinate.y] = null;

@@ -92,12 +92,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 13ffe4530e8c165489cb400280f0f052, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 80
+  speed: 65
   turnSpeed: 3
   followPathTurnSpeed: 10
   turnDistance: 5
   stoppingDistance: 10
   statusLocation: {fileID: 8853654982880946024}
+  remainingDuration: 180
   buildableComponent: {fileID: 2630742768244688191}
   followCameraLocation: {fileID: 1064964591869565853}
   weaponSet:
@@ -117,7 +118,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f382cb59fba3b80468fcc5959b82382b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  description: 
   taskAlreadyDictated: 0
   meshTiers:
   - meshRenderes:
