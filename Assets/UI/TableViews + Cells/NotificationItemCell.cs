@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class NotificationItemCell : MonoBehaviour, ButtonDelegate {
+public class NotificationItemCell : MonoBehaviour, GameButtonDelegate {
     public CanvasGroup canvasGroup;
 
     public Text text;

@@ -10,6 +10,9 @@ public class StationShip : Building, CanSceneChangeDelegate {
     protected override void CompleteBuilding() {
         MessageWindow messageWindow = UIManager.Blueprint.MessageWindow.Instantiate() as MessageWindow;
 
+        TimeManager timeManager = Script.Get<TimeManager>();
+        float completionTime = timeManager.globalTimer;
+
         Action okay = () => {
             FadePanel panel = Tag.FadePanel.GetGameObject().GetComponent<FadePanel>();
 
@@ -17,10 +20,8 @@ public class StationShip : Building, CanSceneChangeDelegate {
                 canSceneChange = true;
             };
 
-            TimeManager timeManager = Script.Get<TimeManager>();
-
             panel.FadeOut(true, completed);
-            SceneManagement.sharedInstance.ChangeScene(SceneManagement.State.GameFinish, null, null, this, timeManager.globalTimer);
+            SceneManagement.sharedInstance.ChangeScene(SceneManagement.State.GameFinish, null, null, this, completionTime);
         };
 
         messageWindow.SetTitleAndText("SUCCESS", "You've created a ship to return to earth!");

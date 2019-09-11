@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TaskAndUnitDetailPanel : NavigationPanel, TaskQueueDelegate, UnitManagerDelegate, TableViewDelegate, ButtonDelegate {
+public class TaskAndUnitDetailPanel : NavigationPanel, TaskQueueDelegate, UnitManagerDelegate, TableViewDelegate, GameButtonDelegate {
     private MasterGameTask.ActionType actionType;
 
     private MasterGameTask[] taskList = new MasterGameTask[0];

@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
 
-public class TabController : MonoBehaviour, ButtonDelegate {
+public class TabController : MonoBehaviour, GameButtonDelegate {
 
     public GameButton prototypeButton;
     //public Text prototypeText;

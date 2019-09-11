@@ -7,7 +7,7 @@ public interface HelpPresenter {
     void dismiss(HelpWindow window);
 }
 
-public class HelpWindow : MonoBehaviour, ButtonDelegate {
+public class HelpWindow : MonoBehaviour, GameButtonDelegate {
     public GameButton closeButton;
     public FadePanel fadePanel;
 

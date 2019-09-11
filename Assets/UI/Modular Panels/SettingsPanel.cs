@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SettingsPanel : MonoBehaviour, PlayerBehaviourUpdateDelegate, ButtonDelegate {
+public class SettingsPanel : MonoBehaviour, PlayerBehaviourUpdateDelegate, GameButtonDelegate {
     public GameButton settingsButton;
     public GameButton playButton;
     public GameButton pauseButton;

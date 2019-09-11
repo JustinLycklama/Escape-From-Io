@@ -2,13 +2,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface ButtonDelegate {
+public interface GameButtonDelegate {
     void ButtonDidClick(GameButton button);
 }
 
 public class GameButton : Clickable {
 
-    public ButtonDelegate buttonDelegate;
+    public GameButtonDelegate buttonDelegate;
 
     protected override void DidClick() {
         if (buttonDelegate != null) {

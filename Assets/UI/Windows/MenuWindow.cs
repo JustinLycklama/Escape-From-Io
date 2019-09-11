@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MenuWindow : MonoBehaviour, ButtonDelegate, CanSceneChangeDelegate, HelpPresenter {
+public class MenuWindow : MonoBehaviour, GameButtonDelegate, CanSceneChangeDelegate, HelpPresenter {
     public GameButton continueButton;
     public GameButton restartButton;
     public GameButton helpButton;

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UnitDisplayCell : MonoBehaviour, TaskStatusUpdateDelegate, ButtonDelegate {
+public class UnitDisplayCell : MonoBehaviour, TaskStatusUpdateDelegate, GameButtonDelegate {
 
     public Text unitTitleText;
     public Text unitTypeText;

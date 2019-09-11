@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class Pages : MonoBehaviour, ButtonDelegate {
+public class Pages : MonoBehaviour, GameButtonDelegate {
     public Transform detailPanel;
 
     public GameButton backButton;

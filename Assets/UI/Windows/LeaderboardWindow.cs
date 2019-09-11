@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class LeaderboardWindow : MonoBehaviour, ButtonDelegate, CanSceneChangeDelegate {
+public class LeaderboardWindow : MonoBehaviour, GameButtonDelegate, CanSceneChangeDelegate {
     public GameButton closeButton;
     public GameButton replayButton;
 

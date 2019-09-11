@@ -3,8 +3,13 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class HighscoreCell : MonoBehaviour, ButtonDelegate {
+public interface HighscoreCellDelegate {
+    void DidSubmit(HighscoreCell cell);
+}
 
+public class HighscoreCell : MonoBehaviour, GameButtonDelegate {
+
+    public Text rank;
     public Text time;
     public Text fullName;
 
@@ -17,11 +22,47 @@ public class HighscoreCell : MonoBehaviour, ButtonDelegate {
 
     public Image backgroundImage;
 
+    [HideInInspector]
+    public HighscoreCellDelegate submitDelegate;
+
+    [HideInInspector]
+    public float score;
+
+    private bool canSubmit = false;
+    private bool subCell = false;
+
     private void Awake() {
         submitButton.buttonDelegate = this;
+
+        firstName.onValueChanged.AddListener(delegate { ValueChangeCheck(); });
+        lastName.onValueChanged.AddListener(delegate { ValueChangeCheck(); });
     }
 
-    public void SetIsSubmissionCell(bool subCell) {
+    void Update() {
+        if(!subCell) { return; }
+
+        if(firstName.isFocused && Input.GetKeyDown(KeyCode.Tab)) {
+            lastName.Select();
+            lastName.ActivateInputField();
+        }
+    }
+
+    private void ValueChangeCheck() {
+        submitButton.SetEnabled(canSubmit && firstName.text.Length > 0 && lastName.text.Length > 0);
+    }
+
+    public void SetRank(int rank) {
+        this.rank.text = rank.ToString() + ".";
+    }
+
+    public void SetScore(float score) {
+        this.score = score;
+
+        System.TimeSpan timeSpan = new System.TimeSpan(0, 0, Mathf.FloorToInt(score)); 
+        time.text = timeSpan.ToString();
+    }
+
+    public void SetIsSubmissionCell(bool subCell, bool canSubmit = false) {
         Color baseColor = backgroundImage.color;
 
         if (subCell) {
@@ -29,7 +70,12 @@ public class HighscoreCell : MonoBehaviour, ButtonDelegate {
             SetObjectActive(InputFieldLayout, true);
             SetObjectActive(submitButton.gameObject, true);
 
-            submitButton.SetEnabled(SceneManagement.sharedInstance.score != null);            
+            this.subCell = subCell;
+            this.canSubmit = canSubmit;
+            ValueChangeCheck();
+
+            firstName.Select();
+            firstName.ActivateInputField();
 
             baseColor.a = 1f;
         } else {
@@ -55,7 +101,6 @@ public class HighscoreCell : MonoBehaviour, ButtonDelegate {
 
     public void ButtonDidClick(GameButton button) {
         button.SetEnabled(false);
-
-
+        submitDelegate.DidSubmit(this);
     }
 }

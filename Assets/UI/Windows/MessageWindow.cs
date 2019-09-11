@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class MessageWindow : MonoBehaviour, ButtonDelegate {
+public class MessageWindow : MonoBehaviour, GameButtonDelegate {
 
     public Text title;
     public Text detailText;

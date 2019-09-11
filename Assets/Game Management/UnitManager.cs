@@ -45,7 +45,7 @@ public class UnitManager : MonoBehaviour, TaskStatusUpdateDelegate {
     }
 
     private void Start() {
-        SceneManagement.sharedInstance.sceneChangeEvent += () => {
+        SceneManagement.sharedInstance.sceneUnloadEvent += () => {
             unitCount[MasterGameTask.ActionType.Build] = 0;
             unitCount[MasterGameTask.ActionType.Mine] = 0;
             unitCount[MasterGameTask.ActionType.Move] = 0;

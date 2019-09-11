@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TitleWindow : MonoBehaviour, ButtonDelegate, CanSceneChangeDelegate, HelpPresenter {
+public class TitleWindow : MonoBehaviour, GameButtonDelegate, CanSceneChangeDelegate, HelpPresenter {
     public GameButton tutorial;
     public GameButton newGame;
     public GameButton leaderboard;

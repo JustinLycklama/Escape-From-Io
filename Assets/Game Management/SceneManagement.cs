@@ -29,16 +29,20 @@ public class SceneManagement {
     public enum State { Title, GameFinish, NewGame, Tutorial }
 
     public State state { get; private set; } = State.Title;
-    public float? score { get; private set; } = null;
+    public float? score = null;
 
     private List<SceneChangeListener> delegateList = new List<SceneChangeListener>();
 
     // Experimental Dup of SceneChangeListener
-    public UnityEngine.Events.UnityAction sceneChangeEvent;
+    public UnityEngine.Events.UnityAction sceneLoadEvent;
+    public UnityEngine.Events.UnityAction sceneUnloadEvent;
 
     SceneManagement() {
-        sceneChangeEvent = new UnityEngine.Events.UnityAction(SceneChange);
+        sceneUnloadEvent = new UnityEngine.Events.UnityAction(SceneUnload);
+        sceneLoadEvent = new UnityEngine.Events.UnityAction(SceneLoad);
+
         SceneManager.sceneUnloaded += OnSceneUnloaded;
+        SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
     public void ChangeScene(State state, Action<float> percentUpdated, Action complete, CanSceneChangeDelegate canChangeDelegate, float? score = null) {
@@ -65,11 +69,16 @@ public class SceneManagement {
         Tag.ClearCache();
         Script.ClearCache();
 
-        sceneChangeEvent.Invoke();
+        sceneUnloadEvent.Invoke();
         NotifySceneListeners();
     }
 
-    private void SceneChange() { }
+    private void OnSceneLoaded(Scene current, LoadSceneMode loadSceneMode) {
+        sceneLoadEvent.Invoke();
+    }
+
+    private void SceneUnload() { }
+    private void SceneLoad() { }
 
     /*
      * SceneChangeListener Interface
