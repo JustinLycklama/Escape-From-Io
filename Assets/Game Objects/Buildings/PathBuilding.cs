@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class PathBuilding : Building {
 
-    protected override string title => "Path";
+    public override string title => "Path";
     protected override float constructionModifierSpeed => 5;    
 
     protected override void CompleteBuilding() {

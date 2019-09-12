@@ -68,10 +68,24 @@ public class PathfindingGrid : MonoBehaviour, TerrainUpdateDelegate {
 
     public void UpdateGrid(Map map, LayoutCoordinate layoutCoordinate) {
         PathGridCoordinate[][] updatedPathGridCoordinates = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(layoutCoordinate);
+        BuildingManager buildingManager = Script.Get<BuildingManager>();
 
-        foreach (PathGridCoordinate[] updatedCoordinateColumn in updatedPathGridCoordinates) {
-            foreach(PathGridCoordinate updatedCoordinate in updatedCoordinateColumn) {
-                grid[updatedCoordinate.xLowSample, updatedCoordinate.yLowSample].walkable = map.GetTerrainAt(layoutCoordinate).walkable;
+        int width = updatedPathGridCoordinates.GetLength(0);
+        for(int x = 0; x < width; x++) {
+
+            PathGridCoordinate[] updatedCoordinateColumn = updatedPathGridCoordinates[x];
+            int height = updatedCoordinateColumn.GetLength(0);
+
+            for(int y = 0; y < height; y++) {
+                PathGridCoordinate updatedCoordinate = updatedCoordinateColumn[y];
+                bool buildingBlocksSpace = false;
+
+                // If we are in the center square, a building blocks our location if one exists at this layout coordinate
+                if (x == width / 2 && y == height / 2) {
+                    buildingBlocksSpace = buildingManager.buildlingAtLocation(layoutCoordinate) != null;
+                }
+
+                grid[updatedCoordinate.xLowSample, updatedCoordinate.yLowSample].walkable = map.GetTerrainAt(layoutCoordinate).walkable && !buildingBlocksSpace;
             }
         }
 

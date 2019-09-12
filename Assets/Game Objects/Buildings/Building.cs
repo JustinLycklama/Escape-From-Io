@@ -50,7 +50,7 @@ public abstract class Building : ActionableItem, Selectable {
 
     public override string description => title;
 
-    protected abstract string title { get; }
+    public abstract string title { get; }
     protected abstract float constructionModifierSpeed { get; }
 
     // Building status

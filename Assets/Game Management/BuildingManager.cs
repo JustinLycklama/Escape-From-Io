@@ -51,12 +51,19 @@ public class BuildingManager : MonoBehaviour {
 
         Script.Get<GameResourceManager>().CueueGatherTasksForCost(cost, worldPosition, building, asLastPriority);
 
-        locationBuildingMap[layoutCoordinate] = building;
-        if (AttemptToSetUnwalkable(layoutCoordinate)) {
-            listOfCoordinatesToBlockTerrain.Add(layoutCoordinate);
-        }
+        AddBuildingAtLocation(building, layoutCoordinate);
 
         NotifyBuildingUpdate(building, true);
+    }
+
+    public void AddBuildingAtLocation(Building building, LayoutCoordinate layoutCoordinate) {
+        // Don't record "PathBuilding" buildings for blocking purposes
+        if(building.title != "Path") {
+            locationBuildingMap[layoutCoordinate] = building;
+            if(AttemptToSetUnwalkable(layoutCoordinate)) {
+                listOfCoordinatesToBlockTerrain.Add(layoutCoordinate);
+            }
+        }
     }
 
     public void CompleteBuilding(Building building) {

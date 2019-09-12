@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Tower : Building {
 
-    protected override string title => "Tower";
+    public override string title => "Tower";
     protected override float constructionModifierSpeed => 0.45f;
 
     public override BuildingEffectStatus BuildingStatusEffects() {

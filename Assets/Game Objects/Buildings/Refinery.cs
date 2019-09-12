@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Refinery : Building {
 
-    protected override string title => "Refinery";
+    public override string title => "Refinery";
     protected override float constructionModifierSpeed => 0.35f;
 
     //protected override int requiredOre => 5;

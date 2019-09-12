@@ -74,9 +74,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate {
             building.transform.position = spawnWorldPosition.vector3;
             
             building.ProceedToCompleteBuilding();
-            Script.Get<PathfindingGrid>().SetCenterGridWalkable(spawnCoordinate, false);
-
-            spawnCoordinate.mapContainer.map.UpdateUserActionsAt(spawnCoordinate);
+            Script.Get<BuildingManager>().AddBuildingAtLocation(building, spawnCoordinate);
 
             Script.Get<PlayerBehaviour>().JumpCameraToPosition(spawnWorldPosition.vector3);
         });
