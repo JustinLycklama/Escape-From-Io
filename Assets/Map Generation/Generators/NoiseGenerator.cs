@@ -87,7 +87,17 @@ public static class NoiseGenerator {
         return noiseMap;
     }
 
-    public static void NormalizeMap(float[,] noiseMap) {
+    public struct MinMaxofNormalize {
+        public float min;
+        public float max;
+
+        public MinMaxofNormalize(float min, float max) {
+            this.min = min;
+            this.max = max;
+        }
+    }
+
+    public static MinMaxofNormalize NormalizeMap(float[,] noiseMap) {
         int mapWidth = noiseMap.GetLength(0);
         int mapHeight = noiseMap.GetLength(1);
 
@@ -114,5 +124,7 @@ public static class NoiseGenerator {
                 noiseMap[x, y] = Mathf.InverseLerp(minNoiseHeight, maxNoiseHeight, noiseMap[x, y]);
             }
         }
+
+        return new MinMaxofNormalize(minNoiseHeight, maxNoiseHeight);
     }
 }

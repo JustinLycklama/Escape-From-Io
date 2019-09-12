@@ -147,12 +147,33 @@ public struct MapCoordinate {
 
     //}
 
+        
+    // Get the center MapCoordinate
     public MapCoordinate(LayoutCoordinate layoutCoordinate) {
         Constants constants = Script.Get<Constants>();
         x = layoutCoordinate.x * constants.featuresPerLayoutPerAxis + (constants.featuresPerLayoutPerAxis / 2f);
         y = layoutCoordinate.y * constants.featuresPerLayoutPerAxis + (constants.featuresPerLayoutPerAxis / 2f);
 
         mapContainer = layoutCoordinate.mapContainer;
+    }
+
+    // Get all MapCoordinates for LayoutCoordinate
+    public static MapCoordinate[,] MapCoordinatesFromLayoutCoordinate(LayoutCoordinate layoutCoordinate) {
+        Constants constants = Script.Get<Constants>();
+        int coordinatesPerLayout = constants.featuresPerLayoutPerAxis;
+
+        int startX = layoutCoordinate.x * coordinatesPerLayout;
+        int startY = layoutCoordinate.y * coordinatesPerLayout;
+
+        MapCoordinate[,] mapCoordinates = new MapCoordinate[coordinatesPerLayout, coordinatesPerLayout];
+
+        for(int x = 0; x < constants.featuresPerLayoutPerAxis; x++) {
+            for(int y = 0; y < constants.featuresPerLayoutPerAxis; y++) {
+                mapCoordinates[x, y] = new MapCoordinate(startX + x, startY + y, layoutCoordinate.mapContainer);
+            }
+        }
+
+        return mapCoordinates;
     }
 
     public static MapCoordinate FromWorldPosition(WorldPosition worldPosition) {

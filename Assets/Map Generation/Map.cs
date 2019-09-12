@@ -2,26 +2,24 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Map : ActionableItem, MasterTaskUpdateDelegate {
+public class TerraformTarget {
+    public LayoutCoordinate coordinate;
+    public TerrainType terrainTypeTarget;
 
-    class TerraformTarget {
-        public LayoutCoordinate coordinate;
-        public TerrainType terrainTypeTarget;
+    public float[,] heightTarget;
+    public float[,] initialHeight;
 
-        public float heightTarget;
-        public float initialHeight;
+    public float percentage;
 
-        public float percentage;
+    public TerraformTarget(LayoutCoordinate coordinate, TerrainType terrainTypeTarget) {
+        this.coordinate = coordinate;
+        this.terrainTypeTarget = terrainTypeTarget;
 
-        public TerraformTarget(LayoutCoordinate coordinate, TerrainType terrainTypeTarget, float heightTarget, float initialHeight) {
-            this.coordinate = coordinate;
-            this.terrainTypeTarget = terrainTypeTarget;
-            this.heightTarget = heightTarget;
-            this.initialHeight = initialHeight;
-
-            percentage = 0;
-        }
+        percentage = 0;
     }
+}
+
+public class Map : ActionableItem, MasterTaskUpdateDelegate {
 
     // Map Width + Height in Map Coordinates (Not Layout Coordinates)
     public int mapWidth;
@@ -31,14 +29,14 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
     public MeshData meshData;
     public Texture2D meshTexture;
 
-    private TerrainType[,] terrainData;
+    //private TerrainType[,] terrainData; // TODO: Remove
     public int featuresPerLayoutPerAxis;
 
-    float[,] layoutNoiseMap;
-    float[,] groundFeaturesNoiseMap;
-    float[,] mountainFeaturesNoiseMap;
+    //float[,] layoutNoiseMap;
+    //float[,] groundFeaturesNoiseMap;
+    //float[,] mountainFeaturesNoiseMap;
 
-    float[,] finalHeightMap;
+    //float[,] finalHeightMap;
 
     public MapContainer mapContainer;
 
@@ -46,25 +44,30 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
 
     public override string description => "Terrain";
 
-    public void InitMap(TerrainType[,] terrainData, float[,] finalHeightMap, float[,] layoutNoiseMap, float[,] groundFeaturesNoiseMap, float[,] mountainFeaturesNoiseMap, MeshData meshData) {
+    public void InitMap(TerrainType[,] terrainData, MeshData meshData) { //  float[,] finalHeightMap, float[,] layoutNoiseMap, float[,] groundFeaturesNoiseMap, float[,] mountainFeaturesNoiseMap,
         Constants constants = Script.Get<Constants>();
         featuresPerLayoutPerAxis = constants.featuresPerLayoutPerAxis;
 
-        mapWidth = finalHeightMap.GetLength(0);
-        mapHeight = finalHeightMap.GetLength(1);
+
+        // Replacement of below
+        mapWidth = terrainData.GetLength(0) * constants.featuresPerLayoutPerAxis;
+        mapHeight = terrainData.GetLength(1) * constants.featuresPerLayoutPerAxis;
+
+        //mapWidth = finalHeightMap.GetLength(0);
+        //mapHeight = finalHeightMap.GetLength(1);
 
         //this.textureMapSize = new Vector2(mapWidth, mapHeight);
 
 
-        this.finalHeightMap = finalHeightMap;
+        //this.finalHeightMap = finalHeightMap;
 
-        this.layoutNoiseMap = layoutNoiseMap;
-        this.groundFeaturesNoiseMap = groundFeaturesNoiseMap;
-        this.mountainFeaturesNoiseMap = mountainFeaturesNoiseMap;
+        //this.layoutNoiseMap = layoutNoiseMap;
+        //this.groundFeaturesNoiseMap = groundFeaturesNoiseMap;
+        //this.mountainFeaturesNoiseMap = mountainFeaturesNoiseMap;
 
         this.meshData = meshData;
         //this.meshTexture = meshTexture;
-        this.terrainData = terrainData;
+        //this.terrainData = terrainData;
 
         int terrainWidth = terrainData.GetLength(0);
         int terrainHeight = terrainData.GetLength(1);
@@ -73,26 +76,38 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
     }
 
     public TerrainType GetTerrainAt(LayoutCoordinate layoutCoordinate) {
-        if (layoutCoordinate.x >= terrainData.GetLength(0) || layoutCoordinate.y >= terrainData.GetLength(1)) {
-            throw new MissingReferenceException();
-        }
-
-        return terrainData[layoutCoordinate.x, layoutCoordinate.y];
+        return Script.Get<MapGenerator>().GetTerrainAt(layoutCoordinate);
     }
 
     // Returns the height in MAP COORDINATE position
     public float getHeightAt(MapCoordinate coordinate) {
-        int mapWidth = finalHeightMap.GetLength(0);
-        int mapHeight = finalHeightMap.GetLength(1);
+        //int mapWidth = finalHeightMap.GetLength(0);
+        //int mapHeight = finalHeightMap.GetLength(1);
 
-        // If I have a map coordinate, should it be guarenteed to be on the map?
-        if(coordinate.x < 0 || coordinate.y < 0 || coordinate.x >= mapWidth || coordinate.y >= mapHeight) {
-            return 10;
-        }
+        //// If I have a map coordinate, should it be guarenteed to be on the map?
+        //if(coordinate.x < 0 || coordinate.y < 0 || coordinate.x >= mapWidth || coordinate.y >= mapHeight) {
+        //    return 10;
+        //}
 
-        // TODO: Triangle Calculations        
+        //// TODO: Triangle Calculations        
 
-        return finalHeightMap[coordinate.xLowSample, coordinate.yLowSample];
+        //return finalHeightMap[coordinate.xLowSample, coordinate.yLowSample];
+
+        return Script.Get<MapGenerator>().GetHeightAt(coordinate);        
+    }
+
+    public void UpdateTerrainAtLocation(LayoutCoordinate layoutCoordinate, TerrainType terrainType) {
+        // Update the terrain type at this location
+        Script.Get<MapGenerator>().UpdateTerrainAt(layoutCoordinate, terrainType);
+
+        // Update the BoxCollider Height
+        mapContainer.ResizeBoxColliderAt(layoutCoordinate);
+
+        // Update pathfinding grid
+        Script.Get<PathfindingGrid>().UpdateGrid(this, layoutCoordinate);
+
+        UpdateUserActionsAt(layoutCoordinate);
+        mapContainer.UpdateShaderTerrainTextures();
     }
 
     //Dictionary<LayoutCoordinate, UserAction[]> userActionDictionary = new Dictionary<LayoutCoordinate, UserAction[]>();
@@ -110,9 +125,10 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
 
 
     public void CreateAllActionableItemOverrides() {
+        Constants constants = Script.Get<Constants>();
 
-        int width = terrainData.GetLength(0);
-        int height = terrainData.GetLength(1);
+        int width = constants.layoutMapWidth;
+        int height = constants.layoutMapHeight;
 
         userActionCoordinateMap = new UserAction[width, height][];
         associatedTasksCoordinateMap = new MasterGameTask[width, height];
@@ -260,11 +276,12 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
             RegionType regionType = terrainManager.regionTypeMap[targetTerrain.Value.regionType];
             float targetTerrainHeight = regionType.plateauAtBase ? regionType.noiseBase : regionType.noiseMax;
 
-            terraformTarget = new TerraformTarget(coordinate, targetTerrain.Value, targetTerrainHeight, layoutNoiseMap[coordinate.x, coordinate.y]);
+            terraformTarget = new TerraformTarget(coordinate, targetTerrain.Value);
             terraformTargetCoordinateMap[coordinate.x, coordinate.y] = terraformTarget;
         }
 
         terraformTarget.percentage += rate * GetTerrainAt(coordinate).modificationSpeedModifier;
+
         if (terraformTarget.percentage >= 1) {
             terraformTarget.percentage = 1;
 
@@ -316,26 +333,9 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
         return terraformTarget.percentage;
     }
 
-    public void UpdateTerrainAtLocation(LayoutCoordinate layoutCoordinate, TerrainType terrainType) {
-        // Update the terrain type at this location
-        terrainData[layoutCoordinate.x, layoutCoordinate.y] = terrainType;
-
-
-        // Update the BoxCollider Height
-        mapContainer.ResizeBoxColliderAt(layoutCoordinate);
-
-        // Update pathfinding grid
-        Script.Get<PathfindingGrid>().UpdateGrid(this, layoutCoordinate);
-
-        UpdateUserActionsAt(layoutCoordinate);
-        mapContainer.UpdateShaderTerrainTextures();
-    }
-
     private void TerraformHeightMap(TerraformTarget terraformTarget) {
-        float currentHeightAtCoordinate = Mathf.Lerp(terraformTarget.initialHeight, terraformTarget.heightTarget, terraformTarget.percentage);
-
         MapGenerator mapGenerator = Script.Get<MapGenerator>();
-        finalHeightMap = mapGenerator.TerraformHeightMap(layoutNoiseMap, groundFeaturesNoiseMap, mountainFeaturesNoiseMap, terrainData, currentHeightAtCoordinate, terraformTarget.coordinate);
+        float[,] finalHeightMap = mapGenerator.TerraformHeightMap(terraformTarget);
 
         MeshGenerator.UpdateTerrainMesh(meshData, finalHeightMap, featuresPerLayoutPerAxis, terraformTarget.coordinate);
         mapContainer.DrawMesh();

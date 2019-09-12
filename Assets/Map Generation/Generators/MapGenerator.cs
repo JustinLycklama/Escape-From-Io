@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class MapGenerator : MonoBehaviour {
 
-    public enum DrawMode {NoiseMap, ColorMap, Mesh}
+    public enum DrawMode { NoiseMap, ColorMap, Mesh }
     public DrawMode drawMode;
 
     [Range(0, 1)]
@@ -119,6 +119,46 @@ public class MapGenerator : MonoBehaviour {
         return true;
     }
 
+
+    /*
+     * Entire map features and data
+     * */
+
+    // In layoutCoordinate space
+    int mapLayoutWidth;
+    int mapLayoutHeight;
+
+    int totalLayoutWidth;
+    int totalLayoutHeight;
+
+    // In MapCoordinate space
+    int mapFullWidth;
+    int mapFullHeight;
+
+    int totalFullWidth;
+    int totalFullHeight;
+
+    // Final noise output
+    float[,] layoutNoiseMap;
+    TerrainType[,] terrainMap;
+
+    float[,] groundFeaturesNoiseMap;
+    float[,] mountainFeaturesNoiseMap;
+
+    float[,] finalNoiseMap;
+
+    NoiseGenerator.MinMaxofNormalize minMaxOfFinalMap;
+
+    class NoiseSubset {
+        public float[,] layoutNoiseMap;
+        public  TerrainType[,] terrainMap;
+
+        public float[,] groundFeaturesNoiseMap;
+        public float[,] mountainFeaturesNoiseMap;
+
+        public float[,] finalNoiseMap;
+    }
+
     // Generate the series of maps, returning a suitable spawn coordinate
     public LayoutCoordinate GenerateWorld(int mapCountX, int mapCountY) {
         MapsManager mapsManager = Script.Get<MapsManager>();
@@ -130,13 +170,14 @@ public class MapGenerator : MonoBehaviour {
          * Generate Layout 
          * */
 
-        int mapLayoutWidth = constants.layoutMapWidth;
-        int mapLayoutHeight = constants.layoutMapHeight;
+        // In layoutCoordinate space
+        mapLayoutWidth = constants.layoutMapWidth;
+        mapLayoutHeight = constants.layoutMapHeight;
 
-        int totalLayoutWidth = mapLayoutWidth * constants.mapCountX;
-        int totalLayoutHeight = mapLayoutHeight * constants.mapCountY;
+        totalLayoutWidth = mapLayoutWidth * constants.mapCountX;
+        totalLayoutHeight = mapLayoutHeight * constants.mapCountY;
 
-        float[,] layoutNoiseMap = new float[0, 0];
+        layoutNoiseMap = new float[0, 0];
         bool success = false;
 
         while(success == false) {
@@ -154,24 +195,26 @@ public class MapGenerator : MonoBehaviour {
         terrainManager.SetGroundMutatorMap(groundMutatorMap);
         terrainManager.SetMounainMutatorMap(mountainMutatorMap);
 
-        TerrainType[,] terrainMap = PlateauMap(layoutNoiseMap);
+        terrainMap = PlateauMap(layoutNoiseMap);
 
         /*
          * Generate Details
          * */
 
-        int mapFullWidth = mapLayoutWidth * constants.featuresPerLayoutPerAxis;
-        int mapFullHeight = mapLayoutHeight * constants.featuresPerLayoutPerAxis;
+        // In MapCoordinate space
+        mapFullWidth = mapLayoutWidth * constants.featuresPerLayoutPerAxis;
+        mapFullHeight = mapLayoutHeight * constants.featuresPerLayoutPerAxis;
 
-        int totalFullWidth = mapFullWidth * constants.mapCountX;
-        int totalFullHeight = mapFullHeight * constants.mapCountY;
+        totalFullWidth = mapFullWidth * constants.mapCountX;
+        totalFullHeight = mapFullHeight * constants.mapCountY;
 
-        float[,] groundFeaturesNoiseMap = GenerateGroundFeaturesMap(totalFullWidth, totalFullHeight);
-        float[,] mountainFeaturesNoiseMap = GenerateMountainFeaturesMap(totalFullWidth, totalFullHeight);
+        // Final Noise Generation
+        groundFeaturesNoiseMap = GenerateGroundFeaturesMap(totalFullWidth, totalFullHeight);
+        mountainFeaturesNoiseMap = GenerateMountainFeaturesMap(totalFullWidth, totalFullHeight);
 
-        float[,] finalNoiseMap = CreateMapWithFeatures(layoutNoiseMap, groundFeaturesNoiseMap, mountainFeaturesNoiseMap, terrainMap);
+        finalNoiseMap = CreateMapWithFeatures();
 
-        NoiseGenerator.NormalizeMap(finalNoiseMap);
+        minMaxOfFinalMap = NoiseGenerator.NormalizeMap(finalNoiseMap);
 
         // Setup world
         LayoutCoordinate spawnCoordinate = new LayoutCoordinate(0, 0, mapsManager.mapContainers[0]);
@@ -183,27 +226,12 @@ public class MapGenerator : MonoBehaviour {
                 spawnCoordinate = new LayoutCoordinate(spawnCoordX - startXLayout, spawnCoordY - startYLayout, container);
             }
 
-            //int xOffset = (container.mapX == 0 ? 0 : 1);
-            //int yOffset = (container.mapY == 0 ? 0 : 1);
-
-            float[,] mapLayoutNoise = RangeSubset(layoutNoiseMap, startXLayout, startYLayout, mapLayoutWidth, mapLayoutHeight);
-            TerrainType[,] mapTerrainData = RangeSubset(terrainMap, startXLayout, startYLayout, mapLayoutWidth, mapLayoutHeight);
-
-            int startXFull = startXLayout * constants.featuresPerLayoutPerAxis;
-            int startYFull = startYLayout * constants.featuresPerLayoutPerAxis;
-
-            float[,] mapGroundFeatures = RangeSubset(groundFeaturesNoiseMap, startXFull, startYFull, mapFullWidth, mapFullHeight);
-            float[,] mapMountainFeatures = RangeSubset(mountainFeaturesNoiseMap, startXFull, startYFull, mapFullWidth, mapFullHeight);
-            float[,] mapFinalNoiseMap = RangeSubset(finalNoiseMap, startXFull, startYFull, mapFullWidth, mapFullHeight);
-
-            //int noiseMapWidth = groundFeaturesNoiseMap.GetLength(0);
-            //int noiseMapHeight = groundFeaturesNoiseMap.GetLength(1);
+            NoiseSubset noiseSubset = GetNoiseSubsetForMap(container);
 
             GameObject mapOject = new GameObject("Map of " + container.name);
             Map map = mapOject.AddComponent<Map>();
 
-            map.InitMap(mapTerrainData, mapFinalNoiseMap, mapLayoutNoise, mapGroundFeatures, mapMountainFeatures,                
-                MeshGenerator.GenerateTerrainMesh(mapFinalNoiseMap));
+            map.InitMap(noiseSubset.terrainMap, MeshGenerator.GenerateTerrainMesh(noiseSubset.finalNoiseMap));
 
             container.setMap(map);
         }
@@ -216,19 +244,113 @@ public class MapGenerator : MonoBehaviour {
         return spawnCoordinate;
     }
 
+    private NoiseSubset GetNoiseSubsetForMap(MapContainer mapContainer) {
+        Constants constants = Script.Get<Constants>();
+
+        NoiseSubset noiseSubset = new NoiseSubset();
+
+        int startXLayout = mapContainer.mapX * mapLayoutWidth;
+        int startYLayout = mapContainer.mapY * mapLayoutHeight;
+
+        noiseSubset.layoutNoiseMap = RangeSubset(layoutNoiseMap, startXLayout, startYLayout, mapLayoutWidth, mapLayoutHeight);
+        noiseSubset.terrainMap = RangeSubset(terrainMap, startXLayout, startYLayout, mapLayoutWidth, mapLayoutHeight);
+
+        int startXFull = startXLayout * constants.featuresPerLayoutPerAxis;
+        int startYFull = startYLayout * constants.featuresPerLayoutPerAxis;
+
+        noiseSubset.groundFeaturesNoiseMap = RangeSubset(groundFeaturesNoiseMap, startXFull, startYFull, mapFullWidth, mapFullHeight);
+        noiseSubset.mountainFeaturesNoiseMap = RangeSubset(mountainFeaturesNoiseMap, startXFull, startYFull, mapFullWidth, mapFullHeight);
+        noiseSubset.finalNoiseMap = RangeSubset(finalNoiseMap, startXFull, startYFull, mapFullWidth, mapFullHeight);
+
+        return noiseSubset;
+    }
+
+    // Returns the height in MAP COORDINATE position
+    public float GetHeightAt(MapCoordinate mapCoordinate) {
+        NoiseSubset noiseSubset = GetNoiseSubsetForMap(mapCoordinate.mapContainer);
+        return noiseSubset.finalNoiseMap[mapCoordinate.xLowSample, mapCoordinate.yLowSample];
+    }
+
+    public TerrainType GetTerrainAt(LayoutCoordinate layoutCoordinate) {
+        Constants constants = Script.Get<Constants>();
+
+        int startX = layoutCoordinate.mapContainer.mapX * constants.layoutMapWidth;
+        int startY = layoutCoordinate.mapContainer.mapY * constants.layoutMapHeight;
+
+        return terrainMap[startX + layoutCoordinate.x, startY + layoutCoordinate.y];
+    }
+
+    // Only call from Map
+    public void UpdateTerrainAt(LayoutCoordinate layoutCoordinate, TerrainType terrainType) {
+        Constants constants = Script.Get<Constants>();
+
+        int startX = layoutCoordinate.mapContainer.mapX * constants.layoutMapWidth;
+        int startY = layoutCoordinate.mapContainer.mapY * constants.layoutMapHeight;
+
+        terrainMap[startX + layoutCoordinate.x, startY + layoutCoordinate.y] = terrainType;
+    }
+
     /*
-     * Map Modification
-     * */
+        * Map Modification
+        * 
+        * MUTATING FUNCTION: layoutNoiseMap, finalNoiseMap
+        * */
 
-    public float[,] TerraformHeightMap(float[,] layoutNoiseMap, float[,] groundFeaturesNoiseMap, float[,] mountainFeaturesNoiseMap, TerrainType[,] terrainMap, float currentLayoutHeight, LayoutCoordinate coordinate) {
-        // TODO More interesting interpolations to mimic mining
+    public float[,] TerraformHeightMap(TerraformTarget terraformTarget) {
+        Constants constants = Script.Get<Constants>();
 
-        layoutNoiseMap[coordinate.x, coordinate.y] = currentLayoutHeight;
+        LayoutCoordinate layoutCoordinate = terraformTarget.coordinate;
+        MapContainer mapContainer = layoutCoordinate.mapContainer;
 
-        float[,] noiseMap = CreateMapWithFeatures(layoutNoiseMap, groundFeaturesNoiseMap, mountainFeaturesNoiseMap, terrainMap);
-        NoiseGenerator.NormalizeMap(noiseMap);
+        int startXLayout = mapContainer.mapX * mapLayoutWidth;
+        int startYLayout = mapContainer.mapY * mapLayoutHeight;
 
-        return noiseMap;
+        int startXMapCoordinate = mapContainer.mapX * mapFullWidth;
+        int startYMapCoordinate = mapContainer.mapY * mapFullHeight;
+
+        MapCoordinate[,] coordinates = MapCoordinate.MapCoordinatesFromLayoutCoordinate(layoutCoordinate);
+
+        RegionType terraformRegionType = Script.Get<TerrainManager>().regionTypeMap[terraformTarget.terrainTypeTarget.regionType];
+        float heightAtNewRegion = HeightAtRegion(terraformRegionType);
+
+        if(terraformTarget.initialHeight == null || terraformTarget.heightTarget == null) {
+            
+            terraformTarget.initialHeight = new float[constants.featuresPerLayoutPerAxis, constants.featuresPerLayoutPerAxis];
+            terraformTarget.heightTarget = new float[constants.featuresPerLayoutPerAxis, constants.featuresPerLayoutPerAxis];
+
+            for(int width = 0; width < coordinates.GetLength(0); width++) {
+                for(int height = 0; height < coordinates.GetLength(1); height++) {
+                    MapCoordinate mapCoordinate = coordinates[width, height];
+
+                    terraformTarget.initialHeight[width, height] = GetHeightAt(mapCoordinate);
+
+                    int x = startXMapCoordinate + mapCoordinate.xLowSample;
+                    int y = startYMapCoordinate + mapCoordinate.yLowSample;
+
+                    float finalValue = MapAtXYWithFeatures(x, y, terraformTarget.terrainTypeTarget, heightAtNewRegion);
+                    terraformTarget.heightTarget[width, height] = Mathf.InverseLerp(minMaxOfFinalMap.min, minMaxOfFinalMap.max, finalValue);
+                }
+            }
+        }
+
+        for(int width = 0; width < coordinates.GetLength(0); width++) {
+            for(int height = 0; height < coordinates.GetLength(1); height++) {
+                MapCoordinate mapCoordinate = coordinates[width, height];
+
+                int x = startXMapCoordinate + mapCoordinate.xLowSample;
+                int y = startYMapCoordinate + mapCoordinate.yLowSample;
+
+                //float finalValue = MapAtXYWithFeatures(x, y, terraformTarget.terrainTypeTarget, heightAtNewRegion);
+                finalNoiseMap[x, y] = Mathf.Lerp(terraformTarget.initialHeight[width, height], terraformTarget.heightTarget[width, height], terraformTarget.percentage);
+            }
+        }
+
+        // Upon completion of terraform, update out layout map to represent what we have 
+        if (terraformTarget.percentage == 1) {
+            layoutNoiseMap[startXLayout + layoutCoordinate.x, startYLayout + layoutCoordinate.y] = heightAtNewRegion;       
+        }
+
+        return GetNoiseSubsetForMap(mapContainer).finalNoiseMap;        
     }
 
     /*
@@ -249,120 +371,133 @@ public class MapGenerator : MonoBehaviour {
                 RegionType region = terrainManager.RegionTypeForValue(map[x, y]);
 
                 terrainMap[x, y] = terrainManager.TerrainTypeForRegion(region, x, y);
-                map[x, y] = (region.plateauAtBase ? region.noiseBase + 0.001f : region.noiseMax - 0.001f);
+                map[x, y] = HeightAtRegion(region);
             }
         }
 
         return terrainMap;
     }
 
+    private float HeightAtRegion(RegionType region) {
+        return (region.plateauAtBase ? region.noiseBase + 0.001f : region.noiseMax - 0.001f);
+    }
 
     // Given arrays for our layouts, features and terrain types, create a final height map
-    public float[,] CreateMapWithFeatures(float[,] layoutMap, float[,] groundFeaturesMap, float[,] mountainFeaturesMap, TerrainType[,] terrainMap) {
-        Constants constants = Script.Get<Constants>();
-        int featuresPerLayoutPerAxis = constants.featuresPerLayoutPerAxis;
+    private float[,] CreateMapWithFeatures() {
+        //int featuresWidth = groundFeaturesNoiseMap.GetLength(0);
+        //int featuresHeight = groundFeaturesNoiseMap.GetLength(1);
 
-        int featuresWidth = groundFeaturesMap.GetLength(0);
-        int featuresHeight = groundFeaturesMap.GetLength(1);
-
-        int dipRadius = 3;
-
-        float[,] fullMap = new float[featuresWidth, featuresHeight];
-        for(int y = 0; y < featuresWidth; y++) {
-            for(int x = 0; x < featuresHeight; x++) {
-
-                int sampleX = x / featuresPerLayoutPerAxis;
-                int sampleY = y / featuresPerLayoutPerAxis;
-
-                TerrainType thisTerrainType = terrainMap[sampleX, sampleY];
-
-                switch(thisTerrainType.regionType) {
-                    case RegionType.Type.Water:
-                        fullMap[x, y] = layoutMap[sampleX, sampleY];
-                        break;
-                    case RegionType.Type.Land:
-                        fullMap[x, y] = (layoutMap[sampleX, sampleY]) * (1 - groundFeaturesImpactOnLayout) + ((groundFeaturesMap[x, y] * groundFeaturesImpactOnLayout));
-                        break;
-                    case RegionType.Type.Mountain:
-                        fullMap[x, y] = layoutMap[sampleX, sampleY] + (mountainFeaturesMap[x, y] * mountainFeaturesImpactOnLayout);
-                        break;
-                }
-
-                float distanceToEdgeX = x % featuresPerLayoutPerAxis;
-                float distanceToEdgeY = y % featuresPerLayoutPerAxis;
-
-                fullMap[x, y] = SampleAtXY(x, y, layoutMap, groundFeaturesMap, mountainFeaturesMap, terrainMap);
-
-                for(int i = 0; i < dipRadius; i++) {
-
-                    float baseline = Script.Get<TerrainManager>().regionTypeMap[thisTerrainType.regionType].noiseBase * (dipRadius - (i + 1)) / dipRadius;
-
-                    // Left
-                    if((sampleX == 0) || (sampleX - 1 >= 0 && thisTerrainType.priority > terrainMap[sampleX - 1, sampleY].priority)) {
-                        if (distanceToEdgeX == i) {
-                            fullMap[x, y] = baseline + (fullMap[x, y] * ((i + 1)) / dipRadius);
-                            continue;
-                        }
-                    }
-
-                    // Top
-                    if((sampleY == 0) || (sampleY - 1 >= 0 && thisTerrainType.priority > terrainMap[sampleX, sampleY - 1].priority)) {
-                        if(distanceToEdgeY == i) {
-                            fullMap[x, y] = baseline + (fullMap[x, y] * ((i + 1)) / dipRadius);
-                            continue;
-                        }
-                    }
-
-                    // Right
-                    if( (sampleX + 1 == terrainMap.GetLength(0)) || (sampleX + 1 < terrainMap.GetLength(0) && thisTerrainType.priority > terrainMap[sampleX + 1, sampleY].priority)) {
-                        if((featuresPerLayoutPerAxis - distanceToEdgeX - 1) == i) {
-                            fullMap[x, y] = baseline + (fullMap[x, y] * ((i + 1)) / dipRadius);
-                            continue;
-                        }
-                    }
-
-                    //// Bottom
-                    if((sampleY + 1 == terrainMap.GetLength(1)) ||(sampleY + 1 < terrainMap.GetLength(1) && thisTerrainType.priority > terrainMap[sampleX, sampleY + 1].priority)) {
-                        if(featuresPerLayoutPerAxis - distanceToEdgeY - 1 == i) {
-                            fullMap[x, y] = baseline + (fullMap[x, y] * ((i + 1)) / dipRadius);
-                            continue;
-                        }
-                    }
-                }
-
-
-                //if (distanceToEdgeX == 0 || (distanceToEdgeX == featuresPerLayoutPerAxis) || distanceToEdgeY == 0 || (distanceToEdgeY == featuresPerLayoutPerAxis)) {
-                //    fullMap[x, y] *= 0.30f;
-                //}
-
-                //if(distanceToEdgeX == 1 || (distanceToEdgeX == featuresPerLayoutPerAxis - 1) || distanceToEdgeY == 1 || (distanceToEdgeY == featuresPerLayoutPerAxis - 1)) {
-                //    fullMap[x, y] *= 0.60f;
-                //}
-
-                //if(distanceToEdgeX == 2 || (distanceToEdgeX == featuresPerLayoutPerAxis - 2) || distanceToEdgeY == 2 || (distanceToEdgeY == featuresPerLayoutPerAxis - 2)) {
-                //    fullMap[x, y] *= 0.90f;
-                //}
+        float[,] fullMap = new float[totalFullWidth, totalFullHeight];
+        for(int y = 0; y < totalFullWidth; y++) {
+            for(int x = 0; x < totalFullHeight; x++) {
+                fullMap[x,y] = MapAtXYWithFeatures(x, y);
             }
         }
 
         return fullMap;
     }
 
+    // On MapCoordinate scale, but for the entire generation, not a single mapContainer
+    private float MapAtXYWithFeatures(int x, int y, TerrainType? withAlternateTerrain = null, float? withAlternateLayoutValue = null) {
+        Constants constants = Script.Get<Constants>();
+        int featuresPerLayoutPerAxis = constants.featuresPerLayoutPerAxis;
+
+        int dipRadius = 3;
+
+        int sampleX = x / featuresPerLayoutPerAxis;
+        int sampleY = y / featuresPerLayoutPerAxis;
+
+        TerrainType thisTerrainType = terrainMap[sampleX, sampleY];
+
+        if (withAlternateTerrain != null) {
+            thisTerrainType = withAlternateTerrain.Value;
+        }
+
+        float mapAtXY = SampleAtXY(x, y, withAlternateTerrain, withAlternateLayoutValue);
+
+        float distanceToEdgeX = x % featuresPerLayoutPerAxis;
+        float distanceToEdgeY = y % featuresPerLayoutPerAxis;
+
+        for(int i = 0; i < dipRadius; i++) {
+
+            float baseline = Script.Get<TerrainManager>().regionTypeMap[thisTerrainType.regionType].noiseBase * (dipRadius - (i + 1)) / dipRadius;
+
+            // Left
+            if((sampleX == 0) || (sampleX - 1 >= 0 && thisTerrainType.priority > terrainMap[sampleX - 1, sampleY].priority)) {
+                if(distanceToEdgeX == i) {
+                    mapAtXY = baseline + (mapAtXY * ((i + 1)) / dipRadius);
+                    continue;
+                }
+            }
+
+            // Top
+            if((sampleY == 0) || (sampleY - 1 >= 0 && thisTerrainType.priority > terrainMap[sampleX, sampleY - 1].priority)) {
+                if(distanceToEdgeY == i) {
+                    mapAtXY = baseline + (mapAtXY * ((i + 1)) / dipRadius);
+                    continue;
+                }
+            }
+
+            // Right
+            if((sampleX + 1 == terrainMap.GetLength(0)) || (sampleX + 1 < terrainMap.GetLength(0) && thisTerrainType.priority > terrainMap[sampleX + 1, sampleY].priority)) {
+                if((featuresPerLayoutPerAxis - distanceToEdgeX - 1) == i) {
+                    mapAtXY = baseline + (mapAtXY * ((i + 1)) / dipRadius);
+                    continue;
+                }
+            }
+
+            //// Bottom
+            if((sampleY + 1 == terrainMap.GetLength(1)) || (sampleY + 1 < terrainMap.GetLength(1) && thisTerrainType.priority > terrainMap[sampleX, sampleY + 1].priority)) {
+                if(featuresPerLayoutPerAxis - distanceToEdgeY - 1 == i) {
+                    mapAtXY = baseline + (mapAtXY * ((i + 1)) / dipRadius);
+                    continue;
+                }
+            }
+        }
+
+
+        return mapAtXY;
+
+        //if (distanceToEdgeX == 0 || (distanceToEdgeX == featuresPerLayoutPerAxis) || distanceToEdgeY == 0 || (distanceToEdgeY == featuresPerLayoutPerAxis)) {
+        //    fullMap[x, y] *= 0.30f;
+        //}
+
+        //if(distanceToEdgeX == 1 || (distanceToEdgeX == featuresPerLayoutPerAxis - 1) || distanceToEdgeY == 1 || (distanceToEdgeY == featuresPerLayoutPerAxis - 1)) {
+        //    fullMap[x, y] *= 0.60f;
+        //}
+
+        //if(distanceToEdgeX == 2 || (distanceToEdgeX == featuresPerLayoutPerAxis - 2) || distanceToEdgeY == 2 || (distanceToEdgeY == featuresPerLayoutPerAxis - 2)) {
+        //    fullMap[x, y] *= 0.90f;
+        //}
+    }
+
     // Sampling at an index for CreateMapWithFeatures
-    private float SampleAtXY(int x, int y, float[,] layoutMap, float[,] groundFeaturesMap, float[,] mountainFeaturesMap, TerrainType[,] terrainMap) {
+    private float SampleAtXY(int x, int y, TerrainType? withAlternateTerrain = null, float ? withAlternateLayoutValue = null) {
         Constants constants = Script.Get<Constants>();
         int featuresPerLayoutPerAxis = constants.featuresPerLayoutPerAxis;
 
         int sampleX = x / featuresPerLayoutPerAxis;
         int sampleY = y / featuresPerLayoutPerAxis;
 
-        switch(terrainMap[sampleX, sampleY].regionType) {
+        float sampleValue = layoutNoiseMap[sampleX, sampleY];
+        TerrainType terrainType = terrainMap[sampleX, sampleY];
+
+
+        if (withAlternateTerrain != null) {
+            terrainType = withAlternateTerrain.Value;
+        }
+
+        if (withAlternateLayoutValue != null) {
+            sampleValue = withAlternateLayoutValue.Value;
+        }
+
+        switch(terrainType.regionType) {
             case RegionType.Type.Water:
-                return layoutMap[sampleX, sampleY];
+                return sampleValue;
             case RegionType.Type.Land:
-                return (layoutMap[sampleX, sampleY]) + ((groundFeaturesMap[x, y] * groundFeaturesImpactOnLayout));
+                return (sampleValue) + ((groundFeaturesNoiseMap[x, y] * groundFeaturesImpactOnLayout));
             case RegionType.Type.Mountain:
-                return layoutMap[sampleX, sampleY] + (mountainFeaturesMap[x, y] * mountainFeaturesImpactOnLayout);
+                return sampleValue + (mountainFeaturesNoiseMap[x, y] * mountainFeaturesImpactOnLayout);
         }
 
         return 0;
