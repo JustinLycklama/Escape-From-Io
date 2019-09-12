@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Builder : Unit {
-    public override int duration => 240;
+    public override int duration => 420;
     public override MasterGameTask.ActionType primaryActionType => MasterGameTask.ActionType.Build;
 
     public override float SpeedForTask(MasterGameTask.ActionType actionType) {
@@ -11,9 +11,9 @@ public class Builder : Unit {
             case MasterGameTask.ActionType.Mine:
                 return 0.3f;
             case MasterGameTask.ActionType.Build:
-                return 0.75f;
+                return 0.9f;
             case MasterGameTask.ActionType.Move:
-                return 0.3f;
+                return 1f;
         }
 
         return 0.1f;

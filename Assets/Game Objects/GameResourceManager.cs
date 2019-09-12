@@ -188,11 +188,9 @@ public class GameResourceManager : MonoBehaviour {
             unitOreDistribution.Add(unit, new List<Ore>());
         }
 
-        //Vector3 localScale = ore.transform.localScale;
         // WorldPositionStays false affects the ore scale
         ore.transform.SetParent(unit.oreLocation, true);
         ore.transform.localPosition = new Vector3(0, 0, 0);
-        //ore.transform.localScale = localScale;
 
         List<Ore> oreList = unitOreDistribution[unit];
         availableOreList.Remove(ore);

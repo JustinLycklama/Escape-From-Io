@@ -285,7 +285,7 @@ public abstract class Building : ActionableItem, Selectable {
         public static Blueprint Tower = new Blueprint("Tower", typeof(Tower), "TowerIcon", "Light Tower", new BlueprintCost(3, 1, 0));
         public static Blueprint Refinery = new Blueprint("Refinery", typeof(Refinery), "MinerIcon", "Refinery", new BlueprintCost(1, 1, 1));
 
-        public static Blueprint StationShip = new Blueprint("StationShip", typeof(StationShip), "ShipIcon", "Interplanetary Ship", new BlueprintCost(50, 25, 15), true);
+        public static Blueprint StationShip = new Blueprint("StationShip", typeof(StationShip), "ShipIcon", "Interplanetary Ship", new BlueprintCost(25, 15, 10), true);
 
         private bool asLastPriority;
 
