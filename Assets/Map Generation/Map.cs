@@ -327,9 +327,6 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
         // Update pathfinding grid
         Script.Get<PathfindingGrid>().UpdateGrid(this, layoutCoordinate);
 
-        // Notify all users of path finding grid about ubdate
-        Script.Get<MapsManager>().NotifyTerrainUpdateDelegates(layoutCoordinate);
-
         UpdateUserActionsAt(layoutCoordinate);
         mapContainer.UpdateShaderTerrainTextures();
     }

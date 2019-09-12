@@ -55,6 +55,17 @@ public class PathfindingGrid : MonoBehaviour, TerrainUpdateDelegate {
         }
     }
 
+    public void SetCenterGridWalkable(LayoutCoordinate layoutCoordinate, bool walkable) {
+        PathGridCoordinate[][] updatedPathGridCoordinates = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(layoutCoordinate);
+
+        PathGridCoordinate updateCoordinate = updatedPathGridCoordinates[1][1];
+
+        grid[updateCoordinate.xLowSample, updateCoordinate.yLowSample].walkable = walkable;
+
+        // Notify all users of path finding grid about ubdate
+        Script.Get<MapsManager>().NotifyTerrainUpdateDelegates(layoutCoordinate);
+    }
+
     public void UpdateGrid(Map map, LayoutCoordinate layoutCoordinate) {
         PathGridCoordinate[][] updatedPathGridCoordinates = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(layoutCoordinate);
 
@@ -63,6 +74,9 @@ public class PathfindingGrid : MonoBehaviour, TerrainUpdateDelegate {
                 grid[updatedCoordinate.xLowSample, updatedCoordinate.yLowSample].walkable = map.GetTerrainAt(layoutCoordinate).walkable;
             }
         }
+
+        // Notify all users of path finding grid about ubdate
+        Script.Get<MapsManager>().NotifyTerrainUpdateDelegates(layoutCoordinate);
     }
 
     const int maxPenalty = 100;

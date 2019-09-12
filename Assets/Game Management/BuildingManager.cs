@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public interface BuildingsUpdateDelegate {
     void NewBuildingStarted(Building building);
@@ -19,19 +20,23 @@ public enum BuildingEffectStatus {
 }
 
 public class BuildingManager : MonoBehaviour {
-    
+
     BuildingEffectStatus[,] statusMap;
     Dictionary<LayoutCoordinate, Building> locationBuildingMap = new Dictionary<LayoutCoordinate, Building>();
+
+    private List<LayoutCoordinate> listOfCoordinatesToBlockTerrain = new List<LayoutCoordinate>();
 
     public void Initialize() {
         MapsManager mapsManager = Script.Get<MapsManager>();
         Constants constants = Script.Get<Constants>();
 
         statusMap = new BuildingEffectStatus[constants.layoutMapWidth * mapsManager.horizontalMapCount, constants.layoutMapHeight * mapsManager.verticalMapCount];
+
+        StartCoroutine(AttemptToSetUnwalkable());
     }
 
     public Building buildlingAtLocation(LayoutCoordinate layoutCoordinate) {
-        if (locationBuildingMap.ContainsKey(layoutCoordinate)) {
+        if(locationBuildingMap.ContainsKey(layoutCoordinate)) {
             return locationBuildingMap[layoutCoordinate];
         }
 
@@ -47,6 +52,9 @@ public class BuildingManager : MonoBehaviour {
         Script.Get<GameResourceManager>().CueueGatherTasksForCost(cost, worldPosition, building, asLastPriority);
 
         locationBuildingMap[layoutCoordinate] = building;
+        if (AttemptToSetUnwalkable(layoutCoordinate)) {
+            listOfCoordinatesToBlockTerrain.Add(layoutCoordinate);
+        }
 
         NotifyBuildingUpdate(building, true);
     }
@@ -73,6 +81,46 @@ public class BuildingManager : MonoBehaviour {
 
         locationBuildingMap.Remove(layoutCoordinate);
         layoutCoordinate.mapContainer.map.UpdateUserActionsAt(layoutCoordinate);
+
+        listOfCoordinatesToBlockTerrain.Remove(layoutCoordinate);
+        Script.Get<PathfindingGrid>().SetCenterGridWalkable(layoutCoordinate, true);
+    }
+
+    private IEnumerator AttemptToSetUnwalkable() {
+
+        while(true) {
+
+            foreach(LayoutCoordinate layoutCoordinate in listOfCoordinatesToBlockTerrain.ToArray()) {
+                bool success = AttemptToSetUnwalkable(layoutCoordinate);
+
+                if (success) {
+                    listOfCoordinatesToBlockTerrain.Remove(layoutCoordinate);
+                }
+            }
+
+            yield return new WaitForSeconds(1);
+        }
+    }
+
+    private bool AttemptToSetUnwalkable(LayoutCoordinate layoutCoordinate) {
+
+        UnitManager unitManager = Script.Get<UnitManager>();
+
+        Unit[] allUnits = unitManager.GetUnitsOfType(MasterGameTask.ActionType.Build).Concat(unitManager.GetUnitsOfType(MasterGameTask.ActionType.Mine)).Concat(unitManager.GetUnitsOfType(MasterGameTask.ActionType.Move)).ToArray();
+
+        foreach(Unit unit in allUnits) {
+            WorldPosition worldPosition = new WorldPosition(unit.transform.position);
+            MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(worldPosition);
+            LayoutCoordinate unitLayoutCoordinate = new LayoutCoordinate(mapCoordinate);
+
+            if (unitLayoutCoordinate == layoutCoordinate) {
+                return false;
+            }
+        }
+
+        // Update pathfinding grid
+        Script.Get<PathfindingGrid>().SetCenterGridWalkable(layoutCoordinate, false);
+        return true;
     }
 
     private void ModifyStatus(int centerX, int centerY, BuildingEffectStatus status, int radius) {
