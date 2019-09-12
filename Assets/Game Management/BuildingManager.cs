@@ -60,7 +60,7 @@ public class BuildingManager : MonoBehaviour {
         // Don't record "PathBuilding" buildings for blocking purposes
         if(building.title != "Path") {
             locationBuildingMap[layoutCoordinate] = building;
-            if(AttemptToSetUnwalkable(layoutCoordinate)) {
+            if(AttemptToSetUnwalkable(layoutCoordinate) == false) {
                 listOfCoordinatesToBlockTerrain.Add(layoutCoordinate);
             }
         }
@@ -115,12 +115,13 @@ public class BuildingManager : MonoBehaviour {
 
         Unit[] allUnits = unitManager.GetUnitsOfType(MasterGameTask.ActionType.Build).Concat(unitManager.GetUnitsOfType(MasterGameTask.ActionType.Mine)).Concat(unitManager.GetUnitsOfType(MasterGameTask.ActionType.Move)).ToArray();
 
+        MapCoordinate centerOfLayout = new MapCoordinate(layoutCoordinate);
+
         foreach(Unit unit in allUnits) {
             WorldPosition worldPosition = new WorldPosition(unit.transform.position);
-            MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(worldPosition);
-            LayoutCoordinate unitLayoutCoordinate = new LayoutCoordinate(mapCoordinate);
+            MapCoordinate unitMapCoordinate = MapCoordinate.FromWorldPosition(worldPosition);
 
-            if (unitLayoutCoordinate == layoutCoordinate) {
+            if (unitMapCoordinate == centerOfLayout) {
                 return false;
             }
         }

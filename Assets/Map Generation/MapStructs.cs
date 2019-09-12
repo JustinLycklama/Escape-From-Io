@@ -235,6 +235,14 @@ public struct MapCoordinate {
     public static bool operator !=(MapCoordinate a, LayoutCoordinate b) {
         return !(a == b);
     }
+
+    public static bool operator ==(MapCoordinate a, MapCoordinate b) {
+        return a.x == b.x && a.y == b.y && a.mapContainer == b.mapContainer;
+    }
+
+    public static bool operator !=(MapCoordinate a, MapCoordinate b) {
+        return !(a == b);
+    }
 }
 
 public struct WorldPosition {
