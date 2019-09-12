@@ -21,7 +21,18 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
     BoxCollider[,] boxColliderArray;
     GameObject[,] fogOfWarMap;
 
+    float[] textureIndexList;
+
     public MapContainerNeighbours neighbours = new MapContainerNeighbours();
+
+    private void Awake() {
+        Constants constants = Script.Get<Constants>();
+
+        int mapWidthWithOverhang = constants.layoutMapWidth + 2;
+        int mapHeightWithOverhang = constants.layoutMapHeight + 2;
+
+        textureIndexList = new float[mapWidthWithOverhang * mapHeightWithOverhang];
+    }
 
     private void Start() {
         Script.Get<SelectionManager>().RegisterForNotifications(this);
@@ -207,10 +218,10 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         Constants constants = Script.Get<Constants>();
         Material mapMaterial = GetComponent<MeshRenderer>().sharedMaterial;
 
-        float[] leftList = new float[constants.layoutMapHeight + 2];
-        float[] rightList = new float[constants.layoutMapHeight + 2];
-        float[] topList = new float[constants.layoutMapWidth + 2];
-        float[] bottomList = new float[constants.layoutMapWidth + 2];
+        //float[] leftList = new float[constants.layoutMapHeight + 2];
+        //float[] rightList = new float[constants.layoutMapHeight + 2];
+        //float[] topList = new float[constants.layoutMapWidth + 2];
+        //float[] bottomList = new float[constants.layoutMapWidth + 2];
 
         TextureGenerator texGen = Script.Get<TextureGenerator>();
 
@@ -319,8 +330,6 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
 
     }
 
-    float[] textureIndexList;
-
     public void SetupMaterialShader() {
         Constants constants = Script.Get<Constants>();
         Material mapMaterial = GetComponent<MeshRenderer>().sharedMaterial;
@@ -358,14 +367,13 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         int mapWidthWithOverhang = constants.layoutMapWidth + 2;
         int mapHeightWithOverhang = constants.layoutMapHeight + 2;
 
-        textureIndexList = new float[mapWidthWithOverhang * mapHeightWithOverhang];
         TextureGenerator texGen = Script.Get<TextureGenerator>();
 
         for(int y = 0; y < mapHeightWithOverhang; y++) {
             for(int x = 0; x < mapWidthWithOverhang; x++) {
 
                 if(x == 0 || x == mapWidthWithOverhang - 1 || y == 0 || y == mapHeightWithOverhang - 1) {
-                    textureIndexList[y * mapWidthWithOverhang + x] = -1;
+                    //textureIndexList[y * mapWidthWithOverhang + x] = -1;
                     continue;
                 }
 

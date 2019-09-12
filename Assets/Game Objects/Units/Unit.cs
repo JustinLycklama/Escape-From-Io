@@ -104,7 +104,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
     GameTask currentGameTask; // The current Game Task we are working on to complete the Master Task
     private HashSet<int> refuseTaskSet; // Set of tasks we aready know we cannot perform
 
-    public static int maxUnitUduration = 180;
+    public static int maxUnitUduration = 480;
     abstract public int duration { get; }
     public int remainingDuration = maxUnitUduration;
     abstract public MasterGameTask.ActionType primaryActionType { get; }
