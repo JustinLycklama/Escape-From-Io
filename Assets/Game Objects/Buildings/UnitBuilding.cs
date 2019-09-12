@@ -13,6 +13,7 @@ public class UnitBuilding : Building
 
     protected override void CompleteBuilding() {
         associatedUnit.Initialize();
+        Script.Get<BuildingManager>().RemoveBuilding(this);
     }
 
     protected override void UpdateCompletionPercent(float percent) {

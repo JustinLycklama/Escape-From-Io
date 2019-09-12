@@ -46,6 +46,8 @@ public class BuildingManager : MonoBehaviour {
 
         Script.Get<GameResourceManager>().CueueGatherTasksForCost(cost, worldPosition, building, asLastPriority);
 
+        locationBuildingMap[layoutCoordinate] = building;
+
         NotifyBuildingUpdate(building, true);
     }
 
@@ -55,8 +57,6 @@ public class BuildingManager : MonoBehaviour {
         WorldPosition worldPosition = new WorldPosition(building.transform.position);
         MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(worldPosition);
         LayoutCoordinate layoutCoordinate = new LayoutCoordinate(mapCoordinate);
-
-        locationBuildingMap[layoutCoordinate] = building;
 
         int x = layoutCoordinate.mapContainer.mapX * constants.layoutMapWidth + layoutCoordinate.x;
         int y = layoutCoordinate.mapContainer.mapY * constants.layoutMapHeight + layoutCoordinate.y;
@@ -69,8 +69,10 @@ public class BuildingManager : MonoBehaviour {
     public void RemoveBuilding(Building buildling) {
         WorldPosition worldPosition = new WorldPosition(buildling.transform.position);
         MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(worldPosition);
+        LayoutCoordinate layoutCoordinate = new LayoutCoordinate(mapCoordinate);
 
-        locationBuildingMap.Remove(new LayoutCoordinate(mapCoordinate));
+        locationBuildingMap.Remove(layoutCoordinate);
+        layoutCoordinate.mapContainer.map.UpdateUserActionsAt(layoutCoordinate);
     }
 
     private void ModifyStatus(int centerX, int centerY, BuildingEffectStatus status, int radius) {
