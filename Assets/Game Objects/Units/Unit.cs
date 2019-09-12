@@ -229,7 +229,12 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
 
         completedPath = (pathComplete) => {
             navigatingToTask = false;
-            unitStatusTooltip.DisplayPercentageBar(true);
+
+            // Don't bother showing completion bar for picking up and droping off
+            if(currentGameTask.action != GameTask.ActionType.DropOff && currentGameTask.action != GameTask.ActionType.PickUp) {
+                unitStatusTooltip.DisplayPercentageBar(true);
+            }        
+            
             StartCoroutine(PerformTaskAction(completedTaskAction));
         };
 

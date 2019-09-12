@@ -245,15 +245,15 @@
 		}
 
 		private void PlayAllParticles () {
-			for (int i = 0; i < Particles.Length; i++) {
-				Particles[i].Play();
-			}
+			//for (int i = 0; i < Particles.Length; i++) {
+			//	Particles[i].Play();
+			//}
 		}
 
 		private void StopAllParticles () {
-			for (int i = 0; i < Particles.Length; i++) {
-				Particles[i].Stop();
-			}
+			//for (int i = 0; i < Particles.Length; i++) {
+			//	Particles[i].Stop();
+			//}
 		}
 
 		private void TriggerLoghtOn () {
