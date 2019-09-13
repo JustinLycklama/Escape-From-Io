@@ -108,11 +108,11 @@ public class TerrainManager : MonoBehaviour {
             return terrainTypeMap[TerrainType.Type.Mud];
         }
 
-        if(terrainType.type == TerrainType.Type.Mud || terrainType.type == TerrainType.Type.Grass) {
-            return terrainTypeMap[TerrainType.Type.Sand];
+        if(terrainType.type == TerrainType.Type.Mud || terrainType.type == TerrainType.Type.Grass || terrainType.type == TerrainType.Type.Sand) {
+            return terrainTypeMap[TerrainType.Type.Empty];
         }
 
-        if (terrainType.type == TerrainType.Type.Sand) {
+        if (terrainType.type == TerrainType.Type.Empty) {
             return terrainTypeMap[TerrainType.Type.Path];
         }
 
@@ -133,7 +133,7 @@ public class TerrainManager : MonoBehaviour {
             case RegionType.Type.Land:
 
                 if (terraformable != null) {
-                    if (terraformable.Value.type == TerrainType.Type.Sand) {
+                    if (terraformable.Value.type == TerrainType.Type.Empty) {
 
                         UserAction action = new UserAction();
 
@@ -295,7 +295,7 @@ public class ChanceFactory {
 public struct TerrainType {
     public string name;
 
-    public enum Type { Water, Sand, Grass, Mud, Path, ScorchedEarth, LooseRock, Rock, HardRock, SolidRock, AlunarRock }
+    public enum Type { Water, Empty, Grass, Mud, Path, ScorchedEarth, LooseRock, Rock, HardRock, SolidRock, AlunarRock, Sand }
     public Type type;
 
     [HideInInspector]

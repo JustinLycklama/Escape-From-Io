@@ -36,8 +36,8 @@
 		float mapYOffsetHigh;
 
 		UNITY_DECLARE_TEX2DARRAY(baseTextures);
-		float indexPriority[10];
-		float indexScale[10];
+		float indexPriority[20];
+		float indexScale[20];
 
 		float selectionX;
 		float selectionY;
