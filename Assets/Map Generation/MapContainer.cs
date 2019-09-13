@@ -176,7 +176,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         float halfTotalHeight = boxSizeZ * height / 2f;
 
         Color materialColor = Color.black;
-        //materialColor.a = 0.1f;
+        materialColor.a = 0.1f;
 
         for(int x = 0; x < width; x++) {
             for(int y = 0; y < height; y++) {
@@ -187,15 +187,15 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
 
                     Material material = newCube.GetComponent<MeshRenderer>().material;
 
-                    //material.SetFloat("_Mode", 4f);
+                    material.SetFloat("_Mode", 4f);
 
-                    //material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-                    //material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-                    //material.SetInt("_ZWrite", 0);
-                    //material.DisableKeyword("_ALPHATEST_ON");
-                    //material.EnableKeyword("_ALPHABLEND_ON");
-                    //material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-                    //material.renderQueue = 3000;
+                    material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                    material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                    material.SetInt("_ZWrite", 0);
+                    material.DisableKeyword("_ALPHATEST_ON");
+                    material.EnableKeyword("_ALPHABLEND_ON");
+                    material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                    material.renderQueue = 3000;
 
                     //newCube.GetComponent<MeshRenderer>().material.shader = transparencyShader;
                     material.color = materialColor;

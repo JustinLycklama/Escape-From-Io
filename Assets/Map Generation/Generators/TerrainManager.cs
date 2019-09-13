@@ -95,7 +95,7 @@ public class TerrainManager : MonoBehaviour {
 
         List<TerrainType> terrainsForRegion = regionToTerrainTypeMap[regionType];
         foreach(TerrainType terrainType in terrainsForRegion) {
-            if(mutatorValue <= terrainType.mutatorNoiseMax && mutatorValue >= terrainType.mutatorNoiseBase) {
+            if(mutatorValue < terrainType.mutatorNoiseMax && mutatorValue >= terrainType.mutatorNoiseBase) {
                 return terrainType;
             }
         }
@@ -295,7 +295,7 @@ public class ChanceFactory {
 public struct TerrainType {
     public string name;
 
-    public enum Type { Water, Sand, Grass, Mud, Path, LooseRock, Rock, HardRock }
+    public enum Type { Water, Sand, Grass, Mud, Path, ScorchedEarth, LooseRock, Rock, HardRock, SolidRock, AlunarRock }
     public Type type;
 
     [HideInInspector]

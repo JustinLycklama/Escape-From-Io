@@ -47,14 +47,20 @@ public class MapGenerator : MonoBehaviour {
 
     public float[,] GenerateGroundMutatorMap(int width, int length) {
         float[,] map = NoiseGenerator.GenerateNoiseMap(width, length, groundMutatorMapNoiseData);
-        NoiseGenerator.NormalizeMap(map);
+        NoiseGenerator.MinMaxofNormalize minMax = NoiseGenerator.NormalizeMap(map);
+
+        print("GroundMutator");
+        print("min " + minMax.min + " max " + minMax.max);
 
         return map;
     }
 
     public float[,] GenerateMountainMutatorMap(int width, int length) {
         float[,] map = NoiseGenerator.GenerateNoiseMap(width, length, mountainMutatorNoiseData);
-        NoiseGenerator.NormalizeMap(map);
+        NoiseGenerator.MinMaxofNormalize minMax = NoiseGenerator.NormalizeMap(map);
+
+        print("MountainMutator");
+        print("min " + minMax.min + " max " + minMax.max);
 
         return map;
     }
@@ -495,7 +501,7 @@ public class MapGenerator : MonoBehaviour {
             case RegionType.Type.Water:
                 return sampleValue;
             case RegionType.Type.Land:
-                return (sampleValue) + ((groundFeaturesNoiseMap[x, y] * groundFeaturesImpactOnLayout));
+                return (sampleValue) + ((groundFeaturesNoiseMap[x, y] * groundFeaturesImpactOnLayout) - (1 * groundFeaturesImpactOnLayout) / 2f);
             case RegionType.Type.Mountain:
                 return sampleValue + (mountainFeaturesNoiseMap[x, y] * mountainFeaturesImpactOnLayout);
         }
