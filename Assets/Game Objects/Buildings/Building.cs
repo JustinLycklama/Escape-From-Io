@@ -91,7 +91,7 @@ public abstract class Building : ActionableItem, Selectable {
     }
 
     public override void Destroy() {
-        if(costPanel != null && costPanel.isActiveAndEnabled) {
+        if(costPanel != null) {
             costPanel.transform.SetParent(null);
             costPanel.gameObject.SetActive(false);        
         }

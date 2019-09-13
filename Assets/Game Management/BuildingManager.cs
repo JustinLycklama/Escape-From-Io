@@ -57,6 +57,8 @@ public class BuildingManager : MonoBehaviour {
     }
 
     public void AddBuildingAtLocation(Building building, LayoutCoordinate layoutCoordinate) {
+        building.transform.SetParent(transform, true);
+
         // Don't record "PathBuilding" buildings for blocking purposes
         if(building.title != "Path") {
             locationBuildingMap[layoutCoordinate] = building;

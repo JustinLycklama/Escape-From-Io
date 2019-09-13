@@ -235,7 +235,7 @@ public class GameResourceManager : MonoBehaviour {
 
             GameTask dropTask = new GameTask("Deposit Ore", depositPosition, GameTask.ActionType.DropOff, actionableItem, PathRequestTargetType.PathGrid);
 
-            string collectMasterTitle = "Collect " + mineralType.ToString() + "\nfor " + actionableItem.description;
+            string collectMasterTitle = "Collect " + mineralType.ToString() + " for " + actionableItem.description;
             MasterGameTask masterCollectTask = new MasterGameTask(MasterGameTask.ActionType.Move, collectMasterTitle, new GameTask[] { oreTask, dropTask }, null, asLastPriority);
             masterCollectTask.repeatCount = cost.costMap[mineralType];
 
