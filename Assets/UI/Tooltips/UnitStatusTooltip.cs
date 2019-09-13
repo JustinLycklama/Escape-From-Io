@@ -13,10 +13,13 @@ public class UnitStatusTooltip : MonoBehaviour, TrackingUIInterface { //TaskStat
     public Image backgroundSprite;
 
     private RectTransform targetCanvas;
-    private RectTransform rectTransform;
+    //private RectTransform rectTransform;
+
 
     // TrackingUIInterface
     public Transform toFollow { get; set; }
+    public CanvasGroup canvas;
+    public CanvasGroup canvasGroup { get => canvas; }
 
     //private Unit unit;
 

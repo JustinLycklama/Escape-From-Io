@@ -205,13 +205,13 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
             unitStatusTooltip.SetRemainingDuration(remainingTime, percentOfMaxUnitTime);
 
             if (remainingTime == NotificationPanel.unitDurationWarning) {
-                Script.Get<NotificationPanel>().AddNotification(new NotificationItem(name.shortform + " only has " + NotificationPanel.unitDurationWarning.ToString() + "s remaining.", transform));
+                Script.Get<NotificationPanel>().AddNotification(new NotificationItem(primaryActionType.TitleAsNoun() + " " + name.shortform + " only has " + NotificationPanel.unitDurationWarning.ToString() + "s remaining.", transform));
             }
         };
 
         // Shutdown
         Action durationCompletionBlock = () => {
-            Script.Get<NotificationPanel>().AddNotification(new NotificationItem(name.shortform + " has run out of power", transform));
+            Script.Get<NotificationPanel>().AddNotification(new NotificationItem(primaryActionType.TitleAsNoun() + " " + name.shortform + " has run out of power", transform));
 
             unitManager.DisableUnit(this);
             Shutdown();

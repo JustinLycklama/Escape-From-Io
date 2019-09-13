@@ -175,6 +175,9 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         float halfTotalWidth = boxSizeX * width / 2f;
         float halfTotalHeight = boxSizeZ * height / 2f;
 
+        Color materialColor = Color.black;
+        //materialColor.a = 0.1f;
+
         for(int x = 0; x < width; x++) {
             for(int y = 0; y < height; y++) {
 
@@ -182,14 +185,27 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                     GameObject newCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                     newCube.name = "Fog " + x + ", " + y;
 
-                    //newCube.GetComponent<MeshRenderer>().material.shader = transparencyShader;
-                    newCube.GetComponent<MeshRenderer>().material.color = Color.black;
-                    newCube.GetComponent<MeshRenderer>().material.SetFloat("_Metallic", 1);
-                    newCube.GetComponent<MeshRenderer>().material.SetFloat("_Glossiness", 0);
+                    Material material = newCube.GetComponent<MeshRenderer>().material;
 
-                    newCube.GetComponent<MeshRenderer>().material.SetFloat("_SpecularHighlights", 0);
-                    newCube.GetComponent<MeshRenderer>().material.SetFloat("_GlossyReflections", 0);
-                    
+                    //material.SetFloat("_Mode", 4f);
+
+                    //material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                    //material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                    //material.SetInt("_ZWrite", 0);
+                    //material.DisableKeyword("_ALPHATEST_ON");
+                    //material.EnableKeyword("_ALPHABLEND_ON");
+                    //material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                    //material.renderQueue = 3000;
+
+                    //newCube.GetComponent<MeshRenderer>().material.shader = transparencyShader;
+                    material.color = materialColor;
+                    material.SetFloat("_Metallic", 1);
+                    material.SetFloat("_Glossiness", 0);
+
+                    material.SetFloat("_SpecularHighlights", 0);
+                    material.SetFloat("_GlossyReflections", 0);
+                    material.SetFloat("_GlossyReflections", 0);
+
                     fogOfWarMap[x, y] = newCube;
                 }
 

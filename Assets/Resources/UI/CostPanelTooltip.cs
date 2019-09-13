@@ -4,6 +4,8 @@ using UnityEngine;
 
 public class CostPanelTooltip : CostPanel, TrackingUIInterface {
     public Transform toFollow { get; set; }
+    public CanvasGroup canvas;
+    public CanvasGroup canvasGroup { get => canvas; }
 
     private void Update() {
         this.UpdateTrackingPosition();
