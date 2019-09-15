@@ -94,6 +94,7 @@ public class MapGenerator : MonoBehaviour {
     int spawnCoordX;
     int spawnCoordY;
     const int suitableCoordinateDistance = 1;
+    public LayoutCoordinate spawnCoordinate { get; private set; }
 
     // returns false if unable to get appropriate coordinate
     private bool GetSpawnCoordinate(float[,] layoutNoiseMap) {
@@ -166,7 +167,7 @@ public class MapGenerator : MonoBehaviour {
     }
 
     // Generate the series of maps, returning a suitable spawn coordinate
-    public LayoutCoordinate GenerateWorld(int mapCountX, int mapCountY) {
+    public void GenerateWorldStepOne(int mapCountX, int mapCountY) {
         MapsManager mapsManager = Script.Get<MapsManager>();
         Constants constants = Script.Get<Constants>();
 
@@ -222,32 +223,44 @@ public class MapGenerator : MonoBehaviour {
 
         minMaxOfFinalMap = NoiseGenerator.NormalizeMap(finalNoiseMap);
 
-        // Setup world
-        LayoutCoordinate spawnCoordinate = new LayoutCoordinate(0, 0, mapsManager.mapContainers[0]);
-        foreach(MapContainer container in mapsManager.mapContainers) {
-            int startXLayout = container.mapX * mapLayoutWidth;
-            int startYLayout = container.mapY * mapLayoutHeight;
+        spawnCoordinate = new LayoutCoordinate(0, 0, mapsManager.mapContainers[0]);
+    }
 
-            if(spawnCoordX >= startXLayout && spawnCoordX < startXLayout + mapLayoutWidth && spawnCoordY >= startYLayout && spawnCoordY < startYLayout + mapLayoutHeight) {
-                spawnCoordinate = new LayoutCoordinate(spawnCoordX - startXLayout, spawnCoordY - startYLayout, container);
-            }
+    public int GenerateStepTwoCount() {
+        MapsManager mapsManager = Script.Get<MapsManager>();
+        return mapsManager.mapContainers.Count;
+    }
 
-            NoiseSubset noiseSubset = GetNoiseSubsetForMap(container);
+    // Setup world in fragments
+    public void GenerateWorldStepTwo(int iteration) {
+        MapsManager mapsManager = Script.Get<MapsManager>();
 
-            GameObject mapOject = new GameObject("Map of " + container.name);
-            Map map = mapOject.AddComponent<Map>();
+        MapContainer container = mapsManager.mapContainers[iteration];
 
-            map.InitMap(noiseSubset.terrainMap, MeshGenerator.GenerateTerrainMesh(noiseSubset.finalNoiseMap));
+        int startXLayout = container.mapX * mapLayoutWidth;
+        int startYLayout = container.mapY * mapLayoutHeight;
 
-            container.setMap(map);
+        if(spawnCoordX >= startXLayout && spawnCoordX < startXLayout + mapLayoutWidth && spawnCoordY >= startYLayout && spawnCoordY < startYLayout + mapLayoutHeight) {
+            spawnCoordinate = new LayoutCoordinate(spawnCoordX - startXLayout, spawnCoordY - startYLayout, container);
         }
+
+        NoiseSubset noiseSubset = GetNoiseSubsetForMap(container);
+
+        GameObject mapOject = new GameObject("Map of " + container.name);
+        Map map = mapOject.AddComponent<Map>();
+
+        map.InitMap(noiseSubset.terrainMap, MeshGenerator.GenerateTerrainMesh(noiseSubset.finalNoiseMap));
+
+        container.setMap(map);
+    }
+
+    public void GenerateWorldStepThree() {
+        MapsManager mapsManager = Script.Get<MapsManager>();
 
         // Second pass to fill in overhang
         foreach(MapContainer container in mapsManager.mapContainers) {
             container.UpdateMapOverhang();
         }
-
-        return spawnCoordinate;
     }
 
     private NoiseSubset GetNoiseSubsetForMap(MapContainer mapContainer) {

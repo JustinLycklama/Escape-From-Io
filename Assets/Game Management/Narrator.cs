@@ -7,14 +7,15 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate {
     PathfindingGrid grid;
     MapGenerator mapGenerator;
     MapsManager mapsManager;
-
     Constants constants;
 
-    public List<Unit> startingUnits;    
-
-    LayoutCoordinate spawnCoordinate;
-
+    public List<Unit> startingUnits;
     Queue<Action> initActionChunks;
+
+    int generationStepTwoCount = 0;
+    int lastGenerationIteration = 0;
+
+    //LayoutCoordinate spawnCoordinate;
 
     private bool canSceneChange = false;
 
@@ -27,10 +28,38 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate {
             mapsManager = Script.Get<MapsManager>();
             constants = GetComponent<Constants>();
 
-            spawnCoordinate = mapGenerator.GenerateWorld(constants.mapCountX, constants.mapCountY);
         });
 
+        initActionChunks.Enqueue(() => {
+            mapGenerator.GenerateWorldStepOne(constants.mapCountX, constants.mapCountY);
 
+            generationStepTwoCount = mapGenerator.GenerateStepTwoCount();
+        });
+
+        int chunkCount = 4;
+
+        for(int chunk = 0; chunk < 4; chunk++) {
+            initActionChunks.Enqueue(() => {
+                int actionsPerChunk = Mathf.RoundToInt(generationStepTwoCount / chunkCount);
+                int stoppingPoint = lastGenerationIteration + actionsPerChunk;
+
+                // on the last chunk, complete all actions regardless of estimation
+                if (chunk == chunkCount - 1) {
+                    stoppingPoint = generationStepTwoCount;
+                }
+
+                for(int iteration = lastGenerationIteration; iteration < stoppingPoint; iteration++) {
+                    mapGenerator.GenerateWorldStepTwo(iteration);
+                }
+
+                lastGenerationIteration = stoppingPoint;
+            });
+        }
+       
+        initActionChunks.Enqueue(() => {
+            mapGenerator.GenerateWorldStepThree();
+        });
+        
         initActionChunks.Enqueue(() => {
             grid.gameObject.transform.position = mapsManager.transform.position;
             grid.createGrid();
@@ -41,9 +70,9 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate {
             Script.Get<BuildingManager>().Initialize();
         });
 
-        initActionChunks.Enqueue(() => {
+        initActionChunks.Enqueue(() => {           
             Script.Get<BuildingManager>().Initialize();
-            PathGridCoordinate[][] coordinatesForSpawnCoordinate = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(spawnCoordinate);
+            PathGridCoordinate[][] coordinatesForSpawnCoordinate = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(mapGenerator.spawnCoordinate);
 
             int i = 0;
             foreach(Unit unit in startingUnits) {
@@ -68,13 +97,13 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate {
         });
 
         initActionChunks.Enqueue(() => {
-            WorldPosition spawnWorldPosition = new WorldPosition(new MapCoordinate(spawnCoordinate));
+            WorldPosition spawnWorldPosition = new WorldPosition(new MapCoordinate(mapGenerator.spawnCoordinate));
 
             Building building = Instantiate(Building.Blueprint.Tower.resource) as Building;
             building.transform.position = spawnWorldPosition.vector3;
             
             building.ProceedToCompleteBuilding();
-            Script.Get<BuildingManager>().AddBuildingAtLocation(building, spawnCoordinate);
+            Script.Get<BuildingManager>().AddBuildingAtLocation(building, mapGenerator.spawnCoordinate);
 
             Script.Get<PlayerBehaviour>().JumpCameraToPosition(spawnWorldPosition.vector3);
         });
@@ -128,6 +157,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate {
 
         float incrementalPercent = 1f / (float) initActionChunks.Count;
 
+        yield return null;
         while(initActionChunks.Count > 0) {
             Action initAction = initActionChunks.Dequeue();
             initAction();

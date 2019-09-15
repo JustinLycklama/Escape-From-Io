@@ -104,7 +104,7 @@ public class TerrainManager : MonoBehaviour {
     }
 
     public TerrainType? CanTerriformTo(TerrainType terrainType) {
-        if (terrainType.regionType == RegionType.Type.Mountain) {
+        if (terrainType.regionType == RegionType.Type.Mountain && terrainType.type != TerrainType.Type.SolidRock) {
             return terrainTypeMap[TerrainType.Type.Mud];
         }
 
@@ -245,7 +245,7 @@ public struct RegionType {
 
 [System.Serializable]
 public enum Chance {
-    AlmostImpossible, Abysmal, Low, Medium, High, VeryHigh, AlmostGuarenteed
+    Impossible, AlmostImpossible, Abysmal, Low, Medium, High, VeryHigh, AlmostGuarenteed, Guarenteed
 }
 
 public struct ChanceTier {
@@ -268,6 +268,9 @@ public class ChanceFactory {
     private ChanceFactory() {        
         List<Chance> chanceList = System.Enum.GetValues(typeof(Chance)).Cast<Chance>().ToList();
 
+        chanceList.Remove(Chance.Impossible);
+        chanceList.Remove(Chance.Guarenteed);
+
         float interval = 1f / chanceList.Count;
         float baseline = 0;
 
@@ -280,6 +283,12 @@ public class ChanceFactory {
     }
 
     public Chance ChanceFromPercent(float percent) {
+        if (percent == 0) {
+            return Chance.Impossible;
+        } else if(percent == 1) {
+            return Chance.Guarenteed;
+        }
+
         foreach(Chance chance in tierMap.Keys) {
             ChanceTier tier = tierMap[chance];
             if (percent >= tier.valueRange.x && percent < tier.valueRange.y) {
@@ -306,7 +315,7 @@ public struct TerrainType {
 
     public bool walkable;
     public bool buildable;
-    
+
     [Range(0, 1)]
     public float walkSpeedMultiplier;
     [Range(0, 1)]
@@ -374,12 +383,20 @@ static class EnumExtensions {
         }
     }
 
-    public static float GetPercentage(this Chance chance) {        
+    public static float GetPercentage(this Chance chance) {
+        if(chance == Chance.Impossible) {
+            return 0;
+        } else if(chance == Chance.Guarenteed) {
+            return 1;
+        }
+
         return ChanceFactory.shardInstance.tierMap[chance].estimatedValue;
     }
 
     public static string NameAsRarity(this Chance chance) {
         switch(chance) {
+            case Chance.Impossible:
+                return "Never";
             case Chance.AlmostImpossible:
                 return "Almost Never";
             case Chance.Abysmal:
@@ -394,6 +411,8 @@ static class EnumExtensions {
                 return "Plentiful";
             case Chance.AlmostGuarenteed:
                 return "Bountiful";
+            case Chance.Guarenteed:
+                return "Always";
         }
 
         return "";
@@ -401,6 +420,8 @@ static class EnumExtensions {
 
     public static string NameAsDifficulty(this Chance chance) {
         switch(chance) {
+            case Chance.Impossible:
+                return "No Resistance";
             case Chance.AlmostImpossible:
                 return "Easiest";
             case Chance.Abysmal:
@@ -415,6 +436,8 @@ static class EnumExtensions {
                 return "Very Difficult";
             case Chance.AlmostGuarenteed:
                 return "Insanely Difficult";
+            case Chance.Guarenteed:
+                return "Impossible";
         }
 
         return "";
@@ -422,6 +445,8 @@ static class EnumExtensions {
 
     public static string NameAsSkill(this Chance chance) {
         switch(chance) {
+            case Chance.Impossible:
+                return "Impossible";
             case Chance.AlmostImpossible:
                 return "Glacier Speed";
             case Chance.Abysmal:
@@ -431,10 +456,12 @@ static class EnumExtensions {
             case Chance.Medium:
                 return "Decent";
             case Chance.High:
-                return "Fast";
+                return "Quick";
             case Chance.VeryHigh:
-                return "Very Fast";
+                return "Fast";
             case Chance.AlmostGuarenteed:
+                return "Very Fast";
+            case Chance.Guarenteed:
                 return "Lightning";
         }
 

@@ -27,7 +27,6 @@ public class TutorialSingleton : MonoBehaviour {
 
     public void ListenForEvent(TutorialEventListener updateDelegate, TutorialEvent tutorialEvent) {
         eventMap[tutorialEvent] = updateDelegate;
-
     }
 
     public void RemoveListener(TutorialEventListener updateDelegate) {

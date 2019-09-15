@@ -8,17 +8,36 @@ public class MapContainerNeighbours {
 }
 
 
-public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffectUpdateDelegate
-{
+public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffectUpdateDelegate {
     public Map map;
 
     public int mapX, mapY; // Virtual position within the maps manager
     public Rect mapRect; // World position within the Maps Manager
 
-    MeshFilter meshFilter;
-    public MeshRenderer meshRenderer;
 
-    BoxCollider[,] boxColliderArray;
+    MeshFilter cachedMeshFilter;
+    MeshFilter meshFilter {
+        get {
+            if(cachedMeshFilter == null) {
+                cachedMeshFilter = GetComponent<MeshFilter>();
+            }
+
+            return cachedMeshFilter;
+        }
+    }
+
+    MeshRenderer cachedMeshRenderer;
+    public MeshRenderer meshRenderer {
+        get {
+            if (cachedMeshRenderer == null) {
+                cachedMeshRenderer = GetComponent<MeshRenderer>();
+            }
+
+            return cachedMeshRenderer;
+        }
+    }
+
+    BoxCollider[,][,] boxColliderArray;
     GameObject[,] fogOfWarMap;
 
     float[] textureIndexList;
@@ -77,11 +96,6 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
     }
 
     public void DrawMesh() {
-        if (meshFilter == null) {
-            meshFilter = GetComponent<MeshFilter>();
-            meshRenderer = GetComponent<MeshRenderer>();
-        }
-
         meshFilter.sharedMesh = map.meshData.FinalizeMesh();
         meshRenderer.sharedMaterial.mainTexture = map.meshTexture;
     }
@@ -103,9 +117,11 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
             int height = boxColliderArray.GetLength(1);
 
             for(int x = 0; x < width; x++) {
-                for(int y = 0; y < height; y++) {
-                    BoxCollider boxCollider = boxColliderArray[x, y];
-                    DestroyImmediate(boxCollider);
+                for(int y = 0; y < height; y++) {                    
+
+                    foreach(BoxCollider collider in boxColliderArray[x, y]) {
+                        DestroyImmediate(collider);
+                    }
                 }
             }
         } else {
@@ -117,42 +133,101 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
     }
 
     private void AddBoxColliders() {
+        Constants constants = Script.Get<Constants>();
+        int numColliders = constants.nodesPerLayoutPerAxis; // featuresPerLayoutPerAxis
 
         int width = map.mapWidth / map.featuresPerLayoutPerAxis;
         int height = map.mapHeight / map.featuresPerLayoutPerAxis;
 
-        float boxSizeX = map.featuresPerLayoutPerAxis;
-        float boxSizeZ = map.featuresPerLayoutPerAxis;
+        float layoutSquareSizeX = map.featuresPerLayoutPerAxis;
+        float layoutSquareSizeY = map.featuresPerLayoutPerAxis;
 
-        float halfTotalWidth = boxSizeX * width / 2f;
-        float halfTotalHeight = boxSizeZ * height / 2f;
+        float boxSizeX = layoutSquareSizeX / numColliders;
+        float boxSizeY = layoutSquareSizeY / numColliders;
 
-        boxColliderArray = new BoxCollider[width, height];
+        float halfTotalWidth = layoutSquareSizeX * width / 2f;
+        float halfTotalHeight = layoutSquareSizeY * height / 2f;
+
+        boxColliderArray = new BoxCollider[width, height][,];
 
         for (int x = 0; x < width; x++) {
             for(int y = 0; y < height; y++) {
-                BoxCollider boxCollider = gameObject.AddComponent<BoxCollider>();
+
+                float xPos = (x * layoutSquareSizeX - halfTotalWidth);
+                float yPos = (y * layoutSquareSizeY - halfTotalHeight);
+
+                boxColliderArray[x, y] = new BoxCollider[numColliders, numColliders];
 
                 LayoutCoordinate layoutCoordinate = new LayoutCoordinate(x, height - 1 - y, this);
-                MapCoordinate mapCoordinate = new MapCoordinate(layoutCoordinate);
 
-                boxCollider.center = new Vector3((x * boxSizeX - halfTotalWidth) + boxSizeX / 2f, 0 , (y * boxSizeZ - halfTotalHeight) + boxSizeZ / 2f);
-                boxCollider.size = new Vector3(boxSizeX, map.getHeightAt(mapCoordinate) * 2, boxSizeZ);
+                PathGridCoordinate[][] gridCoordinates = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(layoutCoordinate);
+                //MapCoordinate[,] mapCoordinates = MapCoordinate.MapCoordinatesFromLayoutCoordinate(layoutCoordinate);
 
-                boxColliderArray[x,y] = boxCollider;
+                for(int w = 0; w < numColliders; w++) {
+                    for(int h = 0; h < numColliders; h++) {
+                        MapCoordinate mapCoordinate = MapCoordinate.FromGridCoordinate(gridCoordinates[w][h]);
+                        //MapCoordinate mapCoordinate = mapCoordinates[w, h];
+
+                        BoxCollider boxCollider = gameObject.AddComponent<BoxCollider>();
+
+                        float wPos = (w * boxSizeX) + boxSizeX / 2f;
+                        float hPos = (h * boxSizeY) + boxSizeY / 2f;
+
+                        boxCollider.center = new Vector3(xPos + wPos, 0, yPos + hPos);
+                        boxCollider.size = new Vector3(boxSizeX, GetHeightAround(mapCoordinate, 2) * highMultiplier, boxSizeY);
+
+                        boxColliderArray[x, y][w, h] = boxCollider;
+                    }
+                }
+
+
             }
         }
     }
 
+    const float highMultiplier = 2f;// * (9f / 10f);
     public void ResizeBoxColliderAt(LayoutCoordinate layoutCoordinate) {
+        Constants constants = Script.Get<Constants>();
+        int numColliders = constants.nodesPerLayoutPerAxis; // featuresPerLayoutPerAxis
+
         float boxSizeX = map.featuresPerLayoutPerAxis;
         float boxSizeZ = map.featuresPerLayoutPerAxis;
 
-        MapCoordinate mapCoordinate = new MapCoordinate(layoutCoordinate);
+        PathGridCoordinate[][] gridCoordinates = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(layoutCoordinate);
+        MapCoordinate[,] mapCoordinates = MapCoordinate.MapCoordinatesFromLayoutCoordinate(layoutCoordinate);    
 
-        BoxCollider boxCollider = boxColliderArray[layoutCoordinate.x, (map.mapHeight / map.featuresPerLayoutPerAxis) - 1 - layoutCoordinate.y];
+        for(int w = 0; w < numColliders; w++) {
+            for(int h = 0; h < numColliders; h++) {
 
-        boxCollider.size = new Vector3(boxSizeX, map.getHeightAt(mapCoordinate) * 2, boxSizeZ);
+                int x = layoutCoordinate.x;
+                int y = (map.mapHeight / map.featuresPerLayoutPerAxis) - 1 - layoutCoordinate.y;
+
+                MapCoordinate mapCoordinate = MapCoordinate.FromGridCoordinate(gridCoordinates[w][h]);
+                //MapCoordinate mapCoordinate = mapCoordinates[w, h];
+
+                BoxCollider boxCollider = boxColliderArray[x, y][w, h];
+
+                boxCollider.size = new Vector3(boxSizeX, GetHeightAround(mapCoordinate, 2) * highMultiplier, boxSizeZ);
+
+                boxColliderArray[x, y][w, h] = boxCollider;
+            }
+        }
+    }
+
+    private float GetHeightAround(MapCoordinate mapCoordinate, int radius) {
+        float heightTotal = 0;
+
+        for(int x = - radius; x <= radius; x++) {
+            for(int y = -radius; y <= radius; y++) {
+                MapCoordinate localCoordinate = new MapCoordinate(mapCoordinate.x + x, mapCoordinate.y + y, mapCoordinate.mapContainer);
+
+                heightTotal += mapCoordinate.mapContainer.map.getHeightAt(mapCoordinate);
+            }
+        }
+
+        int diameter = radius * 2 + 1;
+
+        return heightTotal / (diameter * diameter);
     }
 
     /*
@@ -176,7 +251,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         float halfTotalHeight = boxSizeZ * height / 2f;
 
         Color materialColor = Color.black;
-        materialColor.a = 0.1f;
+        //materialColor.a = 0.1f;
 
         for(int x = 0; x < width; x++) {
             for(int y = 0; y < height; y++) {
@@ -187,15 +262,15 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
 
                     Material material = newCube.GetComponent<MeshRenderer>().material;
 
-                    material.SetFloat("_Mode", 4f);
+                    //material.SetFloat("_Mode", 4f);
 
-                    material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-                    material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-                    material.SetInt("_ZWrite", 0);
-                    material.DisableKeyword("_ALPHATEST_ON");
-                    material.EnableKeyword("_ALPHABLEND_ON");
-                    material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-                    material.renderQueue = 3000;
+                    //material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                    //material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                    //material.SetInt("_ZWrite", 0);
+                    //material.DisableKeyword("_ALPHATEST_ON");
+                    //material.EnableKeyword("_ALPHABLEND_ON");
+                    //material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                    //material.renderQueue = 3000;
 
                     //newCube.GetComponent<MeshRenderer>().material.shader = transparencyShader;
                     material.color = materialColor;
