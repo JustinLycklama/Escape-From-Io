@@ -167,6 +167,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                     for(int h = 0; h < numColliders; h++) {
                         MapCoordinate mapCoordinate = MapCoordinate.FromGridCoordinate(gridCoordinates[w][h]);
                         //MapCoordinate mapCoordinate = mapCoordinates[w, h];
+                        //MapCoordinate mapCoordinate = new MapCoordinate(layoutCoordinate);
 
                         BoxCollider boxCollider = gameObject.AddComponent<BoxCollider>();
 
@@ -190,11 +191,8 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         Constants constants = Script.Get<Constants>();
         int numColliders = constants.nodesPerLayoutPerAxis; // featuresPerLayoutPerAxis
 
-        float boxSizeX = map.featuresPerLayoutPerAxis;
-        float boxSizeZ = map.featuresPerLayoutPerAxis;
-
         PathGridCoordinate[][] gridCoordinates = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(layoutCoordinate);
-        MapCoordinate[,] mapCoordinates = MapCoordinate.MapCoordinatesFromLayoutCoordinate(layoutCoordinate);    
+        //MapCoordinate[,] mapCoordinates = MapCoordinate.MapCoordinatesFromLayoutCoordinate(layoutCoordinate);    
 
         for(int w = 0; w < numColliders; w++) {
             for(int h = 0; h < numColliders; h++) {
@@ -204,10 +202,11 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
 
                 MapCoordinate mapCoordinate = MapCoordinate.FromGridCoordinate(gridCoordinates[w][h]);
                 //MapCoordinate mapCoordinate = mapCoordinates[w, h];
+                //MapCoordinate mapCoordinate = new MapCoordinate(layoutCoordinate);
 
                 BoxCollider boxCollider = boxColliderArray[x, y][w, h];
 
-                boxCollider.size = new Vector3(boxSizeX, GetHeightAround(mapCoordinate, 2) * highMultiplier, boxSizeZ);
+                boxCollider.size = new Vector3(boxCollider.size.x, GetHeightAround(mapCoordinate, 2) * highMultiplier, boxCollider.size.z);
 
                 boxColliderArray[x, y][w, h] = boxCollider;
             }
@@ -251,7 +250,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         float halfTotalHeight = boxSizeZ * height / 2f;
 
         Color materialColor = Color.black;
-        //materialColor.a = 0.1f;
+        materialColor.a = 0.25f;
 
         for(int x = 0; x < width; x++) {
             for(int y = 0; y < height; y++) {
@@ -262,17 +261,17 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
 
                     Material material = newCube.GetComponent<MeshRenderer>().material;
 
-                    //material.SetFloat("_Mode", 4f);
+                    material.SetFloat("_Mode", 4f);
 
-                    //material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-                    //material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-                    //material.SetInt("_ZWrite", 0);
-                    //material.DisableKeyword("_ALPHATEST_ON");
-                    //material.EnableKeyword("_ALPHABLEND_ON");
-                    //material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-                    //material.renderQueue = 3000;
+                    material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                    material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                    material.SetInt("_ZWrite", 0);
+                    material.DisableKeyword("_ALPHATEST_ON");
+                    material.EnableKeyword("_ALPHABLEND_ON");
+                    material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                    material.renderQueue = 3000;
 
-                    //newCube.GetComponent<MeshRenderer>().material.shader = transparencyShader;
+                    newCube.GetComponent<MeshRenderer>().material.shader = transparencyShader;
                     material.color = materialColor;
                     material.SetFloat("_Metallic", 1);
                     material.SetFloat("_Glossiness", 0);

@@ -49,18 +49,12 @@ public class MapGenerator : MonoBehaviour {
         float[,] map = NoiseGenerator.GenerateNoiseMap(width, length, groundMutatorMapNoiseData);
         NoiseGenerator.MinMaxofNormalize minMax = NoiseGenerator.NormalizeMap(map);
 
-        print("GroundMutator");
-        print("min " + minMax.min + " max " + minMax.max);
-
         return map;
     }
 
     public float[,] GenerateMountainMutatorMap(int width, int length) {
         float[,] map = NoiseGenerator.GenerateNoiseMap(width, length, mountainMutatorNoiseData);
         NoiseGenerator.MinMaxofNormalize minMax = NoiseGenerator.NormalizeMap(map);
-
-        print("MountainMutator");
-        print("min " + minMax.min + " max " + minMax.max);
 
         return map;
     }

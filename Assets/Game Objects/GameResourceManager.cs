@@ -5,7 +5,7 @@ using System.Linq;
 using System;
 using UnityEngine.UI;
 
-public enum MineralType { Copper, Silver, Gold, RefinedCopper, RefinedSilver, RefinedGold }
+public enum MineralType { Copper, Silver, Gold, RefinedCopper, RefinedSilver, RefinedGold, Azure }
 
 public interface OreUpdateDelegate {
     void OreAdded(Ore ore);
@@ -20,6 +20,7 @@ public class GameResourceManager : MonoBehaviour {
     public Sprite rawCopperImage;
     public Sprite rawSilverImage;
     public Sprite rawGoldImage;
+    public Sprite azureImage;
 
     public Sprite refinedCopperImage;
     public Sprite refinedSilverImage;
@@ -45,7 +46,7 @@ public class GameResourceManager : MonoBehaviour {
         public static Blueprint Basic = new Blueprint("Ore", typeof(Ore));
         public static Blueprint Silver = new Blueprint("Silver", typeof(Ore));
         public static Blueprint Gold = new Blueprint("Gold", typeof(Ore));
-
+        public static Blueprint Azure = new Blueprint("Azure", typeof(Ore));
 
         private Blueprint(string fileName, Type type) : base(folder + fileName, type) { }
     }
@@ -132,6 +133,9 @@ public class GameResourceManager : MonoBehaviour {
                 break;
             case MineralType.Gold:
                 ore = Blueprint.Gold.Instantiate() as Ore;
+                break;
+            case MineralType.Azure:
+                ore = Blueprint.Azure.Instantiate() as Ore;
                 break;
         }
 

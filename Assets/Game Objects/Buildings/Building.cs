@@ -280,12 +280,29 @@ public abstract class Building : ActionableItem, Selectable {
     public class Blueprint : ConstructionBlueprint {
         private static string folder = "Buildings/";
 
-        public static Blueprint PathBuilding = new Blueprint("PathBuilding", typeof(PathBuilding), "TowerIcon", "Path", new BlueprintCost(1, 0, 0));
+        public static Blueprint PathBuilding = new Blueprint("PathBuilding", typeof(PathBuilding), "TowerIcon", "Path", 
+            new BlueprintCost(new Dictionary<MineralType, int>(){
+                { MineralType.Copper, 1 }
+            }));
 
-        public static Blueprint Tower = new Blueprint("Tower", typeof(Tower), "TowerIcon", "Light Tower", new BlueprintCost(3, 1, 0));
-        public static Blueprint Refinery = new Blueprint("Refinery", typeof(Refinery), "MinerIcon", "Refinery", new BlueprintCost(1, 1, 1));
+        public static Blueprint Tower = new Blueprint("Tower", typeof(Tower), "TowerIcon", "Light Tower",
+            new BlueprintCost(new Dictionary<MineralType, int>(){
+                { MineralType.Copper, 3 },
+                { MineralType.Silver, 1 }
+            }));
 
-        public static Blueprint StationShip = new Blueprint("StationShip", typeof(StationShip), "ShipIcon", "Interplanetary Ship", new BlueprintCost(25, 15, 10), true);
+        public static Blueprint Refinery = new Blueprint("Refinery", typeof(Refinery), "MinerIcon", "Refinery",
+            new BlueprintCost(new Dictionary<MineralType, int>(){
+                { MineralType.Copper, 3 },
+                { MineralType.Silver, 1 }
+            }));
+
+        public static Blueprint StationShip = new Blueprint("StationShip", typeof(StationShip), "ShipIcon", "Interplanetary Ship",
+            new BlueprintCost(new Dictionary<MineralType, int>(){
+                { MineralType.Copper, 25 },
+                { MineralType.Silver, 20 },
+                { MineralType.Gold, 15 }
+            }));
 
         private bool asLastPriority;
 

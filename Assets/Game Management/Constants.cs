@@ -171,20 +171,8 @@ public abstract class PrefabBlueprint {
 public struct BlueprintCost {
     public Dictionary<MineralType, int> costMap;
 
-    public BlueprintCost(int ore, int silver, int gold) {
-        costMap = new Dictionary<MineralType, int>();
-
-        if (ore > 0) {
-            costMap[MineralType.Copper] = ore;
-        }
-
-        if (silver > 0) {
-            costMap[MineralType.Silver] = silver;
-        }
-
-        if(gold > 0) {
-            costMap[MineralType.Gold] = gold;
-        }
+    public BlueprintCost(Dictionary<MineralType, int> costMap) {
+        this.costMap = costMap;
     }
 }
 
