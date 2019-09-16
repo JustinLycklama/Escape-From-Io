@@ -263,15 +263,9 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
 
                 LayoutCoordinate layoutCoordinate = new LayoutCoordinate(mapCoordinate);
 
-                print("Target At: " + layoutCoordinate.description);
-
-
                 StartCoroutine(FollowPath(path, completedPath));
             } else {
                 // There is no path to task, we cannot do this.
-                print("Give up Task" + currentMasterTask.taskNumber);
-                print("Put task back in Queue");
-
                 refuseTaskSet.Add(currentMasterTask.taskNumber);
 
                 taskQueueManager.PutBackTask(currentMasterTask);
@@ -442,7 +436,6 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
 
         float totalTurnDistance = 0;
         float degreesToTurn = (targetRotation.eulerAngles - originalRotation.eulerAngles).magnitude;
-        print("Turn Degrees Magnitude " + degreesToTurn);
 
         while(turningToStart) {
 

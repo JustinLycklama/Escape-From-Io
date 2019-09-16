@@ -280,6 +280,8 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
             terraformTargetCoordinateMap[coordinate.x, coordinate.y] = terraformTarget;
         }
 
+        float previousPercentage = terraformTarget.percentage;
+
         terraformTarget.percentage += rate * GetTerrainAt(coordinate).modificationSpeedModifier;
 
         if (terraformTarget.percentage >= 1) {
@@ -327,7 +329,11 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
                 }                              
             }
         } else {
-            TerraformHeightMap(terraformTarget);
+            if (Mathf.RoundToInt(previousPercentage * 25) != Mathf.RoundToInt(terraformTarget.percentage * 25)) {
+                if(GetTerrainAt(coordinate).regionType != terraformTarget.terrainTypeTarget.regionType) {
+                    TerraformHeightMap(terraformTarget);
+                }                               
+            }
         }
 
         return terraformTarget.percentage;
