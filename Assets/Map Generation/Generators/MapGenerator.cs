@@ -281,7 +281,7 @@ public class MapGenerator : MonoBehaviour {
     // Returns the height in MAP COORDINATE position
     public float GetHeightAt(MapCoordinate mapCoordinate) {
         NoiseSubset noiseSubset = GetNoiseSubsetForMap(mapCoordinate.mapContainer);
-        return noiseSubset.finalNoiseMap[mapCoordinate.xLowSample, mapCoordinate.yLowSample];
+        return noiseSubset.finalNoiseMap[mapCoordinate.xAverageSample, mapCoordinate.yAverageSample];
     }
 
     public TerrainType GetTerrainAt(LayoutCoordinate layoutCoordinate) {

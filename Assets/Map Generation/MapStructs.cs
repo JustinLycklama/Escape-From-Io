@@ -122,10 +122,10 @@ public struct MapCoordinate {
     public float y;
 
     public int xLowSample { get { return Mathf.FloorToInt(x); } }
-    public int xHighSample { get { return Mathf.Clamp(xLowSample, 0, Tag.Narrator.GetGameObject().GetComponent<Constants>().mapWidth); } }
+    public int xAverageSample { get { return Mathf.Clamp(Mathf.RoundToInt(x), 0, Tag.Narrator.GetGameObject().GetComponent<Constants>().mapWidth); } }
 
     public int yLowSample { get { return Mathf.FloorToInt(y); } }
-    public int yHighSample { get { return Mathf.Clamp(yLowSample, 0, Tag.Narrator.GetGameObject().GetComponent<Constants>().mapHeight); } }
+    public int yAverageSample { get { return Mathf.Clamp(Mathf.RoundToInt(y), 0, Tag.Narrator.GetGameObject().GetComponent<Constants>().mapHeight); } }
 
     public MapContainer mapContainer;
 
