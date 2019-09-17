@@ -12,19 +12,18 @@ public class HighscoreList : TabElement, TableViewDelegate, HighscoreCellDelegat
     private List<LeaderboardItem> scoreList;
 
     private void Start() {
-
-
-        highscoreController.leaderboardCollectionUpdate += (sender, e) => {
-            UpdateScore();
-        };
+        highscoreController.leaderboardCollectionUpdate += HighscoreControllerUpdate;
 
         table.dataDelegate = this;
         UpdateScore();
     }
 
     private void OnDestroy() {
-        // TODO: Ubsubscribe
-        //highscoreController.leaderboardCollectionUpdate -= this;
+        highscoreController.leaderboardCollectionUpdate -= HighscoreControllerUpdate;
+    }
+
+    private void HighscoreControllerUpdate(object sender, List<LeaderboardItem> e) {
+        UpdateScore();
     }
 
     private void UpdateScore() {
