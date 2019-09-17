@@ -16,7 +16,7 @@ public class PathFinding : MonoBehaviour {
         grid = GetComponent<PathfindingGrid>();
     }
 
-    public void FindSimplifiedPathToClosestGoal(Vector3 startPos, MineralType gatherGoal, Action<WorldPosition[], ActionableItem, bool> callback) {
+    public void FindSimplifiedPathToClosestGoal(Vector3 startPos, int movementPenaltyMultiplier, MineralType gatherGoal, Action<WorldPosition[], ActionableItem, bool> callback) {
         GameResourceManager resourceManager = Script.Get<GameResourceManager>();
         Ore[] allOreInGame = resourceManager.GetAllAvailableOfType(gatherGoal);
 
@@ -31,7 +31,7 @@ public class PathFinding : MonoBehaviour {
         }
 
         foreach(Ore ore in allOreInGame) {
-            StartCoroutine(FindPath(startPos, ore.transform.position, (path, success) => {
+            StartCoroutine(FindPath(startPos, ore.transform.position, movementPenaltyMultiplier, (path, success) => {
                 completedCalls++;
 
                 if(success && path.Length < lowestLength) {
@@ -55,7 +55,7 @@ public class PathFinding : MonoBehaviour {
     //public static List<PathGridCoordinate> staticGridCoordinatesSurroundingLayoutCoordinate;
 
     // For PathRequestTargetType NodeCoordiante 
-    public void FindSimplifiedPathForPathGrid(Vector3 startPos, LayoutCoordinate layoutCoordinate, Action<WorldPosition[], bool> callback) {
+    public void FindSimplifiedPathForPathGrid(Vector3 startPos, LayoutCoordinate layoutCoordinate, int movementPenaltyMultiplier, Action<WorldPosition[], bool> callback) {
         Constants constants = Script.Get<Constants>();
 
         PathGridCoordinate[][] pathGridCoordinatesOfLayout = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(layoutCoordinate);
@@ -68,11 +68,11 @@ public class PathFinding : MonoBehaviour {
         pathGridCoordinates.Add(pathGridCoordinatesOfLayout[constants.nodesPerLayoutPerAxis - 1][middleCoordinate]);
         pathGridCoordinates.Add(pathGridCoordinatesOfLayout[middleCoordinate][constants.nodesPerLayoutPerAxis - 1]);
 
-        FindSimplifiedPathToAnyIncluding(pathGridCoordinates, startPos, callback);
+        FindSimplifiedPathToAnyIncluding(pathGridCoordinates, startPos, movementPenaltyMultiplier, callback);
     }
 
     // For PathRequestTargetType layout 
-    public void FindSimplifiedPathForLayout(Vector3 startPos, LayoutCoordinate layoutCoordinate, Action<WorldPosition[], bool> callback) {
+    public void FindSimplifiedPathForLayout(Vector3 startPos, LayoutCoordinate layoutCoordinate, int movementPenaltyMultiplier, Action<WorldPosition[], bool> callback) {
         Constants constants = Script.Get<Constants>();
 
         PathGridCoordinate[][] pathGridCoordinatesOfLayout = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(layoutCoordinate);
@@ -109,10 +109,10 @@ public class PathFinding : MonoBehaviour {
             gridCoordinatesSurroundingLayoutCoordinate.Add(new PathGridCoordinate(sample.xLowSample, sample.yLowSample + 1));
         }
 
-        FindSimplifiedPathToAnyIncluding(gridCoordinatesSurroundingLayoutCoordinate, startPos, callback);
+        FindSimplifiedPathToAnyIncluding(gridCoordinatesSurroundingLayoutCoordinate, startPos, movementPenaltyMultiplier, callback);
     }
 
-    private void FindSimplifiedPathToAnyIncluding(List<PathGridCoordinate> pathGridCoordinates, Vector3 startPos, Action<WorldPosition[], bool> callback) {
+    private void FindSimplifiedPathToAnyIncluding(List<PathGridCoordinate> pathGridCoordinates, Vector3 startPos, int movementPenaltyMultiplier, Action<WorldPosition[], bool> callback) {
 
         int lowestLength = int.MaxValue;
         Node[] foundPath = null;
@@ -123,7 +123,7 @@ public class PathFinding : MonoBehaviour {
             MapCoordinate mapCoordinate = MapCoordinate.FromGridCoordinate(gridCoordinate);
             WorldPosition worldPos = new WorldPosition(mapCoordinate);
 
-            StartCoroutine(FindPath(startPos, worldPos.vector3, (path, success) => {
+            StartCoroutine(FindPath(startPos, worldPos.vector3, movementPenaltyMultiplier, (path, success) => {
                 completedCalls++;
 
                 if(success && path.Length < lowestLength) {
@@ -139,13 +139,13 @@ public class PathFinding : MonoBehaviour {
         }
     }
 
-    public void FindSimplifiedPath(Vector3 startPos, Vector3 targetPos, Action<WorldPosition[], bool> callback) {
-        StartCoroutine(FindPath(startPos, targetPos, (path, success) => {
+    public void FindSimplifiedPath(Vector3 startPos, Vector3 targetPos, int movementPenaltyMultiplier, Action<WorldPosition[], bool> callback) {
+        StartCoroutine(FindPath(startPos, targetPos, movementPenaltyMultiplier, (path, success) => {
                 callback((success && path.Length > 0) ? SimplifyPath(path) : null, success);          
         }));
     }
 
-    IEnumerator FindPath(Vector3 startPos, Vector3 targetPos, Action<Node[], bool> callback){
+    IEnumerator FindPath(Vector3 startPos, Vector3 targetPos, int movementPenaltyMultiplier, Action<Node[], bool> callback){
 
         Stopwatch sw = new Stopwatch();
         sw.Start();
@@ -187,7 +187,7 @@ public class PathFinding : MonoBehaviour {
                     continue;
                 }
 
-                int newMovementCostToNeighbour = currentNode.gCost + getDistance(currentNode, neighbour) + neighbour.movementPenalty;
+                int newMovementCostToNeighbour = currentNode.gCost + getDistance(currentNode, neighbour) + (neighbour.movementPenalty * movementPenaltyMultiplier);
                 if (newMovementCostToNeighbour < neighbour.gCost || !openSet.Contains(neighbour)) {
                     neighbour.gCost = newMovementCostToNeighbour;
                     neighbour.hCost = getDistance(neighbour, targetNode);

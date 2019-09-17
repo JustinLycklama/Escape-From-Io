@@ -176,7 +176,9 @@ public class TerrainManager : MonoBehaviour {
                     unitAction.description = "Build Unit";
                     unitAction.layoutCoordinate = coordinate;
 
-                    unitAction.blueprintList = new ConstructionBlueprint[] { Unit.Blueprint.Miner, Unit.Blueprint.Mover, Unit.Blueprint.Builder };
+                    unitAction.blueprintList = new ConstructionBlueprint[] {
+                        Unit.Blueprint.Miner, Unit.Blueprint.Mover, Unit.Blueprint.Builder,
+                        Unit.Blueprint.AdvancedMiner, Unit.Blueprint.AdvancedMover, Unit.Blueprint.AdvancedBuilder };
 
                     actionList.Add(unitAction);
 

@@ -86,6 +86,8 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
     public float turnDistance;
     public float stoppingDistance;
 
+    public int movementPenaltyMultiplier = 1;
+
     public Transform oreLocation;
 
     //Path path;
@@ -319,7 +321,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
             currentGameTask = gameTasksQueue.Dequeue();
             unitStatusTooltip.SetTask(this, currentGameTask);
 
-            PathRequestManager.RequestPathForTask(transform.position, currentGameTask, foundWaypoints);
+            PathRequestManager.RequestPathForTask(transform.position, movementPenaltyMultiplier, currentGameTask, foundWaypoints);
         } else {
             currentMasterTask.MarkTaskFinished();
             ResetTaskState();
@@ -499,9 +501,9 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
                 MapCoordinate playerMapCoordinate = MapCoordinate.FromWorldPosition(playerWorldPos);
 
                 LayoutCoordinate playerLayoutCoordinate = new LayoutCoordinate(playerMapCoordinate);
-                TerrainType currentTerrain = playerLayoutCoordinate.mapContainer.map.GetTerrainAt(playerLayoutCoordinate);
+                TerrainType currentTerrain = playerLayoutCoordinate.mapContainer.map.GetTerrainAt(playerLayoutCoordinate);          
 
-                float localSpeed = currentTerrain.walkSpeedMultiplier * speed;
+                float localSpeed = Mathf.Pow(currentTerrain.walkSpeedMultiplier, movementPenaltyMultiplier) * speed;
 
                 float height = Script.Get<MapsManager>().GetHeightAt(lookPointMapCoordinate) * lookPointMapCoordinate.mapContainer.transform.lossyScale.y; //  + (0.5f * transform.localScale.y)
                 Vector3 lookPoint = new Vector3(lookPointWorldPos.vector3.x, height, lookPointWorldPos.vector3.z);
@@ -562,7 +564,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
 
         if (currentMasterTask != null && navigatingToTask == true && currentGameTask.target.vector3 != this.transform.position) {
             // Request a new path if the world has updated and we are already on the move
-            PathRequestManager.RequestPathForTask(transform.position, currentGameTask, foundWaypoints);
+            PathRequestManager.RequestPathForTask(transform.position, movementPenaltyMultiplier, currentGameTask, foundWaypoints);
         }
     }
 
@@ -649,6 +651,27 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
             new BlueprintCost(new Dictionary<MineralType, int>(){
                 { MineralType.Copper, 2 },
                 { MineralType.Silver, 2 }                
+            }));
+
+        public static Blueprint AdvancedMiner = new Blueprint("AdvancedMiner", typeof(AdvancedMiner), "MinerIcon", "Adv. Miner",
+            new BlueprintCost(new Dictionary<MineralType, int>(){
+                { MineralType.Copper, 1 }
+                //{ MineralType.Silver, 0 },
+                //{ MineralType.Gold, 0 }
+            }));
+
+        public static Blueprint AdvancedMover = new Blueprint("AdvancedMover", typeof(AdvancedMover), "MoverIcon", "Adv. Mover",
+            new BlueprintCost(new Dictionary<MineralType, int>(){
+                { MineralType.Copper, 1 }
+                //{ MineralType.Silver, 0 },
+                //{ MineralType.Gold, 0 }
+            }));
+
+        public static Blueprint AdvancedBuilder = new Blueprint("AdvancedBuilder", typeof(AdvancedBuilder), "BuilderIcon", "Adv. Builder",
+            new BlueprintCost(new Dictionary<MineralType, int>(){
+                { MineralType.Copper, 1 }
+                //{ MineralType.Silver, 0 },
+                //{ MineralType.Gold, 0 }
             }));
 
         public Blueprint(string fileName, Type type, string iconName, string label, BlueprintCost cost) : base(folder + fileName, type, iconName, label, cost) { }

@@ -16,12 +16,15 @@ struct PathRequest {
 
     public Vector3 pathStart;
 
+    public int movementPenaltyMultiplier;
+
     public Action<WorldPosition[], ActionableItem, bool> callback;
 
-    public PathRequest(Vector3 _start, Vector3 _end, Action<WorldPosition[], ActionableItem, bool> _callback) {
+    public PathRequest(Vector3 _start, Vector3 _end, int _movementPenaltyMultiplier, Action<WorldPosition[], ActionableItem, bool> _callback) {
         pathStart = _start;
         pathEndWorld = _end;
         callback = _callback;
+        movementPenaltyMultiplier = _movementPenaltyMultiplier;
 
         targetType = PathRequestTargetType.World;
         pathEndGrid = null;
@@ -39,10 +42,12 @@ struct PathRequest {
     //    pathEndLayout = null;
     //}
 
-    public PathRequest(Vector3 _start, LayoutCoordinate _end, Action<WorldPosition[], ActionableItem, bool> _callback, PathRequestTargetType targetType) {
+    public PathRequest(Vector3 _start, LayoutCoordinate _end, int _movementPenaltyMultiplier, Action<WorldPosition[], ActionableItem, bool> _callback, PathRequestTargetType targetType) {
         pathStart = _start;
         pathEndLayout = _end;
         callback = _callback;
+        movementPenaltyMultiplier = _movementPenaltyMultiplier;
+
 
         this.targetType = targetType;
         pathEndWorld = null;
@@ -50,10 +55,11 @@ struct PathRequest {
         pathEndGoal = null;
     }
 
-    public PathRequest(Vector3 _start, MineralType goalGatherType, Action<WorldPosition[], ActionableItem, bool> _callback) {
+    public PathRequest(Vector3 _start, int _movementPenaltyMultiplier, MineralType goalGatherType, Action<WorldPosition[], ActionableItem, bool> _callback) {
         pathStart = _start;
         pathEndGoal = goalGatherType;
         callback = _callback;
+        movementPenaltyMultiplier = _movementPenaltyMultiplier;
 
         targetType = PathRequestTargetType.Unknown;
         pathEndWorld = null;
@@ -84,22 +90,22 @@ public class PathRequestManager : MonoBehaviour {
     //    instance.TryProcessNext();
     //}
 
-    public static void RequestPathForTask(Vector3 position, GameTask task, Action<WorldPosition[], ActionableItem, bool> callback) {
+    public static void RequestPathForTask(Vector3 position, int movementPenaltyMultiplier, GameTask task, Action<WorldPosition[], ActionableItem, bool> callback) {
 
         PathRequest? request = null;
 
         switch(task.pathRequestTargetType) {
             case PathRequestTargetType.World:
-                request = new PathRequest(position, task.target.vector3, callback);
+                request = new PathRequest(position, task.target.vector3, movementPenaltyMultiplier, callback);
                 break;
             case PathRequestTargetType.Layout:
             case PathRequestTargetType.PathGrid:
                 MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(task.target);
                 LayoutCoordinate layoutCoordinate = new LayoutCoordinate(mapCoordinate);
-                request = new PathRequest(position, layoutCoordinate, callback, task.pathRequestTargetType);
+                request = new PathRequest(position, layoutCoordinate, movementPenaltyMultiplier, callback, task.pathRequestTargetType);
                 break;
             case PathRequestTargetType.Unknown:
-                request = new PathRequest(position, task.gatherType, callback);
+                request = new PathRequest(position, movementPenaltyMultiplier, task.gatherType, callback);
                 break;
         }
 
@@ -121,7 +127,7 @@ public class PathRequestManager : MonoBehaviour {
 
             switch(currentPathRequest.targetType) {
                 case PathRequestTargetType.Unknown:
-                    pathFinding.FindSimplifiedPathToClosestGoal(currentPathRequest.pathStart, currentPathRequest.pathEndGoal.Value, (path, actionableItem, success) => {
+                    pathFinding.FindSimplifiedPathToClosestGoal(currentPathRequest.pathStart, currentPathRequest.movementPenaltyMultiplier, currentPathRequest.pathEndGoal.Value, (path, actionableItem, success) => {
                         currentPathRequest.callback(path, actionableItem, success);
                         isProcessingPath = false;
 
@@ -129,7 +135,7 @@ public class PathRequestManager : MonoBehaviour {
                     });
                     break;
                 case PathRequestTargetType.World:
-                    pathFinding.FindSimplifiedPath(currentPathRequest.pathStart, currentPathRequest.pathEndWorld.Value, (path, success) => {
+                    pathFinding.FindSimplifiedPath(currentPathRequest.pathStart, currentPathRequest.pathEndWorld.Value, currentPathRequest.movementPenaltyMultiplier,(path, success) => {
                         currentPathRequest.callback(path, null, success);
                         isProcessingPath = false;
 
@@ -139,7 +145,7 @@ public class PathRequestManager : MonoBehaviour {
 
                     break;
                 case PathRequestTargetType.Layout:
-                    pathFinding.FindSimplifiedPathForLayout(currentPathRequest.pathStart, currentPathRequest.pathEndLayout.Value, (path, success) => {
+                    pathFinding.FindSimplifiedPathForLayout(currentPathRequest.pathStart, currentPathRequest.pathEndLayout.Value, currentPathRequest.movementPenaltyMultiplier, (path, success) => {
                         currentPathRequest.callback(path, null, success);
                         isProcessingPath = false;
 
@@ -147,7 +153,7 @@ public class PathRequestManager : MonoBehaviour {
                     });
                     break;
                 case PathRequestTargetType.PathGrid:
-                    pathFinding.FindSimplifiedPathForPathGrid(currentPathRequest.pathStart, currentPathRequest.pathEndLayout.Value, (path, success) => {
+                    pathFinding.FindSimplifiedPathForPathGrid(currentPathRequest.pathStart, currentPathRequest.pathEndLayout.Value, currentPathRequest.movementPenaltyMultiplier, (path, success) => {
                         currentPathRequest.callback(path, null, success);
                         isProcessingPath = false;
 
