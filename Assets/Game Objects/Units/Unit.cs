@@ -635,9 +635,8 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
 
         public static Blueprint Miner = new Blueprint("Miner", typeof(Miner), "MinerIcon", "Miner",
             new BlueprintCost(new Dictionary<MineralType, int>(){
-                { MineralType.Copper, 5 },
-                { MineralType.Silver, 3 },
-                { MineralType.Gold, 1 }
+                { MineralType.Copper, 2 },
+                { MineralType.Silver, 2 }                
             }));
 
         public static Blueprint Mover = new Blueprint("Mover", typeof(Mover), "MoverIcon", "Mover",
@@ -648,9 +647,8 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
 
         public static Blueprint Builder = new Blueprint("Builder", typeof(Builder), "BuilderIcon", "Builder",
             new BlueprintCost(new Dictionary<MineralType, int>(){
-                { MineralType.Copper, 5 },
-                { MineralType.Silver, 3 },
-                { MineralType.Azure, 1 }
+                { MineralType.Copper, 2 },
+                { MineralType.Silver, 2 }                
             }));
 
         public Blueprint(string fileName, Type type, string iconName, string label, BlueprintCost cost) : base(folder + fileName, type, iconName, label, cost) { }

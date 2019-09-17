@@ -7,6 +7,8 @@ public class UnitStatusTooltip : MonoBehaviour, TrackingUIInterface { //TaskStat
     public Text taskDescription;
     //public Image taskEfficiencyImage;
 
+    public CanvasGroup unitInfoCanvas;
+
     public PercentageBar durationBar;
     public PercentageBar percentageBar;
 
@@ -14,7 +16,6 @@ public class UnitStatusTooltip : MonoBehaviour, TrackingUIInterface { //TaskStat
 
     private RectTransform targetCanvas;
     //private RectTransform rectTransform;
-
 
     // TrackingUIInterface
     public Transform toFollow { get; set; }
@@ -38,7 +39,16 @@ public class UnitStatusTooltip : MonoBehaviour, TrackingUIInterface { //TaskStat
             taskDescription.text = task.description;
         }
 
-        backgroundSprite.color = unit.GetUnitState().ColorForState();
+        Unit.UnitState unitState = unit.GetUnitState();
+
+        // Override color to display RED on inefficient units
+        Color efficiencyColor = Color.red;
+        if (unitState != Unit.UnitState.Inefficient) {
+            efficiencyColor = unit.GetUnitState().ColorForState();
+        }
+
+        unitInfoCanvas.alpha = unitState == Unit.UnitState.Idle ? 0.7f : 1;        
+        backgroundSprite.color = efficiencyColor;
     }
 
     public void DisplayPercentageBar(bool display) {

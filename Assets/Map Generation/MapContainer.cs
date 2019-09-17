@@ -14,7 +14,6 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
     public int mapX, mapY; // Virtual position within the maps manager
     public Rect mapRect; // World position within the Maps Manager
 
-
     MeshFilter cachedMeshFilter;
     MeshFilter meshFilter {
         get {
@@ -152,7 +151,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
 
         boxColliderArray = new BoxCollider[width, height][,];
 
-        for (int x = 0; x < width; x++) {
+        for(int x = 0; x < width; x++) {
             for(int y = 0; y < height; y++) {
 
                 float xPos = (x * layoutSquareSizeX - halfTotalWidth);
@@ -177,7 +176,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                         MapCoordinate mapCoordinate = mapCoordinates[sampleW, realWorldH];
                         //MapCoordinate mapCoordinate = new MapCoordinate(layoutCoordinate);
 
-                        BoxCollider boxCollider = gameObject.AddComponent<BoxCollider>();
+                        BoxCollider boxCollider = gameObject.AddComponent(typeof(BoxCollider)) as BoxCollider;
 
                         float wPos = (w * boxSizeX) + boxSizeX / 2f;
                         float hPos = (h * boxSizeY) + boxSizeY / 2f;
@@ -266,7 +265,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         float halfTotalHeight = boxSizeZ * height / 2f;
 
         Color materialColor = Color.black;
-        materialColor.a = 0.25f;
+        //materialColor.a = 0.25f;
 
         for(int x = 0; x < width; x++) {
             for(int y = 0; y < height; y++) {
@@ -277,17 +276,17 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
 
                     Material material = newCube.GetComponent<MeshRenderer>().material;
 
-                    material.SetFloat("_Mode", 4f);
+                    //material.SetFloat("_Mode", 4f);
 
-                    material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-                    material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-                    material.SetInt("_ZWrite", 0);
-                    material.DisableKeyword("_ALPHATEST_ON");
-                    material.EnableKeyword("_ALPHABLEND_ON");
-                    material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-                    material.renderQueue = 3000;
+                    //material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+                    //material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+                    //material.SetInt("_ZWrite", 0);
+                    //material.DisableKeyword("_ALPHATEST_ON");
+                    //material.EnableKeyword("_ALPHABLEND_ON");
+                    //material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+                    //material.renderQueue = 3000;
 
-                    newCube.GetComponent<MeshRenderer>().material.shader = transparencyShader;
+
                     material.color = materialColor;
                     material.SetFloat("_Metallic", 1);
                     material.SetFloat("_Glossiness", 0);

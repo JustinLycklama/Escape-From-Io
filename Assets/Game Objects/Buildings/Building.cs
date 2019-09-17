@@ -287,8 +287,7 @@ public abstract class Building : ActionableItem, Selectable {
 
         public static Blueprint Tower = new Blueprint("Tower", typeof(Tower), "TowerIcon", "Light Tower",
             new BlueprintCost(new Dictionary<MineralType, int>(){
-                { MineralType.Copper, 3 },
-                { MineralType.Silver, 1 }
+                { MineralType.Copper, 3 }                
             }));
 
         public static Blueprint Refinery = new Blueprint("Refinery", typeof(Refinery), "MinerIcon", "Refinery",
@@ -299,10 +298,11 @@ public abstract class Building : ActionableItem, Selectable {
 
         public static Blueprint StationShip = new Blueprint("StationShip", typeof(StationShip), "ShipIcon", "Interplanetary Ship",
             new BlueprintCost(new Dictionary<MineralType, int>(){
-                { MineralType.Copper, 25 },
                 { MineralType.Silver, 20 },
-                { MineralType.Gold, 15 }
-            }));
+                { MineralType.Gold, 15 },
+                { MineralType.Azure, 6 }
+            }),
+            true); // As last priority
 
         private bool asLastPriority;
 
