@@ -178,7 +178,8 @@ public class TerrainManager : MonoBehaviour {
 
                     unitAction.blueprintList = new ConstructionBlueprint[] {
                         Unit.Blueprint.Miner, Unit.Blueprint.Mover, Unit.Blueprint.Builder,
-                        Unit.Blueprint.AdvancedMiner, Unit.Blueprint.AdvancedMover, Unit.Blueprint.AdvancedBuilder };
+                        Unit.Blueprint.AdvancedMiner, Unit.Blueprint.AdvancedMover, Unit.Blueprint.AdvancedBuilder
+                    };
 
                     actionList.Add(unitAction);
 

@@ -120,6 +120,11 @@ public class GameResourceManager : MonoBehaviour {
         return new Dictionary<MineralType, int>(); 
     }
 
+    public void ClearMineralsAtCoordinate(LayoutCoordinate layoutCoordinate) {
+        if(mineralsForLayoutCoordinate.ContainsKey(layoutCoordinate)) {
+            mineralsForLayoutCoordinate.Remove(layoutCoordinate);
+        }
+    }
 
     public Ore CreateMineral(MineralType type) {
         Ore ore = null;

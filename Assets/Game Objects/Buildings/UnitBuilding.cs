@@ -18,5 +18,10 @@ public class UnitBuilding : Building
 
     protected override void UpdateCompletionPercent(float percent) {
        
-    }    
+    }
+
+    public override void Destroy() {
+        associatedUnit.Destroy();
+        base.Destroy();        
+    }
 }

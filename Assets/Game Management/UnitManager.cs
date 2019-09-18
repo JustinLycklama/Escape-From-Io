@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public interface UnitManagerDelegate {
     void NotifyUpdateUnitList(Unit[] unitList, MasterGameTask.ActionType actionType, Unit.UnitState unitListState);
@@ -50,6 +51,10 @@ public class UnitManager : MonoBehaviour, TaskStatusUpdateDelegate {
             unitCount[MasterGameTask.ActionType.Mine] = 0;
             unitCount[MasterGameTask.ActionType.Move] = 0;
         };
+    }
+
+    public Unit[] GetAllUnits() {
+        return GetUnitsOfType(MasterGameTask.ActionType.Build).Concat(GetUnitsOfType(MasterGameTask.ActionType.Mine)).Concat(GetUnitsOfType(MasterGameTask.ActionType.Move)).ToArray();
     }
 
     public Unit[] GetUnitsOfType(MasterGameTask.ActionType type) {

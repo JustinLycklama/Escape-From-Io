@@ -340,6 +340,12 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
         ResetTaskState();
     }
 
+    public void Destroy() {
+        transform.SetParent(null);
+        Destroy(unitStatusTooltip.gameObject);
+        Destroy(gameObject);
+    }
+
     private void Shutdown() {
         taskQueueManager.RestractTaskRequest(this);
         InterruptInProgressActions();
@@ -358,9 +364,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
         };
 
         Action destroyBlock = () => {
-            transform.SetParent(null);
-            Destroy(unitStatusTooltip.gameObject);
-            Destroy(gameObject);
+            Destroy();
         };
 
         Script.Get<TimeManager>().AddNewTimer(3, fadeOutBlock, destroyBlock, 2);

@@ -328,6 +328,9 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
                     ore.transform.position = randomPosition;
                 }                              
             }
+
+            resourceManager.ClearMineralsAtCoordinate(coordinate);
+
         } else {
             if (Mathf.RoundToInt(previousPercentage * 25) != Mathf.RoundToInt(terraformTarget.percentage * 25)) {
                 if(GetTerrainAt(coordinate).regionType != terraformTarget.terrainTypeTarget.regionType) {

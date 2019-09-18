@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public interface TaskQueueDelegate {
     void NotifyUpdateTaskList(MasterGameTask[] taskList, MasterGameTask.ActionType actionType, TaskQueueManager.ListState listState);
@@ -271,6 +272,8 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
     }
 
     IEnumerator DishOutTasks() {
+        UnitManager unitManager = Script.Get<UnitManager>();
+
         HashSet<int> exhaustedTaskNumbers = new HashSet<int>();
         List<UnitsDistanceList> unitDistanceListList = new List<UnitsDistanceList>();
 
@@ -292,6 +295,17 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
 
             foreach(UnitAndRefused unitAndRefused in unitsRequestingTasks) {
 
+                // First, look for tasks that other units have, which we could be doing more efficiently
+                //Unit[] unitsWithAccessableTasks = unitManager.GetAllUnits().Where(u => u.currentMasterTask != null &&
+
+                // Check all units who have tasks of our type, or tasks where the type is unlocked
+                //u.currentMasterTask.actionType == u.primaryActionType || taskListLockMap[u.currentMasterTask.actionType] == false).ToArray();
+
+
+
+
+
+                // Look for tasks within our queue
                 List<DistanceAndTask> taskDistances = tasksAndDistancesForUnit(unitAndRefused, false);
 
                 // If we can't find any tasks to do, check the low priority tasks from all Action Types

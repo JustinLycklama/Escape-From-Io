@@ -115,7 +115,7 @@ public class BuildingManager : MonoBehaviour {
 
         UnitManager unitManager = Script.Get<UnitManager>();
 
-        Unit[] allUnits = unitManager.GetUnitsOfType(MasterGameTask.ActionType.Build).Concat(unitManager.GetUnitsOfType(MasterGameTask.ActionType.Mine)).Concat(unitManager.GetUnitsOfType(MasterGameTask.ActionType.Move)).ToArray();
+        Unit[] allUnits = unitManager.GetAllUnits();
 
         MapCoordinate centerOfLayout = new MapCoordinate(layoutCoordinate);
 
