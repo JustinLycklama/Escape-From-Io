@@ -265,7 +265,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         float halfTotalHeight = boxSizeZ * height / 2f;
 
         Color materialColor = Color.black;
-        //materialColor.a = 0.25f;
+        //materialColor.a = 0.75f;
 
         for(int x = 0; x < width; x++) {
             for(int y = 0; y < height; y++) {
@@ -543,7 +543,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                 int sampleX = x + mapX * width;
                 int sampleY = y + mapY * height;
 
-                if ((statusMap[sampleX, sampleY] & BuildingEffectStatus.Light) == BuildingEffectStatus.Light && fogOfWarMap[x, y].activeSelf) {
+                if ((statusMap[sampleX, sampleY] & BuildingEffectStatus.CircularLight) == BuildingEffectStatus.CircularLight && fogOfWarMap[x, y].activeSelf) {
                     fogOfWarMap[x, y].SetActive(false);
                     //print("--");
                     //print("Activate x " + x + " y " + y + " of map " + mapX + ", " + mapY);

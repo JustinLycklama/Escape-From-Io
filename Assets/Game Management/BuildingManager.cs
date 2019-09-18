@@ -14,23 +14,29 @@ public interface StatusEffectUpdateDelegate {
 
 public enum BuildingEffectStatus {
     None = (0 << 0),
-    Light = (1 << 0), //1 in decimal
-    Scan = (1 << 1), //2 in decimal
+    CircularLight = (1 << 0), //1 in decimal
+    DirectLight = (1 << 1), //2 in decimal
+    Scan = (1 << 2), //4 in decimal
                      //Up = (1 << 2), //4 in decimal
 }
 
 public class BuildingManager : MonoBehaviour {
 
     BuildingEffectStatus[,] statusMap;
-    Dictionary<LayoutCoordinate, Building> locationBuildingMap = new Dictionary<LayoutCoordinate, Building>();
+    Building[,] buildingsEffectingStatusMapMap;
 
+    Dictionary<LayoutCoordinate, Building> locationBuildingMap = new Dictionary<LayoutCoordinate, Building>();
     private List<LayoutCoordinate> listOfCoordinatesToBlockTerrain = new List<LayoutCoordinate>();
 
     public void Initialize() {
         MapsManager mapsManager = Script.Get<MapsManager>();
         Constants constants = Script.Get<Constants>();
 
-        statusMap = new BuildingEffectStatus[constants.layoutMapWidth * mapsManager.horizontalMapCount, constants.layoutMapHeight * mapsManager.verticalMapCount];
+        int width = constants.layoutMapWidth * mapsManager.horizontalMapCount;
+        int height = constants.layoutMapHeight * mapsManager.verticalMapCount;
+
+        statusMap = new BuildingEffectStatus[width, height];
+        buildingsEffectingStatusMapMap = new Building[width, height];
 
         StartCoroutine(AttemptToSetUnwalkable());
     }
@@ -78,7 +84,11 @@ public class BuildingManager : MonoBehaviour {
         int x = layoutCoordinate.mapContainer.mapX * constants.layoutMapWidth + layoutCoordinate.x;
         int y = layoutCoordinate.mapContainer.mapY * constants.layoutMapHeight + layoutCoordinate.y;
 
-        ModifyStatus(x, y, building.BuildingStatusEffects(), building.BuildingStatusRange());
+        if (building.BuildingStatusEffects() != BuildingEffectStatus.None) {
+            AddBuildingAffectingStatusMap(building, layoutCoordinate);
+        }
+        
+        //ModifyStatusCircularAroundPoint(x, y, building.BuildingStatusEffects(), building.BuildingStatusRange());
 
         NotifyBuildingUpdate(building, false);
     }
@@ -133,7 +143,139 @@ public class BuildingManager : MonoBehaviour {
         return true;
     }
 
-    private void ModifyStatus(int centerX, int centerY, BuildingEffectStatus status, int radius) {
+    private void AddBuildingAffectingStatusMap(Building building, LayoutCoordinate layoutCoordinate) {
+        Constants constants = Script.Get<Constants>();
+
+        int startX = layoutCoordinate.mapContainer.mapX * constants.layoutMapWidth;
+        int startY = layoutCoordinate.mapContainer.mapY * constants.layoutMapHeight;
+
+        buildingsEffectingStatusMapMap[startX + layoutCoordinate.x, startY + layoutCoordinate.y] = building;
+
+        RecalcluateSightStatuses();
+    }
+
+    public void RecalcluateSightStatuses() {
+        Constants constants = Script.Get<Constants>();
+
+        MapsManager mapsManager = Script.Get<MapsManager>();
+        MapGenerator mapGenerator = Script.Get<MapGenerator>();
+
+        int width = constants.layoutMapWidth * mapsManager.horizontalMapCount;
+        int height = constants.layoutMapHeight * mapsManager.verticalMapCount;
+
+        int buildingX = 0, buildingY = 0;
+
+        ShadowCasting visibilityCasting = new ShadowCasting(delegate (int x, int y) {
+            if (x < 0 || y < 0 || x >= width || y >= height) {
+                return true;
+            }
+
+            return mapGenerator.GetTerrainAtAbsoluteXY(x, y).regionType == RegionType.Type.Mountain;
+        },
+        (int x, int y) => {
+            if(x < 0 || y < 0 || x >= width || y >= height) {
+                return;
+            }
+
+            statusMap[x, y] |= BuildingEffectStatus.CircularLight;
+        },
+        delegate (int x, int y) {
+            return Mathf.RoundToInt(Vector2.Distance(new Vector2(buildingX, buildingY), new Vector2(x, y)));
+        });
+
+        for(int x = 0; x < width; x++) {
+            for(int y = 0; y < height; y++) {
+                Building building = buildingsEffectingStatusMapMap[x, y];
+
+                if(building == null) {
+                    continue;
+                }
+
+                buildingX = x; buildingY = y;
+
+
+                if(building.BuildingStatusEffects() == BuildingEffectStatus.CircularLight) {
+
+
+
+
+                    visibilityCasting.Compute(x, y, 5);
+
+                    //for(int subX = 0; subX < width; subX++) {
+                    //    for(int subY = 0; subY < width; subY++) {
+
+                    //        if(!BresenhamIncludesMountain(subX, subY, buildingX, buildingY)) {
+                    //            statusMap[subX, subY] |= BuildingEffectStatus.CircularLight;
+                    //        }
+                    //    }
+                    //}
+
+
+                }
+            
+
+                if(building.BuildingStatusEffects() == BuildingEffectStatus.DirectLight) {
+
+                }
+
+
+
+            }
+        }
+
+
+
+
+        NotifyStatusEffectUpdate();
+    }
+
+    // x and y should be anyPoint, x2 and y2 should be LightPoint
+    public bool BresenhamIncludesMountain(int x, int y, int x2, int y2) {
+
+        Constants constants = Script.Get<Constants>();
+        MapGenerator mapGenerator = Script.Get<MapGenerator>();
+
+        int originalX = x;
+        int originalY = y;
+
+        int w = x2 - x;
+        int h = y2 - y;
+        int dx1 = 0, dy1 = 0, dx2 = 0, dy2 = 0;
+        if(w < 0) dx1 = -1; else if(w > 0) dx1 = 1;
+        if(h < 0) dy1 = -1; else if(h > 0) dy1 = 1;
+        if(w < 0) dx2 = -1; else if(w > 0) dx2 = 1;
+        int longest = Mathf.Abs(w);
+        int shortest = Mathf.Abs(h);
+        if(!(longest > shortest)) {
+            longest = Mathf.Abs(h);
+            shortest = Mathf.Abs(w);
+            if(h < 0) dy2 = -1; else if(h > 0) dy2 = 1;
+            dx2 = 0;
+        }
+        int numerator = longest >> 1;
+        for(int i = 0; i <= longest; i++) {
+
+            if (originalX != x || originalY != y) {
+                if(mapGenerator.GetTerrainAtAbsoluteXY(x, y).regionType == RegionType.Type.Mountain) {
+                    return true;
+                }
+            }
+           
+            numerator += shortest;
+            if(!(numerator < longest)) {
+                numerator -= longest;
+                x += dx1;
+                y += dy1;
+            } else {
+                x += dx2;
+                y += dy2;
+            }
+        }
+
+        return false;
+    }
+
+    private void ModifyStatusCircularAroundPoint(int centerX, int centerY, BuildingEffectStatus status, int radius) {
 
         if (radius == 0) {
             return;

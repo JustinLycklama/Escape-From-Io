@@ -292,6 +292,7 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
             UpdateTerrainAtLocation(terraformTarget.coordinate, terraformTarget.terrainTypeTarget);
             TerraformHeightMap(terraformTarget);
             terraformTargetCoordinateMap[coordinate.x, coordinate.y] = null;
+            Script.Get<BuildingManager>().RecalcluateSightStatuses();
 
             // Create Ore at location
 

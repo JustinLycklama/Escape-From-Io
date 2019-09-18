@@ -8,7 +8,7 @@ public class Tower : Building {
     protected override float constructionModifierSpeed => 0.45f;
 
     public override BuildingEffectStatus BuildingStatusEffects() {
-        return BuildingEffectStatus.Light;
+        return BuildingEffectStatus.CircularLight;
     }
 
     public override int BuildingStatusRange() {

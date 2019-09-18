@@ -284,13 +284,17 @@ public class MapGenerator : MonoBehaviour {
         return noiseSubset.finalNoiseMap[mapCoordinate.xAverageSample, mapCoordinate.yAverageSample];
     }
 
+    public TerrainType GetTerrainAtAbsoluteXY(int x, int y) {
+        return terrainMap[x, y];
+    }
+
     public TerrainType GetTerrainAt(LayoutCoordinate layoutCoordinate) {
         Constants constants = Script.Get<Constants>();
 
         int startX = layoutCoordinate.mapContainer.mapX * constants.layoutMapWidth;
         int startY = layoutCoordinate.mapContainer.mapY * constants.layoutMapHeight;
 
-        return terrainMap[startX + layoutCoordinate.x, startY + layoutCoordinate.y];
+        return GetTerrainAtAbsoluteXY(startX + layoutCoordinate.x, startY + layoutCoordinate.y);
     }
 
     // Only call from Map
