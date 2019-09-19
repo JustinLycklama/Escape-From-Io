@@ -313,7 +313,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         float halfTotalHeight = boxSizeZ * height / 2f;
 
         Color materialColor = Color.black;
-        //materialColor.a = 0.75f;
+        //materialColor.a = 0.15f;
 
         for(int x = 0; x < width; x++) {
             for(int y = 0; y < height; y++) {

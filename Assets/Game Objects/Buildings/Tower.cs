@@ -12,7 +12,7 @@ public class Tower : Building {
     }
 
     public override int BuildingStatusRange() {
-        return 4;
+        return 5;
     }
 
     //protected override int requiredOre => 3;
