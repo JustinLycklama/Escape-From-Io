@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public class MapGenerator : MonoBehaviour {
 
@@ -152,7 +153,7 @@ public class MapGenerator : MonoBehaviour {
 
     class NoiseSubset {
         public float[,] layoutNoiseMap;
-        public  TerrainType[,] terrainMap;
+        public TerrainType[,] terrainMap;
 
         public float[,] groundFeaturesNoiseMap;
         public float[,] mountainFeaturesNoiseMap;
@@ -331,7 +332,7 @@ public class MapGenerator : MonoBehaviour {
         float heightAtNewRegion = HeightAtRegion(terraformRegionType);
 
         if(terraformTarget.initialHeight == null || terraformTarget.heightTarget == null) {
-            
+
             terraformTarget.initialHeight = new float[constants.featuresPerLayoutPerAxis, constants.featuresPerLayoutPerAxis];
             terraformTarget.heightTarget = new float[constants.featuresPerLayoutPerAxis, constants.featuresPerLayoutPerAxis];
 
@@ -363,16 +364,29 @@ public class MapGenerator : MonoBehaviour {
         }
 
         // Upon completion of terraform, update out layout map to represent what we have 
-        if (terraformTarget.percentage == 1) {
-            layoutNoiseMap[startXLayout + layoutCoordinate.x, startYLayout + layoutCoordinate.y] = heightAtNewRegion;       
+        if(terraformTarget.percentage == 1) {
+            layoutNoiseMap[startXLayout + layoutCoordinate.x, startYLayout + layoutCoordinate.y] = heightAtNewRegion;
         }
 
-        return GetNoiseSubsetForMap(mapContainer).finalNoiseMap;        
+        return GetNoiseSubsetForMap(mapContainer).finalNoiseMap;
     }
 
     /*
      * Map (2d array) Creation
      * */
+
+    const int maxSavedCoordinateValues = 15;
+    const int invalidMutatorValue = 20;
+    struct MutatorCoordinateValues {
+        public float mutator;
+        public int x, y;
+
+        public MutatorCoordinateValues(float mutator, int x, int y) {
+            this.mutator = mutator;
+            this.x = x;
+            this.y = y;
+        }
+    }
 
     // Returns a 2d array of terrainTypes
     public TerrainType[,] PlateauMap(float[,] map) {
@@ -382,14 +396,37 @@ public class MapGenerator : MonoBehaviour {
         TerrainType[,] terrainMap = new TerrainType[map.GetLength(0), map.GetLength(1)];
         TerrainManager terrainManager = Script.Get<TerrainManager>();
 
+
+        MutatorCoordinateValues[] coordinateValues = new MutatorCoordinateValues[maxSavedCoordinateValues];
+
+        for(int i = 0; i < maxSavedCoordinateValues; i ++) {
+            coordinateValues[i] = new MutatorCoordinateValues(invalidMutatorValue, -1, -1);
+        }
+
         for(int y = 0; y < mapHeight; y++) {
             for(int x = 0; x < mapWidth; x++) {
 
                 RegionType region = terrainManager.RegionTypeForValue(map[x, y]);
 
-                terrainMap[x, y] = terrainManager.TerrainTypeForRegion(region, x, y);
+                float mutatorValue;
+
+                terrainMap[x, y] = terrainManager.TerrainTypeForRegion(region, x, y, out mutatorValue);
                 map[x, y] = HeightAtRegion(region);
+
+                if (region.type == RegionType.Type.Mountain) {
+                    coordinateValues[maxSavedCoordinateValues - 1] = new MutatorCoordinateValues(mutatorValue, x, y);
+                    coordinateValues = coordinateValues.OrderBy(m => m.mutator).ToArray();
+                }                
             }
+        }
+
+        foreach(MutatorCoordinateValues values in coordinateValues) {
+            print(values.mutator);
+            if (values.mutator == invalidMutatorValue) {
+                continue;
+            }
+
+            terrainMap[values.x, values.y] = terrainManager.terrainTypeMap[TerrainType.Type.AlunarRock];
         }
 
         return terrainMap;
@@ -512,7 +549,7 @@ public class MapGenerator : MonoBehaviour {
             case RegionType.Type.Water:
                 return sampleValue;
             case RegionType.Type.Land:
-                return (sampleValue) + ((groundFeaturesNoiseMap[x, y] * groundFeaturesImpactOnLayout) - (1 * groundFeaturesImpactOnLayout) / 2f);
+                return (sampleValue) + ((groundFeaturesNoiseMap[x, y] * groundFeaturesImpactOnLayout * 2) - (groundFeaturesImpactOnLayout));
             case RegionType.Type.Mountain:
                 return sampleValue + (mountainFeaturesNoiseMap[x, y] * mountainFeaturesImpactOnLayout);
         }

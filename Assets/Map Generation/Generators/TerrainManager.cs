@@ -79,7 +79,7 @@ public class TerrainManager : MonoBehaviour {
         return regionTypeMap[RegionType.Type.Water];
     }
 
-    public TerrainType TerrainTypeForRegion(RegionType regionType, int x, int y) {
+    public TerrainType TerrainTypeForRegion(RegionType regionType, int x, int y, out float mutatorOut) {
         float mutatorValue = 0;
 
         switch(regionType.type) {
@@ -92,6 +92,8 @@ public class TerrainManager : MonoBehaviour {
             default:
                 break;
         }
+
+        mutatorOut = mutatorValue;
 
         List<TerrainType> terrainsForRegion = regionToTerrainTypeMap[regionType];
         foreach(TerrainType terrainType in terrainsForRegion) {
