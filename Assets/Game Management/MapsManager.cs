@@ -36,16 +36,21 @@ public class MapsManager : MonoBehaviour {
         Plane[] planes = GeometryUtility.CalculateFrustumPlanes(Camera.main);
 
         foreach(MapContainer container in mapContainers) {
-            if(GeometryUtility.TestPlanesAABB(planes, container.meshRenderer.bounds)) {
-                if(!activeContainers.Contains(container)) {
-                    container.gameObject.SetActive(true);
-                    activeContainers.Add(container);
-                }
-            } else {
-                if (activeContainers.Contains(container)) {
-                    container.gameObject.SetActive(false);
-                    activeContainers.Remove(container);
-                }
+
+            bool enabled = true;
+
+            // If we are building box colliders, we cannot disable this object
+            if (!container.isBuildingBoxColliders) {
+                enabled = GeometryUtility.TestPlanesAABB(planes, container.meshRenderer.bounds);
+            }
+
+            if (enabled && !activeContainers.Contains(container)) {
+                container.gameObject.SetActive(true);
+                activeContainers.Add(container);
+            }
+            else if (!enabled && activeContainers.Contains(container)) {
+                container.gameObject.SetActive(false);
+                activeContainers.Remove(container);
             }
         }      
     }

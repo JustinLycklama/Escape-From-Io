@@ -36,6 +36,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         }
     }
 
+    public bool isBuildingBoxColliders = true;
     BoxCollider[,][,] boxColliderArray;
     GameObject[,] fogOfWarMap;
 
@@ -85,7 +86,16 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         DrawMesh();
 
         if (withColliders == true) {
-            AddBoxColliders();
+            Constants constants = Script.Get<Constants>();
+
+            int width = map.mapWidth / map.featuresPerLayoutPerAxis;
+            int height = map.mapHeight / map.featuresPerLayoutPerAxis;
+
+            boxColliderArray = new BoxCollider[width, height][,];
+
+            //StartCoroutine(AddBoxColliders());
+        } else {
+            isBuildingBoxColliders = false;
         }
 
         SetupFogOfWar();
@@ -134,8 +144,36 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
     const int numColliders = 5; // constants.nodesPerLayoutPerAxis; // featuresPerLayoutPerAxis
     List<int> indexList = new List<int> { 1, 3, 5, 7, 9 };
 
-    private void AddBoxColliders() {
+    //private IEnumerator AddBoxColliders() {
+
+    //    Constants constants = Script.Get<Constants>();
+
+    //    int width = map.mapWidth / map.featuresPerLayoutPerAxis;
+    //    int height = map.mapHeight / map.featuresPerLayoutPerAxis;
+
+    //    boxColliderArray = new BoxCollider[width, height][,];
+
+    //    for(int x = 0; x < width; x++) {
+    //        for(int y = 0; y < height; y++) {
+
+
+
+    //            boxColliderArray[x, y] = new BoxCollider[numColliders, numColliders];
+
+    //            LayoutCoordinate layoutCoordinate = new LayoutCoordinate(x, height - 1 - y, this);
+
+    //        }
+    //    }
+
+    //    isBuildingBoxColliders = false;
+    //}    
+
+    private IEnumerator CreateBoxCollidersAtCoordinate(LayoutCoordinate layoutCoordinate) {
         Constants constants = Script.Get<Constants>();
+
+        if (boxColliderArray == null) {
+            yield break;
+        }
 
         int width = map.mapWidth / map.featuresPerLayoutPerAxis;
         int height = map.mapHeight / map.featuresPerLayoutPerAxis;
@@ -149,46 +187,49 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         float halfTotalWidth = layoutSquareSizeX * width / 2f;
         float halfTotalHeight = layoutSquareSizeY * height / 2f;
 
-        boxColliderArray = new BoxCollider[width, height][,];
+        int x = layoutCoordinate.x;
+        int y = height - 1 - layoutCoordinate.y;
 
-        for(int x = 0; x < width; x++) {
-            for(int y = 0; y < height; y++) {
+        float xPos = (x * layoutSquareSizeX - halfTotalWidth);
+        float yPos = (y * layoutSquareSizeY - halfTotalHeight);
 
-                float xPos = (x * layoutSquareSizeX - halfTotalWidth);
-                float yPos = (y * layoutSquareSizeY - halfTotalHeight);
+        //PathGridCoordinate[][] gridCoordinates = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(layoutCoordinate);
+        MapCoordinate[,] mapCoordinates = MapCoordinate.MapCoordinatesFromLayoutCoordinate(layoutCoordinate);
 
-                boxColliderArray[x, y] = new BoxCollider[numColliders, numColliders];
+        for(int w = 0; w < numColliders; w++) {
+            for(int h = 0; h < numColliders; h++) {                
+                //if (w != 0 && h != 0 && w != numColliders -1 && h != numColliders - 1) {
+                //    continue;
+                //}
 
-                LayoutCoordinate layoutCoordinate = new LayoutCoordinate(x, height - 1 - y, this);
+                yield return new WaitForSeconds(0.15f);
 
-                //PathGridCoordinate[][] gridCoordinates = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(layoutCoordinate);
-                MapCoordinate[,] mapCoordinates = MapCoordinate.MapCoordinatesFromLayoutCoordinate(layoutCoordinate);
-
-                for(int w = 0; w < numColliders; w++) {
-                    for(int h = 0; h < numColliders; h++) {
-
-                        int sampleW = indexList[w];
-                        int sampleH = indexList[h];
-
-                        int realWorldH = constants.featuresPerLayoutPerAxis - 1 - sampleH;
-
-                        //MapCoordinate mapCoordinate = MapCoordinate.FromGridCoordinate(gridCoordinates[w][sampleH]);
-                        MapCoordinate mapCoordinate = mapCoordinates[sampleW, realWorldH];
-                        //MapCoordinate mapCoordinate = new MapCoordinate(layoutCoordinate);
-
-                        BoxCollider boxCollider = gameObject.AddComponent(typeof(BoxCollider)) as BoxCollider;
-
-                        float wPos = (w * boxSizeX) + boxSizeX / 2f;
-                        float hPos = (h * boxSizeY) + boxSizeY / 2f;
-
-                        boxCollider.center = new Vector3(xPos + wPos, 0, yPos + hPos);
-                        boxCollider.size = new Vector3(boxSizeX, GetHeightAround(mapCoordinate, 3) * highMultiplier, boxSizeY);
-
-                        boxColliderArray[x, y][w, h] = boxCollider;
-                    }
+                if (boxColliderArray[x, y] == null) {
+                    boxColliderArray[x, y] = new BoxCollider[numColliders, numColliders];
                 }
 
+                if (boxColliderArray[x, y][w, h] != null) {
+                    continue;
+                }
 
+                int sampleW = indexList[w];
+                int sampleH = indexList[h];
+
+                int realWorldH = constants.featuresPerLayoutPerAxis - 1 - sampleH;
+
+                //MapCoordinate mapCoordinate = MapCoordinate.FromGridCoordinate(gridCoordinates[w][sampleH]);
+                MapCoordinate mapCoordinate = mapCoordinates[sampleW, realWorldH];
+                //MapCoordinate mapCoordinate = new MapCoordinate(layoutCoordinate);
+
+                BoxCollider boxCollider = gameObject.AddComponent(typeof(BoxCollider)) as BoxCollider;
+
+                float wPos = (w * boxSizeX) + boxSizeX / 2f;
+                float hPos = (h * boxSizeY) + boxSizeY / 2f;
+
+                boxCollider.center = new Vector3(xPos + wPos, 0, yPos + hPos);
+                boxCollider.size = new Vector3(boxSizeX, GetHeightAround(mapCoordinate, 3) * highMultiplier, boxSizeY);
+
+                boxColliderArray[x, y][w, h] = boxCollider;
             }
         }
     }
@@ -197,28 +238,35 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
     public void ResizeBoxColliderAt(LayoutCoordinate layoutCoordinate) {
         Constants constants = Script.Get<Constants>();
 
+        if (boxColliderArray == null) {
+            return;
+        }
+
         //PathGridCoordinate[][] gridCoordinates = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(layoutCoordinate);
         MapCoordinate[,] mapCoordinates = MapCoordinate.MapCoordinatesFromLayoutCoordinate(layoutCoordinate);
 
         for(int w = 0; w < numColliders; w++) {
             for(int h = 0; h < numColliders; h++) {
 
+                int x = layoutCoordinate.x;
+                int y = (map.mapHeight / map.featuresPerLayoutPerAxis) - 1 - layoutCoordinate.y;
+
+                BoxCollider boxCollider = boxColliderArray[x, y][w, h];
+
+                if (boxCollider == null) {
+                    continue;
+                }
+
                 int sampleW = indexList[w];
                 int sampleH = indexList[h];
 
                 int realWorldH = constants.featuresPerLayoutPerAxis - 1 - sampleH;
 
-                int x = layoutCoordinate.x;
-                int y = (map.mapHeight / map.featuresPerLayoutPerAxis) - 1 - layoutCoordinate.y;
-
                 //MapCoordinate mapCoordinate = MapCoordinate.FromGridCoordinate(gridCoordinates[w][sampleH]);
                 MapCoordinate mapCoordinate = mapCoordinates[sampleW, realWorldH];
                 //MapCoordinate mapCoordinate = new MapCoordinate(layoutCoordinate);
 
-                BoxCollider boxCollider = boxColliderArray[x, y][w, h];
-
                 boxCollider.size = new Vector3(boxCollider.size.x, GetHeightAround(mapCoordinate, 3) * highMultiplier, boxCollider.size.z);
-
                 boxColliderArray[x, y][w, h] = boxCollider;
             }
         }
@@ -543,13 +591,14 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                 int sampleX = x + mapX * width;
                 int sampleY = y + mapY * height;
 
-                if ((statusMap[sampleX, sampleY] & BuildingEffectStatus.CircularLight) == BuildingEffectStatus.CircularLight && fogOfWarMap[x, y].activeSelf) {
+                if ((statusMap[sampleX, sampleY] & BuildingEffectStatus.Light) == BuildingEffectStatus.Light && fogOfWarMap[x, y].activeSelf) {
                     fogOfWarMap[x, y].SetActive(false);
+                    StartCoroutine(CreateBoxCollidersAtCoordinate(new LayoutCoordinate(x, y, this)));
+
                     //print("--");
                     //print("Activate x " + x + " y " + y + " of map " + mapX + ", " + mapY);
                     //print("From x " + sampleX + " y " + sampleY);
                     //print("--");
-
                 }
             }
         }

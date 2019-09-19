@@ -36,7 +36,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate {
             generationStepTwoCount = mapGenerator.GenerateStepTwoCount();
         });
 
-        int chunkCount = 8;
+        int chunkCount = 4;
 
         for(int chunk = 0; chunk < chunkCount; chunk++) {
             initActionChunks.Enqueue(() => {

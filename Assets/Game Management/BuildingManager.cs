@@ -14,9 +14,8 @@ public interface StatusEffectUpdateDelegate {
 
 public enum BuildingEffectStatus {
     None = (0 << 0),
-    CircularLight = (1 << 0), //1 in decimal
-    DirectLight = (1 << 1), //2 in decimal
-    Scan = (1 << 2), //4 in decimal
+    Light = (1 << 0), //1 in decimal
+    Scan = (1 << 1), //2 in decimal
                      //Up = (1 << 2), //4 in decimal
 }
 
@@ -163,9 +162,14 @@ public class BuildingManager : MonoBehaviour {
         int width = constants.layoutMapWidth * mapsManager.horizontalMapCount;
         int height = constants.layoutMapHeight * mapsManager.verticalMapCount;
 
+
+        // Another option for visibility casting
+
+        /*
         int buildingX = 0, buildingY = 0;
 
-        ShadowCasting visibilityCasting = new ShadowCasting(delegate (int x, int y) {
+        
+        AdamMilazzoVision visibilityCasting = new AdamMilazzoVision(delegate (int x, int y) {
             if (x < 0 || y < 0 || x >= width || y >= height) {
                 return true;
             }
@@ -177,11 +181,16 @@ public class BuildingManager : MonoBehaviour {
                 return;
             }
 
-            statusMap[x, y] |= BuildingEffectStatus.CircularLight;
+            statusMap[x, y] |= BuildingEffectStatus.Light;
         },
         delegate (int x, int y) {
-            return Mathf.RoundToInt(Vector2.Distance(new Vector2(buildingX, buildingY), new Vector2(x, y)));
+            return Mathf.RoundToInt(Vector2.Distance(new Vector2(buildingX, buildingY), new Vector2(buildingX + x, buildingY + y)));
         });
+        */
+
+
+
+
 
         for(int x = 0; x < width; x++) {
             for(int y = 0; y < height; y++) {
@@ -191,40 +200,38 @@ public class BuildingManager : MonoBehaviour {
                     continue;
                 }
 
-                buildingX = x; buildingY = y;
+                if(building.BuildingStatusEffects() == BuildingEffectStatus.Light) {
 
+                    // Another option for visibility casting
 
-                if(building.BuildingStatusEffects() == BuildingEffectStatus.CircularLight) {
+                    /*                                         
+                    buildingX = x; buildingY = y;
+                    visibilityCasting.Compute((uint)x, (uint)y, building.BuildingStatusRange());
+                    */
 
+                    EricLippertShadowCast.ComputeFieldOfViewWithShadowCasting(x, y, 5,
+                        delegate (int subX, int subY) {
+                            if(subX < 0 || subY < 0 || subX >= width || subY >= height) {
+                                return true;
+                            }
 
+                            return mapGenerator.GetTerrainAtAbsoluteXY(subX, subY).regionType == RegionType.Type.Mountain;
+                        },
+                        (int subX, int subY) => {
+                            if(subX < 0 || subY < 0 || subX >= width || subY >= height) {
+                                return;
+                            }
 
-
-                    visibilityCasting.Compute(x, y, 5);
-
-                    //for(int subX = 0; subX < width; subX++) {
-                    //    for(int subY = 0; subY < width; subY++) {
-
-                    //        if(!BresenhamIncludesMountain(subX, subY, buildingX, buildingY)) {
-                    //            statusMap[subX, subY] |= BuildingEffectStatus.CircularLight;
-                    //        }
-                    //    }
-                    //}
-
-
-                }
-            
-
-                if(building.BuildingStatusEffects() == BuildingEffectStatus.DirectLight) {
-
-                }
-
-
-
+                            statusMap[subX, subY] |= BuildingEffectStatus.Light;
+                        }
+                        );
+                }           
             }
         }
 
-
-
+        VisionArtifactRemover artifactRemover = new VisionArtifactRemover(statusMap, buildingsEffectingStatusMapMap);
+        artifactRemover.RemoveIslands();
+        artifactRemover.RemoveLayerOfIsolatedTiles();
 
         NotifyStatusEffectUpdate();
     }
