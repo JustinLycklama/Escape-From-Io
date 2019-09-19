@@ -625,7 +625,6 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                     isBuildingBoxColliders = true;
                     totalCouroutinesStarted++;
 
-                    StartCoroutine(CreateBoxCollidersAtCoordinate(new LayoutCoordinate(x, y, this), createBoxEnded));
 
                     Material material = fogOfWarMap[x, y].GetComponent<MeshRenderer>().material;
                     SetMaterialTransparent(material);
@@ -635,11 +634,6 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                     //material.color = color;
 
                     Action<int, float> durationUpdateBlock = (remainingTime, percentComplete) => {
-                        //print(1 - percentComplete);
-                        if (percentComplete < 0 || percentComplete > 1) {
-                            print("why");
-                        }
-
                         color.a = 1f - percentComplete;
                         material.color = color;
                     };
@@ -651,7 +645,12 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                         fogOfWarMap[holdX, holdY].SetActive(false);
                     };
 
-                    Script.Get<TimeManager>().AddNewTimer(1, durationUpdateBlock, durationCompletionBlock, 2);
+                    Action boxEndAndAnimation = () => {
+                        Script.Get<TimeManager>().AddNewTimer(1, durationUpdateBlock, durationCompletionBlock, 2);
+                        createBoxEnded();
+                    };
+
+                    StartCoroutine(CreateBoxCollidersAtCoordinate(new LayoutCoordinate(x, y, this), boxEndAndAnimation));
                 }
             }
         }
