@@ -36,7 +36,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         }
     }
 
-    public bool isBuildingBoxColliders = true;
+    public bool isBuildingBoxColliders = false;
     BoxCollider[,][,] boxColliderArray;
     GameObject[,] fogOfWarMap;
 
@@ -94,8 +94,6 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
             boxColliderArray = new BoxCollider[width, height][,];
 
             //StartCoroutine(AddBoxColliders());
-        } else {
-            isBuildingBoxColliders = false;
         }
 
         SetupFogOfWar();
@@ -174,7 +172,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         canCreateBox = true;
     }
 
-    private IEnumerator CreateBoxCollidersAtCoordinate(LayoutCoordinate layoutCoordinate) {
+    private IEnumerator CreateBoxCollidersAtCoordinate(LayoutCoordinate layoutCoordinate, Action ended) {
         Constants constants = Script.Get<Constants>();
 
         if (boxColliderArray == null) {
@@ -248,6 +246,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         }
 
         pipeline.Remove(this);
+        ended();
     }
 
     const float highMultiplier = 2f;// * (9f / 10f);
@@ -604,6 +603,15 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         float halfTotalWidth = boxSizeX * width / 2f;
         float halfTotalHeight = boxSizeZ * height / 2f;
 
+        int totalCouroutinesStarted = 0;
+        Action createBoxEnded = () => {
+            totalCouroutinesStarted--;
+
+            if(totalCouroutinesStarted <= 0) {
+                isBuildingBoxColliders = false;
+            }
+        };
+
         for(int x = 0; x < width; x++) {
             for(int y = 0; y < height; y++) {
 
@@ -612,7 +620,12 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
 
                 if ((statusMap[sampleX, sampleY] & BuildingEffectStatus.Light) == BuildingEffectStatus.Light && fogOfWarMap[x, y].activeSelf) {
                     
-                    StartCoroutine(CreateBoxCollidersAtCoordinate(new LayoutCoordinate(x, y, this)));
+                    if (gameObject.activeInHierarchy == false) { gameObject.SetActive(true); }
+
+                    isBuildingBoxColliders = true;
+                    totalCouroutinesStarted++;
+
+                    StartCoroutine(CreateBoxCollidersAtCoordinate(new LayoutCoordinate(x, y, this), createBoxEnded));
 
                     Material material = fogOfWarMap[x, y].GetComponent<MeshRenderer>().material;
                     SetMaterialTransparent(material);

@@ -17,7 +17,7 @@ public class Miner : Unit {
     public override float SpeedForTask(MasterGameTask.ActionType actionType) {
         switch(actionType) {
             case MasterGameTask.ActionType.Mine:
-                return 0.9f;
+                return 0.65f;
             case MasterGameTask.ActionType.Build:
                 return 0.3f;
             case MasterGameTask.ActionType.Move:

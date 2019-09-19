@@ -8,7 +8,7 @@ public class StationShip : Building, CanSceneChangeDelegate {
     private bool canSceneChange = false;
 
     public override string title => "Starship";
-    protected override float constructionModifierSpeed => 0.1f;
+    protected override float constructionModifierSpeed => 0.03f;
 
     protected override void CompleteBuilding() {
         MessageWindow messageWindow = UIManager.Blueprint.MessageWindow.Instantiate() as MessageWindow;

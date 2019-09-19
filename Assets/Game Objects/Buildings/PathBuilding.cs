@@ -5,7 +5,7 @@ using UnityEngine;
 public class PathBuilding : Building {
 
     public override string title => "Path";
-    protected override float constructionModifierSpeed => 5;    
+    protected override float constructionModifierSpeed => 0.8f;    
 
     protected override void CompleteBuilding() {
         WorldPosition worldPosition = new WorldPosition(transform.position);
