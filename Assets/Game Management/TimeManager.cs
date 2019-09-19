@@ -69,7 +69,7 @@ public class TimeManager : MonoBehaviour, PlayerBehaviourUpdateDelegate {
             int newTime = Mathf.FloorToInt(timeObject.currentTime);
             int newTimeComparison = Mathf.FloorToInt(timeObject.currentTime * powerMultiplier);
 
-            if(newTime > timeObject.totalDuration) {
+            if(newTime >= timeObject.totalDuration) {
                 timeObject.completionBlock?.Invoke();
                 timeObjects.Remove(timeObject);
             } else if(oldTimeComparison != newTimeComparison) {

@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -7,8 +8,7 @@ public class MapContainerNeighbours {
     public MapContainer topLeftMap, topRightMap, bottomLeftMap, bottomRightMap;
 }
 
-
-public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffectUpdateDelegate {
+public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffectUpdateDelegate, IntervalActionDelegate {
     public Map map;
 
     public int mapX, mapY; // Virtual position within the maps manager
@@ -168,6 +168,12 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
     //    isBuildingBoxColliders = false;
     //}    
 
+    // IntervalActionDelegate
+    bool canCreateBox;
+    public void PerformIntervalAction() {
+        canCreateBox = true;
+    }
+
     private IEnumerator CreateBoxCollidersAtCoordinate(LayoutCoordinate layoutCoordinate) {
         Constants constants = Script.Get<Constants>();
 
@@ -193,6 +199,10 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         float xPos = (x * layoutSquareSizeX - halfTotalWidth);
         float yPos = (y * layoutSquareSizeY - halfTotalHeight);
 
+        // Sign up for IntervalActions
+        IntervalActionPipeline pipeline = Script.Get<IntervalActionPipeline>();
+        pipeline.Add(this);
+
         //PathGridCoordinate[][] gridCoordinates = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(layoutCoordinate);
         MapCoordinate[,] mapCoordinates = MapCoordinate.MapCoordinatesFromLayoutCoordinate(layoutCoordinate);
 
@@ -202,7 +212,11 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                 //    continue;
                 //}
 
-                yield return new WaitForSeconds(0.15f);
+                yield return new WaitUntil(delegate {
+                    return canCreateBox;
+                });
+
+                canCreateBox = false;
 
                 if (boxColliderArray[x, y] == null) {
                     boxColliderArray[x, y] = new BoxCollider[numColliders, numColliders];
@@ -232,6 +246,8 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                 boxColliderArray[x, y][w, h] = boxCollider;
             }
         }
+
+        pipeline.Remove(this);
     }
 
     const float highMultiplier = 2f;// * (9f / 10f);
@@ -313,7 +329,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         float halfTotalHeight = boxSizeZ * height / 2f;
 
         Color materialColor = Color.black;
-        materialColor.a = 0.15f;
+        //materialColor.a = 0.15f;
 
         for(int x = 0; x < width; x++) {
             for(int y = 0; y < height; y++) {
@@ -324,16 +340,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
 
                     Material material = newCube.GetComponent<MeshRenderer>().material;
 
-                    material.SetFloat("_Mode", 4f);
-
-                    material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-                    material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-                    material.SetInt("_ZWrite", 0);
-                    material.DisableKeyword("_ALPHATEST_ON");
-                    material.EnableKeyword("_ALPHABLEND_ON");
-                    material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-                    material.renderQueue = 3000;
-
+                    //SetMaterialTransparent(material);
 
                     material.color = materialColor;
                     material.SetFloat("_Metallic", 1);
@@ -361,6 +368,18 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                 cube.transform.SetParent(this.transform, true);
             }
         }
+    }
+
+    private void SetMaterialTransparent(Material material) {
+        material.SetFloat("_Mode", 4f);
+
+        material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
+        material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
+        material.SetInt("_ZWrite", 0);
+        material.DisableKeyword("_ALPHATEST_ON");
+        material.EnableKeyword("_ALPHABLEND_ON");
+        material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
+        material.renderQueue = 3000;
     }
 
     /*
@@ -592,13 +611,34 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                 int sampleY = y + mapY * height;
 
                 if ((statusMap[sampleX, sampleY] & BuildingEffectStatus.Light) == BuildingEffectStatus.Light && fogOfWarMap[x, y].activeSelf) {
-                    fogOfWarMap[x, y].SetActive(false);
+                    
                     StartCoroutine(CreateBoxCollidersAtCoordinate(new LayoutCoordinate(x, y, this)));
 
-                    //print("--");
-                    //print("Activate x " + x + " y " + y + " of map " + mapX + ", " + mapY);
-                    //print("From x " + sampleX + " y " + sampleY);
-                    //print("--");
+                    Material material = fogOfWarMap[x, y].GetComponent<MeshRenderer>().material;
+                    SetMaterialTransparent(material);
+                    Color color = material.color;
+                    //color.a = 0.15f;
+
+                    //material.color = color;
+
+                    Action<int, float> durationUpdateBlock = (remainingTime, percentComplete) => {
+                        //print(1 - percentComplete);
+                        if (percentComplete < 0 || percentComplete > 1) {
+                            print("why");
+                        }
+
+                        color.a = 1f - percentComplete;
+                        material.color = color;
+                    };
+
+                    int holdX = x;
+                    int holdY = y;
+
+                    Action durationCompletionBlock = () => {
+                        fogOfWarMap[holdX, holdY].SetActive(false);
+                    };
+
+                    Script.Get<TimeManager>().AddNewTimer(1, durationUpdateBlock, durationCompletionBlock, 2);
                 }
             }
         }

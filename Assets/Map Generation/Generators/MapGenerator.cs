@@ -413,7 +413,7 @@ public class MapGenerator : MonoBehaviour {
                 terrainMap[x, y] = terrainManager.TerrainTypeForRegion(region, x, y, out mutatorValue);
                 map[x, y] = HeightAtRegion(region);
 
-                if (region.type == RegionType.Type.Mountain) {
+                if (region.type == RegionType.Type.Mountain && mutatorValue < coordinateValues[maxSavedCoordinateValues - 1].mutator) {
                     coordinateValues[maxSavedCoordinateValues - 1] = new MutatorCoordinateValues(mutatorValue, x, y);
                     coordinateValues = coordinateValues.OrderBy(m => m.mutator).ToArray();
                 }                
@@ -421,7 +421,6 @@ public class MapGenerator : MonoBehaviour {
         }
 
         foreach(MutatorCoordinateValues values in coordinateValues) {
-            print(values.mutator);
             if (values.mutator == invalidMutatorValue) {
                 continue;
             }

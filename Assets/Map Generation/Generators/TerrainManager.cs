@@ -106,6 +106,10 @@ public class TerrainManager : MonoBehaviour {
     }
 
     public TerrainType? CanTerriformTo(TerrainType terrainType) {
+        if(terrainType.regionType == RegionType.Type.Water) {
+            return terrainTypeMap[TerrainType.Type.Mud];
+        }
+
         if (terrainType.regionType == RegionType.Type.Mountain && terrainType.type != TerrainType.Type.SolidRock) {
             return terrainTypeMap[TerrainType.Type.Mud];
         }
@@ -130,8 +134,24 @@ public class TerrainManager : MonoBehaviour {
         List<UserAction> actionList = new List<UserAction>();
 
         TerrainType? terraformable = CanTerriformTo(terrainType);
-
+    
         switch(terrainType.regionType) {
+            case RegionType.Type.Water:
+                if(terraformable.Value.type == TerrainType.Type.Mud) {
+
+                    UserAction action = new UserAction();
+
+                    action.description = "Terraform Land";
+                    action.layoutCoordinate = coordinate;
+
+                    action.performAction = (LayoutCoordinate layoutCoordinate) => {
+                        Building.Blueprint.PathBuilding.ConstructAt(layoutCoordinate);
+                    };
+
+                    actionList.Add(action);
+                }
+
+                break;
             case RegionType.Type.Land:
 
                 if (terraformable != null) {

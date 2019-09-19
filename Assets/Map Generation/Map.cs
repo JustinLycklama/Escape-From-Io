@@ -254,9 +254,13 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
         MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(task.target);
         LayoutCoordinate coordinate = new LayoutCoordinate(mapCoordinate);
 
+        return TerraformAtLocation(coordinate, rate, true);
+    }
+
+    public float TerraformAtLocation(LayoutCoordinate coordinate, float rateOrPercent, bool isRate) {
         TerraformTarget terraformTarget;
 
-        if (terraformTargetCoordinateMap[coordinate.x, coordinate.y] != null) {
+        if(terraformTargetCoordinateMap[coordinate.x, coordinate.y] != null) {
             terraformTarget = terraformTargetCoordinateMap[coordinate.x, coordinate.y];
         } else {
             TerrainManager terrainManager = Script.Get<TerrainManager>();
@@ -268,7 +272,7 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
             //    targetTerrain = Script.Get<MapGenerator>().TerrainForRegion(RegionType.Path);
             //}
 
-            if (targetTerrain == null) {
+            if(targetTerrain == null) {
                 // Do not attempt to terraform a target point into the same terrain type
                 return 1;
             }
@@ -282,9 +286,13 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
 
         float previousPercentage = terraformTarget.percentage;
 
-        terraformTarget.percentage += rate * GetTerrainAt(coordinate).modificationSpeedModifier;
+        if (isRate) {
+            terraformTarget.percentage += rateOrPercent * GetTerrainAt(coordinate).modificationSpeedModifier;
+        } else {
+            terraformTarget.percentage = rateOrPercent;
+        }
 
-        if (terraformTarget.percentage >= 1) {
+        if(terraformTarget.percentage >= 1) {
             terraformTarget.percentage = 1;
 
             // Terraform complete
@@ -296,7 +304,7 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
 
             // Create Ore at location
 
-            Vector3 position = new WorldPosition(new MapCoordinate (terraformTarget.coordinate)).vector3;
+            Vector3 position = new WorldPosition(new MapCoordinate(terraformTarget.coordinate)).vector3;
 
             float offset = 25;
 
@@ -317,8 +325,8 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
             GameResourceManager resourceManager = Script.Get<GameResourceManager>();
 
             Dictionary<MineralType, int> mineralLists = resourceManager.MineralListForCoordinate(coordinate);
-            
-            foreach (MineralType mineralType in mineralLists.Keys) {
+
+            foreach(MineralType mineralType in mineralLists.Keys) {
                 for(int i = 0; i < mineralLists[mineralType]; i++) {
                     int rInt = Random.Range(0, positions.Count - 1);
 
@@ -327,21 +335,22 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
 
                     Ore ore = resourceManager.CreateMineral(mineralType);
                     ore.transform.position = randomPosition;
-                }                              
+                }
             }
 
             resourceManager.ClearMineralsAtCoordinate(coordinate);
 
         } else {
-            if (Mathf.RoundToInt(previousPercentage * 25) != Mathf.RoundToInt(terraformTarget.percentage * 25)) {
+            if(Mathf.RoundToInt(previousPercentage * 25) != Mathf.RoundToInt(terraformTarget.percentage * 25)) {
                 if(GetTerrainAt(coordinate).regionType != terraformTarget.terrainTypeTarget.regionType) {
                     TerraformHeightMap(terraformTarget);
-                }                               
+                }
             }
         }
 
         return terraformTarget.percentage;
     }
+
 
     private void TerraformHeightMap(TerraformTarget terraformTarget) {
         MapGenerator mapGenerator = Script.Get<MapGenerator>();

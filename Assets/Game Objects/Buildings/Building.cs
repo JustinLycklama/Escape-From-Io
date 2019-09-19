@@ -66,7 +66,7 @@ public abstract class Building : ActionableItem, Selectable {
 
     public List<UserActionUpdateDelegate> userActionDelegateList = new List<UserActionUpdateDelegate>();
 
-    private void Awake() {
+    protected virtual void Awake() {
         //title = "Building #" + buildingCount;
         buildingCount++;
 
@@ -281,6 +281,11 @@ public abstract class Building : ActionableItem, Selectable {
         private static string folder = "Buildings/";
 
         public static Blueprint PathBuilding = new Blueprint("PathBuilding", typeof(PathBuilding), "TowerIcon", "Path", 
+            new BlueprintCost(new Dictionary<MineralType, int>(){
+                { MineralType.Copper, 1 }
+            }));
+
+        public static Blueprint TerraformLandBuilding = new Blueprint("PathBuilding", typeof(TerraformLandBuilding), "TowerIcon", "Terraform Land",
             new BlueprintCost(new Dictionary<MineralType, int>(){
                 { MineralType.Copper, 1 }
             }));
