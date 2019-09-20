@@ -99,10 +99,32 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
     UnitStatusTooltip unitStatusTooltip;
 
     // Tasks
+    public float relativeDistanceToTask;
     public MasterGameTask currentMasterTask { get; private set; }
 
     // The queue of all tasks to do for the current Master Task
     Queue<GameTask> gameTasksQueue;
+
+    public GameTask takeableTask {
+        get {
+            return currentGameTask;
+        }
+    }
+
+    public bool canTakeTaskFromUnit {
+        get {
+            return currentMasterTask != null && currentGameTask != null && currentGameTask == currentMasterTask.childGameTasks[0] && currentPercentOfJournery < 1;
+        }
+    }
+
+    public float remainingMovementCostOnTask {
+        get {
+            return movementCostToTask * (1 - currentPercentOfJournery) * speed;
+        }
+    }
+
+    private int movementCostToTask = 0;
+    private float currentPercentOfJournery = 0;
     GameTask currentGameTask; // The current Game Task we are working on to complete the Master Task
     private HashSet<int> refuseTaskSet; // Set of tasks we aready know we cannot perform
 
@@ -240,7 +262,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
             StartCoroutine(PerformTaskAction(completedTaskAction));
         };
 
-        foundWaypoints = (waypoints, actionableItem, success) => {
+        foundWaypoints = (waypoints, actionableItem, success, distance) => {
             StopAllCoroutines();
 
             if(success) {                              
@@ -248,6 +270,9 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
                 if(actionableItem != null) {
                     currentGameTask.actionItem = actionableItem;
                 }
+
+                movementCostToTask = distance;
+                print("Path Distance " + distance);            
 
                 // If the task item is a known, like a location or builing, the actionItem was set at initialization
                 // If the task item was an unknown resource, it has just been set above
@@ -299,7 +324,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
 
     Action<bool> completedTaskAction;
     Action<bool> completedPath;
-    Action<WorldPosition[], ActionableItem, bool> foundWaypoints;
+    Action<LookPoint[], ActionableItem, bool, int> foundWaypoints;
 
     private void DoTask(MasterGameTask task) {
         currentMasterTask = task;
@@ -436,12 +461,17 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
         int pathIndex = 0;
         bool turningToStart = true;
 
-        Vector3 startPoint = path.lookPoints[0].vector3;
+        Vector3 startPoint = path.lookPoints[0].worldPosition.vector3;
         Quaternion originalRotation = transform.rotation;
         Quaternion targetRotation = Quaternion.LookRotation(startPoint - transform.position);
 
         float totalTurnDistance = 0;
         float degreesToTurn = (targetRotation.eulerAngles - originalRotation.eulerAngles).magnitude;
+
+        currentPercentOfJournery = 0;
+        float basePercentOfJourney = 0;
+
+        Vector3 previousWaypointPosition = transform.position;
 
         while(turningToStart) {
 
@@ -482,13 +512,14 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
                     followingPath = false;
                     break;
                 } else {
+                    basePercentOfJourney += path.lookPoints[pathIndex].percentOfJourney;
+                    previousWaypointPosition = path.lookPoints[pathIndex].worldPosition.vector3;
                     pathIndex++;
 
-                    WorldPosition worldPos = path.lookPoints[pathIndex];
-                    MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(worldPos);
+                    //WorldPosition worldPos = path.lookPoints[pathIndex].worldPosition;
+                    //MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(worldPos);
 
-                    LayoutCoordinate layoutCoordinate = new LayoutCoordinate(mapCoordinate);
-
+                    //LayoutCoordinate layoutCoordinate = new LayoutCoordinate(mapCoordinate);
                     //print("New Lookpoint at: " + worldPos.description + ", " + mapCoordinate.description + ", " + layoutCoordinate.description);
                 }
             }
@@ -498,7 +529,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
                     speedPercent = Mathf.Clamp(path.turnBoundaries[path.finishLineIndex].DistanceFromPoint(position2D) / stoppingDistance, 0.15f, 1);
                 }               
 
-                WorldPosition lookPointWorldPos = path.lookPoints[pathIndex];
+                WorldPosition lookPointWorldPos = path.lookPoints[pathIndex].worldPosition;
                 MapCoordinate lookPointMapCoordinate = MapCoordinate.FromWorldPosition(lookPointWorldPos);
 
                 WorldPosition playerWorldPos = new WorldPosition(transform.position);
@@ -515,6 +546,14 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
                 targetRotation = Quaternion.LookRotation(lookPoint - transform.position);
                 transform.rotation =  Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * followPathTurnSpeed);
                 transform.Translate(Vector3.forward * Time.deltaTime * localSpeed * speedPercent, Space.Self);
+
+                // Keep track of our % to reach our goal
+                float totalDistanceFromGoal = Vector3.Distance(previousWaypointPosition, lookPoint);
+                float currentDistanceFromGoal = Vector3.Distance(transform.position, lookPoint);
+
+                currentPercentOfJournery = basePercentOfJourney + ((Mathf.InverseLerp(totalDistanceFromGoal, 0, currentDistanceFromGoal) * path.lookPoints[pathIndex].percentOfJourney));
+
+                //print("Percent of Journey Done: " + currentPercentOfJournery);
             }
 
             yield return null;

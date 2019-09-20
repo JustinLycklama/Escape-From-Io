@@ -16,7 +16,7 @@ public class PathFinding : MonoBehaviour {
         grid = GetComponent<PathfindingGrid>();
     }
 
-    public void FindSimplifiedPathToClosestGoal(Vector3 startPos, int movementPenaltyMultiplier, MineralType gatherGoal, Action<WorldPosition[], ActionableItem, bool> callback) {
+    public void FindSimplifiedPathToClosestGoal(Vector3 startPos, int movementPenaltyMultiplier, MineralType gatherGoal, Action<LookPoint[], ActionableItem, bool, int> callback) {
         GameResourceManager resourceManager = Script.Get<GameResourceManager>();
         Ore[] allOreInGame = resourceManager.GetAllAvailableOfType(gatherGoal);
 
@@ -27,7 +27,7 @@ public class PathFinding : MonoBehaviour {
         int completedCalls = 0;
 
         if (allOreInGame.Length == 0) {
-            callback(null, null, false);
+            callback(null, null, false, 0);
         }
 
         foreach(Ore ore in allOreInGame) {
@@ -46,7 +46,8 @@ public class PathFinding : MonoBehaviour {
                     // Give the found object the flag that a task will soon be assiated
                     foundObject.taskAlreadyDictated = true;
 
-                    callback(anyPathSuccess ? SimplifyPath(foundPath) : null, foundObject, anyPathSuccess);
+                    int totalDistance = 0;
+                    callback(anyPathSuccess ? SimplifyPath(foundPath, movementPenaltyMultiplier, out totalDistance) : null, foundObject, anyPathSuccess, totalDistance);
                 }
             }));
         }
@@ -55,7 +56,7 @@ public class PathFinding : MonoBehaviour {
     //public static List<PathGridCoordinate> staticGridCoordinatesSurroundingLayoutCoordinate;
 
     // For PathRequestTargetType NodeCoordiante 
-    public void FindSimplifiedPathForPathGrid(Vector3 startPos, LayoutCoordinate layoutCoordinate, int movementPenaltyMultiplier, Action<WorldPosition[], bool> callback) {
+    public void FindSimplifiedPathForPathGrid(Vector3 startPos, LayoutCoordinate layoutCoordinate, int movementPenaltyMultiplier, Action<LookPoint[], bool, int> callback) {
         Constants constants = Script.Get<Constants>();
 
         PathGridCoordinate[][] pathGridCoordinatesOfLayout = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(layoutCoordinate);
@@ -72,7 +73,7 @@ public class PathFinding : MonoBehaviour {
     }
 
     // For PathRequestTargetType layout 
-    public void FindSimplifiedPathForLayout(Vector3 startPos, LayoutCoordinate layoutCoordinate, int movementPenaltyMultiplier, Action<WorldPosition[], bool> callback) {
+    public void FindSimplifiedPathForLayout(Vector3 startPos, LayoutCoordinate layoutCoordinate, int movementPenaltyMultiplier, Action<LookPoint[], bool, int> callback) {
         Constants constants = Script.Get<Constants>();
 
         PathGridCoordinate[][] pathGridCoordinatesOfLayout = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(layoutCoordinate);
@@ -112,7 +113,7 @@ public class PathFinding : MonoBehaviour {
         FindSimplifiedPathToAnyIncluding(gridCoordinatesSurroundingLayoutCoordinate, startPos, movementPenaltyMultiplier, callback);
     }
 
-    private void FindSimplifiedPathToAnyIncluding(List<PathGridCoordinate> pathGridCoordinates, Vector3 startPos, int movementPenaltyMultiplier, Action<WorldPosition[], bool> callback) {
+    private void FindSimplifiedPathToAnyIncluding(List<PathGridCoordinate> pathGridCoordinates, Vector3 startPos, int movementPenaltyMultiplier, Action<LookPoint[], bool, int> callback) {
 
         int lowestLength = int.MaxValue;
         Node[] foundPath = null;
@@ -133,15 +134,17 @@ public class PathFinding : MonoBehaviour {
 
                 if(completedCalls == pathGridCoordinates.Count) {
                     bool anyPathSuccess = (foundPath != null && foundPath.Length > 0);
-                    callback(anyPathSuccess ? SimplifyPath(foundPath) : null, anyPathSuccess);
+                    int totalDistance = 0;
+                    callback(anyPathSuccess ? SimplifyPath(foundPath, movementPenaltyMultiplier, out totalDistance) : null, anyPathSuccess, totalDistance);
                 }
             }));
         }
     }
 
-    public void FindSimplifiedPath(Vector3 startPos, Vector3 targetPos, int movementPenaltyMultiplier, Action<WorldPosition[], bool> callback) {
+    public void FindSimplifiedPath(Vector3 startPos, Vector3 targetPos, int movementPenaltyMultiplier, Action<LookPoint[], bool, int> callback) {
         StartCoroutine(FindPath(startPos, targetPos, movementPenaltyMultiplier, (path, success) => {
-                callback((success && path.Length > 0) ? SimplifyPath(path) : null, success);          
+            int totalDistance = 0;
+            callback((success && path.Length > 0) ? SimplifyPath(path, movementPenaltyMultiplier, out totalDistance) : null, success, totalDistance);          
         }));
     }
 
@@ -228,39 +231,65 @@ public class PathFinding : MonoBehaviour {
         return path;
     }
 
-    WorldPosition[] SimplifyPath(Node[] path) {
-        List<WorldPosition> waypoints = new List<WorldPosition>();
+    LookPoint[] SimplifyPath(Node[] path, int movementPenaltyMultiplier, out int totalDistance) {
+        List<LookPoint> lookpoints = new List<LookPoint>();
         Vector2 oldDirection = Vector2.zero;
 
         int lastAddedIndex = 0;
+        int distance = 0;
+
+        int movementPointsToThisWaypoint = 0;
 
         for (int i = 1; i < path.Length; i++) {
-            Vector2 newDirection = new Vector2(path[i - 1].gridX - path[i].gridX, path[i - 1].gridY - path[i].gridY);
+            Node previousNode = path[i - 1];
+            Node currentNode = path[i];
+
+            int movementPointsToThisNode = getDistance(previousNode, currentNode) + currentNode.movementPenalty * movementPenaltyMultiplier;
+
+            movementPointsToThisWaypoint += movementPointsToThisNode;
+            distance += movementPointsToThisNode;
+
+            Vector2 newDirection = new Vector2(previousNode.gridX - currentNode.gridX, previousNode.gridY - currentNode.gridY);
             if(newDirection != oldDirection) {
 
-                if (lastAddedIndex != i - 1) {
-                    WorldPosition oldPathPosition = path[i - 1].worldPosition;
+                if(lastAddedIndex != i - 1) {
+                    WorldPosition oldPathPosition = previousNode.worldPosition;
                     oldPathPosition.recalculateHeight();
 
-                    waypoints.Add(oldPathPosition);
-                }                
+                    // If we are adding a previous look point for the sake of not hitting object corners, lets say the "entire distance" 
+                    // is covered by this previous point. We are only estimating after all
+                    lookpoints.Add(new LookPoint(oldPathPosition, movementPointsToThisWaypoint));
+                    movementPointsToThisWaypoint = 0;
+                }
 
-                WorldPosition pathPosition = path[i].worldPosition;
+                WorldPosition pathPosition = currentNode.worldPosition;
                 pathPosition.recalculateHeight();
 
-                waypoints.Add(pathPosition);
+                lookpoints.Add(new LookPoint(pathPosition, movementPointsToThisWaypoint));
 
                 lastAddedIndex = i;
                 oldDirection = newDirection;
+
+                movementPointsToThisWaypoint = 0;
             }
         }
 
-        WorldPosition finalPathPosition = path[path.Length - 1].worldPosition;
+        totalDistance = distance;
+
+        Node lastNode = path[path.Length - 1];        
+
+        WorldPosition finalPathPosition = lastNode.worldPosition;
         finalPathPosition.recalculateHeight();
 
-        waypoints.Add(finalPathPosition);
+        lookpoints.Add(new LookPoint(finalPathPosition, movementPointsToThisWaypoint));
 
-        return waypoints.ToArray();
+        // Find out how much of the journey each waypoint takes
+        for(int i = 0; i < lookpoints.Count; i++) {
+            LookPoint currentPoint = lookpoints[i];
+            currentPoint.percentOfJourney = (float)currentPoint.movementPoints / (float)totalDistance;
+        }
+
+        return lookpoints.ToArray();
     }
 
     int getDistance(Node nodeA, Node nodeB) {

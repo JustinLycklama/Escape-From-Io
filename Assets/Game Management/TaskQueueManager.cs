@@ -213,7 +213,7 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
 
         public UnitAndRefused(Unit unit, HashSet<int> refuseTaskList, Action<MasterGameTask> callback) {
             this.unit = unit;
-            this.refuseTaskList = refuseTaskList;
+            this.refuseTaskList = refuseTaskList ?? new HashSet<int>();
             this.callback = callback;
         }
     }
@@ -275,7 +275,7 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
         UnitManager unitManager = Script.Get<UnitManager>();
 
         HashSet<int> exhaustedTaskNumbers = new HashSet<int>();
-        List<UnitsDistanceList> unitDistanceListList = new List<UnitsDistanceList>();
+        Dictionary<Unit, UnitsDistanceList> unitDistanceListMap = new Dictionary<Unit, UnitsDistanceList>();
 
         while(true) {
 
@@ -291,22 +291,67 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
             //UnitAndRefused shortestUnitAndRefused = null;
 
             exhaustedTaskNumbers.Clear();
-            unitDistanceListList.Clear();
+            unitDistanceListMap.Clear();
 
-            foreach(UnitAndRefused unitAndRefused in unitsRequestingTasks) {
+            List<DistanceAndTask> takeTaskAttemptList = new List<DistanceAndTask>();
 
-                // First, look for tasks that other units have, which we could be doing more efficiently
-                //Unit[] unitsWithAccessableTasks = unitManager.GetAllUnits().Where(u => u.currentMasterTask != null &&
+            foreach(UnitAndRefused unitAndRefused in unitsRequestingTasks.ToArray()) {
+
+                Unit localRequestingUnit = unitAndRefused.unit;
+
+                /*
+                 * First check if we can take a task from a unit
+                 * */
+
+                Unit[] allUnits = unitManager.GetAllUnits();
+
+                Unit[] unitsWithAccessableTasks = allUnits.Where(u => (u.canTakeTaskFromUnit &&
 
                 // Check all units who have tasks of our type, or tasks where the type is unlocked
-                //u.currentMasterTask.actionType == u.primaryActionType || taskListLockMap[u.currentMasterTask.actionType] == false).ToArray();
+                u.currentMasterTask.actionType == localRequestingUnit.primaryActionType) || (u.currentMasterTask != null && taskListLockMap[u.currentMasterTask.actionType] == false)).ToArray();
 
+                int waitForRequests = 0;
 
+                // Check each unit to see if we should take their task; we will get to it faster
+                foreach(Unit unit in unitsWithAccessableTasks) {
+                    Unit localPerformingUnit = unit;
 
+                    if( unitAndRefused.refuseTaskList.Contains(localPerformingUnit.currentMasterTask.taskNumber)) {
+                        continue;
+                    }
 
+                    waitForRequests++;
+                    float unitDistanceLeft = unit.remainingMovementCostOnTask;
 
-                // Look for tasks within our queue
-                List<DistanceAndTask> taskDistances = tasksAndDistancesForUnit(unitAndRefused, false);
+                    if (unitDistanceLeft == 0 || float.IsNaN(unitDistanceLeft)) {
+                        unitDistanceLeft = 0.0001f;
+                    }
+
+                    PathRequestManager.RequestPathForTask(localRequestingUnit.transform.position, localRequestingUnit.movementPenaltyMultiplier, localPerformingUnit.takeableTask, (LookPoint[] lookPoints, ActionableItem item, bool success, int distance) => {
+                        float distanceForUnit = distance * localRequestingUnit.speed;
+
+                        print("Distance For Searching Unit " + distanceForUnit);
+                        print("Distance For Performing Unit " + unitDistanceLeft);
+
+                        if (distanceForUnit / unitDistanceLeft < 0.75f) {
+                            takeTaskAttemptList.Add(new DistanceAndTask(localPerformingUnit.currentMasterTask, distanceForUnit, unitAndRefused, localPerformingUnit));
+                        } else {
+                            unitAndRefused.refuseTaskList.Add(localPerformingUnit.currentMasterTask.taskNumber);
+                        }
+
+                        waitForRequests--;
+                    });
+                }
+
+                yield return new WaitUntil(() => {
+                    return waitForRequests == 0;
+                });
+
+                /*
+                 * Look for tasks within our queue
+                 * */
+
+                List <DistanceAndTask> taskDistances = tasksAndDistancesForUnit(unitAndRefused, false);
 
                 // If we can't find any tasks to do, check the low priority tasks from all Action Types
                 if (taskDistances.Count == 0) {
@@ -315,14 +360,43 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
 
                 // Don't even bother if this unit can't do anything
                 if (taskDistances.Count > 0) {
-                    unitDistanceListList.Add(new UnitsDistanceList(unitAndRefused, taskDistances, taskDistances[0].distance));
+                    unitDistanceListMap[unitAndRefused.unit] = new UnitsDistanceList(unitAndRefused, taskDistances, taskDistances[0].distance);
                 }               
             }
 
-            // Give the unit with the closest viable task its task, remove that task from any others down the list, and do it all again
-            while (unitDistanceListList.Count > 0) {
+            /*
+             * Give out tasks that should be taken from other units
+             * */
 
-                unitDistanceListList.Sort(delegate (UnitsDistanceList t1, UnitsDistanceList t2) {
+            List<DistanceAndTask> sortedDistances = takeTaskAttemptList.OrderBy(dt => dt.distance).ToList();
+            HashSet<Unit> unitsWhoHaveHadTaskTaken = new HashSet<Unit>();
+
+            for(int i = 0; i < sortedDistances.Count; i++) {
+                DistanceAndTask distanceAndTask = sortedDistances[i];
+
+                // Unit has already had their task taken, cannot happen twice
+                if(unitsWhoHaveHadTaskTaken.Contains(distanceAndTask.performingUnit)) {
+                    continue;
+                }
+
+                distanceAndTask.performingUnit.CancelTask();
+                distanceAndTask.requestingUnit.callback(distanceAndTask.masterTask);
+
+                unitsWhoHaveHadTaskTaken.Add(distanceAndTask.performingUnit);
+
+                unitDistanceListMap.Remove(distanceAndTask.requestingUnit.unit);
+                unitsRequestingTasks.Remove(distanceAndTask.requestingUnit);
+            }
+
+            /*
+             * Give out tasks within our queue, for units that were not already assigned during task taking
+             * */
+
+            // Give the unit with the closest viable task its task, remove that task from any others down the list, and do it all again
+            while (unitDistanceListMap.Count > 0) {
+                List<UnitsDistanceList> unitDistanceListList = unitDistanceListMap.Values.ToList();
+
+                unitDistanceListList.ToList().Sort(delegate (UnitsDistanceList t1, UnitsDistanceList t2) {
                     return t1.shortestTaskDistance.CompareTo(t2.shortestTaskDistance);
                 });
 
@@ -361,7 +435,7 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
 
                         // If we have removed all viable tasks from this units list, he cannot be completed
                         if(otherUnitDistanceList.distanceAndTasksList.Count == 0) {
-                            unitDistanceListList.Remove(otherUnitDistanceList);
+                            unitDistanceListMap.Remove(otherUnitDistanceList.unitAndRefused.unit);
                         }
                     }
                 }
@@ -369,38 +443,11 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
                 // Give the unit this task, then remove him from the list of people with viable tasks, AND from the list of requesters
                 unitsDistanceList.unitAndRefused.callback(givingTask);
 
-                unitDistanceListList.Remove(unitsDistanceList);
-                unitsRequestingTasks.Remove(unitsDistanceList.unitAndRefused);
+                unitDistanceListMap.Remove(unitsDistanceList.unitAndRefused.unit);
+                unitsRequestingTasks.Remove(unitsDistanceList.unitAndRefused);                
 
                 NotifyDelegates(givingTask.actionType);
             }
-
-
-
-            // TODO: NOTIFY
-            //NotifyDelegates(new HashSet<MasterGameTask.ActionType>() { MasterGameTask.ActionType.Build, MasterGameTask.ActionType.Mine, MasterGameTask.ActionType.Move });
-
-
-
-            //UnitAndRefused receivingUnit = unitsDistanceList.unit;
-            //List<DistanceAndTask> taskDistances = unitsDistanceList.distanceAndTasksList;
-
-            // Find a task that has not already been taken
-            //MasterGameTask viableTask = null;
-            //for (int i = 0; i < unitsDistanceList.distanceAndTasksList.Count; i++) {
-            //    MasterGameTask currentTask = taskDistances[i].masterTask;
-            //    if (exhaustedTaskNumbers.Contains(currentTask.taskNumber))
-
-            //}
-
-
-            
-
-
-
-
-
-
         }
     }
 
@@ -408,10 +455,16 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
         public MasterGameTask masterTask;
         public float distance;
 
-        public DistanceAndTask(MasterGameTask masterTask, float distance) : this() {
+        public UnitAndRefused requestingUnit;
+        public Unit performingUnit;
+
+        public DistanceAndTask(MasterGameTask masterTask, float distance, UnitAndRefused requestingUnit = null, Unit performingUnit = null) : this() {
             this.masterTask = masterTask;
             this.distance = distance;
-        }
+
+            this.requestingUnit = requestingUnit;
+            this.performingUnit = performingUnit;
+        }        
     }
 
     private List<DistanceAndTask> geAvailableTaskDistancesFromList(List<MasterGameTask> taskList, Unit unit, bool lastPriorityTasks, HashSet<int> refuseTaskList = null) {

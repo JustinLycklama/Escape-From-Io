@@ -54,7 +54,7 @@ public class UnitManager : MonoBehaviour, TaskStatusUpdateDelegate {
     }
 
     public Unit[] GetAllUnits() {
-        return GetUnitsOfType(MasterGameTask.ActionType.Build).Concat(GetUnitsOfType(MasterGameTask.ActionType.Mine)).Concat(GetUnitsOfType(MasterGameTask.ActionType.Move)).ToArray();
+        return GetUnitsOfType(MasterGameTask.ActionType.Build).Concat(GetUnitsOfType(MasterGameTask.ActionType.Mine)).Concat(GetUnitsOfType(MasterGameTask.ActionType.Move)).ToArray() ?? new Unit[0];
     }
 
     public Unit[] GetUnitsOfType(MasterGameTask.ActionType type) {

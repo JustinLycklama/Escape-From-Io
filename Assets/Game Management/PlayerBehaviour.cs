@@ -36,7 +36,8 @@ public class PlayerBehaviour : MonoBehaviour {
         }
 
         if(Input.GetKey("escape")) {
-            Application.Quit();
+            SettingsPanel settingsPanel = Script.Get<SettingsPanel>();
+            settingsPanel.ButtonDidClick(settingsPanel.settingsButton);
         }
     }
 
