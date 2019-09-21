@@ -17,7 +17,8 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
     public Text taskCountText;
     public Toggle taskListLocked;
 
-    public Image backgroundPairConnection;
+    public Image mainPairConnection;
+    public Image[] sidePairConnection;
 
     public MasterGameTask.ActionType actionType;
     public Image unitBackgroundSprite;
@@ -61,15 +62,22 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
         Unit.UnitState taskListColorState = state ? Unit.UnitState.Efficient : Unit.UnitState.Inefficient;
         taskBackgroundSprite.color = taskListColorState.ColorForState();
 
-        Color pairConnectionColor = backgroundPairConnection.color;
+        Color mainPairConnectionColor = mainPairConnection.color;
+        Color sidePairConnectionColor = mainPairConnectionColor;
 
         if (state == true) {
-            pairConnectionColor.a = 1f;
+            mainPairConnectionColor.a = 1f;
+            sidePairConnectionColor.a = 0.1f;
         } else {
-            pairConnectionColor.a = 0.5f;
+            mainPairConnectionColor.a = 0.5f;
+            sidePairConnectionColor.a = 0.8f;
         }
 
-        backgroundPairConnection.color = pairConnectionColor;
+        mainPairConnection.color = mainPairConnectionColor;
+
+        foreach(Image image in sidePairConnection) {
+            image.color = sidePairConnectionColor;
+        }
     }
 
     /*
