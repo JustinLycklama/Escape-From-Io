@@ -8,6 +8,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate {
     MapGenerator mapGenerator;
     MapsManager mapsManager;
     Constants constants;
+    PlayerBehaviour playerBehaviour;
 
     public List<Unit> startingUnits;
     Queue<Action> initActionChunks;
@@ -21,13 +22,15 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate {
 
     void Start() {
         initActionChunks = new Queue<Action>();
-
+      
         initActionChunks.Enqueue(() => {
             grid = Tag.AStar.GetGameObject().GetComponent<PathfindingGrid>();
             mapGenerator = Tag.MapGenerator.GetGameObject().GetComponent<MapGenerator>();
             mapsManager = Script.Get<MapsManager>();
             constants = GetComponent<Constants>();
+            playerBehaviour = Script.Get<PlayerBehaviour>();
 
+            playerBehaviour.SetPauseState(true);
         });
 
         initActionChunks.Enqueue(() => {
@@ -155,7 +158,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate {
         float percent = 0;
         fadePanel.SetPercent(percent);
 
-        float incrementalPercent = 1f / (float) initActionChunks.Count;
+        float incrementalPercent = 1f / ((float) initActionChunks.Count + 1);
 
         yield return null;
         while(initActionChunks.Count > 0) {
@@ -166,7 +169,15 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate {
             yield return null;
         }
 
+        // Wait for colliders to be built
+        yield return new WaitUntil(delegate {
+            return mapsManager.AnyBoxColliderBeingBuilt() == false;
+        });
+
+        fadePanel.SetPercent(percent += incrementalPercent);     
         fadePanel.FadeOut(false, null);
+
+        playerBehaviour.SetPauseState(false);
     }
 
     IEnumerator CheckForNoRobots() {

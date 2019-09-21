@@ -16,6 +16,8 @@ public class HighscoreList : TabElement, TableViewDelegate, HighscoreCellDelegat
 
         table.dataDelegate = this;
         UpdateScore();
+
+        highscoreController.ListLoaded();
     }
 
     private void OnDestroy() {

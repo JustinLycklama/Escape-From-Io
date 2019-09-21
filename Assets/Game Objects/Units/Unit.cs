@@ -697,24 +697,21 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
             }));
 
         public static Blueprint AdvancedMiner = new Blueprint("AdvancedMiner", typeof(AdvancedMiner), "MinerIcon", "Adv. Miner",
-            new BlueprintCost(new Dictionary<MineralType, int>(){
-                { MineralType.Copper, 1 }
-                //{ MineralType.Silver, 0 },
-                //{ MineralType.Gold, 0 }
+            new BlueprintCost(new Dictionary<MineralType, int>(){                
+                { MineralType.Silver, 2 },
+                { MineralType.Gold, 1 }
             }));
 
         public static Blueprint AdvancedMover = new Blueprint("AdvancedMover", typeof(AdvancedMover), "MoverIcon", "Adv. Mover",
             new BlueprintCost(new Dictionary<MineralType, int>(){
-                { MineralType.Copper, 1 }
-                //{ MineralType.Silver, 0 },
-                //{ MineralType.Gold, 0 }
+                { MineralType.Silver, 2 },
+                { MineralType.Gold, 1 }
             }));
 
         public static Blueprint AdvancedBuilder = new Blueprint("AdvancedBuilder", typeof(AdvancedBuilder), "BuilderIcon", "Adv. Builder",
-            new BlueprintCost(new Dictionary<MineralType, int>(){
-                { MineralType.Copper, 1 }
-                //{ MineralType.Silver, 0 },
-                //{ MineralType.Gold, 0 }
+            new BlueprintCost(new Dictionary<MineralType, int>(){                
+                { MineralType.Silver, 2 },
+                { MineralType.Gold, 1 }
             }));
 
         public Blueprint(string fileName, Type type, string iconName, string label, BlueprintCost cost) : base(folder + fileName, type, iconName, label, cost) { }

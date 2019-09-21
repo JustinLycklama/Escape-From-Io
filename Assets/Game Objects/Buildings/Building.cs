@@ -303,10 +303,9 @@ public abstract class Building : ActionableItem, Selectable {
 
         public static Blueprint StationShip = new Blueprint("StationShip", typeof(StationShip), "ShipIcon", "Interplanetary Ship",
             new BlueprintCost(new Dictionary<MineralType, int>(){
-                                { MineralType.Copper, 1 }
-                //{ MineralType.Silver, 20 },
-                //{ MineralType.Gold, 15 },
-                //{ MineralType.Azure, 6 }
+                { MineralType.Silver, 20 },
+                { MineralType.Gold, 15 },
+                { MineralType.Azure, 8 }
             }),
             true); // As last priority
 

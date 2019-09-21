@@ -65,28 +65,33 @@ public class HighscoreController : MonoBehaviour {
     private PubNub pubnub;
     private const string channel = "leaderboard";
 
-    public List<LeaderboardItem> leaderboardItems { get; private set; }
+    public List<LeaderboardItem> leaderboardItems = new List<LeaderboardItem>();
     public event EventHandler<List<LeaderboardItem>> leaderboardCollectionUpdate;
 
     // Have we submitted our new value? 
     public static bool preSubmit = false;
     public static int preSubmitValue = int.MaxValue;
 
-    private void Awake() {
-        leaderboardItems = new List<LeaderboardItem>();
+    public void ListLoaded() {
+        if(SceneManagement.sharedInstance.state == SceneManagement.State.GameFinish && SceneManagement.sharedInstance.score != null) {
+            preSubmit = true;
+            preSubmitValue = Mathf.FloorToInt(SceneManagement.sharedInstance.score.Value);
+            SceneManagement.sharedInstance.score = null;
+
+            AddPlaceholderScoreCell();
+        }
     }
 
     void Start() {
+        //SceneManagement.sharedInstance.sceneLoadEvent += () => {
+        //    if (SceneManagement.sharedInstance.state == SceneManagement.State.GameFinish && SceneManagement.sharedInstance.score != null) {
+        //        preSubmit = true;
+        //        preSubmitValue = Mathf.FloorToInt(SceneManagement.sharedInstance.score.Value);
+        //        SceneManagement.sharedInstance.score = null;
 
-        SceneManagement.sharedInstance.sceneLoadEvent += () => {
-            if (SceneManagement.sharedInstance.state == SceneManagement.State.GameFinish && SceneManagement.sharedInstance.score != null) {
-                preSubmit = true;
-                preSubmitValue = Mathf.FloorToInt(SceneManagement.sharedInstance.score.Value);
-                SceneManagement.sharedInstance.score = null;
-
-                AddPlaceholderScoreCell();
-            }
-        };
+        //        AddPlaceholderScoreCell();
+        //    }
+        //};
 
         PNConfiguration pnConfiguration = new PNConfiguration();
         pnConfiguration.SubscribeKey = "sub-c-705a78cc-ce95-11e9-8b24-569e8a5c3af3";

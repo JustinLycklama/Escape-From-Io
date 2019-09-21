@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 public interface TerrainUpdateDelegate {
     void NotifyTerrainUpdate(LayoutCoordinate layoutCoordinate);
@@ -138,6 +139,10 @@ public class MapsManager : MonoBehaviour {
                 }
             }
         }
+    }
+
+    public bool AnyBoxColliderBeingBuilt() {
+        return mapContainers.Where(c => c.isBuildingBoxColliders).Count() > 0;
     }
 
     public void AddTerrainUpdateDelegate(TerrainUpdateDelegate updateDelegate) {

@@ -16,6 +16,7 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
 
     public Text taskCountText;
     public Toggle taskListLocked;
+    public Text taskListLockedText;
 
     public Image mainPairConnection;
     public Image[] sidePairConnection;
@@ -78,6 +79,8 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
         foreach(Image image in sidePairConnection) {
             image.color = sidePairConnectionColor;
         }
+
+        taskListLockedText.text = state ? "Paired" : "Open";
     }
 
     /*

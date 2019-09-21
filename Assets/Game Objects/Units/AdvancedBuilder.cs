@@ -11,7 +11,7 @@ public class AdvancedBuilder : Unit {
             case MasterGameTask.ActionType.Mine:
                 return 0.3f;
             case MasterGameTask.ActionType.Build:
-                return 0.9f;
+                return 1.2f;
             case MasterGameTask.ActionType.Move:
                 return 1f;
         }
