@@ -139,8 +139,8 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         }       
     }
 
-    const int numColliders = 5; // constants.nodesPerLayoutPerAxis; // featuresPerLayoutPerAxis
-    List<int> indexList = new List<int> { 1, 3, 5, 7, 9 };
+    const int numColliders = 3; // constants.nodesPerLayoutPerAxis; // featuresPerLayoutPerAxis
+    List<int> indexList = new List<int> { 2, 5, 9 };
 
     //private IEnumerator AddBoxColliders() {
 
@@ -239,7 +239,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                 float hPos = (h * boxSizeY) + boxSizeY / 2f;
 
                 boxCollider.center = new Vector3(xPos + wPos, 0, yPos + hPos);
-                boxCollider.size = new Vector3(boxSizeX, GetHeightAround(mapCoordinate, 3) * highMultiplier, boxSizeY);
+                boxCollider.size = new Vector3(boxSizeX, GetHeightAround(mapCoordinate, 5) * highMultiplier, boxSizeY);
 
                 boxColliderArray[x, y][w, h] = boxCollider;
             }
@@ -281,7 +281,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                 MapCoordinate mapCoordinate = mapCoordinates[sampleW, realWorldH];
                 //MapCoordinate mapCoordinate = new MapCoordinate(layoutCoordinate);
 
-                boxCollider.size = new Vector3(boxCollider.size.x, GetHeightAround(mapCoordinate, 3) * highMultiplier, boxCollider.size.z);
+                boxCollider.size = new Vector3(boxCollider.size.x, GetHeightAround(mapCoordinate, 5) * highMultiplier, boxCollider.size.z);
                 boxColliderArray[x, y][w, h] = boxCollider;
             }
         }

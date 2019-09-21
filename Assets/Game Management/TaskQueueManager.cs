@@ -315,18 +315,17 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
                 // Check each unit to see if we should take their task; we will get to it faster
                 foreach(Unit unit in unitsWithAccessableTasks) {
                     Unit localPerformingUnit = unit;
+                    float unitDistanceLeft = unit.remainingMovementCostOnTask;
+
+                    if(unitDistanceLeft < 100 || float.IsNaN(unitDistanceLeft)) {
+                        continue;
+                    }
 
                     if( unitAndRefused.refuseTaskList.Contains(localPerformingUnit.currentMasterTask.taskNumber)) {
                         continue;
                     }
 
                     waitForRequests++;
-                    float unitDistanceLeft = unit.remainingMovementCostOnTask;
-
-                    if (unitDistanceLeft == 0 || float.IsNaN(unitDistanceLeft)) {
-                        unitDistanceLeft = 0.0001f;
-                    }
-
                     PathRequestManager.RequestPathForTask(localRequestingUnit.transform.position, localRequestingUnit.movementPenaltyMultiplier, localPerformingUnit.takeableTask, (LookPoint[] lookPoints, ActionableItem item, bool success, int distance) => {
                         float distanceForUnit = distance * localRequestingUnit.speed;
 

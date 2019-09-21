@@ -113,7 +113,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
 
     public bool canTakeTaskFromUnit {
         get {
-            return currentMasterTask != null && currentGameTask != null && currentGameTask == currentMasterTask.childGameTasks[0] && currentPercentOfJournery < 1;
+            return currentMasterTask != null && currentGameTask != null && currentGameTask == currentMasterTask.childGameTasks[0] && currentPercentOfJournery < 1 && currentMasterTask.actionType != MasterGameTask.ActionType.Move;
         }
     }
 

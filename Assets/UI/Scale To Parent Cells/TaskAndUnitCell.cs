@@ -17,8 +17,11 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
     public Text taskCountText;
     public Toggle taskListLocked;
 
+    public Image backgroundPairConnection;
+
     public MasterGameTask.ActionType actionType;
-    public Image backgroundSprite;
+    public Image unitBackgroundSprite;
+    public Image taskBackgroundSprite;
 
     public List<PercentageBar> percentBars;
     private List<Unit> soonToExpireUnits = new List<Unit>();
@@ -49,11 +52,24 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
 
 
     private void UpdateCellColor() {
-        if(unitList.Length == 0 && taskList.Length != 0) {
-            backgroundSprite.color = unitListState.ColorForState();
+        unitBackgroundSprite.color = unitListState.ColorForState();                
+    }
+
+    private void SetLockState(bool state) {
+        taskListLocked.SetState(state);
+
+        Unit.UnitState taskListColorState = state ? Unit.UnitState.Efficient : Unit.UnitState.Inefficient;
+        taskBackgroundSprite.color = taskListColorState.ColorForState();
+
+        Color pairConnectionColor = backgroundPairConnection.color;
+
+        if (state == true) {
+            pairConnectionColor.a = 1f;
         } else {
-            backgroundSprite.color = unitListState.ColorForState();
-        }           
+            pairConnectionColor.a = 0.5f;
+        }
+
+        backgroundPairConnection.color = pairConnectionColor;
     }
 
     /*
@@ -62,7 +78,7 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
 
     public void ButtonDidClick(GameButton button) {
         if (button == taskListLocked) {
-            taskListLocked.SetState(!taskListLocked.state);
+            SetLockState(!taskListLocked.state);
 
             Script.Get<TaskQueueManager>().SetTaskListLocked(actionType, taskListLocked.state);
         }
@@ -83,9 +99,9 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
 
     public void NotifyUpdateTaskList(MasterGameTask[] taskList, MasterGameTask.ActionType actionType, TaskQueueManager.ListState listState) {
         this.taskList = taskList;
-        taskCountText.text = taskList.Length + " Task" + ((taskList.Length == 1)? "" : "s");
+        taskCountText.text = taskList.Length.ToString(); // + " Task" + ((taskList.Length == 1)? "" : "s");
 
-        taskListLocked.SetState(Script.Get<TaskQueueManager>().GetTaskListLockStatus(actionType));
+        SetLockState(Script.Get<TaskQueueManager>().GetTaskListLockStatus(actionType));
 
         UpdateCellColor();
     }
