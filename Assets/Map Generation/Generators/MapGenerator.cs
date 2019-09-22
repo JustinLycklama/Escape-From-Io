@@ -73,9 +73,43 @@ public class MapGenerator : MonoBehaviour {
     /*
      * World Generation (series of maps)
      * */
+    private static Dictionary<int, List<float[,]>> resourcePoolMap = new Dictionary<int, List<float[,]>>();
+    private static Dictionary<int, int> resourcePoolIndex = new Dictionary<int, int>();
 
+    //private const int maxPoolNeeds = 5;
+    private static float[,] ResourcePool(int resourceLength) {
+        if(!resourcePoolMap.ContainsKey(resourceLength)) {
+            resourcePoolMap[resourceLength] = new List<float[,]>();
+            resourcePoolIndex[resourceLength] = 0;
+        }
+
+        List<float[,]> poolList = resourcePoolMap[resourceLength];
+
+        if (resourcePoolIndex[resourceLength] >= poolList.Count) {
+            print("Grow Pool");
+            poolList.Add(new float[resourceLength, resourceLength]);
+            resourcePoolMap[resourceLength] = poolList;
+        }
+
+        resourcePoolIndex[resourceLength]++;
+        return poolList[resourcePoolIndex[resourceLength] - 1];
+    }
+
+    private static void ResetResourcePool() {
+        foreach(int key in resourcePoolMap.Keys.ToArray()) {
+            resourcePoolIndex[key] = 0;
+        }
+    }
+
+    // This is a method we call a LOT. Pool the array resources, to save on GC
     private static T[,] RangeSubset<T>(T[,] array, int startIndexX, int startIndexY, int lengthX, int lengthY) {
-        T[,] subset = new T[lengthX, lengthY];
+        T[,] subset;
+
+        if (typeof(T) == typeof(float) && lengthX == lengthY) {
+            subset = ResourcePool(lengthX) as T[,];
+        } else {
+            subset = new T[lengthX, lengthY];
+        }        
 
         for(int x = startIndexX; x < startIndexX + lengthX; x++) {
             for(int y = startIndexY; y < startIndexY + lengthY; y++) {
@@ -245,6 +279,7 @@ public class MapGenerator : MonoBehaviour {
         Map map = mapOject.AddComponent<Map>();
 
         map.InitMap(noiseSubset.terrainMap, MeshGenerator.GenerateTerrainMesh(noiseSubset.finalNoiseMap));
+        ResetResourcePool();
 
         container.setMap(map);
     }
@@ -282,7 +317,11 @@ public class MapGenerator : MonoBehaviour {
     // Returns the height in MAP COORDINATE position
     public float GetHeightAt(MapCoordinate mapCoordinate) {
         NoiseSubset noiseSubset = GetNoiseSubsetForMap(mapCoordinate.mapContainer);
-        return noiseSubset.finalNoiseMap[mapCoordinate.xAverageSample, mapCoordinate.yAverageSample];
+        float finalNoiseAtCoordinate = noiseSubset.finalNoiseMap[mapCoordinate.xAverageSample, mapCoordinate.yAverageSample];
+
+        ResetResourcePool();
+
+        return finalNoiseAtCoordinate;
     }
 
     public TerrainType GetTerrainAtAbsoluteXY(int x, int y) {
@@ -368,7 +407,10 @@ public class MapGenerator : MonoBehaviour {
             layoutNoiseMap[startXLayout + layoutCoordinate.x, startYLayout + layoutCoordinate.y] = heightAtNewRegion;
         }
 
-        return GetNoiseSubsetForMap(mapContainer).finalNoiseMap;
+        float[,] finalSubsetNoiseMap = GetNoiseSubsetForMap(mapContainer).finalNoiseMap;
+        ResetResourcePool();
+
+        return finalSubsetNoiseMap;
     }
 
     /*

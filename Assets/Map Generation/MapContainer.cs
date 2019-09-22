@@ -51,6 +51,8 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         int mapHeightWithOverhang = constants.layoutMapHeight + 2;
 
         textureIndexList = new float[mapWidthWithOverhang * mapHeightWithOverhang];
+
+        gameObject.isStatic = true;
     }
 
     private void Start() {
@@ -204,6 +206,8 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         //PathGridCoordinate[][] gridCoordinates = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(layoutCoordinate);
         MapCoordinate[,] mapCoordinates = MapCoordinate.MapCoordinatesFromLayoutCoordinate(layoutCoordinate);
 
+        Dictionary<MapCoordinate, float> cachedHeights = CacheHightsAround(layoutCoordinate);
+
         for(int w = 0; w < numColliders; w++) {
             for(int h = 0; h < numColliders; h++) {                
                 //if (w != 0 && h != 0 && w != numColliders -1 && h != numColliders - 1) {
@@ -239,7 +243,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                 float hPos = (h * boxSizeY) + boxSizeY / 2f;
 
                 boxCollider.center = new Vector3(xPos + wPos, 0, yPos + hPos);
-                boxCollider.size = new Vector3(boxSizeX, GetHeightAround(mapCoordinate, 5) * highMultiplier, boxSizeY);
+                boxCollider.size = new Vector3(boxSizeX, GetHeightAround(mapCoordinate, 5, cachedHeights) * highMultiplier, boxSizeY);
 
                 boxColliderArray[x, y][w, h] = boxCollider;
             }
@@ -259,6 +263,8 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
 
         //PathGridCoordinate[][] gridCoordinates = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(layoutCoordinate);
         MapCoordinate[,] mapCoordinates = MapCoordinate.MapCoordinatesFromLayoutCoordinate(layoutCoordinate);
+
+        Dictionary<MapCoordinate, float> cachedHeights = CacheHightsAround(layoutCoordinate);
 
         for(int w = 0; w < numColliders; w++) {
             for(int h = 0; h < numColliders; h++) {
@@ -281,24 +287,36 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                 MapCoordinate mapCoordinate = mapCoordinates[sampleW, realWorldH];
                 //MapCoordinate mapCoordinate = new MapCoordinate(layoutCoordinate);
 
-                boxCollider.size = new Vector3(boxCollider.size.x, GetHeightAround(mapCoordinate, 5) * highMultiplier, boxCollider.size.z);
+                boxCollider.size = new Vector3(boxCollider.size.x, GetHeightAround(mapCoordinate, 5, cachedHeights) * highMultiplier, boxCollider.size.z);
                 boxColliderArray[x, y][w, h] = boxCollider;
             }
         }
     }
 
-    private float GetHeightAround(MapCoordinate mapCoordinate, int radius) {
+    //private Dictionary<MapCoordinate, float> cachedHeights = new Dictionary<MapCoordinate, float>();
+    private Dictionary<MapCoordinate, float> CacheHightsAround(LayoutCoordinate layoutCoordinate) {
+        Dictionary<MapCoordinate, float> cachedHeights = new Dictionary<MapCoordinate, float>();
+
+        foreach(MapCoordinate mapCoordinate in MapCoordinate.MapCoordinatesFromLayoutCoordinate(layoutCoordinate)) {
+            cachedHeights[mapCoordinate] = mapCoordinate.mapContainer.map.getHeightAt(mapCoordinate);
+        }
+
+        return cachedHeights;
+    }
+
+    private float GetHeightAround(MapCoordinate mapCoordinate, int radius, Dictionary<MapCoordinate, float> cachedHeights) {
         Constants constants = Script.Get<Constants>();
         float heightTotal = 0;        
 
         for(int x = - radius; x <= radius; x++) {
             for(int y = -radius; y <= radius; y++) {
-                float localX = Mathf.Clamp(mapCoordinate.x + x, 0, constants.featuresPerLayoutPerAxis);
-                float localY = Mathf.Clamp(mapCoordinate.y + y, 0, constants.featuresPerLayoutPerAxis);
+                //float localX = Mathf.Clamp(mapCoordinate.x + x, 0, constants.featuresPerLayoutPerAxis);
+                //float localY = Mathf.Clamp(mapCoordinate.y + y, 0, constants.featuresPerLayoutPerAxis);
 
-                MapCoordinate localCoordinate = new MapCoordinate(localX, localY, mapCoordinate.mapContainer);
+                //MapCoordinate localCoordinate = new MapCoordinate(localX, localY, mapCoordinate.mapContainer);
 
-                heightTotal += mapCoordinate.mapContainer.map.getHeightAt(mapCoordinate);
+                //heightTotal += mapCoordinate.mapContainer.map.getHeightAt(mapCoordinate);
+                heightTotal += cachedHeights[mapCoordinate];
             }
         }
 

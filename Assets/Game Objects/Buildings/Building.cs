@@ -77,6 +77,8 @@ public abstract class Building : ActionableItem, Selectable {
         tintableShader = Shader.Find("Custom/Tintable");
 
         SetTransparentShaders();
+
+        gameObject.isStatic = true;
     }
 
     public void SetCost(BlueprintCost cost) {

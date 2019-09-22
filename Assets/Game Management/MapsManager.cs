@@ -31,29 +31,32 @@ public class MapsManager : MonoBehaviour {
         activeContainers = new List<MapContainer>();
         terrainUpdateDelegates = new List<TerrainUpdateDelegate>();
     }
-
+   
     // Manage Visible Maps
-    private void Update() {
-        Plane[] planes = GeometryUtility.CalculateFrustumPlanes(Camera.main);
+    IEnumerator UpdateVisibleMaps() {
+        while(true) {
+            yield return new WaitForSeconds(0.25f);
 
-        foreach(MapContainer container in mapContainers) {
+            Plane[] planes = GeometryUtility.CalculateFrustumPlanes(Camera.main);
 
-            bool enabled = true;
+            foreach(MapContainer container in mapContainers) {
 
-            // If we are building box colliders, we cannot disable this object
-            if (!container.isBuildingBoxColliders) {
-                enabled = GeometryUtility.TestPlanesAABB(planes, container.meshRenderer.bounds);
+                bool enabled = true;
+
+                // If we are building box colliders, we cannot disable this object
+                if(!container.isBuildingBoxColliders) {
+                    enabled = GeometryUtility.TestPlanesAABB(planes, container.meshRenderer.bounds);
+                }
+
+                if(enabled && !activeContainers.Contains(container)) {
+                    container.gameObject.SetActive(true);
+                    activeContainers.Add(container);
+                } else if(!enabled && activeContainers.Contains(container)) {
+                    container.gameObject.SetActive(false);
+                    activeContainers.Remove(container);
+                }
             }
-
-            if (enabled && !activeContainers.Contains(container)) {
-                container.gameObject.SetActive(true);
-                activeContainers.Add(container);
-            }
-            else if (!enabled && activeContainers.Contains(container)) {
-                container.gameObject.SetActive(false);
-                activeContainers.Remove(container);
-            }
-        }      
+        }
     }
 
     public void InitializeMaps(int horizontalMaps, int verticalMaps) {
@@ -139,6 +142,8 @@ public class MapsManager : MonoBehaviour {
                 }
             }
         }
+
+        StartCoroutine(UpdateVisibleMaps());
     }
 
     public bool AnyBoxColliderBeingBuilt() {

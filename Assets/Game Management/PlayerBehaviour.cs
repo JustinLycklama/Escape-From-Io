@@ -77,11 +77,11 @@ public class PlayerBehaviour : MonoBehaviour {
     RaycastHit? lastHit;
 
     void SelectGameObject() {
-        Debug.DrawRay(lastRay.origin, lastRay.direction * 1000, Color.yellow);
+        //Debug.DrawRay(lastRay.origin, lastRay.direction * 1000, Color.yellow);
 
-        if (lastHit != null) {
-            Debug.DrawRay(lastHit.Value.point, Vector3.up * 1000, Color.red);
-        }       
+        //if (lastHit != null) {
+        //    Debug.DrawRay(lastHit.Value.point, Vector3.up * 1000, Color.red);
+        //}       
 
         if(Input.GetMouseButtonDown(0)) {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);

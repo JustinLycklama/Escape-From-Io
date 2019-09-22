@@ -18,7 +18,7 @@ public class CurrentSelectionPanel : MonoBehaviour, SelectionManagerDelegate, Ta
     public TerrainDetailPanel terrainDetailPanel;
     public ActionsList actionsList;
 
-    public CameraPanel cameraPanel;
+    //public CameraPanel cameraPanel;
 
     void Start() {
         title.text = noSelectionText;
@@ -60,7 +60,7 @@ public class CurrentSelectionPanel : MonoBehaviour, SelectionManagerDelegate, Ta
         //    (currentSelection.selection as TaskStatusNotifiable).EndNotifications(this);
         //}
 
-        cameraPanel.SetSelection(nextSelection);
+        //cameraPanel.SetSelection(nextSelection);
 
         if (currentSelection != null) {
             currentSelection.EndSubscriptionToUserActions(this);

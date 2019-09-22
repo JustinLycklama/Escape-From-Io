@@ -10,7 +10,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1812086295636223081}
   - component: {fileID: 3575532068644558124}
-  - component: {fileID: 7105699027060790844}
   m_Layer: 5
   m_Name: CameraPanel
   m_TagString: Untagged
@@ -48,20 +47,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1702064577093481953}
   m_CullTransparentMesh: 0
---- !u!114 &7105699027060790844
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1702064577093481953}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 75560d5316d73de40b275c668a66ab17, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  followCamera: {fileID: 6136267148543251796}
-  cameraRenderPanel: {fileID: 7445637490671436136}
 --- !u!1 &3005389013933081389
 GameObject:
   m_ObjectHideFlags: 0
@@ -116,7 +101,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 3005389013933081389}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -765806418, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
@@ -136,6 +121,7 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
+  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &7445637490671436136
 GameObject:
   m_ObjectHideFlags: 0
@@ -190,7 +176,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 7445637490671436136}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -98529514, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Script: {fileID: 11500000, guid: 1344c3c82d62a2a41a3576d8abb8e3ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
@@ -224,7 +210,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &9218656493095491936
 RectTransform:
   m_ObjectHideFlags: 0
