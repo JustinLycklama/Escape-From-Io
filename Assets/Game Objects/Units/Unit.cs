@@ -272,7 +272,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
                 }
 
                 movementCostToTask = distance;
-                print("Path Distance " + distance);            
+                //print("Path Distance " + distance);            
 
                 // If the task item is a known, like a location or builing, the actionItem was set at initialization
                 // If the task item was an unknown resource, it has just been set above

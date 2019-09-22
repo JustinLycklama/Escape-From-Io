@@ -316,10 +316,6 @@ public class MapsManager : MonoBehaviour {
             }
         }
 
-        if(map == null) {
-            print("Null");
-        }
-
         for(int mapX = 0; mapX < horizontalMapCount; mapX++) {
             for(int mapY = 0; mapY < verticalMapCount; mapY++) {
                 MapContainer mapContainer = mapContainer2d[mapX, mapY];

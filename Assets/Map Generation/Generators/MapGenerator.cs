@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using System;
 
 public class MapGenerator : MonoBehaviour {
 
@@ -73,31 +74,44 @@ public class MapGenerator : MonoBehaviour {
     /*
      * World Generation (series of maps)
      * */
-    private static Dictionary<int, List<float[,]>> resourcePoolMap = new Dictionary<int, List<float[,]>>();
-    private static Dictionary<int, int> resourcePoolIndex = new Dictionary<int, int>();
+    private static Dictionary<int, List<float[,]>> resourceFloatPoolMap = new Dictionary<int, List<float[,]>>();
+    private static Dictionary<int, int> resourceFloatPoolIndex = new Dictionary<int, int>();
 
-    //private const int maxPoolNeeds = 5;
-    private static float[,] ResourcePool(int resourceLength) {
-        if(!resourcePoolMap.ContainsKey(resourceLength)) {
-            resourcePoolMap[resourceLength] = new List<float[,]>();
-            resourcePoolIndex[resourceLength] = 0;
+    private static Dictionary<int, List<TerrainType[,]>> resourceTerrainTypePoolMap = new Dictionary<int, List<TerrainType[,]>>();
+    private static Dictionary<int, int> resourceTerrainTypetPoolIndex = new Dictionary<int, int>();
+    
+    private static float[,] FloatResourcePool(int resourceLength) {
+        return ResourcePool(resourceLength, resourceFloatPoolMap, resourceFloatPoolIndex);
+    }
+
+    private static TerrainType[,] TerrainResourcePool(int resourceLength) {
+        return ResourcePool(resourceLength, resourceTerrainTypePoolMap, resourceTerrainTypetPoolIndex);
+    }
+
+    private static T[,] ResourcePool<T>(int resourceLength, Dictionary<int, List<T[,]>> pool, Dictionary<int, int> index) {
+        if(!pool.ContainsKey(resourceLength)) {
+            pool[resourceLength] = new List<T[,]>();
+            index[resourceLength] = 0;
         }
 
-        List<float[,]> poolList = resourcePoolMap[resourceLength];
+        List<T[,]> poolList = pool[resourceLength];
 
-        if (resourcePoolIndex[resourceLength] >= poolList.Count) {
-            print("Grow Pool");
-            poolList.Add(new float[resourceLength, resourceLength]);
-            resourcePoolMap[resourceLength] = poolList;
+        if (index[resourceLength] >= poolList.Count) {
+            poolList.Add(new T[resourceLength, resourceLength]);
+            pool[resourceLength] = poolList;
         }
 
-        resourcePoolIndex[resourceLength]++;
-        return poolList[resourcePoolIndex[resourceLength] - 1];
+        index[resourceLength]++;
+        return poolList[index[resourceLength] - 1];
     }
 
     private static void ResetResourcePool() {
-        foreach(int key in resourcePoolMap.Keys.ToArray()) {
-            resourcePoolIndex[key] = 0;
+        foreach(int key in resourceFloatPoolMap.Keys.ToArray()) {
+            resourceFloatPoolIndex[key] = 0;
+        }
+
+        foreach(int key in resourceTerrainTypePoolMap.Keys.ToArray()) {
+            resourceTerrainTypetPoolIndex[key] = 0;
         }
     }
 
@@ -105,8 +119,10 @@ public class MapGenerator : MonoBehaviour {
     private static T[,] RangeSubset<T>(T[,] array, int startIndexX, int startIndexY, int lengthX, int lengthY) {
         T[,] subset;
 
-        if (typeof(T) == typeof(float) && lengthX == lengthY) {
-            subset = ResourcePool(lengthX) as T[,];
+        if(typeof(T) == typeof(float) && lengthX == lengthY) {
+            subset = FloatResourcePool(lengthX) as T[,];
+        } else if(typeof(T) == typeof(TerrainType) && lengthX == lengthY) {
+            subset = TerrainResourcePool(lengthX) as T[,];
         } else {
             subset = new T[lengthX, lengthY];
         }        
@@ -315,13 +331,18 @@ public class MapGenerator : MonoBehaviour {
     }
 
     // Returns the height in MAP COORDINATE position
+    private KeyValuePair<MapContainer, float[,]> cachedMapContainer = new KeyValuePair<MapContainer, float[,]>();
     public float GetHeightAt(MapCoordinate mapCoordinate) {
-        NoiseSubset noiseSubset = GetNoiseSubsetForMap(mapCoordinate.mapContainer);
-        float finalNoiseAtCoordinate = noiseSubset.finalNoiseMap[mapCoordinate.xAverageSample, mapCoordinate.yAverageSample];
+        
+        // We often request heights for the same mapContainer over and over.
+        if (mapCoordinate.mapContainer != cachedMapContainer.Key) {
+            NoiseSubset noiseSubset = GetNoiseSubsetForMap(mapCoordinate.mapContainer);
+            cachedMapContainer = new KeyValuePair<MapContainer, float[,]>(mapCoordinate.mapContainer, noiseSubset.finalNoiseMap);
 
-        ResetResourcePool();
+            ResetResourcePool();
+        }
 
-        return finalNoiseAtCoordinate;
+        return cachedMapContainer.Value[mapCoordinate.xAverageSample, mapCoordinate.yAverageSample];
     }
 
     public TerrainType GetTerrainAtAbsoluteXY(int x, int y) {

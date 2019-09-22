@@ -15,10 +15,15 @@ public class TerrainManager : MonoBehaviour {
     public TerrainType[] landTerrainTypes;
     public TerrainType[] mountainTerrainTypes;
 
+    private TerrainType[] cachedTypes;
     [HideInInspector]
     public TerrainType[] terrainTypes {
         get {
-            return waterTerrainTypes.Concat(landTerrainTypes).Concat(mountainTerrainTypes).ToArray();
+            if (cachedTypes == null) {
+                cachedTypes = waterTerrainTypes.Concat(landTerrainTypes).Concat(mountainTerrainTypes).ToArray();
+            }
+
+            return cachedTypes;
         }
     }
 

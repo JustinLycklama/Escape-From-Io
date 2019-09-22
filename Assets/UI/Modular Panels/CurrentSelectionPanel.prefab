@@ -170,7 +170,6 @@ MonoBehaviour:
   unitDetailPanel: {fileID: 7478783563859978366}
   terrainDetailPanel: {fileID: 3909799514134522530}
   actionsList: {fileID: 8948945438840293462}
-  cameraPanel: {fileID: 0}
 --- !u!114 &6359797850240501774
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -327,10 +326,10 @@ RectTransform:
   m_Father: {fileID: 1520639721978913292}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 483.5, y: -76.61539}
-  m_SizeDelta: {x: 917, y: 82.15385}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &6559376019635620879
 CanvasRenderer:
@@ -393,10 +392,10 @@ RectTransform:
   m_Father: {fileID: 1520639721978913292}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 483.5, y: -25.26923}
-  m_SizeDelta: {x: 917, y: 20.538462}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &2162446768473125168
 CanvasRenderer:
@@ -761,10 +760,10 @@ RectTransform:
   m_Father: {fileID: 1520639721978913292}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 1}
-  m_AnchorMax: {x: 0, y: 1}
-  m_AnchoredPosition: {x: 483.5, y: -199.84616}
-  m_SizeDelta: {x: 917, y: 164.3077}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &3355598258779021770
 CanvasRenderer:
@@ -1869,6 +1868,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 6376064882998026353}
     m_Modifications:
+    - target: {fileID: 4836565511559286925, guid: 968ed016ab5788e41bd121e5d63f0e8c,
+        type: 3}
+      propertyPath: m_Name
+      value: TerrainDetailPanel
+      objectReference: {fileID: 0}
     - target: {fileID: 7093260731494135992, guid: 968ed016ab5788e41bd121e5d63f0e8c,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -1973,11 +1977,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Pivot.y
       value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 4836565511559286925, guid: 968ed016ab5788e41bd121e5d63f0e8c,
-        type: 3}
-      propertyPath: m_Name
-      value: TerrainDetailPanel
       objectReference: {fileID: 0}
     - target: {fileID: 2796444565459006277, guid: 968ed016ab5788e41bd121e5d63f0e8c,
         type: 3}
@@ -2576,6 +2575,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2389471163007239017}
     m_Modifications:
+    - target: {fileID: 8133435529080096491, guid: 1504f025bf3ce5e40a3077c9991150e1,
+        type: 3}
+      propertyPath: m_Name
+      value: PercentageBar
+      objectReference: {fileID: 0}
     - target: {fileID: 8133435529080096490, guid: 1504f025bf3ce5e40a3077c9991150e1,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -2681,11 +2685,6 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.5
       objectReference: {fileID: 0}
-    - target: {fileID: 8133435529080096491, guid: 1504f025bf3ce5e40a3077c9991150e1,
-        type: 3}
-      propertyPath: m_Name
-      value: PercentageBar
-      objectReference: {fileID: 0}
     - target: {fileID: 4096305946947106068, guid: 1504f025bf3ce5e40a3077c9991150e1,
         type: 3}
       propertyPath: m_AnchorMax.x
@@ -2723,6 +2722,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 2081285886758793243}
     m_Modifications:
+    - target: {fileID: 4256054586874378573, guid: 1e6520e1f9682db42bf8e9abe63abfa2,
+        type: 3}
+      propertyPath: m_Name
+      value: ActionsList
+      objectReference: {fileID: 0}
     - target: {fileID: 3871324239059157917, guid: 1e6520e1f9682db42bf8e9abe63abfa2,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -2827,11 +2831,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Pivot.y
       value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 4256054586874378573, guid: 1e6520e1f9682db42bf8e9abe63abfa2,
-        type: 3}
-      propertyPath: m_Name
-      value: ActionsList
       objectReference: {fileID: 0}
     - target: {fileID: 8186808133993980509, guid: 1e6520e1f9682db42bf8e9abe63abfa2,
         type: 3}
