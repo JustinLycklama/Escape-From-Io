@@ -15,6 +15,10 @@ public class ActionsList : MonoBehaviour {
         SetActions(new UserAction[] { });
     }
 
+    private void Start() {
+        actionCell1.SetHotKey(KeyCode.E);
+    }
+
     public void SetActions(UserAction[] actions) {
 
         for(int i = 0; i < actionCellList.Length; i++) {

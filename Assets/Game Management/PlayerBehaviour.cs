@@ -6,11 +6,16 @@ public interface PlayerBehaviourUpdateDelegate {
     void PauseStateUpdated(bool paused);
 }
 
+public interface HotkeyDelegate {
+    void HotKeyPressed(KeyCode key);
+}
+
 public class PlayerBehaviour : MonoBehaviour {
     float cameraMovementSpeed = 200;
     float cameraRotateSpeed = 100;
 
     Rect UIRect;
+    SettingsPanel settingsPanel;
 
     public static Color tintColor = new Color(0, 1, 1);
 
@@ -24,24 +29,21 @@ public class PlayerBehaviour : MonoBehaviour {
 
         Vector2 size = Vector2.Scale(localRect.rect.size, transform.lossyScale);
         UIRect = new Rect((Vector2)localRect.transform.position - (size * 0.5f), size);
+
+        settingsPanel = Script.Get<SettingsPanel>();
     }
 
     // Update is called once per frame
     void Update() {
-        MoveCamera();
+        CheckButtonInput();
 
         Vector2 mousePos = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
         if(!UIRect.Contains(mousePos)) {
             SelectGameObject();
         }
-
-        if(Input.GetKey("escape")) {
-            SettingsPanel settingsPanel = Script.Get<SettingsPanel>();
-            settingsPanel.ButtonDidClick(settingsPanel.settingsButton);
-        }
     }
 
-    void MoveCamera() {
+    void CheckButtonInput() {
 
         var cameraForward = Camera.main.transform.forward;
         cameraForward.y = 0f;
@@ -51,6 +53,7 @@ public class PlayerBehaviour : MonoBehaviour {
         cameraForward.y = 0f;
         cameraForward.Normalize();
 
+        // Camera Move
         if(Input.GetKey(KeyCode.D)) {
             Camera.main.transform.Translate(cameraRight * cameraMovementSpeed * Time.deltaTime, Space.World);
         }
@@ -64,12 +67,51 @@ public class PlayerBehaviour : MonoBehaviour {
             Camera.main.transform.Translate(cameraForward * cameraMovementSpeed * Time.deltaTime, Space.World);
         }
 
+        // Camera Rotate
         if(Input.GetKey(KeyCode.RightArrow)) {
             Camera.main.transform.Rotate(new Vector3(0, cameraRotateSpeed * Time.deltaTime, 0), Space.World);
         }
 
         if(Input.GetKey(KeyCode.LeftArrow)) {
             Camera.main.transform.Rotate(new Vector3(0, -cameraRotateSpeed * Time.deltaTime, 0), Space.World);
+        }
+
+        // Hotkeys
+        if(Input.GetKeyUp("escape")) {
+            settingsPanel = Script.Get<SettingsPanel>();
+        }
+
+        if(Input.GetKeyUp(KeyCode.Space)) {
+            SetPauseState(!gamePaused);
+        }
+
+        foreach(KeyCode vKey in System.Enum.GetValues(typeof(KeyCode))) {
+            if(Input.GetKeyUp(vKey) && hotKeyListMap.ContainsKey(vKey)) {
+                foreach(HotkeyDelegate keyDelegate in hotKeyListMap[vKey]) {
+                    keyDelegate.HotKeyPressed(vKey);
+                }
+            }
+        }
+    }
+
+    /*
+     * HotkeyDelegate Interface
+     * */
+
+    private Dictionary<KeyCode, List<HotkeyDelegate>> hotKeyListMap = new Dictionary<KeyCode, List<HotkeyDelegate>>();
+
+    public void AddHotKeyDelegate(KeyCode key, HotkeyDelegate keyDelegate) {
+        if(!hotKeyListMap.ContainsKey(key)) {
+            hotKeyListMap[key] = new List<HotkeyDelegate>();
+        }
+
+        List<HotkeyDelegate> list = hotKeyListMap[key];
+        list.Add(keyDelegate);
+    }
+    
+    public void RemoveHotKeyDelegate(HotkeyDelegate keyDelegate) {
+        foreach(List<HotkeyDelegate> delegateList in hotKeyListMap.Values) {
+            delegateList.Remove(keyDelegate);
         }
     }
 

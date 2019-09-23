@@ -345,6 +345,10 @@ public class MapGenerator : MonoBehaviour {
         return cachedMapContainer.Value[mapCoordinate.xAverageSample, mapCoordinate.yAverageSample];
     }
 
+    private void ResetCachedMap() {
+        cachedMapContainer = new KeyValuePair<MapContainer, float[,]>();        
+    }
+
     public TerrainType GetTerrainAtAbsoluteXY(int x, int y) {
         return terrainMap[x, y];
     }
@@ -430,6 +434,8 @@ public class MapGenerator : MonoBehaviour {
 
         float[,] finalSubsetNoiseMap = GetNoiseSubsetForMap(mapContainer).finalNoiseMap;
         ResetResourcePool();
+
+        ResetCachedMap();
 
         return finalSubsetNoiseMap;
     }

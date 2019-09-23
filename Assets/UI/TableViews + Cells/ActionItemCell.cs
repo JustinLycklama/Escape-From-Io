@@ -15,9 +15,10 @@ public class UserAction {
     public ConstructionBlueprint[] blueprintList;
 }
 
-public class ActionItemCell : Clickable {
+public class ActionItemCell : Clickable, HotkeyDelegate {
     public Text actionItemTitle;
     UserAction action;
+    KeyCode? hotkey;
 
     const string defaultText = " - ";
 
@@ -30,11 +31,34 @@ public class ActionItemCell : Clickable {
     public void SetAction(UserAction action) {
         this.action = action;
 
-        if (action == null) {
+        UpdateText();
+    }
+
+    public void SetHotKey(KeyCode hotkey) {
+        PlayerBehaviour playerBehaviour = Script.Get<PlayerBehaviour>();
+
+        if(this.hotkey != null) {
+            playerBehaviour.RemoveHotKeyDelegate(this);
+        }
+
+        this.hotkey = hotkey;
+        playerBehaviour.AddHotKeyDelegate(hotkey, this);
+
+        UpdateText();
+    }
+
+    private void UpdateText() {
+        string hotkeyText = "";
+
+        if (hotkey != null) {
+            hotkeyText = " (" + hotkey.ToString() + ")";
+        }
+
+        if(action == null) {
             actionItemTitle.text = defaultText;
         } else {
-            actionItemTitle.text = action.description;
-        }   
+            actionItemTitle.text = action.description + hotkeyText;
+        }
     }
 
     /*
@@ -53,5 +77,9 @@ public class ActionItemCell : Clickable {
             BlueprintPanel blueprintPanel = Script.Get<UIManager>().Push(UIManager.Blueprint.BlueprintPanel) as BlueprintPanel;
             blueprintPanel.SetData(action.description, action.blueprintList, action.layoutCoordinate);
         }
+    }
+
+    public void HotKeyPressed(KeyCode vKey) {
+        DidClick();
     }
 }

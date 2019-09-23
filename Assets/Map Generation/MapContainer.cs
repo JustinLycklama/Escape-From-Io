@@ -674,6 +674,22 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         }
     }
 
+    public override bool Equals(object obj) {
+        var container = obj as MapContainer;
+        return container != null &&
+               base.Equals(obj) &&
+               mapX == container.mapX &&
+               mapY == container.mapY;
+    }
+
+    public override int GetHashCode() {
+        var hashCode = -820503359;
+        hashCode = hashCode * -1521134295 + base.GetHashCode();
+        hashCode = hashCode * -1521134295 + mapX.GetHashCode();
+        hashCode = hashCode * -1521134295 + mapY.GetHashCode();
+        return hashCode;
+    }
+
     //private void OnDrawGizmos() {
     //    if (boxColliderArray == null) {
     //        return;
