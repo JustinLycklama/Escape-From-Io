@@ -308,10 +308,10 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
 
                 Unit[] allUnits = unitManager.GetAllUnits();
 
-                Unit[] unitsWithAccessableTasks = allUnits.Where(u => (u.canTakeTaskFromUnit &&
+                Unit[] unitsWithAccessableTasks = allUnits.Where(u => u.canTakeTaskFromUnit &&
 
                 // Check all units who have tasks of our type, or tasks where the type is unlocked
-                u.currentMasterTask.actionType == localRequestingUnit.primaryActionType) || (u.currentMasterTask != null && taskListLockMap[u.currentMasterTask.actionType] == false)).ToArray();
+                ((u.currentMasterTask.actionType == localRequestingUnit.primaryActionType) || (u.currentMasterTask != null && taskListLockMap[u.currentMasterTask.actionType] == false))).ToArray();
 
                 int waitForRequests = 0;
 
@@ -326,6 +326,10 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
 
                     if( unitAndRefused.refuseStealTaskList.Contains(localPerformingUnit.currentMasterTask.taskNumber)) {
                         continue;
+                    }
+
+                    if (localPerformingUnit.takeableTask.pathRequestTargetType == PathRequestTargetType.Unknown) {
+                        print("should never happen");
                     }
 
                     waitForRequests++;
