@@ -697,24 +697,43 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
             }));
 
         public static Blueprint AdvancedMiner = new Blueprint("AdvancedMiner", typeof(AdvancedMiner), "MinerIcon", "Adv. Miner",
-            new BlueprintCost(new Dictionary<MineralType, int>(){                
+            new BlueprintCost(new Dictionary<MineralType, int>(){
                 { MineralType.Silver, 2 },
                 { MineralType.Gold, 1 }
-            }));
+            }),
+            (LayoutCoordinate layoutCoordinate) => {
+                return Script.Get<BuildingManager>().IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(AdvUnitBuilding));                
+            },
+            "Build Adjacent to " + Building.Blueprint.AdvUnitBuilding.label            
+            );
 
         public static Blueprint AdvancedMover = new Blueprint("AdvancedMover", typeof(AdvancedMover), "MoverIcon", "Adv. Mover",
             new BlueprintCost(new Dictionary<MineralType, int>(){
                 { MineralType.Silver, 2 },
                 { MineralType.Gold, 1 }
-            }));
+            }),
+            (LayoutCoordinate layoutCoordinate) => {
+                return Script.Get<BuildingManager>().IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(AdvUnitBuilding));
+            },
+            "Build Adjacent to " + Building.Blueprint.AdvUnitBuilding.label
+            );
 
         public static Blueprint AdvancedBuilder = new Blueprint("AdvancedBuilder", typeof(AdvancedBuilder), "BuilderIcon", "Adv. Builder",
             new BlueprintCost(new Dictionary<MineralType, int>(){                
                 { MineralType.Silver, 2 },
                 { MineralType.Gold, 1 }
-            }));
+            }),
+            (LayoutCoordinate layoutCoordinate) => {
+                return Script.Get<BuildingManager>().IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(AdvUnitBuilding));
+            },
+            "Build Adjacent to " + Building.Blueprint.AdvUnitBuilding.label
+            );
 
         public Blueprint(string fileName, Type type, string iconName, string label, BlueprintCost cost) : base(folder + fileName, type, iconName, label, cost) { }
+
+        public Blueprint(string fileName, Type type, string iconName, string label, BlueprintCost cost, Func<LayoutCoordinate, bool> requirementsMet, string notMetString) : 
+            base(folder + fileName, type, iconName, label, cost, requirementsMet, notMetString) { }
+
 
         public override GameObject ConstructAt(LayoutCoordinate layoutCoordinate) {
             UnitManager unitManager = Script.Get<UnitManager>();

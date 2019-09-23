@@ -186,9 +186,14 @@ public abstract class ConstructionBlueprint : PrefabBlueprint {
 
     public Sprite iconImage;
 
-    public ConstructionBlueprint(string fileName, Type type, string iconName, string label, BlueprintCost cost) : base(fileName, type) {
+    public Func<LayoutCoordinate, bool> requirementsMet;
+    public string requirementsNotMetString;
+
+    public ConstructionBlueprint(string fileName, Type type, string iconName, string label, BlueprintCost cost, Func<LayoutCoordinate, bool> requirementsMet = null, string requirementsNotMetString = null) : base(fileName, type) {
         this.label = label;
         this.cost = cost;
+        this.requirementsMet = requirementsMet;
+        this.requirementsNotMetString = requirementsNotMetString;
 
         iconImage = Resources.Load<Sprite>(iconFolder + iconName);
     }

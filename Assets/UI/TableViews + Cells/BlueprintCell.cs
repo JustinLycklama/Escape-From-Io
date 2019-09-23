@@ -10,6 +10,10 @@ public class BlueprintCell : MonoBehaviour, IPointerClickHandler {
     public Text labelText;
     public CostPanel costPanel;
 
+    public CanvasGroup canvasGroup;
+    public Text disabledText;
+    private bool disabled = false;
+
     private ConstructionBlueprint blueprint;
     private LayoutCoordinate blueprintLayoutCoordinate;
 
@@ -19,6 +23,14 @@ public class BlueprintCell : MonoBehaviour, IPointerClickHandler {
 
         this.blueprint = blueprint;
         this.blueprintLayoutCoordinate = blueprintLayoutCoordinate;
+
+        if (blueprint.requirementsMet != null && !blueprint.requirementsMet(blueprintLayoutCoordinate)) {
+            canvasGroup.alpha = 0.5f;
+            disabledText.text = blueprint.requirementsNotMetString;
+            disabled = true;
+        } else {
+            disabledText.gameObject.SetActive(false);
+        }
     }
 
     /*
@@ -26,6 +38,10 @@ public class BlueprintCell : MonoBehaviour, IPointerClickHandler {
      * */
 
     public void OnPointerClick(PointerEventData eventData) {
+        if (disabled) {
+            return;
+        }
+
         blueprint.ConstructAt(blueprintLayoutCoordinate);
         Script.Get<UIManager>().PopToRoot();
     }

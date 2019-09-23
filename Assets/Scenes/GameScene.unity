@@ -906,14 +906,11 @@ MonoBehaviour:
     - type: 1
       chance: 2
       maxNumberGenerated: 2
-    - type: 2
-      chance: 1
-      maxNumberGenerated: 1
   - name: Rock
     type: 7
     regionType: 0
     mutatorNoiseBase: 0.55
-    mutatorNoiseMax: 0.7
+    mutatorNoiseMax: 0.65
     walkable: 0
     buildable: 0
     walkSpeedMultiplier: 0
@@ -923,17 +920,17 @@ MonoBehaviour:
     mineralChances:
     - type: 0
       chance: 6
-      maxNumberGenerated: 2
+      maxNumberGenerated: 3
     - type: 1
       chance: 5
       maxNumberGenerated: 3
     - type: 2
-      chance: 2
-      maxNumberGenerated: 1
+      chance: 3
+      maxNumberGenerated: 2
   - name: Hard Rock
     type: 8
     regionType: 0
-    mutatorNoiseBase: 0.7
+    mutatorNoiseBase: 0.65
     mutatorNoiseMax: 1
     walkable: 0
     buildable: 0
@@ -946,11 +943,11 @@ MonoBehaviour:
       chance: 6
       maxNumberGenerated: 2
     - type: 1
-      chance: 2
+      chance: 3
       maxNumberGenerated: 2
     - type: 2
-      chance: 3
-      maxNumberGenerated: 3
+      chance: 5
+      maxNumberGenerated: 2
   - name: Alunar Rock
     type: 10
     regionType: 0

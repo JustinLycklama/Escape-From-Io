@@ -111,12 +111,12 @@ public class SensorTower : Building, TerrainUpdateDelegate {
             return rotating == false;
         });
 
+        rotating = true;
         StartCoroutine(Rotate(angles, duration));
     }
 
     bool rotating;
     private IEnumerator Rotate(Vector3 angles, float duration) {
-        rotating = true;
 
         Quaternion startRotation = towerObject.transform.rotation;
         Quaternion endRotation = Quaternion.Euler(angles);

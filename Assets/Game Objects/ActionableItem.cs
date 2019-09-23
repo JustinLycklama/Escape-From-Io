@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public abstract class ActionableItem : MonoBehaviour, TaskStatusNotifiable {
+public abstract class ActionableItem : MonoBehaviour, TaskStatusNotifiable, MasterTaskUpdateDelegate {
     public abstract string description { get; }
 
     // taskAlreadyDictated is used when a task is about to be assoctaed with this object, 
@@ -60,5 +60,19 @@ public abstract class ActionableItem : MonoBehaviour, TaskStatusNotifiable {
         foreach(TaskStatusUpdateDelegate updateDelegate in taskStatusDelegateList) {
             updateDelegate.NowPerformingTask(null, associatedTask, null);
         }
+    }
+
+    /*
+     * MasterTaskUpdateDelegate Interface
+     * */
+
+    public void RepeatCountUpdated(MasterGameTask masterGameTask, int count) {
+    }
+
+    public void TaskCancelled(MasterGameTask masterGameTask) {
+        throw new System.NotImplementedException();
+    }
+
+    public void TaskFinished(MasterGameTask masterGameTask) {
     }
 }

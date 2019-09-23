@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using System;
 
 public interface BuildingsUpdateDelegate {
     void NewBuildingStarted(Building building);
@@ -46,6 +47,20 @@ public class BuildingManager : MonoBehaviour {
         }
 
         return null;
+    }
+
+    public bool IsLayoutCoordinateAdjacentToBuilding(LayoutCoordinate layoutCoordinate, Type buildingType) {
+        foreach(LayoutCoordinate adjCoordinate in layoutCoordinate.AdjacentCoordinates()) {
+            if (locationBuildingMap.ContainsKey(adjCoordinate)) {
+
+                Building building = locationBuildingMap[adjCoordinate];
+                if(building.buildingComplete && building.GetType() == buildingType) {
+                    return true;
+                }                
+            }
+        }
+
+        return false;
     }
 
     public void BuildAt(Building building, LayoutCoordinate layoutCoordinate, BlueprintCost cost, bool asLastPriority) {

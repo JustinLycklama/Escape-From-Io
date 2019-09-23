@@ -30,6 +30,66 @@ public struct LayoutCoordinate {
         this.mapContainer = mapContainer;
     }
 
+    public LayoutCoordinate[] AdjacentCoordinates() {
+        Constants constants = Script.Get<Constants>();
+        MapsManager mapsManager = Script.Get<MapsManager>();
+
+        List<LayoutCoordinate> layourCoordinateList = new List<LayoutCoordinate>();
+
+        int startX = mapContainer.mapX * constants.layoutMapWidth;
+        int startY = mapContainer.mapY * constants.layoutMapHeight;
+
+        int posX = startX + x;
+        int posY = startY + y;
+
+        // Left
+        if(posX > 0) {
+            int mapX = Mathf.FloorToInt((posX - 1) / constants.layoutMapWidth);
+            int mapY = Mathf.FloorToInt(posY / constants.layoutMapWidth);
+
+
+            layourCoordinateList.Add(new LayoutCoordinate(
+                posX - 1 - mapX * constants.layoutMapWidth, 
+                posY - mapY * constants.layoutMapHeight, 
+                mapsManager.mapContainer2d[mapX, mapY]));
+        }
+
+        // Right
+        if (posX < constants.layoutMapWidth * constants.mapCountX - 1) {
+            int mapX = Mathf.FloorToInt((posX + 1) / constants.layoutMapWidth);
+            int mapY = Mathf.FloorToInt(posY / constants.layoutMapWidth);
+
+            layourCoordinateList.Add(new LayoutCoordinate(
+                  posX + 1 - mapX * constants.layoutMapWidth,
+                  posY - mapY * constants.layoutMapHeight,
+                  mapsManager.mapContainer2d[mapX, mapY]));
+        }
+
+        // Left
+        if(posY > 0) {
+            int mapX = Mathf.FloorToInt(posX / constants.layoutMapWidth);
+            int mapY = Mathf.FloorToInt((posY - 1) / constants.layoutMapWidth);
+
+            layourCoordinateList.Add(new LayoutCoordinate(
+                  posX - mapX * constants.layoutMapWidth,
+                  posY - 1 - mapY * constants.layoutMapHeight,
+                  mapsManager.mapContainer2d[mapX, mapY]));
+        }
+
+        // Right
+        if(posY < constants.layoutMapHeight * constants.mapCountY - 1) {
+            int mapX = Mathf.FloorToInt(posX / constants.layoutMapWidth);
+            int mapY = Mathf.FloorToInt((posY + 1) / constants.layoutMapWidth);
+
+            layourCoordinateList.Add(new LayoutCoordinate(
+                  posX - mapX * constants.layoutMapWidth,
+                  posY + 1 - mapY * constants.layoutMapHeight,
+                  mapsManager.mapContainer2d[mapX, mapY]));
+        }
+
+        return layourCoordinateList.ToArray();
+    }
+
     public override bool Equals(object obj) {
         if(!(obj is LayoutCoordinate)) {
             return false;

@@ -16,6 +16,7 @@ public class PathFinding : MonoBehaviour {
         grid = GetComponent<PathfindingGrid>();
     }
 
+    // Since this is associated an ore to a future task, this cannot be done just as a check, must be done when unit is actually moving to task
     public void FindSimplifiedPathToClosestGoal(Vector3 startPos, int movementPenaltyMultiplier, MineralType gatherGoal, Action<LookPoint[], ActionableItem, bool, int> callback) {
         GameResourceManager resourceManager = Script.Get<GameResourceManager>();
         Ore[] allOreInGame = resourceManager.GetAllAvailableOfType(gatherGoal);
@@ -43,7 +44,7 @@ public class PathFinding : MonoBehaviour {
                 if(completedCalls == allOreInGame.Length) {
                     bool anyPathSuccess = (foundPath != null && foundPath.Length > 0);
 
-                    // Give the found object the flag that a task will soon be assiated
+                    // Give the found object the flag that a task will soon be associated
                     foundObject.taskAlreadyDictated = true;
 
                     int totalDistance = 0;

@@ -214,7 +214,8 @@ public class TerrainManager : MonoBehaviour {
                     buildingAction.description = "Build Building";
                     buildingAction.layoutCoordinate = coordinate;
 
-                    buildingAction.blueprintList = new ConstructionBlueprint[] { Building.Blueprint.Tower, Building.Blueprint.SensorTower, Building.Blueprint.StationShip }; //Building.Blueprint.Refinery,
+                    buildingAction.blueprintList = new ConstructionBlueprint[] { Building.Blueprint.Tower, Building.Blueprint.SensorTower, Building.Blueprint.AdvUnitBuilding,
+                        Building.Blueprint.StationShip }; //Building.Blueprint.Refinery,
 
                     actionList.Add(buildingAction);
                 }

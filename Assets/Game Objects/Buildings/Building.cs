@@ -53,6 +53,8 @@ public abstract class Building : ActionableItem, Selectable {
     public abstract string title { get; }
     protected abstract float constructionModifierSpeed { get; }
 
+    public bool buildingComplete = false;
+
     // Building status
     private float percentComplete = 0;
     private Dictionary<GameTask, float> percentPerTask;
@@ -197,8 +199,9 @@ public abstract class Building : ActionableItem, Selectable {
         if (costPanel != null && costPanel.isActiveAndEnabled) {
             costPanel.gameObject.SetActive(false);
             costPanel.transform.SetParent(null);
-        }        
+        }
 
+        buildingComplete = true;
         CompleteBuilding();
 
         BuildingManager buildingManager = Script.Get<BuildingManager>();
@@ -299,7 +302,14 @@ public abstract class Building : ActionableItem, Selectable {
 
         public static Blueprint SensorTower = new Blueprint("SensorTower", typeof(SensorTower), "TowerIcon", "Azure Sensor",
             new BlueprintCost(new Dictionary<MineralType, int>(){
-                { MineralType.Copper, 1 }
+                { MineralType.Copper, 2 },                                
+                { MineralType.Gold, 1 }
+            }));
+
+        public static Blueprint AdvUnitBuilding = new Blueprint("AdvUnitBuilding", typeof(AdvUnitBuilding), "TowerIcon", "Adv. Units Building",
+            new BlueprintCost(new Dictionary<MineralType, int>(){
+                { MineralType.Silver, 5 },                                
+                { MineralType.Azure, 2 }
             }));
 
         public static Blueprint Refinery = new Blueprint("Refinery", typeof(Refinery), "MinerIcon", "Refinery",
@@ -310,9 +320,9 @@ public abstract class Building : ActionableItem, Selectable {
 
         public static Blueprint StationShip = new Blueprint("StationShip", typeof(StationShip), "ShipIcon", "Interplanetary Ship",
             new BlueprintCost(new Dictionary<MineralType, int>(){
-                { MineralType.Silver, 20 },
-                { MineralType.Gold, 15 },
-                { MineralType.Azure, 8 }
+                { MineralType.Silver, 15 },
+                { MineralType.Gold, 12 },
+                { MineralType.Azure, 10 }
             }),
             true); // As last priority
 
