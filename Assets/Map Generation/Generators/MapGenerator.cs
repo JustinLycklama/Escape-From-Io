@@ -369,7 +369,20 @@ public class MapGenerator : MonoBehaviour {
         int startX = layoutCoordinate.mapContainer.mapX * constants.layoutMapWidth;
         int startY = layoutCoordinate.mapContainer.mapY * constants.layoutMapHeight;
 
-        terrainMap[startX + layoutCoordinate.x, startY + layoutCoordinate.y] = terrainType;
+        int posX = startX + layoutCoordinate.x;
+        int posY = startY + layoutCoordinate.y;
+
+        if (terrainMap[posX, posY].type == TerrainType.Type.AlunarRock) {
+            for(int i = 0; i < listOfLunarLocations.Count; i++) {
+                KeyValuePair<int, int> pair = listOfLunarLocations[i];
+                if (pair.Key == posX && pair.Value == posY) {
+                    listOfLunarLocations.RemoveAt(i);
+                    break;
+                }
+            }
+        }
+
+        terrainMap[posX, posY] = terrainType;        
     }
 
     /*
@@ -457,6 +470,8 @@ public class MapGenerator : MonoBehaviour {
         }
     }
 
+    public List<KeyValuePair<int, int>> listOfLunarLocations = new List<KeyValuePair<int, int>>();
+
     // Returns a 2d array of terrainTypes
     public TerrainType[,] PlateauMap(float[,] map) {
         int mapWidth = map.GetLength(0);
@@ -464,7 +479,6 @@ public class MapGenerator : MonoBehaviour {
 
         TerrainType[,] terrainMap = new TerrainType[map.GetLength(0), map.GetLength(1)];
         TerrainManager terrainManager = Script.Get<TerrainManager>();
-
 
         MutatorCoordinateValues[] coordinateValues = new MutatorCoordinateValues[maxSavedCoordinateValues];
 
@@ -495,6 +509,7 @@ public class MapGenerator : MonoBehaviour {
             }
 
             terrainMap[values.x, values.y] = terrainManager.terrainTypeMap[TerrainType.Type.AlunarRock];
+            listOfLunarLocations.Add(new KeyValuePair<int, int>(values.x, values.y));
         }
 
         return terrainMap;

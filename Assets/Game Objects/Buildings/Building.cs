@@ -297,6 +297,11 @@ public abstract class Building : ActionableItem, Selectable {
                 { MineralType.Copper, 3 }                
             }));
 
+        public static Blueprint SensorTower = new Blueprint("SensorTower", typeof(SensorTower), "TowerIcon", "Azure Sensor",
+            new BlueprintCost(new Dictionary<MineralType, int>(){
+                { MineralType.Copper, 1 }
+            }));
+
         public static Blueprint Refinery = new Blueprint("Refinery", typeof(Refinery), "MinerIcon", "Refinery",
             new BlueprintCost(new Dictionary<MineralType, int>(){
                 { MineralType.Copper, 3 },

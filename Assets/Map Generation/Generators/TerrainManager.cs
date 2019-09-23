@@ -142,7 +142,7 @@ public class TerrainManager : MonoBehaviour {
     
         switch(terrainType.regionType) {
             case RegionType.Type.Water:
-                if(terraformable.Value.type == TerrainType.Type.Mud) {
+                /*if(terraformable.Value.type == TerrainType.Type.Mud) {
 
                     UserAction action = new UserAction();
 
@@ -154,7 +154,7 @@ public class TerrainManager : MonoBehaviour {
                     };
 
                     actionList.Add(action);
-                }
+                }*/
 
                 break;
             case RegionType.Type.Land:
@@ -214,7 +214,7 @@ public class TerrainManager : MonoBehaviour {
                     buildingAction.description = "Build Building";
                     buildingAction.layoutCoordinate = coordinate;
 
-                    buildingAction.blueprintList = new ConstructionBlueprint[] { Building.Blueprint.Tower, Building.Blueprint.StationShip }; //Building.Blueprint.Refinery,
+                    buildingAction.blueprintList = new ConstructionBlueprint[] { Building.Blueprint.Tower, Building.Blueprint.SensorTower, Building.Blueprint.StationShip }; //Building.Blueprint.Refinery,
 
                     actionList.Add(buildingAction);
                 }
