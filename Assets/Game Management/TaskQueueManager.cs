@@ -209,11 +209,14 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
     class UnitAndRefused {
         public Unit unit;
         public HashSet<int> refuseTaskList;
+        public HashSet<int> refuseStealTaskList;
+
         public Action<MasterGameTask> callback;
 
         public UnitAndRefused(Unit unit, HashSet<int> refuseTaskList, Action<MasterGameTask> callback) {
             this.unit = unit;
             this.refuseTaskList = refuseTaskList ?? new HashSet<int>();
+            refuseStealTaskList = new HashSet<int>();
             this.callback = callback;
         }
     }
@@ -321,7 +324,7 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
                         continue;
                     }
 
-                    if( unitAndRefused.refuseTaskList.Contains(localPerformingUnit.currentMasterTask.taskNumber)) {
+                    if( unitAndRefused.refuseStealTaskList.Contains(localPerformingUnit.currentMasterTask.taskNumber)) {
                         continue;
                     }
 
@@ -335,7 +338,7 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
                         if (distanceForUnit / unitDistanceLeft < 0.75f) {
                             takeTaskAttemptList.Add(new DistanceAndTask(localPerformingUnit.currentMasterTask, distanceForUnit, unitAndRefused, localPerformingUnit));
                         } else {
-                            unitAndRefused.refuseTaskList.Add(localPerformingUnit.currentMasterTask.taskNumber);
+                            unitAndRefused.refuseStealTaskList.Add(localPerformingUnit.currentMasterTask.taskNumber);
                         }
 
                         waitForRequests--;
@@ -395,7 +398,7 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
             while (unitDistanceListMap.Count > 0) {
                 List<UnitsDistanceList> unitDistanceListList = unitDistanceListMap.Values.ToList();
 
-                unitDistanceListList.ToList().Sort(delegate (UnitsDistanceList t1, UnitsDistanceList t2) {
+                unitDistanceListList.Sort(delegate (UnitsDistanceList t1, UnitsDistanceList t2) {
                     return t1.shortestTaskDistance.CompareTo(t2.shortestTaskDistance);
                 });
 
