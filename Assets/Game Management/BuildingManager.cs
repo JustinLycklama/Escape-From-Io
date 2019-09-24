@@ -49,12 +49,12 @@ public class BuildingManager : MonoBehaviour {
         return null;
     }
 
-    public bool IsLayoutCoordinateAdjacentToBuilding(LayoutCoordinate layoutCoordinate, Type buildingType) {
+    public bool IsLayoutCoordinateAdjacentToBuilding(LayoutCoordinate layoutCoordinate, Type buildingType, bool requiresComplete = true) {
         foreach(LayoutCoordinate adjCoordinate in layoutCoordinate.AdjacentCoordinates()) {
             if (locationBuildingMap.ContainsKey(adjCoordinate)) {
 
                 Building building = locationBuildingMap[adjCoordinate];
-                if(building.buildingComplete && building.GetType() == buildingType) {
+                if((building.buildingComplete || !requiresComplete) && building.GetType() == buildingType) {
                     return true;
                 }                
             }
@@ -224,7 +224,7 @@ public class BuildingManager : MonoBehaviour {
                     visibilityCasting.Compute((uint)x, (uint)y, building.BuildingStatusRange());
                     */
 
-                    EricLippertShadowCast.ComputeFieldOfViewWithShadowCasting(x, y, 5,
+                    EricLippertShadowCast.ComputeFieldOfViewWithShadowCasting(x, y, building.BuildingStatusRange(),
                         delegate (int subX, int subY) {
                             if(subX < 0 || subY < 0 || subX >= width || subY >= height) {
                                 return true;

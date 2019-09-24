@@ -285,50 +285,152 @@ public abstract class Building : ActionableItem, Selectable {
     public class Blueprint : ConstructionBlueprint {
         private static string folder = "Buildings/";
 
-        public static Blueprint PathBuilding = new Blueprint("PathBuilding", typeof(PathBuilding), "TowerIcon", "Path", 
+        public static Blueprint PathBuilding = new Blueprint("PathBuilding", typeof(PathBuilding), "TowerIcon", "Path", "Units move faster along a path.",
             new BlueprintCost(new Dictionary<MineralType, int>(){
                 { MineralType.Copper, 1 }
             }));
 
-        public static Blueprint TerraformLandBuilding = new Blueprint("PathBuilding", typeof(TerraformLandBuilding), "TowerIcon", "Terraform Land",
+        public static Blueprint TerraformLandBuilding = new Blueprint("PathBuilding", typeof(TerraformLandBuilding), "TowerIcon", "Terraform Land", "Create a path over water.",
             new BlueprintCost(new Dictionary<MineralType, int>(){
                 { MineralType.Copper, 1 }
             }));
 
-        public static Blueprint Tower = new Blueprint("Tower", typeof(Tower), "TowerIcon", "Light Tower",
+        public static Blueprint Tower = new Blueprint("Tower", typeof(Tower), "TowerIcon", "Light Tower", "Provides vision in all directions until obstructed.",
             new BlueprintCost(new Dictionary<MineralType, int>(){
                 { MineralType.Copper, 3 }                
             }));
 
-        public static Blueprint SensorTower = new Blueprint("SensorTower", typeof(SensorTower), "TowerIcon", "Azure Sensor",
+        public static Blueprint SensorTower = new Blueprint("SensorTower", typeof(SensorTower), "TowerIcon", "Azure Sensor", "Points to the closest Azure vein.",
             new BlueprintCost(new Dictionary<MineralType, int>(){
                 { MineralType.Copper, 2 },                                
                 { MineralType.Gold, 1 }
             }));
 
-        public static Blueprint AdvUnitBuilding = new Blueprint("AdvUnitBuilding", typeof(AdvUnitBuilding), "TowerIcon", "Adv. Units Building",
+        public static Blueprint AdvUnitBuilding = new Blueprint("AdvUnitBuilding", typeof(AdvUnitBuilding), "TowerIcon", "Adv. Units Building", "Advanced units can be built adjacent to this.", 
             new BlueprintCost(new Dictionary<MineralType, int>(){
                 { MineralType.Silver, 5 },                                
                 { MineralType.Azure, 2 }
             }));
 
-        public static Blueprint Refinery = new Blueprint("Refinery", typeof(Refinery), "MinerIcon", "Refinery",
+        public static Blueprint Refinery = new Blueprint("Refinery", typeof(Refinery), "MinerIcon", "Refinery", "",
             new BlueprintCost(new Dictionary<MineralType, int>(){
                 { MineralType.Copper, 3 },
                 { MineralType.Silver, 1 }
             }));
 
-        public static Blueprint StationShip = new Blueprint("StationShip", typeof(StationShip), "ShipIcon", "Interplanetary Ship",
-            new BlueprintCost(new Dictionary<MineralType, int>(){
-                { MineralType.Silver, 15 },
-                { MineralType.Gold, 12 },
-                { MineralType.Azure, 10 }
-            }),
-            true); // As last priority
+        /*
+         * Ship Parts
+         * */
 
         private bool asLastPriority;
 
-        public Blueprint(string fileName, Type type, string iconName, string label, BlueprintCost cost, bool asLastPriority = false) : base(folder+fileName, type, iconName, label, cost) { this.asLastPriority = asLastPriority; }
+        public static Blueprint StationShip = new Blueprint("StationShip", typeof(StationShip), "ShipIcon", "Ship Frame", "Build components adjacent to Frame.",
+            new BlueprintCost(new Dictionary<MineralType, int>(){
+                { MineralType.Copper, 8 },
+                { MineralType.Silver, 4 },
+                { MineralType.Azure, 2 }
+            }),
+            (LayoutCoordinate layoutCoordinate) => {
+                LayoutCoordinate[] adjCoordinates = layoutCoordinate.AdjacentCoordinates();
+                if (adjCoordinates.Length != 4) {
+                    return false;
+                }
+
+                MapGenerator mapGenerator = Script.Get<MapGenerator>();
+                foreach(LayoutCoordinate coordinate in adjCoordinates) {
+                    if(!mapGenerator.GetTerrainAt(coordinate).buildable) {
+                        return false;
+                    }
+                }
+
+                return true;                
+            },
+            "All Four Coordinates around Frame must be Buildable.",
+            true); // As last priority
+
+        public static Blueprint Thrusters = new Blueprint("ShipThrusters", typeof(ShipThrusters), "ShipIcon", "Ship Thrusters", "Once built, ALL units move 33% faster.",
+           new BlueprintCost(new Dictionary<MineralType, int>(){
+                { MineralType.Silver, 4 },
+                { MineralType.Gold, 3 },
+                { MineralType.Azure, 2 }
+           }),           
+            (LayoutCoordinate layoutCoordinate) => {
+                if (ShipThrusters.count > 0) {
+                    return false;
+                }
+
+                return Script.Get<BuildingManager>().IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(StationShip));
+            },
+            "Only 1.\nBuild Adjacent to " + Building.Blueprint.StationShip.label,
+            true); // As last priority
+
+        public static Blueprint Reactor = new Blueprint("ShipReactor", typeof(ShipReactor), "ShipIcon", "Ship Reactor", "Once built, ALL units get duration +60s.",
+           new BlueprintCost(new Dictionary<MineralType, int>(){
+                { MineralType.Silver, 4 },
+                { MineralType.Gold, 3 },
+                { MineralType.Azure, 2 }
+           }),
+            (LayoutCoordinate layoutCoordinate) => {
+                if(ShipReactor.count > 0) {
+                    return false;
+                }
+
+                return Script.Get<BuildingManager>().IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(StationShip));
+            },
+            "Only 1.\nBuild Adjacent to " + Building.Blueprint.StationShip.label,
+            true); // As last priority
+
+        public static Blueprint Machining = new Blueprint("ShipMachining", typeof(ShipMachining), "ShipIcon", "Ship Machining", "Once built, ALL units act 33% faster.",
+           new BlueprintCost(new Dictionary<MineralType, int>(){
+                { MineralType.Silver, 4 },
+                { MineralType.Gold, 3 },
+                { MineralType.Azure, 2 }
+           }),
+            (LayoutCoordinate layoutCoordinate) => {
+                if(ShipMachining.count > 0) {
+                    return false;
+                }
+
+                return Script.Get<BuildingManager>().IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(StationShip));
+            },
+            "Only 1.\nBuild Adjacent to " + Building.Blueprint.StationShip.label,
+            true); // As last priority
+
+        public static Blueprint Telemerty = new Blueprint("ShipTelemetry", typeof(ShipTelemetry), "ShipIcon", "Ship Telemetry", "Once built, Tower vision increased from 3 to 5.",
+           new BlueprintCost(new Dictionary<MineralType, int>(){
+                { MineralType.Silver, 4 },
+                { MineralType.Gold, 3 },
+                { MineralType.Azure, 2 }
+           }),
+            (LayoutCoordinate layoutCoordinate) => {
+                if(ShipTelemetry.count > 0) {
+                    return false;
+                }
+
+                return Script.Get<BuildingManager>().IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(StationShip));
+            },
+            "Only 1.\nBuild Adjacent to " + Building.Blueprint.StationShip.label,
+            true); // As last priority
+
+        /*
+         * Constructors
+         * */
+
+        public Blueprint(string fileName, Type type, string iconName, string label, string description, BlueprintCost cost, bool asLastPriority = false) : 
+            base(folder+fileName, type, iconName, label, description, cost) {
+
+            // We cannot build any buildings next to the ship frame
+            requirementsMet = (LayoutCoordinate layoutCoordinate) => {
+                return !Script.Get<BuildingManager>().IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(StationShip), false);
+            };
+
+            requirementsNotMetString = "Cannot Build Adjacent to Ship Frame";
+
+            this.asLastPriority = asLastPriority;
+        }
+
+        public Blueprint(string fileName, Type type, string iconName, string label, string description,  BlueprintCost cost, Func<LayoutCoordinate, bool> requirementsMet, string notMetString, bool asLastPriority = false) :
+            base(folder + fileName, type, iconName, label, description, cost, requirementsMet, notMetString) { this.asLastPriority = asLastPriority; }
 
         public override GameObject ConstructAt(LayoutCoordinate layoutCoordinate) {
             BuildingManager buildingManager = Script.Get<BuildingManager>();

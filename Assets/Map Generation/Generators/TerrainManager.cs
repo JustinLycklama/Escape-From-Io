@@ -214,10 +214,17 @@ public class TerrainManager : MonoBehaviour {
                     buildingAction.description = "Build Building";
                     buildingAction.layoutCoordinate = coordinate;
 
-                    buildingAction.blueprintList = new ConstructionBlueprint[] { Building.Blueprint.Tower, Building.Blueprint.SensorTower, Building.Blueprint.AdvUnitBuilding,
-                        Building.Blueprint.StationShip }; //Building.Blueprint.Refinery,
+                    buildingAction.blueprintList = new ConstructionBlueprint[] { Building.Blueprint.Tower, Building.Blueprint.SensorTower, Building.Blueprint.AdvUnitBuilding }; //Building.Blueprint.Refinery,
 
                     actionList.Add(buildingAction);
+
+                    UserAction shipAction = new UserAction();
+                    shipAction.description = "Build Ship Parts";
+                    shipAction.layoutCoordinate = coordinate;
+
+                    shipAction.blueprintList = new ConstructionBlueprint[] { Building.Blueprint.StationShip, Building.Blueprint.Thrusters, Building.Blueprint.Reactor, Building.Blueprint.Machining, Building.Blueprint.Telemerty }; //Building.Blueprint.Refinery,
+
+                    actionList.Add(shipAction);
                 }
 
                 break;

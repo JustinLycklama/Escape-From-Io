@@ -87,6 +87,12 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
     public float stoppingDistance;
 
     public int movementPenaltyMultiplier = 1;
+    public float unitSpeed {
+        get {
+            return speed * ResearchSingleton.sharedInstance.unitSpeedMultiplier;
+        }
+    }
+
 
     public Transform oreLocation;
 
@@ -119,7 +125,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
 
     public float remainingMovementCostOnTask {
         get {
-            return movementCostToTask * (1 - currentPercentOfJournery) * speed;
+            return movementCostToTask * (1 - currentPercentOfJournery) * unitSpeed;
         }
     }
 
@@ -128,8 +134,10 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
     GameTask currentGameTask; // The current Game Task we are working on to complete the Master Task
     private HashSet<int> refuseTaskSet; // Set of tasks we aready know we cannot perform
 
-    public static int maxUnitUduration = 480;
+    public static int maxUnitUduration = 600;
     abstract public int duration { get; }
+    public int unitDuration { get { return duration + ResearchSingleton.sharedInstance.unitDurationAddition; } }
+
     public int remainingDuration = maxUnitUduration;
     abstract public MasterGameTask.ActionType primaryActionType { get; }
 
@@ -192,8 +200,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
         unitStatusTooltip.SetTitle(title);
         unitStatusTooltip.SetTask(this, null);
         unitStatusTooltip.DisplayPercentageBar(false);
-        unitStatusTooltip.SetRemainingDuration(duration, (float) duration / (float) maxUnitUduration);
-
+        unitStatusTooltip.SetRemainingDuration(unitDuration, (float)unitDuration / (float) maxUnitUduration);
     }
 
     private void OnDestroy() {
@@ -221,7 +228,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
         title = name.fullName;
 
         // Duration
-        this.remainingDuration = duration;
+        this.remainingDuration = unitDuration;
         Action<int, float> durationUpdateBlock = (remainingTime, percentComplete) => {
             this.remainingDuration = remainingTime;
             float percentOfMaxUnitTime = (float) remainingTime / (float) maxUnitUduration;
@@ -241,7 +248,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
             Shutdown();
         };
 
-        Script.Get<TimeManager>().AddNewTimer(duration, durationUpdateBlock, durationCompletionBlock);
+        Script.Get<TimeManager>().AddNewTimer(unitDuration, durationUpdateBlock, durationCompletionBlock);
         
         // Setup Task Pipeline
         taskQueueManager = Script.Get<TaskQueueManager>();
@@ -432,7 +439,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
 
     IEnumerator PerformTaskAction(Action<bool> callBack) {
 
-        float speed = SpeedForTask(currentMasterTask.actionType);
+        float speed = SpeedForTask(currentMasterTask.actionType) * ResearchSingleton.sharedInstance.unitActionMultiplier;
 
         while (true) {
 
@@ -538,7 +545,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
                 LayoutCoordinate playerLayoutCoordinate = new LayoutCoordinate(playerMapCoordinate);
                 TerrainType currentTerrain = playerLayoutCoordinate.mapContainer.map.GetTerrainAt(playerLayoutCoordinate);          
 
-                float localSpeed = Mathf.Pow(currentTerrain.walkSpeedMultiplier, movementPenaltyMultiplier) * speed;
+                float localSpeed = Mathf.Pow(currentTerrain.walkSpeedMultiplier, movementPenaltyMultiplier) * unitSpeed;
 
                 float height = Script.Get<MapsManager>().GetHeightAt(lookPointMapCoordinate) * lookPointMapCoordinate.mapContainer.transform.lossyScale.y; //  + (0.5f * transform.localScale.y)
                 Vector3 lookPoint = new Vector3(lookPointWorldPos.vector3.x, height, lookPointWorldPos.vector3.z);
@@ -678,25 +685,25 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
     public class Blueprint : ConstructionBlueprint {
         private static string folder = "Units/";
 
-        public static Blueprint Miner = new Blueprint("Miner", typeof(Miner), "MinerIcon", "Miner",
+        public static Blueprint Miner = new Blueprint("Miner", typeof(Miner), "MinerIcon", "Miner", "A basic Mining Automaton.",
             new BlueprintCost(new Dictionary<MineralType, int>(){
                 { MineralType.Copper, 2 },
                 { MineralType.Silver, 2 }                
             }));
 
-        public static Blueprint Mover = new Blueprint("Mover", typeof(Mover), "MoverIcon", "Mover",
+        public static Blueprint Mover = new Blueprint("Mover", typeof(Mover), "MoverIcon", "Mover", "A basic Moving Automaton.",
             new BlueprintCost(new Dictionary<MineralType, int>(){
                 { MineralType.Copper, 3 },
                 { MineralType.Silver, 1 },                
             }));
 
-        public static Blueprint Builder = new Blueprint("Builder", typeof(Builder), "BuilderIcon", "Builder",
+        public static Blueprint Builder = new Blueprint("Builder", typeof(Builder), "BuilderIcon", "Builder", "A basic Building Automaton.",
             new BlueprintCost(new Dictionary<MineralType, int>(){
                 { MineralType.Copper, 2 },
                 { MineralType.Silver, 2 }                
             }));
 
-        public static Blueprint AdvancedMiner = new Blueprint("AdvancedMiner", typeof(AdvancedMiner), "MinerIcon", "Adv. Miner",
+        public static Blueprint AdvancedMiner = new Blueprint("AdvancedMiner", typeof(AdvancedMiner), "MinerIcon", "Adv. Miner", "Faster at Mining than the basic.", 
             new BlueprintCost(new Dictionary<MineralType, int>(){
                 { MineralType.Silver, 2 },
                 { MineralType.Gold, 1 }
@@ -707,7 +714,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
             "Build Adjacent to " + Building.Blueprint.AdvUnitBuilding.label            
             );
 
-        public static Blueprint AdvancedMover = new Blueprint("AdvancedMover", typeof(AdvancedMover), "MoverIcon", "Adv. Mover",
+        public static Blueprint AdvancedMover = new Blueprint("AdvancedMover", typeof(AdvancedMover), "MoverIcon", "Adv. Mover", "Hovering Mover.\nTerrain has no effect on this Unit.",
             new BlueprintCost(new Dictionary<MineralType, int>(){
                 { MineralType.Silver, 2 },
                 { MineralType.Gold, 1 }
@@ -718,7 +725,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
             "Build Adjacent to " + Building.Blueprint.AdvUnitBuilding.label
             );
 
-        public static Blueprint AdvancedBuilder = new Blueprint("AdvancedBuilder", typeof(AdvancedBuilder), "BuilderIcon", "Adv. Builder",
+        public static Blueprint AdvancedBuilder = new Blueprint("AdvancedBuilder", typeof(AdvancedBuilder), "BuilderIcon", "Adv. Builder", "Faster at Building than the basic.",
             new BlueprintCost(new Dictionary<MineralType, int>(){                
                 { MineralType.Silver, 2 },
                 { MineralType.Gold, 1 }
@@ -729,10 +736,10 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
             "Build Adjacent to " + Building.Blueprint.AdvUnitBuilding.label
             );
 
-        public Blueprint(string fileName, Type type, string iconName, string label, BlueprintCost cost) : base(folder + fileName, type, iconName, label, cost) { }
+        public Blueprint(string fileName, Type type, string iconName, string label, string description, BlueprintCost cost) : base(folder + fileName, type, iconName, label, description, cost) { }
 
-        public Blueprint(string fileName, Type type, string iconName, string label, BlueprintCost cost, Func<LayoutCoordinate, bool> requirementsMet, string notMetString) : 
-            base(folder + fileName, type, iconName, label, cost, requirementsMet, notMetString) { }
+        public Blueprint(string fileName, Type type, string iconName, string label, string description, BlueprintCost cost, Func<LayoutCoordinate, bool> requirementsMet, string notMetString) : 
+            base(folder + fileName, type, iconName, label, description, cost, requirementsMet, notMetString) { }
 
 
         public override GameObject ConstructAt(LayoutCoordinate layoutCoordinate) {

@@ -189,8 +189,10 @@ public abstract class ConstructionBlueprint : PrefabBlueprint {
     public Func<LayoutCoordinate, bool> requirementsMet;
     public string requirementsNotMetString;
 
-    public ConstructionBlueprint(string fileName, Type type, string iconName, string label, BlueprintCost cost, Func<LayoutCoordinate, bool> requirementsMet = null, string requirementsNotMetString = null) : base(fileName, type) {
+    public ConstructionBlueprint(string fileName, Type type, string iconName, string label, string description, 
+        BlueprintCost cost, Func<LayoutCoordinate, bool> requirementsMet = null, string requirementsNotMetString = null) : base(fileName, type) {
         this.label = label;
+        this.description = description;
         this.cost = cost;
         this.requirementsMet = requirementsMet;
         this.requirementsNotMetString = requirementsNotMetString;
@@ -200,6 +202,7 @@ public abstract class ConstructionBlueprint : PrefabBlueprint {
 
     public BlueprintCost cost;
     public string label;
+    public string description;
 
     public abstract GameObject ConstructAt(LayoutCoordinate layoutCoordinate);
 }

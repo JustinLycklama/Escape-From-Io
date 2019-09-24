@@ -12,7 +12,7 @@ public class Tower : Building {
     }
 
     public override int BuildingStatusRange() {
-        return 5;
+        return 3 + ResearchSingleton.sharedInstance.visionRadiusAddiiton;
     }
 
     //protected override int requiredOre => 3;

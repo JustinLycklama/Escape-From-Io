@@ -334,10 +334,10 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
 
                     waitForRequests++;
                     PathRequestManager.RequestPathForTask(localRequestingUnit.transform.position, localRequestingUnit.movementPenaltyMultiplier, localPerformingUnit.takeableTask, (LookPoint[] lookPoints, ActionableItem item, bool success, int distance) => {
-                        float distanceForUnit = distance * localRequestingUnit.speed;
+                        float distanceForUnit = distance * localRequestingUnit.unitSpeed;
 
-                        print("Distance For Searching Unit " + distanceForUnit);
-                        print("Distance For Performing Unit " + unitDistanceLeft);
+                        //print("Distance For Searching Unit " + distanceForUnit);
+                        //print("Distance For Performing Unit " + unitDistanceLeft);
 
                         if (distanceForUnit / unitDistanceLeft < 0.75f) {
                             takeTaskAttemptList.Add(new DistanceAndTask(localPerformingUnit.currentMasterTask, distanceForUnit, unitAndRefused, localPerformingUnit));
