@@ -4,8 +4,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
+// Registers for individual action types
 public interface TaskQueueDelegate {
     void NotifyUpdateTaskList(MasterGameTask[] taskList, MasterGameTask.ActionType actionType, TaskQueueManager.ListState listState);
+}
+
+// Registers for all lock status
+public interface TaskLockUpdateDelegate {
+    void NotifyUpdateLockState(MasterGameTask.ActionType actionType, bool locked);
 }
 
 public static class ListStateExtensions {
@@ -49,6 +55,8 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
     Dictionary<MasterGameTask.ActionType, List<MasterGameTask>> taskListMap;
     Dictionary<MasterGameTask.ActionType, List<TaskQueueDelegate>> delegateListMap;
 
+    List<TaskLockUpdateDelegate> lockDelegateList;
+
     void Awake()
     {
         //mineTaskList = new List<MasterGameTask>();
@@ -57,6 +65,8 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
 
         taskListMap = new Dictionary<MasterGameTask.ActionType, List<MasterGameTask>>();
         delegateListMap = new Dictionary<MasterGameTask.ActionType, List<TaskQueueDelegate>>();
+
+        lockDelegateList = new List<TaskLockUpdateDelegate>();
 
         taskListLockMap = new Dictionary<MasterGameTask.ActionType, bool>();
         taskListStateMap = new Dictionary<MasterGameTask.ActionType, ListState>();
@@ -121,10 +131,26 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
         if (!notified) {
             NotifyDelegates(actionType);
         }
+
+        NotifyLockUpdates(actionType);
     }
 
     public bool GetTaskListLockStatus(MasterGameTask.ActionType actionType) {
         return taskListLockMap[actionType];
+    }
+
+    public void RegisterForLockStatusUpdates(TaskLockUpdateDelegate notificationDelegate) {
+        lockDelegateList.Add(notificationDelegate);
+    }
+
+    public void EndLockUpdates(TaskLockUpdateDelegate notificationDelegate) {
+        lockDelegateList.Remove(notificationDelegate);
+    }
+
+    private void NotifyLockUpdates(MasterGameTask.ActionType actionType) {
+        foreach(TaskLockUpdateDelegate notificationDelegate in lockDelegateList) {
+            notificationDelegate.NotifyUpdateLockState(actionType, taskListLockMap[actionType]);
+        }
     }
 
     /*

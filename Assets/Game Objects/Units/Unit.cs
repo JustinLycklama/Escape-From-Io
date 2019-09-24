@@ -65,7 +65,7 @@ public static class UnitStateExtensions {
 }
 
 // Unit is an actionable item when it is being built, other units can take actions on it by dropping resources and building it.
-public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, Followable {
+public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, Followable, TaskLockUpdateDelegate {
 
     public enum UnitState {
         Idle, Efficient, Inefficient
@@ -206,6 +206,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
     private void OnDestroy() {
         try {
             Script.Get<MapsManager>().RemoveTerrainUpdateDelegate(this);
+            taskQueueManager.EndLockUpdates(this);
         } catch(System.NullReferenceException e) { }
     }
 
@@ -252,6 +253,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
         
         // Setup Task Pipeline
         taskQueueManager = Script.Get<TaskQueueManager>();
+        taskQueueManager.RegisterForLockStatusUpdates(this);
 
         completedTaskAction = (pathComplete) => {
             unitStatusTooltip.DisplayPercentageBar(false);
@@ -386,7 +388,6 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
         if(currentMasterTask != null) {
             taskQueueManager.PutBackTask(currentMasterTask);
         }
-
 
         buildableComponent.SetTransparentShaders();
         buildableComponent.SetAlphaSolid();
@@ -675,6 +676,21 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
     public void NotifyAllUserActionsUpdate() {
         foreach(UserActionUpdateDelegate updateDelegate in userActionDelegateList) {
             updateDelegate.UpdateUserActionsAvailable(null);
+        }
+    }
+
+    /*
+     * TaskLockUpdateDelegate Interface
+     * */
+
+    public void NotifyUpdateLockState(MasterGameTask.ActionType actionType, bool locked) {
+        // If we are locking a current list we should not have access to
+        if (locked && currentMasterTask != null && currentMasterTask.actionType == actionType && actionType != primaryActionType) {
+            InterruptInProgressActions();
+
+            taskQueueManager.PutBackTask(currentMasterTask);
+
+            ResetTaskState();
         }
     }
 
