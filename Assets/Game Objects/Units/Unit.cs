@@ -703,20 +703,20 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
 
         public static Blueprint Miner = new Blueprint("Miner", typeof(Miner), "MinerIcon", "Miner", "A basic Mining Automaton.",
             new BlueprintCost(new Dictionary<MineralType, int>(){
-                { MineralType.Copper, 2 },
-                { MineralType.Silver, 2 }                
+                { MineralType.Copper, 3 },
+                { MineralType.Silver, 1 }                
             }));
 
         public static Blueprint Mover = new Blueprint("Mover", typeof(Mover), "MoverIcon", "Mover", "A basic Moving Automaton.",
             new BlueprintCost(new Dictionary<MineralType, int>(){
-                { MineralType.Copper, 3 },
+                { MineralType.Copper, 2 },
                 { MineralType.Silver, 1 },                
             }));
 
         public static Blueprint Builder = new Blueprint("Builder", typeof(Builder), "BuilderIcon", "Builder", "A basic Building Automaton.",
             new BlueprintCost(new Dictionary<MineralType, int>(){
-                { MineralType.Copper, 2 },
-                { MineralType.Silver, 2 }                
+                { MineralType.Copper, 3 },
+                { MineralType.Silver, 1 }                
             }));
 
         public static Blueprint AdvancedMiner = new Blueprint("AdvancedMiner", typeof(AdvancedMiner), "MinerIcon", "Adv. Miner", "Faster at Mining than the basic.", 
@@ -732,7 +732,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
 
         public static Blueprint AdvancedMover = new Blueprint("AdvancedMover", typeof(AdvancedMover), "MoverIcon", "Adv. Mover", "Hovering Mover.\nTerrain has no effect on this Unit.",
             new BlueprintCost(new Dictionary<MineralType, int>(){
-                { MineralType.Silver, 2 },
+                { MineralType.Silver, 1 },
                 { MineralType.Gold, 1 }
             }),
             (LayoutCoordinate layoutCoordinate) => {
