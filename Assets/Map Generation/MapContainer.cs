@@ -346,7 +346,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         float halfTotalHeight = boxSizeZ * height / 2f;
 
         Color materialColor = Color.black;
-        //materialColor.a = 0.15f;
+        materialColor.a = 0f;
 
         for(int x = 0; x < width; x++) {
             for(int y = 0; y < height; y++) {
@@ -357,7 +357,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
 
                     Material material = newCube.GetComponent<MeshRenderer>().material;
 
-                    //SetMaterialTransparent(material);
+                    SetMaterialTransparent(material);
 
                     material.color = materialColor;
                     material.SetFloat("_Metallic", 1);
@@ -469,6 +469,10 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
 
              if(y == constants.layoutMapHeight + 1 && neighbours.bottomRightMap != null) {
                 LayoutCoordinate coordinate = new LayoutCoordinate(0, 0, neighbours.bottomRightMap);
+
+                if (neighbours.bottomRightMap.map == null) {
+                    print("yo");
+                }
 
                 TerrainType terrain = neighbours.bottomRightMap.map.GetTerrainAt(coordinate);
                 textureIndexList[y * mapWidthWithOverhang + x] = texGen.RegionTypeTextureIndex(terrain);

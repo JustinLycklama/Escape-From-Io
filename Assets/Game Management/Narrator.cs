@@ -42,12 +42,13 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate {
         int chunkCount = 4;
 
         for(int chunk = 0; chunk < chunkCount; chunk++) {
+            int localChunk = chunk;
             initActionChunks.Enqueue(() => {
                 int actionsPerChunk = Mathf.RoundToInt(generationStepTwoCount / chunkCount);
                 int stoppingPoint = lastGenerationIteration + actionsPerChunk;
 
                 // on the last chunk, complete all actions regardless of estimation
-                if (chunk == chunkCount - 1) {
+                if (localChunk == chunkCount - 1) {
                     stoppingPoint = generationStepTwoCount;
                 }
 

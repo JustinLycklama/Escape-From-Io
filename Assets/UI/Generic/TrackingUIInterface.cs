@@ -42,7 +42,12 @@ public static class TrackingUIInterfaceExtension {
             trackingInterface.canvasGroup.alpha = 1;
         }
 
-        behaviour.transform.localScale = Vector3.one * (1.0f / (aa - bb).magnitude);
+        float magnitude = (aa - bb).magnitude;
+        if (magnitude == 0) {
+            magnitude = 0.001f;
+        }
+
+        behaviour.transform.localScale = Vector3.one * (1.0f / magnitude);
 
         // Canvas local coordinates are relative to its center, 
         // so we offset by half. We also discard the depth.
@@ -50,9 +55,5 @@ public static class TrackingUIInterfaceExtension {
         screenPoint.z = 0;
 
         behaviour.transform.position = screenPoint;
-
-        if (trackingInterface is MonoBehaviour) {
- 
-        }
     }
 }

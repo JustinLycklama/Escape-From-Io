@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class AdvancedMover : Unit {
-    public override int duration => 240;
+    public override int duration => 360;
     public override MasterGameTask.ActionType primaryActionType => MasterGameTask.ActionType.Move;
 
     public override float SpeedForTask(MasterGameTask.ActionType actionType) {
@@ -13,7 +13,7 @@ public class AdvancedMover : Unit {
             case MasterGameTask.ActionType.Build:
                 return 0.3f;
             case MasterGameTask.ActionType.Move:
-                return 1;
+                return 2;
         }
 
         return 0.1f;

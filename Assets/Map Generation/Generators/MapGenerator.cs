@@ -247,7 +247,7 @@ public class MapGenerator : MonoBehaviour {
         terrainManager.SetGroundMutatorMap(groundMutatorMap);
         terrainManager.SetMounainMutatorMap(mountainMutatorMap);
 
-        terrainMap = PlateauMap(layoutNoiseMap);
+        terrainMap = PlateauMap(layoutNoiseMap, spawnCoordX, spawnCoordY);
 
         /*
          * Generate Details
@@ -473,7 +473,7 @@ public class MapGenerator : MonoBehaviour {
     public List<KeyValuePair<int, int>> listOfLunarLocations = new List<KeyValuePair<int, int>>();
 
     // Returns a 2d array of terrainTypes
-    public TerrainType[,] PlateauMap(float[,] map) {
+    public TerrainType[,] PlateauMap(float[,] map, int spawnX, int spawnY) {
         int mapWidth = map.GetLength(0);
         int mapHeight = map.GetLength(1);
 
@@ -481,6 +481,8 @@ public class MapGenerator : MonoBehaviour {
         TerrainManager terrainManager = Script.Get<TerrainManager>();
 
         MutatorCoordinateValues[] coordinateValues = new MutatorCoordinateValues[maxSavedCoordinateValues];
+
+         Vector2 spawnCoord = new Vector2(spawnX, spawnY);
 
         for(int i = 0; i < maxSavedCoordinateValues; i ++) {
             coordinateValues[i] = new MutatorCoordinateValues(invalidMutatorValue, -1, -1);
@@ -497,8 +499,10 @@ public class MapGenerator : MonoBehaviour {
                 map[x, y] = HeightAtRegion(region);
 
                 if (region.type == RegionType.Type.Mountain && mutatorValue < coordinateValues[maxSavedCoordinateValues - 1].mutator) {
-                    coordinateValues[maxSavedCoordinateValues - 1] = new MutatorCoordinateValues(mutatorValue, x, y);
-                    coordinateValues = coordinateValues.OrderBy(m => m.mutator).ToArray();
+                    if (Vector2.Distance(spawnCoord, new Vector2(x, y)) > 4) {
+                        coordinateValues[maxSavedCoordinateValues - 1] = new MutatorCoordinateValues(mutatorValue, x, y);
+                        coordinateValues = coordinateValues.OrderBy(m => m.mutator).ToArray();
+                    }
                 }                
             }
         }
