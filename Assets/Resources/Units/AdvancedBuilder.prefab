@@ -153,13 +153,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc814e6cc4a467b419bad359cb5b3b91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 80
+  speed: 125
   turnSpeed: 3
   followPathTurnSpeed: 10
   turnDistance: 5
   stoppingDistance: 10
+  movementPenaltyMultiplier: 1
   oreLocation: {fileID: 8694496418313283408}
   statusLocation: {fileID: 8699261290107197277}
+  relativeDistanceToTask: 0
   remainingDuration: 480
   buildableComponent: {fileID: 2802711064574047498}
   followCameraLocation: {fileID: 910008489170447272}
@@ -194,6 +196,7 @@ MonoBehaviour:
     - {fileID: 8495036445915105245}
     aproximateTopPercentage: 1
   statusLocation: {fileID: 7946607379296062907}
+  buildingComplete: 0
   associatedUnit: {fileID: 3606553699785398249}
 --- !u!1 &8527435091751321781
 GameObject:

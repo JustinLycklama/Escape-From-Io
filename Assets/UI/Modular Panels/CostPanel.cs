@@ -12,7 +12,7 @@ public class CostPanel : MonoBehaviour {
 
     private bool tallyMode = false;
     private BlueprintCost cost;
-    private Dictionary<MineralType, int> tallyCountDictionary = new Dictionary<MineralType, int>();
+    protected Dictionary<MineralType, int> tallyCountDictionary = new Dictionary<MineralType, int>();
 
     //private int
 

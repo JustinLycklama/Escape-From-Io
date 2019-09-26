@@ -96,7 +96,7 @@ public struct LayoutCoordinate {
         }
 
         var point = (LayoutCoordinate)obj;
-        return x == point.x && y == point.y;
+        return x == point.x && y == point.y && mapContainer == point.mapContainer;
     }
 
     public override int GetHashCode() {

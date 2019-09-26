@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class StationShip : Building, CanSceneChangeDelegate, BuildingsUpdateDelegate {
+public class StationShip : Building, CanSceneChangeDelegate /*, BuildingsUpdateDelegate*/ {
 
     private bool canSceneChange = false;
 
@@ -22,29 +22,32 @@ public class StationShip : Building, CanSceneChangeDelegate, BuildingsUpdateDele
     }
 
     private void OnDestroy() {
-        Script.Get<BuildingManager>()?.EndBuildingNotifications(this);
+        //Script.Get<BuildingManager>()?.EndBuildingNotifications(this);
     }
 
     protected override void CompleteBuilding() {
-        Script.Get<BuildingManager>().RegisterFoBuildingNotifications(this);
+        CompleteGame();
+
+
+        //Script.Get<BuildingManager>().RegisterFoBuildingNotifications(this);
     }
 
     protected override void UpdateCompletionPercent(float percent) {
         
     }
 
-    public void CheckComponentCompletion() {
-        BuildingManager buildingManager = Script.Get<BuildingManager>();
+    //public void CheckComponentCompletion() {
+    //    BuildingManager buildingManager = Script.Get<BuildingManager>();
 
-        if (
-            buildingManager.IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(ShipThrusters)) &&
-            buildingManager.IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(ShipTelemetry)) &&
-            buildingManager.IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(ShipMachining)) &&
-            buildingManager.IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(ShipReactor)) 
-            ) {
-            CompleteGame();
-        }
-    }
+    //    if (
+    //        buildingManager.IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(ShipThrusters)) &&
+    //        buildingManager.IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(ShipTelemetry)) &&
+    //        buildingManager.IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(ShipMachining)) &&
+    //        buildingManager.IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(ShipReactor)) 
+    //        ) {
+    //        CompleteGame();
+    //    }
+    //}
 
     private void CompleteGame() {
         MessageWindow messageWindow = UIManager.Blueprint.MessageWindow.Instantiate() as MessageWindow;
@@ -81,10 +84,10 @@ public class StationShip : Building, CanSceneChangeDelegate, BuildingsUpdateDele
      * BuildingsUpdateDelegate Interface
      * */
 
-    public void NewBuildingStarted(Building building) {
-    }
+    //public void NewBuildingStarted(Building building) {
+    //}
 
-    public void BuildingFinished(Building building) {
-        CheckComponentCompletion();
-    }
+    //public void BuildingFinished(Building building) {
+    //    CheckComponentCompletion();
+    //}
 }

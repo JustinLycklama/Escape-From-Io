@@ -10,4 +10,8 @@ public class CostPanelTooltip : CostPanel, TrackingUIInterface {
     private void Update() {
         this.UpdateTrackingPosition();
     }
+
+    public void MoveUnusedCostToResourceManager() {
+        Script.Get<GameResourceManager>().CostPanelToEnvironmentDump(tallyCountDictionary);
+    }
 }

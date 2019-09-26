@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Mover : Unit {
-    public override int duration => 20;
+    public override int duration => 280;
     public override MasterGameTask.ActionType primaryActionType => MasterGameTask.ActionType.Move;
 
     public override float SpeedForTask(MasterGameTask.ActionType actionType) {

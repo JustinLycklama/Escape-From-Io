@@ -98,8 +98,15 @@ public abstract class Building : ActionableItem, Selectable {
         deletionWatcher?.ObjectDeleted(this);
 
         if(costPanel != null) {
+
+            // If we haven't completed our building, move the resources that have been placed here back onto the map
+            if (buildingComplete == false) {
+                costPanel.MoveUnusedCostToResourceManager();
+            }
+
             costPanel.transform.SetParent(null);
-            costPanel.gameObject.SetActive(false);        
+            //costPanel.gameObject.SetActive(false);
+            Destroy(costPanel.gameObject);
         }
 
         Script.Get<BuildingManager>().RemoveBuilding(this);
@@ -176,9 +183,15 @@ public abstract class Building : ActionableItem, Selectable {
 
         foreach(MeshBuildingTier tier in meshTiers) {
             if(percent > tierBase && percent <= tier.aproximateTopPercentage) {
-                foreach(MeshRenderer meshRenderer in tier.meshRenderes) {
-                    meshRenderer.material.SetFloat("percentComplete", Mathf.InverseLerp(tierBase, tier.aproximateTopPercentage, percent));
+                float localPercent = Mathf.InverseLerp(tierBase, tier.aproximateTopPercentage, percent);
+
+                foreach(MeshRenderer meshRenderer in tier.meshRenderes) {                                        
+                    meshRenderer.material.SetFloat("percentComplete", localPercent);
                 }
+
+                print("base " + tierBase);
+                print("top " + tier.aproximateTopPercentage);
+                print("local% " + localPercent);
             }
 
             tierBase = tier.aproximateTopPercentage;
@@ -337,11 +350,9 @@ public abstract class Building : ActionableItem, Selectable {
 
         private bool asLastPriority;
 
-        public static Blueprint StationShip = new Blueprint("StationShip", typeof(StationShip), "ShipIcon", "Ship Frame", "Build components adjacent to Frame.",
+        public static Blueprint StationShipFrame = new Blueprint("StationShipProps", typeof(ShipProps), "ShipIcon", "Ship Frame", "Required for Ship Components",
             new BlueprintCost(new Dictionary<MineralType, int>(){
-                { MineralType.Copper, 8 },
-                { MineralType.Silver, 4 },
-                { MineralType.Azure, 2 }
+                { MineralType.Copper, 5 }
             }),
             (LayoutCoordinate layoutCoordinate) => {
                 LayoutCoordinate[] adjCoordinates = layoutCoordinate.AdjacentCoordinates();
@@ -361,7 +372,32 @@ public abstract class Building : ActionableItem, Selectable {
             "All Four Coordinates around Frame must be Buildable.",
             true); // As last priority
 
-        public static Blueprint Thrusters = new Blueprint("ShipThrusters", typeof(ShipThrusters), "ShipIcon", "Ship Thrusters", "Once built, ALL units move 33% faster.",
+        public static Blueprint StationShip = new Blueprint("StationShip", typeof(StationShip), "ShipIcon", "Ship Frame", "Escape...",
+            new BlueprintCost(new Dictionary<MineralType, int>(){
+                { MineralType.Silver, 8 },                
+                { MineralType.Gold, 5 },                
+                { MineralType.Azure, 4 }
+            }),
+            (LayoutCoordinate layoutCoordinate) => {
+                BuildingManager buildingManager = Script.Get<BuildingManager>();
+
+                Building thisCoordinate = buildingManager.buildlingAtLocation(layoutCoordinate);
+                if(
+                    thisCoordinate != null && thisCoordinate.GetType() == typeof(ShipProps) &&
+                    buildingManager.IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(ShipThrusters)) &&
+                    buildingManager.IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(ShipTelemetry)) &&
+                    buildingManager.IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(ShipMachining)) &&
+                    buildingManager.IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(ShipReactor))
+                    ) {
+                    return true;
+                }
+
+                return false;
+            },
+            "Must be build on a Frame with all four Components built.",
+            true); // As last priority
+
+        public static Blueprint Thrusters = new Blueprint("ShipThrusters", typeof(ShipThrusters), "ShipIcon", "Ship Thrusters", "Once built, ALL units MOVE 50% faster.",
            new BlueprintCost(new Dictionary<MineralType, int>(){
                 { MineralType.Silver, 4 },
                 { MineralType.Gold, 3 },
@@ -372,7 +408,7 @@ public abstract class Building : ActionableItem, Selectable {
                     return false;
                 }
 
-                return Script.Get<BuildingManager>().IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(StationShip));
+                return Script.Get<BuildingManager>().IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(ShipProps));
             },
             "Only 1.\nBuild Adjacent to " + Building.Blueprint.StationShip.label,
             true); // As last priority
@@ -388,12 +424,12 @@ public abstract class Building : ActionableItem, Selectable {
                     return false;
                 }
 
-                return Script.Get<BuildingManager>().IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(StationShip));
+                return Script.Get<BuildingManager>().IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(ShipProps));
             },
             "Only 1.\nBuild Adjacent to " + Building.Blueprint.StationShip.label,
             true); // As last priority
 
-        public static Blueprint Machining = new Blueprint("ShipMachining", typeof(ShipMachining), "ShipIcon", "Ship Machining", "Once built, ALL units act 33% faster.",
+        public static Blueprint Machining = new Blueprint("ShipMachining", typeof(ShipMachining), "ShipIcon", "Ship Machining", "Once built, ALL units ACT 50% faster.",
            new BlueprintCost(new Dictionary<MineralType, int>(){
                 { MineralType.Silver, 4 },
                 { MineralType.Gold, 3 },
@@ -404,7 +440,7 @@ public abstract class Building : ActionableItem, Selectable {
                     return false;
                 }
 
-                return Script.Get<BuildingManager>().IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(StationShip));
+                return Script.Get<BuildingManager>().IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(ShipProps));
             },
             "Only 1.\nBuild Adjacent to " + Building.Blueprint.StationShip.label,
             true); // As last priority
@@ -420,7 +456,7 @@ public abstract class Building : ActionableItem, Selectable {
                     return false;
                 }
 
-                return Script.Get<BuildingManager>().IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(StationShip));
+                return Script.Get<BuildingManager>().IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(ShipProps));
             },
             "Only 1.\nBuild Adjacent to " + Building.Blueprint.StationShip.label,
             true); // As last priority
@@ -434,7 +470,10 @@ public abstract class Building : ActionableItem, Selectable {
 
             // We cannot build any buildings next to the ship frame
             requirementsMet = (LayoutCoordinate layoutCoordinate) => {
-                return !Script.Get<BuildingManager>().IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(StationShip), false);
+                BuildingManager buildingManager = Script.Get<BuildingManager>();
+                Building thisCoordinate = buildingManager.buildlingAtLocation(layoutCoordinate);
+                
+                return !buildingManager.IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(ShipProps), false) || (thisCoordinate != null);
             };
 
             requirementsNotMetString = "Cannot Build Adjacent to Ship Frame";

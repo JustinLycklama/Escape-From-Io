@@ -830,8 +830,8 @@ MonoBehaviour:
   - name: Grass
     type: 2
     regionType: 0
-    mutatorNoiseBase: 2
-    mutatorNoiseMax: 2
+    mutatorNoiseBase: 0.2
+    mutatorNoiseMax: 0.6
     walkable: 1
     buildable: 0
     walkSpeedMultiplier: 0.55
@@ -860,7 +860,7 @@ MonoBehaviour:
     buildable: 1
     walkSpeedMultiplier: 1
     modificationSpeedModifier: 1
-    texture: {fileID: 2800000, guid: f9f6d1b5ce3a9b048bf3dda4662ddaae, type: 3}
+    texture: {fileID: 2800000, guid: d13c75e0b1e347f43942fa95f902235b, type: 3}
     textureScale: 100
     mineralChances: []
   - name: Scorched Earth
@@ -878,8 +878,8 @@ MonoBehaviour:
   - name: Sand
     type: 11
     regionType: 0
-    mutatorNoiseBase: 0.2
-    mutatorNoiseMax: 0.6
+    mutatorNoiseBase: 2
+    mutatorNoiseMax: 2
     walkable: 1
     buildable: 0
     walkSpeedMultiplier: 0.5
@@ -1118,8 +1118,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3800f88f7f852a1428757ebdfadc48d2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mapCountX: 4
-  mapCountY: 4
+  mapCountX: 5
+  mapCountY: 5
   layoutMapWidth: 5
   layoutMapHeight: 5
   featuresPerLayoutPerAxis: 10

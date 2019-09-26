@@ -226,6 +226,19 @@ public class GameResourceManager : MonoBehaviour {
         }        
     }
 
+    private Dictionary<MineralType, int> tallyCountDictionary;
+    public void CostPanelToEnvironmentDump(Dictionary<MineralType, int> tallyCountDictionary) {
+        this.tallyCountDictionary = tallyCountDictionary;
+    }
+
+    public Dictionary<MineralType, int>  FloatingCostPanelResources() {
+        Dictionary<MineralType, int> retDict = tallyCountDictionary ?? new Dictionary<MineralType, int>();
+
+        tallyCountDictionary = null;
+
+        return retDict;
+    }
+
     /*
      * Task Queue Methods
      * */

@@ -198,7 +198,8 @@ public class TerrainManager : MonoBehaviour {
                     }
                 }
 
-                if (terrainType.buildable && Script.Get<BuildingManager>().buildlingAtLocation(coordinate) == null) {
+                Building buildingAtLocation = Script.Get<BuildingManager>().buildlingAtLocation(coordinate);
+                if (terrainType.buildable && (buildingAtLocation == null || buildingAtLocation.GetType() == typeof(ShipProps))) {
                     UserAction unitAction = new UserAction();
                     unitAction.description = "Build Unit";
                     unitAction.layoutCoordinate = coordinate;
@@ -222,7 +223,7 @@ public class TerrainManager : MonoBehaviour {
                     shipAction.description = "Build Ship Parts";
                     shipAction.layoutCoordinate = coordinate;
 
-                    shipAction.blueprintList = new ConstructionBlueprint[] { Building.Blueprint.StationShip, Building.Blueprint.Thrusters, Building.Blueprint.Reactor, Building.Blueprint.Machining, Building.Blueprint.Telemerty }; //Building.Blueprint.Refinery,
+                    shipAction.blueprintList = new ConstructionBlueprint[] { Building.Blueprint.StationShipFrame, Building.Blueprint.Thrusters, Building.Blueprint.Reactor, Building.Blueprint.Machining, Building.Blueprint.Telemerty, Building.Blueprint.StationShip }; //Building.Blueprint.Refinery,
 
                     actionList.Add(shipAction);
                 }

@@ -123,7 +123,6 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
     private MasterGameTask[,] associatedTasksCoordinateMap;
     private List<TaskStatusUpdateDelegate>[,] taskUpdateDelegateMap;
 
-
     public void CreateAllActionableItemOverrides() {
         Constants constants = Script.Get<Constants>();
 
@@ -174,6 +173,9 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
 
             action.performAction = (LayoutCoordinate layoutCoordinate) => {
                 associatedTasksCoordinateMap[layoutCoordinate.x, layoutCoordinate.y].CancelTask();
+
+                GameResourceManager resourceManager = Script.Get<GameResourceManager>();
+                PlaceMineralsAroundLocation(new WorldPosition(new MapCoordinate(layoutCoordinate)), resourceManager.FloatingCostPanelResources());
             };
 
             actionList.Add(action);
@@ -303,40 +305,10 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
             Script.Get<BuildingManager>().RecalcluateSightStatuses();
 
             // Create Ore at location
-
-            Vector3 position = new WorldPosition(new MapCoordinate(terraformTarget.coordinate)).vector3;
-
-            float offset = 25;
-
-            Vector3 position1 = position + new Vector3(offset, 0, 0);
-            Vector3 position2 = position + new Vector3(0, 0, offset);
-            Vector3 position3 = position + new Vector3(-offset, 0, 0);
-            Vector3 position4 = position + new Vector3(0, 0, -offset);
-
-            Vector3 position5 = position + new Vector3(offset, 0, offset);
-            Vector3 position6 = position + new Vector3(offset, 0, -offset);
-            Vector3 position7 = position + new Vector3(-offset, 0, offset);
-            Vector3 position8 = position + new Vector3(-offset, 0, -offset);
-
-            Vector3 position9 = position + new Vector3(0, 0, 0);
-
-            List<Vector3> positions = new List<Vector3> { position1, position2, position3, position4, position5, position6, position7, position8, position9 };
-
             GameResourceManager resourceManager = Script.Get<GameResourceManager>();
-
             Dictionary<MineralType, int> mineralLists = resourceManager.MineralListForCoordinate(coordinate);
 
-            foreach(MineralType mineralType in mineralLists.Keys) {
-                for(int i = 0; i < mineralLists[mineralType]; i++) {
-                    int rInt = Random.Range(0, positions.Count - 1);
-
-                    Vector3 randomPosition = positions[rInt];
-                    positions.RemoveAt(rInt);
-
-                    Ore ore = resourceManager.CreateMineral(mineralType);
-                    ore.transform.position = randomPosition;
-                }
-            }
+            PlaceMineralsAroundLocation(new WorldPosition(new MapCoordinate(terraformTarget.coordinate)), mineralLists);
 
             resourceManager.ClearMineralsAtCoordinate(coordinate);
 
@@ -382,6 +354,39 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
 
         if (terraformTarget.coordinate.y == layoutHeight - 1 && mapContainer.neighbours.bottomMap != null) {
             mapContainer.neighbours.bottomMap.UpdateMapOverhang();
+        }
+    }
+
+    private void PlaceMineralsAroundLocation(WorldPosition worldPosition, Dictionary<MineralType, int> mineralLists) {
+        float offset = 25;
+
+        Vector3 position = worldPosition.vector3;
+        GameResourceManager resourceManager = Script.Get<GameResourceManager>();
+
+        Vector3 position1 = position + new Vector3(offset, 0, 0);
+        Vector3 position2 = position + new Vector3(0, 0, offset);
+        Vector3 position3 = position + new Vector3(-offset, 0, 0);
+        Vector3 position4 = position + new Vector3(0, 0, -offset);
+
+        Vector3 position5 = position + new Vector3(offset, 0, offset);
+        Vector3 position6 = position + new Vector3(offset, 0, -offset);
+        Vector3 position7 = position + new Vector3(-offset, 0, offset);
+        Vector3 position8 = position + new Vector3(-offset, 0, -offset);
+
+        Vector3 position9 = position + new Vector3(0, 0, 0);
+
+        List<Vector3> positions = new List<Vector3> { position1, position2, position3, position4, position5, position6, position7, position8, position9 };
+
+        foreach(MineralType mineralType in mineralLists.Keys) {
+            for(int i = 0; i < mineralLists[mineralType]; i++) {
+                int rInt = Random.Range(0, positions.Count - 1);
+
+                Vector3 randomPosition = positions[rInt];
+                positions.RemoveAt(rInt);
+
+                Ore ore = resourceManager.CreateMineral(mineralType);
+                ore.transform.position = randomPosition;
+            }
         }
     }
 

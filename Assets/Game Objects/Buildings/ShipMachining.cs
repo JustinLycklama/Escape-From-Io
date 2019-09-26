@@ -23,6 +23,6 @@ public class ShipMachining : Building {
     }
 
     protected override void CompleteBuilding() {
-        ResearchSingleton.sharedInstance.unitActionMultiplier = 1.333f;
+        ResearchSingleton.sharedInstance.unitActionMultiplier = 1.5f;
     }
 }

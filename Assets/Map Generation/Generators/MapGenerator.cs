@@ -457,7 +457,7 @@ public class MapGenerator : MonoBehaviour {
      * Map (2d array) Creation
      * */
 
-    const int maxSavedCoordinateValues = 20;
+    const int maxSavedCoordinateValues = 30;
     const int invalidMutatorValue = 20;
     struct MutatorCoordinateValues {
         public float mutator;
