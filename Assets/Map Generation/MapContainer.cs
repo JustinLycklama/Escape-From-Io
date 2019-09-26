@@ -346,7 +346,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         float halfTotalHeight = boxSizeZ * height / 2f;
 
         Color materialColor = Color.black;
-        //materialColor.a = 0f;
+        //materialColor.a = 0;
 
         for(int x = 0; x < width; x++) {
             for(int y = 0; y < height; y++) {
@@ -590,7 +590,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         //Material mapMaterial = meshRenderer.material; meshRenderer Null??
         Material mapMaterial = GetComponent<MeshRenderer>().material;
 
-        if(selection.selectionType == Selection.SelectionType.Terrain && selection.coordinate.mapContainer == this) {
+        if(selection != null && selection.selectionType == Selection.SelectionType.Terrain && selection.coordinate.mapContainer == this) {
             //mapMaterial.SetFloat("selectedXOffsetLow", selection.coordinate.x * constants.featuresPerLayoutPerAxis - (constants.layoutMapWidth * constants.featuresPerLayoutPerAxis / 2f));
             //mapMaterial.SetFloat("selectedXOffsetHigh", (selection.coordinate.x + 1) * constants.featuresPerLayoutPerAxis - (constants.layoutMapWidth * constants.featuresPerLayoutPerAxis / 2f));
 

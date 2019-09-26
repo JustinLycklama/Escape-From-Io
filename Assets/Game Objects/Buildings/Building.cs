@@ -95,6 +95,8 @@ public abstract class Building : ActionableItem, Selectable {
     }
 
     public override void Destroy() {
+        deletionWatcher?.ObjectDeleted(this);
+
         if(costPanel != null) {
             costPanel.transform.SetParent(null);
             costPanel.gameObject.SetActive(false);        
@@ -132,6 +134,17 @@ public abstract class Building : ActionableItem, Selectable {
             foreach(MeshRenderer renderer in meshTier.meshRenderes) {
                 renderer.material.SetColor("_Color", color);
             }
+        }
+    }
+
+    DeletionWatch deletionWatcher;
+    public void SubscribeToDeletionWatch(DeletionWatch watcher) {
+        deletionWatcher = watcher;
+    }
+
+    public void EndDeletionWatch(DeletionWatch watcher) {
+        if(deletionWatcher == watcher) {
+            deletionWatcher = null;
         }
     }
 

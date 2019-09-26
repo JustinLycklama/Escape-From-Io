@@ -457,7 +457,7 @@ public class MapGenerator : MonoBehaviour {
      * Map (2d array) Creation
      * */
 
-    const int maxSavedCoordinateValues = 15;
+    const int maxSavedCoordinateValues = 20;
     const int invalidMutatorValue = 20;
     struct MutatorCoordinateValues {
         public float mutator;
@@ -499,7 +499,7 @@ public class MapGenerator : MonoBehaviour {
                 map[x, y] = HeightAtRegion(region);
 
                 if (region.type == RegionType.Type.Mountain && mutatorValue < coordinateValues[maxSavedCoordinateValues - 1].mutator) {
-                    if (Vector2.Distance(spawnCoord, new Vector2(x, y)) > 4) {
+                    if (Vector2.Distance(spawnCoord, new Vector2(x, y)) > 3) {
                         coordinateValues[maxSavedCoordinateValues - 1] = new MutatorCoordinateValues(mutatorValue, x, y);
                         coordinateValues = coordinateValues.OrderBy(m => m.mutator).ToArray();
                     }

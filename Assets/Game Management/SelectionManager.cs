@@ -5,6 +5,10 @@ using UnityEngine;
 //    void InformCurrentTask(MasterGameTask task, GameTask gameTask);
 //}
 
+public interface DeletionWatch {
+    void ObjectDeleted(Selectable selectable);
+}
+
 public interface Selectable : TaskStatusNotifiable, UserActionNotifiable {
     string description { get; }
 
@@ -12,13 +16,15 @@ public interface Selectable : TaskStatusNotifiable, UserActionNotifiable {
     //void SetStatusDelegate(StatusDelegate statusDelegate);
     //UserAction[] UserAction
 
+    void SubscribeToDeletionWatch(DeletionWatch watcher);
+    void EndDeletionWatch(DeletionWatch watcher);
 }
 
 public interface SelectionManagerDelegate {
     void NotifyUpdateSelection(Selection selection);
 }
 
-public class SelectionManager : MonoBehaviour {
+public class SelectionManager : MonoBehaviour, DeletionWatch {
 
     Selection currentSelection;
     List<SelectionManagerDelegate> delegateList = new List<SelectionManagerDelegate>();
@@ -38,49 +44,6 @@ public class SelectionManager : MonoBehaviour {
         Selection selection = new Selection();
         selection.setTerrain(coordinate);
 
-        //MonoBehaviour.print("-----");
-
-        //MonoBehaviour.print("LayoutCoordinate: " + coordinate.description);
-
-        //MapCoordinate mapCoordinate = new MapCoordinate(coordinate);
-        //MonoBehaviour.print("MapCoordinate: " + mapCoordinate.description);
-
-        //WorldPosition worldPosition = new WorldPosition(mapCoordinate);
-        //MonoBehaviour.print("WorldPosition: " + worldPosition.description);
-
-        //MapCoordinate newMapCoordinate = MapCoordinate.FromWorldPosition(worldPosition);
-        //MonoBehaviour.print("Back Into MapCoordinate: " + newMapCoordinate.description);
-
-        //LayoutCoordinate layoutCoordinate = new LayoutCoordinate(newMapCoordinate);
-        //MonoBehaviour.print("Back Into LayoutCoordinate: " + layoutCoordinate.description);
-
-        //PathGridCoordinate anyGridCoordinate = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(layoutCoordinate)[0][0];
-        //MonoBehaviour.print("Any PathGridCoordiate: " + anyGridCoordinate.description);
-
-        //MapCoordinate secondMapCoordinate = MapCoordinate.FromGridCoordinate(anyGridCoordinate);
-        //MonoBehaviour.print("MapCoordinate For PathGrid: " + secondMapCoordinate.description);
-
-        //WorldPosition pathGridWorldPosition = new WorldPosition(secondMapCoordinate);
-        //MonoBehaviour.print("WorldPosition For PathGrid: " + worldPosition.description);
-
-        //MapCoordinate thirdMapCoordinate = MapCoordinate.FromWorldPosition(pathGridWorldPosition);
-        //MonoBehaviour.print("Back Into MapCoordinate: " + thirdMapCoordinate.description);
-
-        //PathGridCoordinate newPathGrid = PathGridCoordinate.fromMapCoordinate(thirdMapCoordinate);
-        //MonoBehaviour.print("Back Into PathGrid: " + newPathGrid.description);
-
-        //MonoBehaviour.print("-----");
-
-        //MonoBehaviour.print("-----");
-
-        //foreach(PathGridCoordinate[] anyGridCoordinates in PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(coordinate)) {
-        //    foreach(PathGridCoordinate anyGridCoordinate in anyGridCoordinates) {
-        //        MonoBehaviour.print("PathGridCoordiate: " + anyGridCoordinate.description);
-        //    }
-        //}
-
-        //MonoBehaviour.print("-----");
-
         UpdateSelection(selection);
         return selection;
     }
@@ -93,6 +56,8 @@ public class SelectionManager : MonoBehaviour {
         UpdateSelection(selection);
         selectable.SetSelected(true);
 
+        selectable.SubscribeToDeletionWatch(this);
+
         return selection;
     }
 
@@ -101,7 +66,7 @@ public class SelectionManager : MonoBehaviour {
             return;
         }
 
-        currentSelection.Deselect();
+        currentSelection.Deselect(this);      
     }
 
     public void RegisterForNotifications(SelectionManagerDelegate notificationDelegate) {
@@ -110,6 +75,17 @@ public class SelectionManager : MonoBehaviour {
 
     public void EndNotifications(SelectionManagerDelegate notificationDelegate) {
         delegateList.Remove(notificationDelegate);
+    }
+
+    /*
+     * DeletionWatch Interface
+     * */
+
+    public void ObjectDeleted(Selectable selectable) {
+        if (currentSelection != null && currentSelection.Is(selectable)) {
+            currentSelection = null;
+            UpdateSelection(currentSelection);
+        }
     }
 }
 
@@ -130,14 +106,17 @@ public class Selection {
         this.coordinate = coordinate;
     }
 
+    public bool Is(Selectable selectable) {
+        return selectionType == SelectionType.Selectable && selection == selectable;
+    }
+
     // Mutators
 
-
-    public void Deselect() {
+    public void Deselect(DeletionWatch watcher) {
         if(selectionType == SelectionType.Terrain) {
         } else if(selectionType == SelectionType.Selectable) {
-            selection.SetSelected(false);
-            //selection.SetStatusDelegate(null);
+            selection?.SetSelected(false);
+            selection.EndDeletionWatch(watcher);
         }
     }
 

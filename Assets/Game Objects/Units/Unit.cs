@@ -375,6 +375,8 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
     }
 
     public void Destroy() {
+        deletionWatcher?.ObjectDeleted(this);
+
         transform.SetParent(null);
         Destroy(unitStatusTooltip.gameObject);
         Destroy(gameObject);
@@ -634,6 +636,17 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
             foreach(MeshRenderer renderer in meshTier.meshRenderes) {
                 renderer.material.SetColor("_Color", color);
             }
+        }
+    }
+
+    DeletionWatch deletionWatcher;
+    public void SubscribeToDeletionWatch(DeletionWatch watcher) {
+        deletionWatcher = watcher;
+    }
+
+    public void EndDeletionWatch(DeletionWatch watcher) {
+        if (deletionWatcher == watcher) {
+            deletionWatcher = null;
         }
     }
 
