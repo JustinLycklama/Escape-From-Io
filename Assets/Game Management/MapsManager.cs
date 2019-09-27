@@ -8,6 +8,9 @@ public interface TerrainUpdateDelegate {
 }
 
 public class MapsManager : MonoBehaviour {
+
+    public GameObject mapBoundaryObject;
+
     [HideInInspector]
     public int horizontalMapCount;
     [HideInInspector]
@@ -74,6 +77,9 @@ public class MapsManager : MonoBehaviour {
         mapContainer2d = new MapContainer[horizontalMaps, verticalMaps];
 
         //Object mapResource = Resources.Load("Map", typeof(MapContainer));
+
+        mapBoundaryObject.transform.localPosition = new Vector3(mapBoundaryObject.transform.localPosition.x, 4, mapBoundaryObject.transform.localPosition.z);
+        mapBoundaryObject.transform.localScale = new Vector3(mapWidth * horizontalMapCount, 10, mapWidth * horizontalMapCount);
 
         float mapEdgeX = mapsBoundaries.x - (mapsBoundaries.width / 2f);
         float mapEdgeY = mapsBoundaries.y - (mapsBoundaries.height / 2f);

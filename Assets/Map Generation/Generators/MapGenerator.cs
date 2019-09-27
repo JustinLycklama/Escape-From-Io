@@ -164,11 +164,34 @@ public class MapGenerator : MonoBehaviour {
     }
 
     private bool IsLayoutSuitable(float[,] layoutNoiseMap) {
+        // Get Spawn Coordinate
         if(GetSpawnCoordinate(layoutNoiseMap) == false) {
             return false;
         }
 
-        return true;
+        // There should be at least 1 walkable tile adjacent to spawn coordinate
+        int groundTerrainCount = 0;
+        TerrainManager manager = Script.Get<TerrainManager>();
+
+        for(int x = -1; x <= 1; x++) {
+            for(int y = -1; y <= 1; y++) {
+
+                if (x == y || (x == -1 && y == 1) || (x == 1 && y == -1)) {
+                    continue;
+                }
+
+                int sampleX = spawnCoordX + x;
+                int sampleY = spawnCoordY + y;
+
+                float sample = layoutNoiseMap[sampleX, sampleY];
+
+                if(manager.RegionTypeForValue(sample).type == RegionType.Type.Land) {
+                    groundTerrainCount++;
+                }
+            }
+        }
+
+        return groundTerrainCount >= 1;
     }
 
 
