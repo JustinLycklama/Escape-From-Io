@@ -78,15 +78,16 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate {
             Script.Get<BuildingManager>().Initialize();
             PathGridCoordinate[][] coordinatesForSpawnCoordinate = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(mapGenerator.spawnCoordinate);
 
+            List<PathGridCoordinate> unitSpawnPositions = new List<PathGridCoordinate>() {
+                coordinatesForSpawnCoordinate[0][1],
+                coordinatesForSpawnCoordinate[1][0],
+                coordinatesForSpawnCoordinate[2][1],
+                coordinatesForSpawnCoordinate[1][2]
+            };
+
             int i = 0;
             foreach(Unit unit in startingUnits) {
-
-                int horizontalComponent = 1;
-                if(i == 1) {
-                    horizontalComponent = 0;
-                }
-
-                WorldPosition worldPos = new WorldPosition(MapCoordinate.FromGridCoordinate(coordinatesForSpawnCoordinate[horizontalComponent][i]));
+                WorldPosition worldPos = new WorldPosition(MapCoordinate.FromGridCoordinate(unitSpawnPositions[i]));
                 unit.transform.position = worldPos.vector3;
                 i++;
 
@@ -96,6 +97,10 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate {
                     unitBuilding.ProceedToCompleteBuilding();
                 } else {
                     unit.Initialize();
+                }
+
+                if (i == startingUnits.Count - 1) {
+                    unit.remainingDuration -= 75;
                 }
             }
         });

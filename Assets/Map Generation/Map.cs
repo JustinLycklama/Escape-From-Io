@@ -103,6 +103,9 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
         // Update the BoxCollider Height
         mapContainer.ResizeBoxColliderAt(layoutCoordinate);
 
+        // Recalculate Sight
+        Script.Get<BuildingManager>().RecalcluateSightStatuses();
+
         // Update pathfinding grid
         Script.Get<PathfindingGrid>().UpdateGrid(this, layoutCoordinate);
 
@@ -302,7 +305,6 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
             UpdateTerrainAtLocation(terraformTarget.coordinate, terraformTarget.terrainTypeTarget);
             TerraformHeightMap(terraformTarget);
             terraformTargetCoordinateMap[coordinate.x, coordinate.y] = null;
-            Script.Get<BuildingManager>().RecalcluateSightStatuses();
 
             // Create Ore at location
             GameResourceManager resourceManager = Script.Get<GameResourceManager>();

@@ -4,7 +4,7 @@ using UnityEngine;
 
 using UnityEditor; // handles
 
-public class PathfindingGrid : MonoBehaviour, TerrainUpdateDelegate {
+public class PathfindingGrid : MonoBehaviour, TerrainUpdateDelegate, StatusEffectUpdateDelegate {
 
     Constants constants;
 
@@ -43,9 +43,14 @@ public class PathfindingGrid : MonoBehaviour, TerrainUpdateDelegate {
         //}       
     }
 
+    private void Start() {
+        Script.Get<BuildingManager>().RegisterForStatusEffectNotifications(this);
+    }
+
     private void OnDestroy() {
         try {
             Script.Get<MapsManager>().RemoveTerrainUpdateDelegate(this);
+            Script.Get<BuildingManager>().EndStatusEffectNotifications(this);
         } catch(System.NullReferenceException e) { }
     }
 
@@ -70,6 +75,12 @@ public class PathfindingGrid : MonoBehaviour, TerrainUpdateDelegate {
         PathGridCoordinate[][] updatedPathGridCoordinates = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(layoutCoordinate);
         BuildingManager buildingManager = Script.Get<BuildingManager>();
 
+        bool terrainWalkable = false;
+
+        if((buildingManager.StatusAtLocation(layoutCoordinate) & BuildingEffectStatus.Light) == BuildingEffectStatus.Light) {
+            terrainWalkable = map.GetTerrainAt(layoutCoordinate).walkable;
+        }
+
         int width = updatedPathGridCoordinates.GetLength(0);
         for(int x = 0; x < width; x++) {
 
@@ -85,7 +96,7 @@ public class PathfindingGrid : MonoBehaviour, TerrainUpdateDelegate {
                     buildingBlocksSpace = buildingManager.buildlingAtLocation(layoutCoordinate) != null;
                 }
 
-                grid[updatedCoordinate.xLowSample, updatedCoordinate.yLowSample].walkable = map.GetTerrainAt(layoutCoordinate).walkable && !buildingBlocksSpace;
+                grid[updatedCoordinate.xLowSample, updatedCoordinate.yLowSample].walkable = terrainWalkable && !buildingBlocksSpace;
             }
         }
 
@@ -97,6 +108,7 @@ public class PathfindingGrid : MonoBehaviour, TerrainUpdateDelegate {
     public void createGrid() {
         grid = new Node[gridSizeX, gridSizeY];
         MapsManager mapsManager = Script.Get<MapsManager>();
+        BuildingManager buildingManager = Script.Get<BuildingManager>();
 
         for(int x = 0; x < gridSizeX; x++) {
             for(int y = 0; y < gridSizeY; y++) {
@@ -113,9 +125,14 @@ public class PathfindingGrid : MonoBehaviour, TerrainUpdateDelegate {
 
                 if(terrain.walkable) {
                     penalty = Mathf.FloorToInt((1 - terrain.walkSpeedMultiplier) * maxPenalty);
-                }              
+                }
 
-                grid[x, y] = new Node(terrain.walkable, worldPosition, x, y, penalty);
+                bool walkable = false;
+                if((buildingManager.StatusAtLocation(layoutCoordinate) & BuildingEffectStatus.Light) == BuildingEffectStatus.Light) {
+                    walkable = terrain.walkable;
+                }
+
+                grid[x, y] = new Node(walkable, worldPosition, x, y, penalty);
             }
         }
 
@@ -236,7 +253,7 @@ public class PathfindingGrid : MonoBehaviour, TerrainUpdateDelegate {
 
         if (constants == null) { return;  }
 
-        float cubeDiameter = constants.layoutMapWidth / 3.5f;
+        float cubeDiameter = constants.layoutMapWidth; // / 3.5f;
         if(grid != null && displayGridGizmos && Script.Get<MapsManager>().mapContainers.Count > 0) {
 
             Vector3 mapScale = Script.Get<MapsManager>().mapContainers[0].transform.lossyScale;
@@ -301,6 +318,30 @@ public class PathfindingGrid : MonoBehaviour, TerrainUpdateDelegate {
             foreach(PathGridCoordinate coordinate in coordinates) {
                 grid[coordinate.xLowSample, coordinate.yLowSample].movementPenalty = penalty;
             }
+        }
+    }
+
+    /*
+     * StatusEffectUpdateDelegate Interface
+     * */
+
+    public void StatusEffectMapUpdated(BuildingEffectStatus[,] statusMap, List<KeyValuePair<int, int>> effectedIndicies) {
+        Constants constants = Script.Get<Constants>();
+        MapsManager mapsManager = Script.Get<MapsManager>();
+
+        int width = constants.layoutMapWidth;
+        int height = constants.layoutMapHeight;
+
+        foreach(KeyValuePair<int, int> index in effectedIndicies) {
+            int x = index.Key;
+            int y = index.Value;
+
+            int mapX = Mathf.FloorToInt((float)x / (float)constants.layoutMapWidth);
+            int mapY = Mathf.FloorToInt((float)y / (float)constants.layoutMapHeight);
+
+            LayoutCoordinate coordinate = new LayoutCoordinate(x % constants.layoutMapWidth, y % constants.layoutMapHeight, mapsManager.mapContainer2d[mapX, mapY]);
+
+            UpdateGrid(coordinate.mapContainer.map, coordinate);
         }
     }
 

@@ -612,7 +612,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
      * StatusEffectUpdateDelegate Interface
      * */
 
-    public void StatusEffectMapUpdated(BuildingEffectStatus[,] statusMap) {
+    public void StatusEffectMapUpdated(BuildingEffectStatus[,] statusMap, List<KeyValuePair<int, int>> effectedIndicies) {
 
         Constants constants = Script.Get<Constants>();
 
@@ -634,46 +634,50 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
             }
         };
 
-        for(int x = 0; x < width; x++) {
-            for(int y = 0; y < height; y++) {
+        foreach(KeyValuePair<int, int> index in effectedIndicies) {
+            int sampleX = index.Key;
+            int sampleY = index.Value;
 
-                int sampleX = x + mapX * width;
-                int sampleY = y + mapY * height;
+            int x = sampleX - (mapX * width);
+            int y = sampleY - (mapY * height);
 
-                if ((statusMap[sampleX, sampleY] & BuildingEffectStatus.Light) == BuildingEffectStatus.Light && fogOfWarMap[x, y].activeSelf) {
-                    
-                    if (gameObject.activeInHierarchy == false) { gameObject.SetActive(true); }
+            if (x < 0 || x >= width || y < 0 || y >= height) {
+                continue;
+            }
 
-                    isBuildingBoxColliders = true;
-                    totalCouroutinesStarted++;
+            if((statusMap[sampleX, sampleY] & BuildingEffectStatus.Light) == BuildingEffectStatus.Light && fogOfWarMap[x, y].activeSelf) {
+
+                if(gameObject.activeInHierarchy == false) { gameObject.SetActive(true); }
+
+                isBuildingBoxColliders = true;
+                totalCouroutinesStarted++;
 
 
-                    Material material = fogOfWarMap[x, y].GetComponent<MeshRenderer>().material;
-                    SetMaterialTransparent(material);
-                    Color color = material.color;
-                    //color.a = 0.15f;
+                Material material = fogOfWarMap[x, y].GetComponent<MeshRenderer>().material;
+                SetMaterialTransparent(material);
+                Color color = material.color;
+                //color.a = 0.15f;
 
-                    //material.color = color;
+                //material.color = color;
 
-                    Action<int, float> durationUpdateBlock = (remainingTime, percentComplete) => {
-                        color.a = 1f - percentComplete;
-                        material.color = color;
-                    };
+                Action<int, float> durationUpdateBlock = (remainingTime, percentComplete) => {
+                    color.a = 1f - percentComplete;
+                    material.color = color;
+                };
 
-                    int holdX = x;
-                    int holdY = y;
+                int holdX = x;
+                int holdY = y;
 
-                    Action durationCompletionBlock = () => {
-                        fogOfWarMap[holdX, holdY].SetActive(false);
-                    };
+                Action durationCompletionBlock = () => {
+                    fogOfWarMap[holdX, holdY].SetActive(false);
+                };
 
-                    Action boxEndAndAnimation = () => {
-                        Script.Get<TimeManager>().AddNewTimer(1, durationUpdateBlock, durationCompletionBlock, 2);
-                        createBoxEnded();
-                    };
+                Action boxEndAndAnimation = () => {
+                    Script.Get<TimeManager>().AddNewTimer(1, durationUpdateBlock, durationCompletionBlock, 2);
+                    createBoxEnded();
+                };
 
-                    StartCoroutine(CreateBoxCollidersAtCoordinate(new LayoutCoordinate(x, y, this), boxEndAndAnimation));
-                }
+                StartCoroutine(CreateBoxCollidersAtCoordinate(new LayoutCoordinate(x, y, this), boxEndAndAnimation));
             }
         }
     }

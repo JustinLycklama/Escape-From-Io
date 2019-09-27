@@ -10,7 +10,7 @@ public interface BuildingsUpdateDelegate {
 }
 
 public interface StatusEffectUpdateDelegate {
-    void StatusEffectMapUpdated(BuildingEffectStatus[,] statusMap);
+    void StatusEffectMapUpdated(BuildingEffectStatus[,] statusMap, List<KeyValuePair<int, int>> effectedIndicies);
 }
 
 public enum BuildingEffectStatus {
@@ -172,6 +172,19 @@ public class BuildingManager : MonoBehaviour {
         RecalcluateSightStatuses();
     }
 
+    public BuildingEffectStatus StatusAtLocation(LayoutCoordinate layoutCoordinate) {
+        Constants constants = Script.Get<Constants>();
+
+        int startX = layoutCoordinate.mapContainer.mapX * constants.layoutMapWidth;
+        int startY = layoutCoordinate.mapContainer.mapY * constants.layoutMapHeight;
+
+        if (statusMap == null) {
+            return BuildingEffectStatus.None;
+        }
+
+        return statusMap[startX + layoutCoordinate.x, startY + layoutCoordinate.y];
+    }
+
     public void RecalcluateSightStatuses() {
         Constants constants = Script.Get<Constants>();
 
@@ -209,7 +222,7 @@ public class BuildingManager : MonoBehaviour {
 
 
 
-
+        List<KeyValuePair<int, int>> effectedIndicies = new List<KeyValuePair<int, int>>();
 
         for(int x = 0; x < width; x++) {
             for(int y = 0; y < height; y++) {
@@ -242,6 +255,7 @@ public class BuildingManager : MonoBehaviour {
                             }
 
                             statusMap[subX, subY] |= BuildingEffectStatus.Light;
+                            effectedIndicies.Add(new KeyValuePair<int, int>(subX, subY));
                         }
                         );
                 }           
@@ -252,7 +266,7 @@ public class BuildingManager : MonoBehaviour {
         artifactRemover.RemoveIslands();
         artifactRemover.RemoveLayerOfIsolatedTiles();
 
-        NotifyStatusEffectUpdate();
+        NotifyStatusEffectUpdate(effectedIndicies);
     }
 
     // x and y should be anyPoint, x2 and y2 should be LightPoint
@@ -313,6 +327,8 @@ public class BuildingManager : MonoBehaviour {
         int maxX = constants.layoutMapWidth * mapsManager.horizontalMapCount;
         int maxY = constants.layoutMapHeight * mapsManager.verticalMapCount;
 
+        List<KeyValuePair<int, int>> effectedIndicies = new List<KeyValuePair<int, int>>();
+
         for(int x = centerX - radius; x <= centerX + radius; x++) {
             for(int y = centerY - radius; y <= centerY + radius; y++) {
 
@@ -325,10 +341,11 @@ public class BuildingManager : MonoBehaviour {
                 int clampedY = Mathf.Clamp(y, 0, maxY);
 
                 statusMap[clampedX, clampedY] |= status;
+                effectedIndicies.Add(new KeyValuePair<int, int>(clampedX, clampedY));
             }
         }
 
-        NotifyStatusEffectUpdate();
+        NotifyStatusEffectUpdate(effectedIndicies);
     }
 
     /*
@@ -372,9 +389,9 @@ public class BuildingManager : MonoBehaviour {
         statusEffectUpdateDelegateList.Remove(notificationDelegate);
     }
 
-    public void NotifyStatusEffectUpdate() {
+    public void NotifyStatusEffectUpdate(List<KeyValuePair<int, int>> effectedIndicies) {
         foreach(StatusEffectUpdateDelegate updateDelegate in statusEffectUpdateDelegateList) {
-                updateDelegate.StatusEffectMapUpdated(statusMap);
+                updateDelegate.StatusEffectMapUpdated(statusMap, effectedIndicies);
         }
     }
 

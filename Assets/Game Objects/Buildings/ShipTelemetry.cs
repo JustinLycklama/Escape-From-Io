@@ -23,6 +23,8 @@ public class ShipTelemetry : Building {
     protected override void CompleteBuilding() {
         ResearchSingleton.sharedInstance.visionRadiusAddiiton = 2;
         Script.Get<BuildingManager>().RecalcluateSightStatuses();
+
+        Script.Get<NotificationPanel>().AddNotification(new NotificationItem("Ship Telemetry Complete! Tower sight increased from 3 to 5!", transform));
     }
 
 }
