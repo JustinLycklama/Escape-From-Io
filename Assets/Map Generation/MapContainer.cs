@@ -350,7 +350,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         float halfTotalHeight = boxSizeZ * height / 2f;
 
         Color materialColor = Color.black;
-        //materialColor.a = 0;
+        materialColor.a = 0;
 
         for(int x = 0; x < width; x++) {
             for(int y = 0; y < height; y++) {
@@ -363,15 +363,9 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
 
                     material.shader = unlitShader;
 
-                    //SetMaterialTransparent(material);
+                    SetMaterialTransparent(material);
 
                     material.color = materialColor;
-                    //material.SetFloat("_Metallic", 1);
-                    //material.SetFloat("_Glossiness", 0);
-
-                    //material.SetFloat("_SpecularHighlights", 0);
-                    //material.SetFloat("_GlossyReflections", 0);
-                    //material.SetFloat("_GlossyReflections", 0);
 
                     fogOfWarMap[x, y] = newCube;
                 }
@@ -566,6 +560,9 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
 
         Texture2DArray texturesArray = texGen.TextureArray();
         mapMaterial.SetTexture("baseTextures", texturesArray);
+
+        Texture2DArray bumpArray = texGen.BumpMapArray();
+        mapMaterial.SetTexture("bumpMapTextures", bumpArray);
     }
 
     public void UpdateShaderTerrainTextures() {

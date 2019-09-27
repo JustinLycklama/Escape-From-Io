@@ -8,8 +8,6 @@ public class TextureGenerator : MonoBehaviour {
     const int textureSize = 512;
     const TextureFormat textureFormat = TextureFormat.RGB565;
 
-    private Texture2DArray textureArray;
-
     //private Color[] CreateColorMapWithTerrain(TerrainType[,] terrainTypeMap, MapContainer mapContainer) {
 
     //    int terrainMapWidth = terrainTypeMap.GetLength(0);
@@ -83,6 +81,7 @@ public class TextureGenerator : MonoBehaviour {
         return TextureFromColorMap(colorMap, width, height);
     }
 
+    private Texture2DArray textureArray;
     private void GenerateTextureArray() {
         TerrainManager terrainManager = Script.Get<TerrainManager>();
         textureArray = new Texture2DArray(textureSize, textureSize, terrainManager.terrainTypes.Length, textureFormat, true);
@@ -98,6 +97,24 @@ public class TextureGenerator : MonoBehaviour {
         }
 
         return textureArray;
+    }
+
+    private Texture2DArray bumpMapArray;
+    private void GenerateBumpMapArray() {
+        TerrainManager terrainManager = Script.Get<TerrainManager>();
+        bumpMapArray = new Texture2DArray(textureSize, textureSize, terrainManager.terrainTypes.Length, textureFormat, true);
+        for(int i = 0; i < terrainManager.terrainTypes.Length; i++) {
+            bumpMapArray.SetPixels(terrainManager.terrainTypes[i].bumpMap.GetPixels(), i);
+        }
+        bumpMapArray.Apply();
+    }
+
+    public Texture2DArray BumpMapArray() {
+        if(bumpMapArray == null) {
+            GenerateBumpMapArray();
+        }
+
+        return bumpMapArray;
     }
 
     public int RegionTypeTextureIndex(TerrainType terrainType) {
