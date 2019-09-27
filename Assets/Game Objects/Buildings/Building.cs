@@ -189,9 +189,9 @@ public abstract class Building : ActionableItem, Selectable {
                     meshRenderer.material.SetFloat("percentComplete", localPercent);
                 }
 
-                print("base " + tierBase);
-                print("top " + tier.aproximateTopPercentage);
-                print("local% " + localPercent);
+                //print("base " + tierBase);
+                //print("top " + tier.aproximateTopPercentage);
+                //print("local% " + localPercent);
             }
 
             tierBase = tier.aproximateTopPercentage;
@@ -328,7 +328,8 @@ public abstract class Building : ActionableItem, Selectable {
 
         public static Blueprint SensorTower = new Blueprint("SensorTower", typeof(SensorTower), "TowerIcon", "Azure Sensor", "Points to the closest Azure vein.",
             new BlueprintCost(new Dictionary<MineralType, int>(){
-                { MineralType.Copper, 2 },                                
+                { MineralType.Copper, 4 },
+                { MineralType.Silver, 2 },
                 { MineralType.Gold, 1 }
             }));
 
@@ -355,6 +356,10 @@ public abstract class Building : ActionableItem, Selectable {
                 { MineralType.Copper, 5 }
             }),
             (LayoutCoordinate layoutCoordinate) => {
+                if(ResearchSingleton.sharedInstance.GetBuildingCount(typeof(ShipProps)) > 0) {
+                    return false;
+                }
+
                 LayoutCoordinate[] adjCoordinates = layoutCoordinate.AdjacentCoordinates();
                 if (adjCoordinates.Length != 4) {
                     return false;
@@ -374,9 +379,9 @@ public abstract class Building : ActionableItem, Selectable {
 
         public static Blueprint StationShip = new Blueprint("StationShip", typeof(StationShip), "ShipIcon", "Ship Frame", "Escape...",
             new BlueprintCost(new Dictionary<MineralType, int>(){
-                { MineralType.Silver, 8 },                
-                { MineralType.Gold, 5 },                
-                { MineralType.Azure, 4 }
+                { MineralType.Silver, 4 },                
+                { MineralType.Gold, 3 },                
+                { MineralType.Azure, 2 }
             }),
             (LayoutCoordinate layoutCoordinate) => {
                 BuildingManager buildingManager = Script.Get<BuildingManager>();
@@ -404,13 +409,13 @@ public abstract class Building : ActionableItem, Selectable {
                 { MineralType.Azure, 2 }
            }),           
             (LayoutCoordinate layoutCoordinate) => {
-                if (ShipThrusters.count > 0) {
+                if(ResearchSingleton.sharedInstance.GetBuildingCount(typeof(ShipThrusters)) > 0) {
                     return false;
                 }
 
                 return Script.Get<BuildingManager>().IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(ShipProps));
             },
-            "Only 1.\nBuild Adjacent to " + Building.Blueprint.StationShip.label,
+            "Only 1.\nBuild Adjacent to " + Building.Blueprint.StationShipFrame.label,
             true); // As last priority
 
         public static Blueprint Reactor = new Blueprint("ShipReactor", typeof(ShipReactor), "ShipIcon", "Ship Reactor", "Once built, ALL units get duration +60s.",
@@ -420,13 +425,13 @@ public abstract class Building : ActionableItem, Selectable {
                 { MineralType.Azure, 2 }
            }),
             (LayoutCoordinate layoutCoordinate) => {
-                if(ShipReactor.count > 0) {
+                if(ResearchSingleton.sharedInstance.GetBuildingCount(typeof(ShipReactor)) > 0) {
                     return false;
                 }
 
                 return Script.Get<BuildingManager>().IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(ShipProps));
             },
-            "Only 1.\nBuild Adjacent to " + Building.Blueprint.StationShip.label,
+            "Only 1.\nBuild Adjacent to " + Building.Blueprint.StationShipFrame.label,
             true); // As last priority
 
         public static Blueprint Machining = new Blueprint("ShipMachining", typeof(ShipMachining), "ShipIcon", "Ship Machining", "Once built, ALL units ACT 50% faster.",
@@ -436,29 +441,29 @@ public abstract class Building : ActionableItem, Selectable {
                 { MineralType.Azure, 2 }
            }),
             (LayoutCoordinate layoutCoordinate) => {
-                if(ShipMachining.count > 0) {
+                if(ResearchSingleton.sharedInstance.GetBuildingCount(typeof(ShipMachining)) > 0) {
                     return false;
                 }
 
                 return Script.Get<BuildingManager>().IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(ShipProps));
             },
-            "Only 1.\nBuild Adjacent to " + Building.Blueprint.StationShip.label,
+            "Only 1.\nBuild Adjacent to " + Building.Blueprint.StationShipFrame.label,
             true); // As last priority
 
-        public static Blueprint Telemerty = new Blueprint("ShipTelemetry", typeof(ShipTelemetry), "ShipIcon", "Ship Telemetry", "Once built, Tower vision increased from 3 to 5.",
+        public static Blueprint Telemerty = new Blueprint("ShipTelemetry", typeof(ShipTelemetry), "ShipIcon", "Ship Telemetry", "Once built, Tower vision increased 3->5.",
            new BlueprintCost(new Dictionary<MineralType, int>(){
                 { MineralType.Silver, 4 },
                 { MineralType.Gold, 3 },
                 { MineralType.Azure, 2 }
            }),
             (LayoutCoordinate layoutCoordinate) => {
-                if(ShipTelemetry.count > 0) {
+                if(ResearchSingleton.sharedInstance.GetBuildingCount(typeof(ShipTelemetry)) > 0) {
                     return false;
                 }
 
                 return Script.Get<BuildingManager>().IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(ShipProps));
             },
-            "Only 1.\nBuild Adjacent to " + Building.Blueprint.StationShip.label,
+            "Only 1.\nBuild Adjacent to " + Building.Blueprint.StationShipFrame.label,
             true); // As last priority
 
         /*

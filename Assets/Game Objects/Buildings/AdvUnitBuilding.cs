@@ -8,18 +8,27 @@ public class AdvUnitBuilding : Building {
 
     public GameObject towerHead;
 
+    private PlayerBehaviour playerBehaviour;
+
     protected override void UpdateCompletionPercent(float percent) {
 
     }
 
     protected override void CompleteBuilding() {
+        playerBehaviour = Script.Get<PlayerBehaviour>();
         StartCoroutine(RotateHead());
     }
 
     IEnumerator RotateHead() {
         while(true) {
-            towerHead.transform.Rotate(Vector3.up, 2);
             yield return new WaitForSeconds(0.01f);
+
+            if (playerBehaviour.gamePaused) {
+                continue;
+            }
+
+            towerHead.transform.Rotate(Vector3.up, 2);
+            
         }
     }
 }

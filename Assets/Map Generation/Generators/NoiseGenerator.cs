@@ -17,6 +17,21 @@ public struct NoiseData {
 
 public static class NoiseGenerator {
 
+    public static float[,] GenerateRandomNoiseMap(int mapWidth, int mapHeight) {
+        float[,] noiseMap = new float[mapWidth, mapHeight];
+
+        System.Random rnd = new System.Random(System.Guid.NewGuid().GetHashCode());
+
+        for(int y = 0; y < mapHeight; y++) {
+            for(int x = 0; x < mapWidth; x++) {
+
+                noiseMap[x, y] = rnd.Next(0, 100);
+            }
+        }
+
+        return noiseMap;
+    }
+
     // Octaves are detail levels
     // Persistance is the effect each subsequent octave has on the map as a whole 
     // Lacunarity is the increase in seperation between each samples point on each octave
@@ -73,7 +88,7 @@ public static class NoiseGenerator {
                     minNoiseHeight = noiseHeight;
                 }
 
-                noiseMap[x, y] = noiseHeight;                
+                noiseMap[x, y] = noiseHeight;
             }
         }
 

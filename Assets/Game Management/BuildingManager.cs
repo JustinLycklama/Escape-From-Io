@@ -82,6 +82,7 @@ public class BuildingManager : MonoBehaviour {
         // Don't record "PathBuilding" buildings for blocking purposes
         if(building.title != "Path") {
             locationBuildingMap[layoutCoordinate] = building;
+
             if(AttemptToSetUnwalkable(layoutCoordinate) == false) {
                 listOfCoordinatesToBlockTerrain.Add(layoutCoordinate);
             }
@@ -112,11 +113,14 @@ public class BuildingManager : MonoBehaviour {
         MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(worldPosition);
         LayoutCoordinate layoutCoordinate = new LayoutCoordinate(mapCoordinate);
 
-        locationBuildingMap.Remove(layoutCoordinate);
-        layoutCoordinate.mapContainer.map.UpdateUserActionsAt(layoutCoordinate);
-
         listOfCoordinatesToBlockTerrain.Remove(layoutCoordinate);
-        Script.Get<PathfindingGrid>().SetCenterGridWalkable(layoutCoordinate, true);
+
+        if(locationBuildingMap.ContainsKey(layoutCoordinate) && locationBuildingMap[layoutCoordinate] == buildling) {
+            locationBuildingMap.Remove(layoutCoordinate);
+            Script.Get<PathfindingGrid>().SetCenterGridWalkable(layoutCoordinate, true);
+        }
+
+        layoutCoordinate.mapContainer.map.UpdateUserActionsAt(layoutCoordinate);
     }
 
     private IEnumerator AttemptToSetUnwalkable() {

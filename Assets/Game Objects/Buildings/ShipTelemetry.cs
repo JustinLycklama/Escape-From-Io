@@ -3,20 +3,17 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class ShipTelemetry : Building {
-
-    public static int count = 0;
-
     public override string title => "Telemetry";
     protected override float constructionModifierSpeed => 0.20f;
 
     protected override void Awake() {
         base.Awake();
-        count++;
+        ResearchSingleton.sharedInstance.AddBuildingCount(this);
     }
 
     public override void Destroy() {
         base.Destroy();
-        count--;
+        ResearchSingleton.sharedInstance.RemoveBuildingCount(this);
     }
 
     protected override void UpdateCompletionPercent(float percent) {
