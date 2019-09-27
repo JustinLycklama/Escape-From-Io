@@ -78,8 +78,8 @@ public class MapsManager : MonoBehaviour {
 
         //Object mapResource = Resources.Load("Map", typeof(MapContainer));
 
-        mapBoundaryObject.transform.localPosition = new Vector3(mapBoundaryObject.transform.localPosition.x, 4, mapBoundaryObject.transform.localPosition.z);
-        mapBoundaryObject.transform.localScale = new Vector3(mapWidth * horizontalMapCount, 10, mapWidth * horizontalMapCount);
+        mapBoundaryObject.transform.localPosition = new Vector3(mapBoundaryObject.transform.localPosition.x, 4.9f, mapBoundaryObject.transform.localPosition.z);
+        mapBoundaryObject.transform.localScale = new Vector3(mapWidth * horizontalMapCount + 1, 10, mapWidth * horizontalMapCount + 1);
 
         float mapEdgeX = mapsBoundaries.x - (mapsBoundaries.width / 2f);
         float mapEdgeY = mapsBoundaries.y - (mapsBoundaries.height / 2f);
