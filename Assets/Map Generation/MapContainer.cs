@@ -329,10 +329,14 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
      * Fog of War
      * */
 
-    private void SetupFogOfWar() {
-        Shader transparencyShader = Shader.Find("Custom/Buildable");
+    Shader transparencyShader;
+    Shader unlitShader;
 
+    private void SetupFogOfWar() {       
         Constants constants = Script.Get<Constants>();
+
+        transparencyShader = Shader.Find("Standard");
+        unlitShader = Shader.Find("Unlit/Color");
 
         int width = constants.layoutMapWidth;
         int height = constants.layoutMapHeight;
@@ -357,15 +361,17 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
 
                     Material material = newCube.GetComponent<MeshRenderer>().material;
 
+                    material.shader = unlitShader;
+
                     //SetMaterialTransparent(material);
 
                     material.color = materialColor;
-                    material.SetFloat("_Metallic", 1);
-                    material.SetFloat("_Glossiness", 0);
+                    //material.SetFloat("_Metallic", 1);
+                    //material.SetFloat("_Glossiness", 0);
 
-                    material.SetFloat("_SpecularHighlights", 0);
-                    material.SetFloat("_GlossyReflections", 0);
-                    material.SetFloat("_GlossyReflections", 0);
+                    //material.SetFloat("_SpecularHighlights", 0);
+                    //material.SetFloat("_GlossyReflections", 0);
+                    //material.SetFloat("_GlossyReflections", 0);
 
                     fogOfWarMap[x, y] = newCube;
                 }
@@ -388,7 +394,16 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
     }
 
     private void SetMaterialTransparent(Material material) {
+        material.shader = transparencyShader;
+
         material.SetFloat("_Mode", 4f);
+
+        material.SetFloat("_Metallic", 1);
+        material.SetFloat("_Glossiness", 0);
+
+        material.SetFloat("_SpecularHighlights", 0);
+        material.SetFloat("_GlossyReflections", 0);
+        material.SetFloat("_GlossyReflections", 0);
 
         material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
         material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);

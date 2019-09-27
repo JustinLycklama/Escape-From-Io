@@ -225,7 +225,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
         NotificationPanel notificationManager = Script.Get<NotificationPanel>();
         notificationManager.AddNotification(new NotificationItem(title + " initialized and named: " + name.fullName, transform));
 
-        unitStatusTooltip.SetTitle(name.shortform);
+        unitStatusTooltip.SetTitle(primaryActionType.TitleAsNoun());
         title = name.fullName;
 
         // Duration
