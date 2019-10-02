@@ -8,12 +8,7 @@ public class PathBuilding : Building {
     protected override float constructionModifierSpeed => 0.8f;    
 
     protected override void CompleteBuilding() {
-        WorldPosition worldPosition = new WorldPosition(transform.position);
-        MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(worldPosition);
-
-        LayoutCoordinate layoutCoordinate = new LayoutCoordinate(mapCoordinate);
-
-        layoutCoordinate.mapContainer.map.UpdateTerrainAtLocation(layoutCoordinate, Script.Get<TerrainManager>().terrainTypeMap[TerrainType.Type.Path]);
+        buildingLayoutCoordinate.mapContainer.map.UpdateTerrainAtLocation(buildingLayoutCoordinate, Script.Get<TerrainManager>().terrainTypeMap[TerrainType.Type.Path]);
 
         Destroy();
     }

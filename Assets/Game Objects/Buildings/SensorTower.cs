@@ -8,24 +8,20 @@ public class SensorTower : Building, TerrainUpdateDelegate {
 
     private KeyValuePair<int, int>? closestLunarRock = null;
 
-    LayoutCoordinate layoutCoordinate;
     Vector2 buildingPos;
 
     public GameObject towerObject;
 
-    void Start() {
+    protected override void Start() {
+        base.Start();
+
         Constants constants = Script.Get<Constants>();
 
-        WorldPosition worldPosition = new WorldPosition(transform.position);
-        MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(worldPosition);
+        int startX = buildingLayoutCoordinate.mapContainer.mapX * constants.layoutMapWidth;
+        int startY = buildingLayoutCoordinate.mapContainer.mapY * constants.layoutMapHeight;
 
-        layoutCoordinate = new LayoutCoordinate(mapCoordinate);
-
-        int startX = layoutCoordinate.mapContainer.mapX * constants.layoutMapWidth;
-        int startY = layoutCoordinate.mapContainer.mapY * constants.layoutMapHeight;
-
-        int xPos = startX + layoutCoordinate.x;
-        int yPos = startY + layoutCoordinate.y;
+        int xPos = startX + buildingLayoutCoordinate.x;
+        int yPos = startY + buildingLayoutCoordinate.y;
 
         buildingPos = new Vector2(xPos, yPos);
     }

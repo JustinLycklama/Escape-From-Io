@@ -3,7 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Narrator : MonoBehaviour, CanSceneChangeDelegate {
+public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListener {
+
+    public AudioSource audioSource;
+
     PathfindingGrid grid;
     MapGenerator mapGenerator;
     MapsManager mapsManager;
@@ -124,6 +127,8 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate {
 
         StartCoroutine(InitializeScene());
 
+        SceneManagement.sharedInstance.RegisterForSceneUpdates(this);
+
         //NotificationPanel notificationManager = Script.Get<NotificationPanel>();
 
         //TimeManager timeManager = Script.Get<TimeManager>();
@@ -134,6 +139,10 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate {
         //};
 
         //timeManager.AddNewTimer(20, createNotificationBlock, null);
+    }
+
+    private void OnDestroy() {
+        SceneManagement.sharedInstance.EndSceneUpdates(this);
     }
 
     private void EndGameFailure() {
@@ -184,6 +193,14 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate {
         fadePanel.FadeOut(false, null);
 
         playerBehaviour.SetPauseState(false);
+
+        StartCoroutine(StartMusic());
+    }
+
+    IEnumerator StartMusic() {
+        yield return new WaitForSeconds(2.5f);
+
+        audioSource.Play();
     }
 
     IEnumerator CheckForNoRobots() {
@@ -212,5 +229,13 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate {
 
     public bool CanWeSwitchScene() {
         return canSceneChange;
+    }
+
+    /*
+     * SceneChangeListener Interface
+     * */
+
+    public void WillSwitchScene() {
+        audioSource.Stop();
     }
 }

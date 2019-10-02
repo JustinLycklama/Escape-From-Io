@@ -62,6 +62,7 @@ public class MapsManager : MonoBehaviour {
         }
     }
 
+    public bool initialized { get; private set; } = false;
     public void InitializeMaps(int horizontalMaps, int verticalMaps) {
         Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();
 
@@ -149,6 +150,7 @@ public class MapsManager : MonoBehaviour {
             }
         }
 
+        initialized = true;
         StartCoroutine(UpdateVisibleMaps());
     }
 

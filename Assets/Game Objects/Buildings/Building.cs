@@ -53,7 +53,11 @@ public abstract class Building : ActionableItem, Selectable {
     public abstract string title { get; }
     protected abstract float constructionModifierSpeed { get; }
 
+    private float layoutTerrainModifier;
+
     public bool buildingComplete = false;
+
+    public LayoutCoordinate buildingLayoutCoordinate;
 
     // Building status
     private float percentComplete = 0;
@@ -81,6 +85,17 @@ public abstract class Building : ActionableItem, Selectable {
         SetTransparentShaders();
 
         gameObject.isStatic = true;
+    }
+
+    protected virtual void Start() {
+        if(Script.Get<MapsManager>().initialized) {
+            WorldPosition worldPosition = new WorldPosition(transform.position);
+            MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(worldPosition);
+
+            buildingLayoutCoordinate = new LayoutCoordinate(mapCoordinate);
+
+            layoutTerrainModifier = Mathf.Clamp01(buildingLayoutCoordinate.mapContainer.map.GetTerrainAt(buildingLayoutCoordinate).modificationSpeedModifier * 2);
+        } 
     }
 
     public void SetCost(BlueprintCost cost) {
@@ -245,7 +260,7 @@ public abstract class Building : ActionableItem, Selectable {
         switch(task.action) {
             case GameTask.ActionType.Build:
                 float previousPercent = percentComplete;
-                percentComplete += rate * constructionModifierSpeed;
+                percentComplete += rate * constructionModifierSpeed * layoutTerrainModifier;
 
                 if(percentComplete > 1) {
                     percentComplete = 1;
