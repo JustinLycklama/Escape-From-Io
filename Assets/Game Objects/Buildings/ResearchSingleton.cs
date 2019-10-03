@@ -47,10 +47,6 @@ public class ResearchSingleton: SceneChangeListener {
     public void RemoveBuildingCount(Building building) {
         Type type = building.GetType();
 
-        if(!buildingCount.ContainsKey(type)) {
-            return;
-        }
-
         buildingCount[type] = 0;
     }
 

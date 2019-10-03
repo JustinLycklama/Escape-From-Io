@@ -10,17 +10,6 @@ public class StationShip : Building, CanSceneChangeDelegate /*, BuildingsUpdateD
     public override string title => "Starship Frame";
     protected override float constructionModifierSpeed => 0.15f;
 
-    private LayoutCoordinate layoutCoordinate;
-
-    void Start() {
-        Constants constants = Script.Get<Constants>();
-
-        WorldPosition worldPosition = new WorldPosition(transform.position);
-        MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(worldPosition);
-
-        layoutCoordinate = new LayoutCoordinate(mapCoordinate);
-    }
-
     private void OnDestroy() {
         //Script.Get<BuildingManager>()?.EndBuildingNotifications(this);
     }
