@@ -1,6 +1,8 @@
 # Escape-From-Io
 
-[![Escape From Io](https://raw.githubusercontent.com/JustinLycklama/Escape-From-Io/master/docs/videoScreenShot.png)](https://www.youtube.com/watch?v=NFybfWf554w "Escape From Io Gameplay")
+<div align="center">
+  <a href="https://www.youtube.com/watch?v=NFybfWf554w"><img src="https://raw.githubusercontent.com/JustinLycklama/Escape-From-Io/master/docs/videoScreenShot.png" alt="Escape From Io Gameplay"></a>
+</div>
 
 <p align=center>Escape from Io: A resource management and exploration simulator</p>
 
