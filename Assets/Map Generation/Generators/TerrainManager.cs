@@ -361,6 +361,8 @@ public struct TerrainType {
     public float modificationSpeedModifier;
 
     public Texture2D texture;
+    public Texture2D bumpMap;
+
     public float textureScale;
 
     [System.Serializable]

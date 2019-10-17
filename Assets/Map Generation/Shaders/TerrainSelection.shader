@@ -36,6 +36,8 @@
 		float mapYOffsetHigh;
 
 		UNITY_DECLARE_TEX2DARRAY(baseTextures);
+		UNITY_DECLARE_TEX2DARRAY(bumpMapTextures);
+
 		float indexPriority[20];
 		float indexScale[20];
 
@@ -58,12 +60,13 @@
 		{
 			// Pre-Defined
 			float3 worldPos;
-			float3 worldNormal;
+			float3 worldNormal; INTERNAL_DATA
 
 			//float2 uv_MainTex;
 
 			// Custom
 			float2 layoutCoordinate;
+			float3 normal;
 		};
 		
 		void vert(inout appdata_full v, out Input o) {
@@ -76,6 +79,9 @@
 
 			o.layoutCoordinate = float2(layoutCoordinateX + 1, layoutCoordinateY + 1);
 
+			//TANGENT_SPACE_ROTATION;
+			//float3 tangentSpaceNormal = mul(rotation, worldNormal);
+			//o.normal = tangentSpaceNormal; //mul((float3x3)unity_ObjectToWorld, v.normal);
 
 				//if (hasSelection > 0.5) {
 				   // o.isSelected = vertex.x > selectedXOffsetLow && vertex.x < selectedXOffsetHigh &&
@@ -101,6 +107,26 @@
 			float3 yProjection = UNITY_SAMPLE_TEX2DARRAY(baseTextures, float3(scaledWorldPos.x, scaledWorldPos.z, textureIndex)) * blendAxes.y;
 			float3 zProjection = UNITY_SAMPLE_TEX2DARRAY(baseTextures, float3(scaledWorldPos.x, scaledWorldPos.y, textureIndex)) * blendAxes.z;
 			return xProjection + yProjection + zProjection;
+		}
+
+		float3 triplanarBumpMap(float3 worldPos, float scale, float3 blendAxes, int textureIndex) {
+
+			if (textureIndex == -1) {
+				textureIndex = 0; // Default to water
+			}
+
+			float3 scaledWorldPos = worldPos / scale;
+
+			fixed4 xProjection = UNITY_SAMPLE_TEX2DARRAY(bumpMapTextures, float3(scaledWorldPos.y, scaledWorldPos.z, textureIndex));// *blendAxes.x;
+			fixed4  yProjection = UNITY_SAMPLE_TEX2DARRAY(bumpMapTextures, float3(scaledWorldPos.x, scaledWorldPos.z, textureIndex));// *blendAxes.y;
+			fixed4  zProjection = UNITY_SAMPLE_TEX2DARRAY(bumpMapTextures, float3(scaledWorldPos.x, scaledWorldPos.y, textureIndex));// *blendAxes.z;
+
+			fixed4 b = xProjection * blendAxes.x + yProjection * blendAxes.y + zProjection * blendAxes.z;
+
+			return UnpackNormal(b);
+
+
+
 		}
 
 		void sampleAndStrength(float origCoord, int sizeInDimension, out int sampleCoord, out float drawStrength) {
@@ -168,8 +194,14 @@
 			int floorX = floor(x);
 			int floorY = floor(y);
 
-			float3 blendAxes = abs(IN.worldNormal);
+			float3 worldNormal = WorldNormalVector(IN, o.Normal);
+			//float3 localNormal = IN.normal;
+
+			float3 blendAxes = abs(worldNormal);
 			blendAxes /= blendAxes.x + blendAxes.y + blendAxes.z;
+
+			//float3 blendAxesLocal = abs(localNormal);
+			//blendAxesLocal /= blendAxesLocal.x + blendAxesLocal.y + blendAxesLocal.z;
 
 			// Sample
 			int sampleCoordX = floorX;
@@ -183,6 +215,11 @@
 			// The color to blend from adjacent index
 			int baseIndex = floorY * mapLayoutWidth + floorX;
 			float3 baseColor = triplanar(IN.worldPos, indexScale[layoutTextures[baseIndex]], blendAxes, layoutTextures[baseIndex]);
+
+			// BumpMap test
+			float3 baseBumpMap = triplanarBumpMap(IN.worldPos, indexScale[layoutTextures[baseIndex]], blendAxes, layoutTextures[baseIndex]);
+			// BumpMap test
+
 
 			// Is this tile selected
 			if (hasSelection && floorX - 1 == selectionX && floorY - 1 == selectionY) {
@@ -306,6 +343,21 @@
 			// If we neither override or are overriden by adjacent, drawstrength will blend the two evenly in the center
 			o.Albedo = (drawStrength * baseColor) + ((1 - drawStrength) * otherColor);
 			//o.Albedo = float3(1, 1, 1);
+
+			//o.Normal = baseBumpMap;
+			
+			//if (baseBumpMap.r > baseBumpMap.b && baseBumpMap.r > baseBumpMap.g) {
+			//	o.Albedo = float3(1, 1, 1); // *0.5 + 0.5;
+			//}
+			//else {
+			//	o.Albedo = baseBumpMap; // *0.5 + 0.5;
+			//}
+		
+			o.Albedo = worldNormal; // *0.5 + 0.5;
+
+
+			//o.Normal = UnpackNormal(tex2D(_BumpMap, IN.uv_BumpMap));
+			//float3 worldNormal = WorldNormalVector(IN, o.Normal);
 		}
         ENDCG
     }
