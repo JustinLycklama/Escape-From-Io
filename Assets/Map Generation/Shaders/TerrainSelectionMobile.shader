@@ -26,6 +26,7 @@ Shader "Custom/TerrainSelectionMobile" {
 		// Given a layout width and height of 5, plus 2 for overhang in each direction
 		float layoutTextures[7*7];
 		UNITY_DECLARE_TEX2DARRAY(baseTextures);
+		UNITY_DECLARE_TEX2DARRAY(bumpMapTextures);
 
 		float indexPriority[20];
 		float indexScale[20];
@@ -39,7 +40,7 @@ Shader "Custom/TerrainSelectionMobile" {
 		{
 			// Pre-Defined
 			float3 worldPos;
-			float3 worldNormal;
+			float3 worldNormal; INTERNAL_DATA
 
 			//float2 uv_MainTex;
 
@@ -86,6 +87,52 @@ Shader "Custom/TerrainSelectionMobile" {
 			return xProjection + yProjection + zProjection;
 		}
 
+		half3 triplanarBump(float3 worldPos, float3 worldNormal, float scale, float3 blendAxes, int textureIndex) {
+
+			if (textureIndex == -1) {
+				textureIndex = 0; // Default to water
+			}
+
+			// UDN blend
+			
+			// Triplanar uvs
+			//float2 uvX = worldPos.zy; // x facing plane
+			//float2 uvY = worldPos.xz; // y facing plane
+			//float2 uvZ = worldPos.xy; // z facing plane
+			
+										
+			// Tangent space normal maps
+			
+			// Original
+			//half3 tnormalX = UnpackNormal(tex2D(_BumpMap, uvX));
+			//half3 tnormalY = UnpackNormal(tex2D(_BumpMap, uvY));
+			//half3 tnormalZ = UnpackNormal(tex2D(_BumpMap, uvZ));
+
+			float3 scaledWorldPos = worldPos / scale;
+
+			half3 tnormalX = UnpackScaleNormal(UNITY_SAMPLE_TEX2DARRAY(bumpMapTextures, float3(scaledWorldPos.z, scaledWorldPos.y, textureIndex)), 1000);
+			half3 tnormalY = UnpackScaleNormal(UNITY_SAMPLE_TEX2DARRAY(bumpMapTextures, float3(scaledWorldPos.x, scaledWorldPos.z, textureIndex)), 1000);
+			half3 tnormalZ = UnpackScaleNormal(UNITY_SAMPLE_TEX2DARRAY(bumpMapTextures, float3(scaledWorldPos.x, scaledWorldPos.y, textureIndex)), 1000);
+		
+
+			// Swizzle world normals into tangent space and apply UDN blend.
+			// These should get normalized, but it's very a minor visual
+			// difference to skip it until after the blend.
+			tnormalX = half3(tnormalX.xy + worldNormal.zy, worldNormal.x);
+			tnormalY = half3(tnormalY.xy + worldNormal.xz, worldNormal.y);
+			tnormalZ = half3(tnormalZ.xy + worldNormal.xy, worldNormal.z);
+
+
+			// Swizzle tangent normals to match world orientation and triblend
+			half3 newNormal = normalize(
+				tnormalX.zyx * blendAxes.x +
+				tnormalY.xzy * blendAxes.y +
+				tnormalZ.xyz * blendAxes.z
+			);
+
+			return newNormal;
+		}
+
 		void sampleAndStrength(float origCoord, int sizeInDimension, out int sampleCoord, out float drawStrength) {
 			const float overrideLine = (1 / tileSize) / 2; // Point where higher terrain takes complete precedence
 
@@ -113,6 +160,7 @@ Shader "Custom/TerrainSelectionMobile" {
 			o.Alpha = c.a;
 			o.Normal = UnpackNormal(tex2D(_BumpMap, IN.uv_MainTex));*/
 
+			float3 worldNormal = WorldNormalVector(IN, o.Normal);
 
 			float x = IN.layoutCoordinate.x;
 			float y = IN.layoutCoordinate.y;
@@ -120,7 +168,7 @@ Shader "Custom/TerrainSelectionMobile" {
 			int floorX = floor(x);
 			int floorY = floor(y);
 
-			float3 blendAxes = abs(IN.worldNormal);
+			float3 blendAxes = abs(worldNormal);
 			blendAxes /= blendAxes.x + blendAxes.y + blendAxes.z;
 
 			// Sample
@@ -259,7 +307,11 @@ Shader "Custom/TerrainSelectionMobile" {
 
 			// If we neither override or are overriden by adjacent, drawstrength will blend the two evenly in the center
 			o.Albedo = (drawStrength * baseColor) + ((1 - drawStrength) * otherColor);
-			//o.Albedo = float3(1, 1, 1);
+			//o.Albedo = float3(1, 0, 1);
+
+			half3 newWorldNormal = triplanarBump(IN.worldPos, worldNormal, indexScale[layoutTextures[baseIndex]], blendAxes, layoutTextures[baseIndex]);
+			//o.Albedo = newWorldNormal;
+			o.Normal = newWorldNormal;
 		}
 		ENDCG
 	}
