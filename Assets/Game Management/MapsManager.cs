@@ -97,7 +97,7 @@ public class MapsManager : MonoBehaviour {
                 MeshRenderer renderer = mapContainerObject.AddComponent<MeshRenderer>();
                 mapContainerObject.AddComponent<MeshFilter>();
 
-                renderer.material = new Material(Shader.Find("Custom/TerrainSelection"));
+                renderer.material = new Material(Shader.Find("Custom/TerrainSelectionMobile"));
 
                 mapContainer.SetMapPosition(x, y, mapRect);
 

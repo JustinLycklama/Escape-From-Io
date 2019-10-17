@@ -350,7 +350,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         float halfTotalHeight = boxSizeZ * height / 2f;
 
         Color materialColor = Color.black;
-        //materialColor.a = 0;
+        materialColor.a = 0;
 
         for(int x = 0; x < width; x++) {
             for(int y = 0; y < height; y++) {
@@ -363,7 +363,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
 
                     material.shader = unlitShader;
 
-                    //SetMaterialTransparent(material);
+                    SetMaterialTransparent(material);
 
                     material.color = materialColor;
                     //material.SetFloat("_Metallic", 1);
@@ -486,7 +486,6 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                 LayoutCoordinate coordinate = new LayoutCoordinate(0, 0, neighbours.bottomRightMap);
 
                 if (neighbours.bottomRightMap.map == null) {
-                    print("yo");
                 }
 
                 TerrainType terrain = neighbours.bottomRightMap.map.GetTerrainAt(coordinate);
@@ -551,11 +550,21 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         mapMaterial.SetFloat("mapLayoutHeight", mapHeightWithOverhang);
 
 
-        mapMaterial.SetFloat("mapXOffsetLow", 0 - (constants.layoutMapWidth * constants.featuresPerLayoutPerAxis / 2f));
-        mapMaterial.SetFloat("mapXOffsetHigh", constants.layoutMapWidth - (constants.layoutMapWidth * constants.featuresPerLayoutPerAxis / 2f));
+        mapMaterial.SetVector("mapLayout", new Vector2(mapWidthWithOverhang, mapHeightWithOverhang));
 
-        mapMaterial.SetFloat("mapYOffsetLow", 0 - (constants.layoutMapHeight * constants.featuresPerLayoutPerAxis / 2f));
-        mapMaterial.SetFloat("mapYOffsetHigh", constants.layoutMapHeight - (constants.layoutMapHeight * constants.featuresPerLayoutPerAxis / 2f));
+        //mapMaterial.SetFloat("mapXOffsetLow", 0 - (constants.layoutMapWidth * constants.featuresPerLayoutPerAxis / 2f));
+        //mapMaterial.SetFloat("mapXOffsetHigh", constants.layoutMapWidth - (constants.layoutMapWidth * constants.featuresPerLayoutPerAxis / 2f));
+
+        //mapMaterial.SetFloat("mapYOffsetLow", 0 - (constants.layoutMapHeight * constants.featuresPerLayoutPerAxis / 2f));
+        //mapMaterial.SetFloat("mapYOffsetHigh", constants.layoutMapHeight - (constants.layoutMapHeight * constants.featuresPerLayoutPerAxis / 2f));
+
+        float mapXOffsetLow = 0 - (constants.layoutMapWidth * constants.featuresPerLayoutPerAxis / 2f);
+        float mapXOffsetHigh = constants.layoutMapWidth - (constants.layoutMapWidth * constants.featuresPerLayoutPerAxis / 2f);
+
+        float mapYOffsetLow = 0 - (constants.layoutMapHeight * constants.featuresPerLayoutPerAxis / 2f);
+        float mapYOffsetHigh = constants.layoutMapHeight - (constants.layoutMapHeight * constants.featuresPerLayoutPerAxis / 2f);
+
+        mapMaterial.SetVector("mapOffset", new Vector4(mapXOffsetLow, mapXOffsetHigh, mapYOffsetLow, mapYOffsetHigh));
 
         TextureGenerator texGen = Script.Get<TextureGenerator>();
 
@@ -613,13 +622,18 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
             //mapMaterial.SetFloat("selectedYOffsetHigh", (selection.coordinate.y + 1) * constants.featuresPerLayoutPerAxis - (constants.layoutMapHeight * constants.featuresPerLayoutPerAxis / 2f));
 
             mapMaterial.SetFloat("hasSelection", 1);
-            mapMaterial.SetFloat("selectionX", selection.coordinate.x);
-            mapMaterial.SetFloat("selectionY", selection.coordinate.y);
+            //mapMaterial.SetFloat("selectionX", selection.coordinate.x);
+            //mapMaterial.SetFloat("selectionY", selection.coordinate.y);
+
+            mapMaterial.SetVector("selection", new Vector2(selection.coordinate.x, selection.coordinate.y));
 
         } else {
             mapMaterial.SetFloat("hasSelection", 0);
-            mapMaterial.SetFloat("selectionX", -1);
-            mapMaterial.SetFloat("selectionY", -1);
+            //mapMaterial.SetFloat("selectionX", -1);
+            //mapMaterial.SetFloat("selectionY", -1);
+
+            mapMaterial.SetVector("selection", new Vector2(-1, -1));
+
         }
     }
 
