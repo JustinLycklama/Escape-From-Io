@@ -8,12 +8,10 @@ layout: default
 				<div class="article-image-first" style="background-image: url({{"/img/" | prepend: site.baseurl | append : "title-gif-2.gif"}})">
 					<div class="article-content-first">
 						<div class="article-tag">
-
-							Tag
-
+							<!--Tag-->
 						</div>
-						<h2 class="article-title">Title</h2>
-						<p class="article-excerpt">Excerpt from article</p>
+						<h2 class="article-title">A Resource Exploration Sims</h2>
+						<p class="article-excerpt">Build robots to </p>
 						<a href="dead link" class="button read-more">Read More</a>
 					</div>
 				</div>
@@ -25,6 +23,7 @@ layout: default
 <!--Main Text-->
 <div class="container">
 	<div class="row">
+
 		<article class="col col-12 col-t-10 push-t-1 page">
 			<div class="post-content">
 
@@ -45,38 +44,147 @@ layout: default
 				</div>
 
 				<div class="post-body">
-					YOOO
+					Centuries after an attempted terraform of Io, you activate due to nearby volcanic activity. Driven by your love of humans, you mobilize your last remaining architecture automatons in an effort to return home...
+
+					<img src="/galada/img/planet/blue-planet.png" alt="" class="reveal-in">
+
+
+					<div class="post-info-author">
+						<div class="info-author-avatar" style="background-image: url({{"/img/" | prepend: site.baseurl | append : site.author-avatar}})"></div>
+						<span>by</span>
+						<span class="info-author-name">Author</span>
+					</div>
+
+					Welcome and thanks for playing! Please skim the overview for an outline of the systems, and read the details in the tabs below for more. This window is available during the game as well, under Settings -> Help.
+
+					In Escape From Io, you will be taking control of an Artificial Intelligence programmed to pair tasks and robots of three categories: Mining, Movement, and Building.
+
+					Manage tasks and the associated robots as efficiently as possible to excape from Io! Robots have a limited duration and are not efficient at performing tasks they are not designed to do.
+
+					Read more about "Tasks" and "Task Locks" below.
+
+
+					This is a game of exploration.
+
+					The resources you need to escape the planet are scattered over a large area. To explore your surroundings, build Towers at the edge of your vision. Robots will only be able to place buildings on Cleaned tiles.
+					
+					Clean tiles and build Paths to keep robots moving efficiently. Robots will go out of their way to find the quickest path to a task, even if it is not the shortest one.
+
+
+					Gathering enough resources for the Ship (in the Buildings panel) is your goal. Exploration in order to find the correct resources is important, but don't let it slow you down!
+
+					Your final score is the time it takes you to complete the ship.
+					Leave a highscore if you can, challenge a friend to beat it, and send me thoughs you have on this first version :) 
+
+
+
+
+
+
+					Selected actions will be added to one of three TASK LISTS. For example, selecting this Loose Rock to be mined will be added to the Mine List.
+
+					At the top of the page is a Quick Reference for each category.
+
+
+
+					Once a task is assigned, we can see it has been added to the appropriate list.
+
+					Once assigned to a list, any units of that category will be able to do the work.
+
+
+
+
+
+					If you select the Miner Quick Reference from the previous screen, you will navigate to the Miner Detail Panel. Here you can see the list of robots currently active, as well as the list of tasks that have yet to be assigned. 
+
+					On the right you see can see a Miner performing a task, with a second task in the queue on the bottom.
+
+
+
+
+
+					On each task list you will find a toggle for the Lock. 
+This is where you will find the most control for optimizing your units.
+
+When a list is locked, only units of that type will have access. 
+If our example here were Locked, only Miners would have access.
+
+				When Unlocked, all units have access to this list. 
+					If a Mover is idle and there is an excess of Miner tasks, the Mover will try its hand at Mining. This is the current case in the image above.
+
+
+
+
+
+
+
+
+					Here the Mine List has been Unlocked, and the closest unit was the Builder. The Builder has been assigned the mine task in place of the Miner.
+
+The Quick Reference Panel has been marked Inefficient since a Builder is now beginning to do work on a task it was not designed for.
+
+While an open Task List means any unit may pick from it, a Unit still takes tasks from its OWN list FIRST. If the Builder had to choose between a Build task and a Mine task, it will always choose the Build Task. 
+
+
+
+When a new unit is created, our human-loving AI will assign it a name. 
+
+Units are specialized at one type of task: Mining, Moving, or Building.
+Each unit also has a unique movement speed and battery life.
+
+When a unit is performing a task, its name panel will light up with a description of the task. If the unit is performing an inefficient task, the panel's color will be disfigured. 
+
+
+
+
+
+In the Quick Reference panel we can see the number of Units of a given category. 
+
+In the center of the panel The SHORTEST THREE durations are displayed, so you can tell at a glance how close you are to losing a Unit.
+
+
+
+Build an Interplanetary Ship, and your goal is complete. It does not matter how much resources you collect, how many units you build or how much space you explore.
+
+Your score is the time to completion.
+
+
+
+
+The construction of all ships is last priority.
+
+While you are building you ship, any additional tasks you queue will be considered more important than the ship itself! Use this to build additional units and clear additional paths to speed the process.
+
+Good luck!
+
 				</div>
 			</div>
+		</article> 
 
-	</article> 
-	<!-- /.post -->
-	
-	<article class="col col-12 col-t-10 push-t-1 page">
-
-		<div class="row">
-			{%- for post in paginator.posts offset: 0 -%}
-				<article class="article col col-12 col-t-6">
-					<div class="article-box">
-						<div class="article-head">
-							<a href="{{ post.url | prepend: site.baseurl }}" class="article-image" style="background-image: url({{"/img/" | prepend: site.baseurl | append : post.image}})">
-								<div class="image-overlay">
-									<span class="image-overlay-text">{{post.title | slice: 0}}</span>
-								</div>
-							</a>
+		<article class="col col-12 col-t-10 push-t-1 page">
+			<div class="row">
+				{%- for post in paginator.posts offset: 0 -%}
+					<article class="article col col-12 col-t-6">
+						<div class="article-box">
+							<div class="article-head">
+								<a href="{{ post.url | prepend: site.baseurl }}" class="article-image" style="background-image: url({{"/img/" | prepend: site.baseurl | append : post.image}})">
+									<div class="image-overlay">
+										<span class="image-overlay-text">{{post.title | slice: 0}}</span>
+									</div>
+								</a>
+							</div>
+							<div class="article-content">
+								<h2 class="article-title">
+									<a href="{{ post.url | prepend: site.baseurl }}">{{post.title}}</a>
+								</h2>
+								<p class="article-excerpt">{% if post.description %}{{ post.description | strip_html | truncate: 135 }}{% else %}{{ post.content | strip_html | truncate: 135 }}{% endif %}</p>
+							</div>
 						</div>
-						<div class="article-content">
-							<h2 class="article-title">
-								<a href="{{ post.url | prepend: site.baseurl }}">{{post.title}}</a>
-							</h2>
-							<p class="article-excerpt">{% if post.description %}{{ post.description | strip_html | truncate: 135 }}{% else %}{{ post.content | strip_html | truncate: 135 }}{% endif %}</p>
-						</div>
-					</div>
-				</article> <!-- /.article -->
-			{% endfor %}
-			</div>
-			{% include pagination.html %}			
-		</article>
+					</article> <!-- /.article -->
+				{% endfor %}
+				</div>
+				{% include pagination.html %}			
+			</article>
 
 	</div>
 </div>
