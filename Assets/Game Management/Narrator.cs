@@ -33,6 +33,9 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
             constants = GetComponent<Constants>();
             playerBehaviour = Script.Get<PlayerBehaviour>();
 
+            // Kickoff premade noise if it exists
+            Tag.MapGenerator.GetGameObject().GetComponent<PremadeNoiseGenerator>();
+
             playerBehaviour.SetPauseState(true);
         });
 

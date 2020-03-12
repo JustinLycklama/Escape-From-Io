@@ -255,16 +255,28 @@ public class MapGenerator : MonoBehaviour {
         layoutNoiseMap = new float[0, 0];
         bool success = false;
 
+        PremadeNoiseGenerator premadeLayoutMap = GetComponent<PremadeNoiseGenerator>();
+
         while(success == false) {
             RandomizeSeed();
-            layoutNoiseMap = GenerateLayoutMap(totalLayoutWidth, totalLayoutHeight);
+
+            layoutNoiseMap = premadeLayoutMap?.LayoutNoiseData ?? GenerateLayoutMap(totalLayoutWidth, totalLayoutHeight);            
             success = IsLayoutSuitable(layoutNoiseMap);
+
+            if (success == false && premadeLayoutMap?.LayoutNoiseData != null) {
+                break;
+            }
         }
 
         print("Found Suitable Map");
 
-        float[,] groundMutatorMap = GenerateGroundMutatorMap(totalLayoutWidth, totalLayoutHeight);
-        float[,] mountainMutatorMap = GenerateMountainMutatorMap(totalLayoutWidth, totalLayoutHeight);
+        float[,] groundMutatorMap = premadeLayoutMap?.GroundMutatorNoiseData ?? GenerateGroundMutatorMap(totalLayoutWidth, totalLayoutHeight);
+        float[,] mountainMutatorMap = premadeLayoutMap?.MountainMutatorNoiseData ?? GenerateMountainMutatorMap(totalLayoutWidth, totalLayoutHeight);
+
+        // If we are using a premade layout map, don't add random alunar rocks
+        if (premadeLayoutMap?.LayoutNoiseData != null) {
+            maxSavedCoordinateValues = 0;
+        }
 
         TerrainManager terrainManager = Script.Get<TerrainManager>();
         terrainManager.SetGroundMutatorMap(groundMutatorMap);
@@ -480,7 +492,7 @@ public class MapGenerator : MonoBehaviour {
      * Map (2d array) Creation
      * */
 
-    const int maxSavedCoordinateValues = 30;
+    int maxSavedCoordinateValues = 30;
     const int invalidMutatorValue = 20;
     struct MutatorCoordinateValues {
         public float mutator;
@@ -521,7 +533,7 @@ public class MapGenerator : MonoBehaviour {
                 terrainMap[x, y] = terrainManager.TerrainTypeForRegion(region, x, y, out mutatorValue);
                 map[x, y] = HeightAtRegion(region);
 
-                if (region.type == RegionType.Type.Mountain && mutatorValue < coordinateValues[maxSavedCoordinateValues - 1].mutator) {
+                if (maxSavedCoordinateValues > 0 && region.type == RegionType.Type.Mountain && mutatorValue < coordinateValues[maxSavedCoordinateValues - 1].mutator) {
                     if (Vector2.Distance(spawnCoord, new Vector2(x, y)) > 3) {
                         coordinateValues[maxSavedCoordinateValues - 1] = new MutatorCoordinateValues(mutatorValue, x, y);
                         coordinateValues = coordinateValues.OrderBy(m => m.mutator).ToArray();
