@@ -18,6 +18,7 @@ public class SceneManagement {
 
     private const int MenuScene = 0;
     private const int GameScene = 1;
+    private const int TutorialScene = 2;
 
     /*
      * Title state is the defaut state on game load
@@ -57,8 +58,10 @@ public class SceneManagement {
                 scene = MenuScene;
                 break;
             case State.NewGame:
-            case State.Tutorial:
                 scene = GameScene;
+                break;
+            case State.Tutorial:
+                scene = TutorialScene;
                 break;
         }
 

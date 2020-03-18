@@ -43,8 +43,12 @@ public class TitleWindow : MonoBehaviour, GameButtonDelegate, CanSceneChangeDele
         };
 
         if(button == tutorial) {
-            helpWindow.gameObject.SetActive(true);
-            gameObject.SetActive(false);
+            //helpWindow.gameObject.SetActive(true);
+            //gameObject.SetActive(false);
+
+            fadePanel.FadeOut(true, completeTransition);
+            SceneManagement.sharedInstance.ChangeScene(SceneManagement.State.Tutorial, null, null, this);
+        
         } else if(button == newGame) {
             fadePanel.FadeOut(true, completeTransition);
             SceneManagement.sharedInstance.ChangeScene(SceneManagement.State.NewGame, null, null, this);

@@ -14,7 +14,6 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
     public Text unitCountText;
     public Text unitStatusText;
 
-    public Text taskCountText;
     public Toggle taskListLocked;
     public Text taskListLockedText;
 
@@ -80,8 +79,17 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
             image.color = sidePairConnectionColor;
         }
 
-        taskListLockedText.text = state ? "Paired" : "Open";
+        SetLockAndCount();
     }
+
+    private void SetLockAndCount() {
+
+        string stateText = taskListLocked.state ? "Paired" : "Open";
+        string count = taskList.Length.ToString();
+
+        taskListLockedText.text = $"{count} {stateText}";
+    }
+
 
     /*
      * ButtonDelegate Interface
@@ -109,8 +117,8 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
      * */
 
     public void NotifyUpdateTaskList(MasterGameTask[] taskList, MasterGameTask.ActionType actionType, TaskQueueManager.ListState listState) {
-        this.taskList = taskList;
-        taskCountText.text = taskList.Length.ToString(); // + " Task" + ((taskList.Length == 1)? "" : "s");
+        this.taskList = taskList;        
+        SetLockAndCount();
 
         SetLockState(Script.Get<TaskQueueManager>().GetTaskListLockStatus(actionType));
 
