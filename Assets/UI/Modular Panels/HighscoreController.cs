@@ -5,7 +5,7 @@ using System.Collections.ObjectModel;
 
 using System.Linq;
 
-using PubNubAPI;
+//using PubNubAPI;
 using System;
 
 public struct PubNubScoreObject {
@@ -62,7 +62,7 @@ public class LeaderboardItem {
 
 public class HighscoreController : MonoBehaviour {
 
-    private PubNub pubnub;
+    //private PubNub pubnub;
     private const string channel = "leaderboard";
 
     public List<LeaderboardItem> leaderboardItems = new List<LeaderboardItem>();
@@ -93,7 +93,7 @@ public class HighscoreController : MonoBehaviour {
         //    }
         //};
 
-        PNConfiguration pnConfiguration = new PNConfiguration();
+        /*PNConfiguration pnConfiguration = new PNConfiguration();
         pnConfiguration.SubscribeKey = "sub-c-705a78cc-ce95-11e9-8b24-569e8a5c3af3";
         pnConfiguration.PublishKey = "pub-c-c6e1fb2f-39fb-4003-8526-29e45b48e1e2";
         pnConfiguration.SecretKey = "sec-c-MDA3ZDE5YmItYmQ5Mi00MjFjLWIwNmEtYzY2ZTQ5NzdjNTEz";
@@ -192,7 +192,7 @@ public class HighscoreController : MonoBehaviour {
 
         //SubmitScore(100, "justin", "l");
         //preSubmitValue = 25;
-        //AddPlaceholderScoreCell();
+        //AddPlaceholderScoreCell();*/
     }    
 
     public void UpdateLeaderItems() {
@@ -231,7 +231,7 @@ public class HighscoreController : MonoBehaviour {
         json = json.Replace(@"\", string.Empty);
 
         preSubmit = false;
-
+        /*
         pubnub.Publish()
           .Channel(channel)
           .Message(newScoreObject)
@@ -247,6 +247,6 @@ public class HighscoreController : MonoBehaviour {
                   preSubmit = true;
                   UpdateLeaderItems();
               }
-          });
+          });*/
     }
 }
