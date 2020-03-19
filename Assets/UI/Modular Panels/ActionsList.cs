@@ -29,11 +29,6 @@ public class ActionsList : MonoBehaviour {
                 action = actions[i];
             }
 
-            bool enabled = action != null;
-            if(cell.buttonEnabled != enabled) {
-                cell.SetEnabled(enabled);
-            }
-
             cell.SetAction(action);
         }
     }

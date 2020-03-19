@@ -39,8 +39,6 @@ public class StationShip : Building, CanSceneChangeDelegate /*, BuildingsUpdateD
     //}
 
     private void CompleteGame() {
-        MessageWindow messageWindow = UIManager.Blueprint.MessageWindow.Instantiate() as MessageWindow;
-
         TimeManager timeManager = Script.Get<TimeManager>();
         float completionTime = timeManager.globalTimer;
 
@@ -55,10 +53,7 @@ public class StationShip : Building, CanSceneChangeDelegate /*, BuildingsUpdateD
             SceneManagement.sharedInstance.ChangeScene(SceneManagement.State.GameFinish, null, null, this, completionTime);
         };
 
-        messageWindow.SetTitleAndText("SUCCESS", "You've created a ship to return to earth!");
-        messageWindow.SetSingleAction(okay, "Continue");
-
-        messageWindow.Display();
+        Script.Get<MessageManager>().EnqueueMessage("SUCCESS", "You've created a ship to return to earth!", okay);
     }
 
     /*

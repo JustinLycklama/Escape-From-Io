@@ -99,10 +99,11 @@ public class Script {
     public static Script FadePanel { get { return new Script(Tag.FadePanel, typeof(FadePanel)); } }
     public static Script SettingsPanel { get { return new Script(Tag.SettingsPanel, typeof(SettingsPanel)); } }
     public static Script IntervalActionPipeline { get { return new Script(Tag.Narrator, typeof(IntervalActionPipeline)); } }
+    public static Script MessageManager { get { return new Script(Tag.UIManager, typeof(MessageManager)); } }
 
     public static Script[] allScripts = new Script[] { Constants, PlayerBehaviour, MapsManager, UIManager, TaskQueue, MapGenerator, PathfindingGrid,
         SelectionManager, UnitManager, TextureGenerator, TerrainManager, ResourceManager, MiniMap, BuildingManager, TimeManager, NotificationManager, FadePanel,
-        SettingsPanel, IntervalActionPipeline}; 
+        SettingsPanel, IntervalActionPipeline, MessageManager}; 
 
     public static T Get<T> () where T : Component {
 

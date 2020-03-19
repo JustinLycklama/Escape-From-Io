@@ -6,6 +6,18 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class UserAction {
+    public enum TutorialIdentifier {
+        None,
+        DrillDown,
+        BuildUnit,
+        BuildBuilding,
+        Mine,
+        Clean,
+        Path
+    }
+
+    public TutorialIdentifier tutorialIdentifier = TutorialIdentifier.None;
+
     public string description;
     public LayoutCoordinate layoutCoordinate;
 
@@ -31,7 +43,7 @@ public class ActionItemCell : Clickable, HotkeyDelegate {
     public void SetAction(UserAction action) {
         this.action = action;
 
-        UpdateText();
+        UpdateButtonState();
     }
 
     public void SetHotKey(KeyCode hotkey) {
@@ -44,10 +56,10 @@ public class ActionItemCell : Clickable, HotkeyDelegate {
         this.hotkey = hotkey;
         playerBehaviour.AddHotKeyDelegate(hotkey, this);
 
-        UpdateText();
+        UpdateButtonState();
     }
 
-    private void UpdateText() {
+    private void UpdateButtonState() {
         string hotkeyText = "";
 
         if (hotkey != null) {
@@ -58,6 +70,18 @@ public class ActionItemCell : Clickable, HotkeyDelegate {
             actionItemTitle.text = defaultText;
         } else {
             actionItemTitle.text = action.description + hotkeyText;
+        }
+
+
+        bool enabled = action != null;
+        var currentTutorialIdentifier = TutorialManager.isolateUserAction;
+
+        if (currentTutorialIdentifier.HasValue) {
+            enabled = enabled && currentTutorialIdentifier.Value == action.tutorialIdentifier;
+        }
+
+        if(buttonEnabled != enabled) {
+            SetEnabled(enabled);
         }
     }
 

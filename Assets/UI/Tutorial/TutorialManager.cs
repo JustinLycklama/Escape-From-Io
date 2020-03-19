@@ -6,16 +6,21 @@ public enum TutorialEvent {
 
 }
 
-
 public interface TutorialEventListener {
     void EventFired(TutorialEvent e);
 }
 
+public class TutorialManager : MonoBehaviour {
 
-public class TutorialSingleton : MonoBehaviour {
-    public static TutorialSingleton sharedInstance;
+    public static UserAction.TutorialIdentifier? isolateUserAction = null;
+    public static PrefabBlueprint isolateBlueprint = null;
 
     private Dictionary<TutorialEvent, TutorialEventListener> eventMap = new Dictionary<TutorialEvent, TutorialEventListener>();
+
+    private void Start() {
+        isolateUserAction = UserAction.TutorialIdentifier.BuildBuilding;
+        isolateBlueprint = Building.Blueprint.Tower;
+    }
 
     public void Fire(TutorialEvent e) {
         NotifyEvent(e);

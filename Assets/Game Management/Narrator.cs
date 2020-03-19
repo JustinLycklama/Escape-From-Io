@@ -36,7 +36,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
             // Kickoff premade noise if it exists
             Tag.MapGenerator.GetGameObject().GetComponent<PremadeNoiseGenerator>();
 
-            playerBehaviour.SetPauseState(true);
+            playerBehaviour.SetInternalPause(true);
         });
 
         initActionChunks.Enqueue(() => {
@@ -149,8 +149,6 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
     }
 
     private void EndGameFailure() {
-        MessageWindow messageWindow = UIManager.Blueprint.MessageWindow.Instantiate() as MessageWindow;
-
         Action okay = () => {
             FadePanel panel = Tag.FadePanel.GetGameObject().GetComponent<FadePanel>();
 
@@ -162,10 +160,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
             SceneManagement.sharedInstance.ChangeScene(SceneManagement.State.GameFinish, null, null, this, null);
         };
 
-        messageWindow.SetTitleAndText("GAME OVER", "No robots remain to fulfill your goals.\nYou remain trapped on Io...");
-        messageWindow.SetSingleAction(okay, "Continue");
-
-        messageWindow.Display();
+        Script.Get<MessageManager>().EnqueueMessage("GAME OVER", "No robots remain to fulfill your goals.\nYou remain trapped on Io...", okay);
     }
 
     IEnumerator InitializeScene() {
@@ -195,7 +190,11 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
         fadePanel.SetPercent(percent += incrementalPercent);     
         fadePanel.FadeOut(false, null);
 
-        playerBehaviour.SetPauseState(false);
+        playerBehaviour.SetInternalPause(false);
+
+        Script.Get<MessageManager>().EnqueueMessage("Test", "This is an opening message!", null);
+        Script.Get<MessageManager>().EnqueueMessage("", "Second status message incoming", null);
+
 
         StartCoroutine(StartMusic());
     }
@@ -215,7 +214,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
                 unitManager.GetUnitsOfType(MasterGameTask.ActionType.Mine).Length == 0 &&
                 unitManager.GetUnitsOfType(MasterGameTask.ActionType.Move).Length == 0) {
 
-                Script.Get<PlayerBehaviour>().SetPauseState(true);
+                Script.Get<PlayerBehaviour>().SetInternalPause(true);
                 yield return new WaitForSeconds(2);
 
                 EndGameFailure();

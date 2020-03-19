@@ -17,7 +17,7 @@ public class TutorialOverlay : MonoBehaviour, TutorialEventListener {
     private void ContinueTutorialQueue() {
         TutorialScene scene = tutorialScenes.Dequeue();
 
-        playerBehaviour.SetPauseState(scene.isPaused);
+        playerBehaviour.SetInternalPause(scene.isPaused);
     }
 
     /*

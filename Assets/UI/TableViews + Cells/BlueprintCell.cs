@@ -46,11 +46,18 @@ public class BlueprintCell : MonoBehaviour, IPointerClickHandler, BuildingsUpdat
             return;
         }
 
-        disabled = false;
-        if(blueprint.requirementsMet != null && !blueprint.requirementsMet(blueprintLayoutCoordinate)) {
+        // If we are disabled due to requiredment not being met, use text. If we are disabled from a tutorial standpoint, use nothing
+        disabled = blueprint.requirementsMet != null && !blueprint.requirementsMet(blueprintLayoutCoordinate);
+        var disabledTextString = disabled ? blueprint.requirementsNotMetString : "";
+
+        var tutorialBlueprint = TutorialManager.isolateBlueprint;
+        if(tutorialBlueprint != null) {
+            disabled = disabled || tutorialBlueprint != blueprint;
+        }
+
+        if(disabled) {
             canvasGroup.alpha = 0.5f;
-            disabledText.text = blueprint.requirementsNotMetString;
-            disabled = true;
+            disabledText.text = disabledTextString;
         } else {
             canvasGroup.alpha = 1f;
         }

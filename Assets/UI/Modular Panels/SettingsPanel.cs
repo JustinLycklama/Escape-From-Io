@@ -19,9 +19,7 @@ public class SettingsPanel : MonoBehaviour, PlayerBehaviourUpdateDelegate, GameB
 
     private void Start() {
         playerBehaviour = Script.Get<PlayerBehaviour>();
-
         playerBehaviour.RegisterForPlayerBehaviourNotifications(this);
-        playerBehaviour.SetPauseState(false);
 
         menuWindow.gameObject.SetActive(false);
     }
@@ -34,7 +32,7 @@ public class SettingsPanel : MonoBehaviour, PlayerBehaviourUpdateDelegate, GameB
 
     public void CloseWindows() {
         menuWindow.gameObject.SetActive(false);
-        playerBehaviour.SetMenuPause(false);
+        playerBehaviour.SetInternalPause(false);
     }
 
     /*
@@ -43,13 +41,12 @@ public class SettingsPanel : MonoBehaviour, PlayerBehaviourUpdateDelegate, GameB
 
     public void ButtonDidClick(GameButton button) {
         if(button == settingsButton) {
-            //lastPausedState = playerBehaviour.gamePaused;
-            playerBehaviour.SetMenuPause(true);
+            playerBehaviour.SetInternalPause(true);
             menuWindow.gameObject.SetActive(true);
         } else if(button == playButton) {
-            playerBehaviour.SetPauseState(false);
+            playerBehaviour.SetPlayerPauseState(false);
         } else if(button == pauseButton) {
-            playerBehaviour.SetPauseState(true);
+            playerBehaviour.SetPlayerPauseState(true);
         }
     }
 

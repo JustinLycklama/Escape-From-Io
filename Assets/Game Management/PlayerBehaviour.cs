@@ -20,7 +20,7 @@ public class PlayerBehaviour : MonoBehaviour {
     public static Color tintColor = new Color(0, 1, 1);
 
     public bool gamePaused { get; private set; }
-    private bool lastPausedState = false;
+    private bool lastPlayerPausedState = false;
 
     List<PlayerBehaviourUpdateDelegate> delegateList = new List<PlayerBehaviourUpdateDelegate>();
 
@@ -82,7 +82,7 @@ public class PlayerBehaviour : MonoBehaviour {
         }
 
         if(Input.GetKeyUp(KeyCode.Space)) {
-            SetPauseState(!gamePaused);
+            SetPlayerPauseState(!gamePaused);
         }
 
         foreach(KeyCode vKey in System.Enum.GetValues(typeof(KeyCode))) {
@@ -201,22 +201,30 @@ public class PlayerBehaviour : MonoBehaviour {
         Camera.main.transform.position = position + new Vector3(0, 250, -250);
     }
 
-    public void SetMenuPause(bool paused) {
+    /*
+     * Menu paused state if used when a non player has requested a pause. 
+     * When we return from our 'internal' paused state, we return to the state the player had, which could also be paused
+     * */
+    public void SetInternalPause(bool paused) {
         if (paused) {
-            lastPausedState = gamePaused;
-            SetPauseState(true);
+            InternalUpdatePaused(true);
         } else {
-            SetPauseState(lastPausedState);
+            InternalUpdatePaused(lastPlayerPausedState);
         }
     }
 
-    public void SetPauseState(bool paused) {
+    private void InternalUpdatePaused(bool paused) {
         bool oldPausedState = gamePaused;
         gamePaused = paused;
 
-        if (oldPausedState != gamePaused) {
+        if(oldPausedState != gamePaused) {
             NotifyAllPlayerBehaviourUpdate();
         }
+    }
+
+    public void SetPlayerPauseState(bool paused) {
+        lastPlayerPausedState = paused;
+        InternalUpdatePaused(paused);
     }
 
     /*

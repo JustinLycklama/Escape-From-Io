@@ -164,6 +164,8 @@ public class TerrainManager : MonoBehaviour {
 
                         UserAction action = new UserAction();
 
+                        action.tutorialIdentifier = UserAction.TutorialIdentifier.Clean;
+
                         action.description = "Clean " + coordinate.mapContainer.map.GetTerrainAt(coordinate).name;
                         action.layoutCoordinate = coordinate;
 
@@ -187,6 +189,8 @@ public class TerrainManager : MonoBehaviour {
 
                         UserAction action = new UserAction();
 
+                        action.tutorialIdentifier = UserAction.TutorialIdentifier.Path;
+
                         action.description = "Create Path";
                         action.layoutCoordinate = coordinate;
 
@@ -204,6 +208,8 @@ public class TerrainManager : MonoBehaviour {
                     unitAction.description = "Build Unit";
                     unitAction.layoutCoordinate = coordinate;
 
+                    unitAction.tutorialIdentifier = UserAction.TutorialIdentifier.BuildUnit;
+
                     unitAction.blueprintList = new ConstructionBlueprint[] {
                         Unit.Blueprint.Miner, Unit.Blueprint.Mover, Unit.Blueprint.Builder,
                         Unit.Blueprint.AdvancedMiner, Unit.Blueprint.AdvancedMover, Unit.Blueprint.AdvancedBuilder
@@ -214,6 +220,8 @@ public class TerrainManager : MonoBehaviour {
                     UserAction buildingAction = new UserAction();
                     buildingAction.description = "Build Building";
                     buildingAction.layoutCoordinate = coordinate;
+
+                    buildingAction.tutorialIdentifier = UserAction.TutorialIdentifier.BuildBuilding;
 
                     buildingAction.blueprintList = new ConstructionBlueprint[] { Building.Blueprint.Tower, Building.Blueprint.SensorTower, Building.Blueprint.AdvUnitBuilding }; //Building.Blueprint.Refinery,
 
@@ -233,6 +241,8 @@ public class TerrainManager : MonoBehaviour {
 
                 if(terraformable != null) {
                     UserAction action = new UserAction();
+
+                    action.tutorialIdentifier = UserAction.TutorialIdentifier.Mine;
 
                     action.description = "Mine " + coordinate.mapContainer.map.GetTerrainAt(coordinate).name;
                     action.layoutCoordinate = coordinate;
