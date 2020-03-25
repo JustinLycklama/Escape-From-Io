@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CurrentSelectionPanel : MonoBehaviour, SelectionManagerDelegate, TaskStatusUpdateDelegate, UserActionUpdateDelegate {
+public class CurrentSelectionPanel : NavigationPanel, SelectionManagerDelegate, TaskStatusUpdateDelegate, UserActionUpdateDelegate {
 
     Selection currentSelection;
 
@@ -24,15 +24,19 @@ public class CurrentSelectionPanel : MonoBehaviour, SelectionManagerDelegate, Ta
         title.text = noSelectionText;
         Script.Get<SelectionManager>().RegisterForNotifications(this);
 
-        NotifyUpdateSelection(null);
+        //NotifyUpdateSelection(null);
 
         unitDetailPanel.durationBar = percentageBar;
     }
 
     private void OnDestroy() {
-        try {
-            Script.Get<SelectionManager>().EndNotifications(this);
-        } catch(System.NullReferenceException e) { }
+
+        if(currentSelection != null) {
+            currentSelection.EndSubscriptionToUserActions(this);
+            currentSelection.EndSubscriptionToTaskStatus(this);
+        }
+
+        Script.Get<SelectionManager>().EndNotifications(this);
     }
 
     private void SetActiveDetail(MonoBehaviour activePanel) {

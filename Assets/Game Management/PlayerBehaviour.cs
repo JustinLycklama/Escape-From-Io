@@ -207,24 +207,24 @@ public class PlayerBehaviour : MonoBehaviour {
      * */
     public void SetInternalPause(bool paused) {
         if (paused) {
-            InternalUpdatePaused(true);
+            EnactPauseUpdate(true);
         } else {
-            InternalUpdatePaused(lastPlayerPausedState);
+            EnactPauseUpdate(lastPlayerPausedState);
         }
     }
 
-    private void InternalUpdatePaused(bool paused) {
+    public void SetPlayerPauseState(bool paused) {
+        lastPlayerPausedState = paused;
+        EnactPauseUpdate(paused);
+    }
+
+    private void EnactPauseUpdate(bool paused) {
         bool oldPausedState = gamePaused;
         gamePaused = paused;
 
         if(oldPausedState != gamePaused) {
             NotifyAllPlayerBehaviourUpdate();
         }
-    }
-
-    public void SetPlayerPauseState(bool paused) {
-        lastPlayerPausedState = paused;
-        InternalUpdatePaused(paused);
     }
 
     /*
