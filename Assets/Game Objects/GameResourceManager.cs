@@ -97,6 +97,11 @@ public class GameResourceManager : MonoBehaviour {
 
                     for(int iteration = 0; iteration < mineralChance.maxNumberGenerated; iteration++) {
                         float coinToss = (rnd.Next(0, 100) / 100.0f);
+
+                        if (TutorialManager.isTutorial) {
+                            coinToss = 1.0f;
+                        }
+
                         float threshold = (1 - mineralChance.chance.GetPercentage());
 
                         if(coinToss > threshold) {

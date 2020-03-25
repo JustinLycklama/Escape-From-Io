@@ -43,16 +43,24 @@ public class PremadeNoiseGenerator : MonoBehaviour {
     }
 
     private (RegionType.Type, TerrainType.Type)[,] TwoByFiveTileType() {
+
+        var WT = (R.Water, T.Water);
+        var EL = (R.Land, T.Empty);
+        var SR = (R.Mountain, T.SolidRock);
+        var LR = (R.Mountain, T.LooseRock);
+        var HR = (R.Mountain, T.HardRock);
+        var AL = (R.Mountain, T.AlunarRock);
+
         return new (RegionType.Type, TerrainType.Type)[10, 10] {
-        { (R.Water, T.Water),  (R.Water, T.Water),  (R.Water, T.Water),  (R.Water, T.Water), (R.Water, T.Water), (R.Water, T.Water), (R.Water, T.Water), (R.Water, T.Water), (R.Water, T.Water), (R.Water, T.Water) },
-        { (R.Water, T.Water),  (R.Water, T.Water),  (R.Water, T.Water),  (R.Water, T.Water), (R.Water, T.Water), (R.Water, T.Water), (R.Water, T.Water), (R.Water, T.Water), (R.Water, T.Water), (R.Water, T.Water) },
-        { (R.Water, T.Water),  (R.Water, T.Water),  (R.Water, T.Water),  (R.Water, T.Water), (R.Water, T.Water), (R.Water, T.Water), (R.Water, T.Water), (R.Water, T.Water), (R.Water, T.Water), (R.Water, T.Water) },
-        { (R.Water, T.Water),  (R.Water, T.Water),  (R.Water, T.Water),  (R.Mountain, T.SolidRock), (R.Mountain, T.SolidRock), (R.Mountain, T.SolidRock), (R.Mountain, T.SolidRock), (R.Water, T.Water), (R.Water, T.Water), (R.Water, T.Water) },
-        { (R.Water, T.Water),  (R.Water, T.Water),  (R.Water, T.Water),  (R.Land, T.Empty), (R.Land, T.Empty), (R.Land, T.Empty), (R.Mountain, T.SolidRock), (R.Water, T.Water), (R.Water, T.Water), (R.Water, T.Water) },
-        { (R.Water, T.Water),  (R.Water, T.Water),  (R.Water, T.Water),  (R.Land, T.Empty), (R.Land, T.Empty), (R.Land, T.Empty), (R.Mountain, T.SolidRock), (R.Water, T.Water), (R.Water, T.Water), (R.Water, T.Water) },
-        { (R.Water, T.Water),  (R.Water, T.Water),  (R.Water, T.Water),  (R.Land, T.Empty), (R.Land, T.Empty), (R.Land, T.Empty), (R.Mountain, T.SolidRock), (R.Water, T.Water), (R.Water, T.Water), (R.Water, T.Water) },
-        { (R.Water, T.Water),  (R.Water, T.Water),  (R.Water, T.Water),  (R.Water, T.Water), (R.Water, T.Water), (R.Water, T.Water), (R.Water, T.Water), (R.Water, T.Water), (R.Water, T.Water), (R.Water, T.Water) },
-        { (R.Water, T.Water),  (R.Water, T.Water),  (R.Water, T.Water),  (R.Water, T.Water), (R.Water, T.Water), (R.Water, T.Water), (R.Water, T.Water), (R.Water, T.Water), (R.Water, T.Water), (R.Water, T.Water) },
-        { (R.Water, T.Water),  (R.Water, T.Water),  (R.Water, T.Water),  (R.Water, T.Water), (R.Water, T.Water), (R.Water, T.Water), (R.Water, T.Water), (R.Water, T.Water), (R.Water, T.Water), (R.Water, T.Water) } };
+        { WT,  WT,  HR,  EL, WT, WT, WT, WT, WT, WT },
+        { WT,  EL,  HR,  EL, EL, EL, EL, WT, WT, WT },
+        { WT,  EL,  SR,  SR, SR, SR, LR, WT, WT, WT },
+        { AL,  AL,  SR,  EL, EL, SR, EL, WT, WT, WT },
+        { WT,  AL,  SR,  EL, EL, LR, EL, SR, WT, WT },
+        { WT,  WT,  SR,  SR, SR, SR, LR, WT, WT, WT },
+        { WT,  WT,  SR,  SR, SR, SR, SR, WT, WT, WT },
+        { WT,  WT,  WT,  WT, WT, WT, WT, WT, WT, WT },
+        { WT,  WT,  WT,  WT, WT, WT, WT, WT, WT, WT },
+        { WT,  WT,  WT,  WT, WT, WT, WT, WT, WT, WT } };
     }
 }

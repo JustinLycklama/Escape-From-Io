@@ -363,7 +363,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
 
                     material.shader = unlitShader;
 
-                    SetMaterialTransparent(material);
+                    //SetMaterialTransparent(material);
 
                     material.color = materialColor;
 

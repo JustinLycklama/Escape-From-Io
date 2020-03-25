@@ -193,7 +193,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
         playerBehaviour.SetInternalPause(false);
 
         Script.Get<MessageManager>().EnqueueMessage("Test", "This is an opening message!", null);
-        Script.Get<MessageManager>().EnqueueMessage("", "Second status message incoming", null);
+        //Script.Get<MessageManager>().EnqueueMessage("", "Second status message incoming", null);
 
 
         StartCoroutine(StartMusic());

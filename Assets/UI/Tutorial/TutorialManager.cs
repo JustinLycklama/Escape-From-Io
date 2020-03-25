@@ -15,11 +15,13 @@ public class TutorialManager : MonoBehaviour {
     public static UserAction.TutorialIdentifier? isolateUserAction = null;
     public static PrefabBlueprint isolateBlueprint = null;
 
+    public static bool isTutorial = true;
+
     private Dictionary<TutorialEvent, TutorialEventListener> eventMap = new Dictionary<TutorialEvent, TutorialEventListener>();
 
     private void Start() {
-        isolateUserAction = UserAction.TutorialIdentifier.BuildBuilding;
-        isolateBlueprint = Building.Blueprint.Tower;
+        //isolateUserAction = UserAction.TutorialIdentifier.BuildBuilding;
+        //isolateBlueprint = Building.Blueprint.Tower;
     }
 
     public void Fire(TutorialEvent e) {
