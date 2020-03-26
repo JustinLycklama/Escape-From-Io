@@ -77,7 +77,8 @@ Shader "Custom/TerrainSelectionMobile" {
 		float3 triplanar(float3 worldPos, float scale, float3 blendAxes, int textureIndex) {
 
 			if (textureIndex == -1) {
-				textureIndex = 0; // Default to water
+				//textureIndex = 0; // Default to water
+				return float3(1.0, 1.0, 1.0);
 			}
 
 			float3 scaledWorldPos = worldPos / scale;
@@ -91,6 +92,7 @@ Shader "Custom/TerrainSelectionMobile" {
 
 			if (textureIndex == -1) {
 				textureIndex = 0; // Default to water
+				//return float3(0.0, 0.0, 0.0);
 			}
 
 			// UDN blend

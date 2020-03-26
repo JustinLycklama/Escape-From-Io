@@ -15,7 +15,25 @@ public struct NoiseData {
     public Vector2 offset;
 }
 
+
 public static class NoiseGenerator {
+
+
+    private static System.Random _random = null;
+    public static System.Random random {
+        get {
+            if(_random == null) {
+                int seed = System.Guid.NewGuid().GetHashCode();
+                seed = 1904886234;
+
+                MonoBehaviour.print("Seed: " + seed);
+
+                _random = new System.Random(seed);
+            }
+
+            return _random;
+        }
+    }
 
     public static float[,] GenerateRandomNoiseMap(int mapWidth, int mapHeight) {
         float[,] noiseMap = new float[mapWidth, mapHeight];
@@ -38,7 +56,8 @@ public static class NoiseGenerator {
     public static float[,] GenerateNoiseMap(int mapWidth, int mapHeight, NoiseData data) {
         float[,] noiseMap = new float[mapWidth, mapHeight];
 
-        System.Random prng = new System.Random(data.seed);
+        // Use constant seed. NoiseData.seed will do nothing
+        System.Random prng = NoiseGenerator.random;
 
         Vector2[] octaveSampleOffsets = new Vector2[data.octaves];
         for (int i = 0; i < data.octaves; i++) {

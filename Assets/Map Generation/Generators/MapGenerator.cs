@@ -25,11 +25,9 @@ public class MapGenerator : MonoBehaviour {
     public NoiseData mountainFeaturesMapNoiseData;
 
     const int seedCap = 1000;
-    System.Random rnd = new System.Random();
+    System.Random rnd = NoiseGenerator.random;
 
-    private void RandomizeSeed() {
-        rnd = new System.Random(System.Guid.NewGuid().GetHashCode());
-
+    private void RandomizeSeed() {      
         layoutMapNoiseData.seed = rnd.Next(1, seedCap);
 
         groundMutatorMapNoiseData.seed = rnd.Next(1, seedCap);

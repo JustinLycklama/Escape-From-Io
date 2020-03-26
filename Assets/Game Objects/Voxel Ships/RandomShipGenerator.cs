@@ -20,7 +20,7 @@ public class RandomShipGenerator : MonoBehaviour {
     private List<bool> shouldRotate = new List<bool> { false, false, false, false, false, false, false, false, false, true, true, true, false };
 
     void Awake() {
-        random = new System.Random(Guid.NewGuid().GetHashCode());
+        random = NoiseGenerator.random;
     }
 
     void Start() {

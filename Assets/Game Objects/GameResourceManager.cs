@@ -80,7 +80,7 @@ public class GameResourceManager : MonoBehaviour {
     public void RegisterMapForMinerals(Map map) {
         Constants constants = Script.Get<Constants>();
 
-        System.Random rnd = new System.Random();
+        System.Random rnd = NoiseGenerator.random;
 
         for(int y = 0; y < constants.layoutMapHeight; y++) {
             for(int x = 0; x < constants.layoutMapWidth; x++) {
@@ -153,7 +153,7 @@ public class GameResourceManager : MonoBehaviour {
         ore.mineralType = type;
         oreCount++;
 
-        System.Random rnd = new System.Random(Guid.NewGuid().GetHashCode());
+        System.Random rnd = NoiseGenerator.random;
         int index = rnd.Next(0, mineralMeshList.Length);
 
         ore.GetComponentInChildren<MeshFilter>().mesh = mineralMeshList[index];

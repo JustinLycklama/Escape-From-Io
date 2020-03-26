@@ -50,7 +50,7 @@ public class NameSingleton
             lastNames.names = new string[] { "Johnson" };
         }
 
-        randomGenerator = new System.Random(System.Guid.NewGuid().GetHashCode());
+        randomGenerator = NoiseGenerator.random;
     }
 
     public Name GenerateName() {

@@ -98,7 +98,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
             //StartCoroutine(AddBoxColliders());
         }
 
-        SetupFogOfWar();
+        //SetupFogOfWar();
         SetupMaterialShader();
 
         map.transform.SetParent(this.transform, true);
@@ -413,6 +413,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
      * */
 
     private void UpdateMaterialOverhangTextures() {
+
         Constants constants = Script.Get<Constants>();
         Material mapMaterial = GetComponent<MeshRenderer>().sharedMaterial;
 
@@ -433,17 +434,23 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         int y = 0;
 
         for(y = 0; y < constants.layoutMapHeight + 2; y++) {
+
+
+
             if(y == 0 && neighbours.topLeftMap != null) {
                 LayoutCoordinate coordinate = new LayoutCoordinate(constants.layoutMapWidth - 1, constants.layoutMapHeight - 1, neighbours.topLeftMap);
 
                 TerrainType terrain = neighbours.topLeftMap.map.GetTerrainAt(coordinate);
-                textureIndexList[y * mapWidthWithOverhang] = texGen.RegionTypeTextureIndex(terrain); 
+                textureIndexList[y * mapWidthWithOverhang] = texGen.RegionTypeTextureIndex(terrain);
             }
 
             if(y > 0 && y < constants.layoutMapHeight + 1 && neighbours.leftMap != null) {
                 LayoutCoordinate coordinate = new LayoutCoordinate(constants.layoutMapWidth - 1, (y - 1), neighbours.leftMap);
 
                 TerrainType terrain = neighbours.leftMap.map.GetTerrainAt(coordinate);
+
+                print("Left Terrain Type: " + terrain.type);
+
                 textureIndexList[y * mapWidthWithOverhang] = texGen.RegionTypeTextureIndex(terrain);
             }
 
@@ -459,7 +466,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         x = mapWidthWithOverhang - 1;
 
         for(y = 0; y < constants.layoutMapHeight + 2; y++) {
-             if(y == 0 && neighbours.topRightMap != null) {
+            if(y == 0 && neighbours.topRightMap != null) {
                 LayoutCoordinate coordinate = new LayoutCoordinate(0, constants.layoutMapHeight - 1, neighbours.topRightMap);
 
                 TerrainType terrain = neighbours.topRightMap.map.GetTerrainAt(coordinate);
@@ -467,30 +474,28 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
 
 
                 //finalSampleHeight = neibours.topRightMap.map.getHeightAt(coordinate);
-             }
+            }
 
-             if(y > 0 && y < constants.layoutMapHeight + 1 && neighbours.rightMap != null) {
-                 LayoutCoordinate coordinate = new LayoutCoordinate(0, y - 1, neighbours.rightMap);
+            if(y > 0 && y < constants.layoutMapHeight + 1 && neighbours.rightMap != null) {
+                LayoutCoordinate coordinate = new LayoutCoordinate(0, y - 1, neighbours.rightMap);
 
                 TerrainType terrain = neighbours.rightMap.map.GetTerrainAt(coordinate);
                 textureIndexList[y * mapWidthWithOverhang + x] = texGen.RegionTypeTextureIndex(terrain);
             }
 
-             if(y == constants.layoutMapHeight + 1 && neighbours.bottomRightMap != null) {
+            if(y == constants.layoutMapHeight + 1 && neighbours.bottomRightMap != null) {
                 LayoutCoordinate coordinate = new LayoutCoordinate(0, 0, neighbours.bottomRightMap);
 
-                if (neighbours.bottomRightMap.map == null) {
+                if(neighbours.bottomRightMap.map == null) {
                 }
 
                 TerrainType terrain = neighbours.bottomRightMap.map.GetTerrainAt(coordinate);
                 textureIndexList[y * mapWidthWithOverhang + x] = texGen.RegionTypeTextureIndex(terrain);
             }
 
-         }
-
+        }
 
         // Top 
-
         y = 0;
 
         for(x = 1; x < constants.layoutMapWidth + 1; x++) {
@@ -501,9 +506,8 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                 textureIndexList[y * mapWidthWithOverhang + x] = texGen.RegionTypeTextureIndex(terrain);
             }
         }
-
-        // Bottom
-
+        
+        //Bottom
         y = mapHeightWithOverhang - 1;
 
         for(x = 1; x < mapWidthWithOverhang - 1; x++) {
@@ -639,6 +643,8 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
      * */
 
     public void StatusEffectMapUpdated(BuildingEffectStatus[,] statusMap, List<KeyValuePair<int, int>> effectedIndicies) {
+
+        return;
 
         Constants constants = Script.Get<Constants>();
 

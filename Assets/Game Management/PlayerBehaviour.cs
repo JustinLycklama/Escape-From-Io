@@ -303,6 +303,9 @@ public class PlayerBehaviour : MonoBehaviour {
 
     public void JumpCameraToPosition(Vector3 position) {
         Camera.main.transform.position = position + new Vector3(0, 250, -250);
+
+        //Camera.main.transform.position = position + new Vector3(0, 250, 250);
+        //Camera.main.transform.Rotate(new Vector3(0, 180, 0), Space.World);
     }
 
     /*
