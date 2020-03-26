@@ -440,7 +440,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                 textureIndexList[y * mapWidthWithOverhang] = texGen.RegionTypeTextureIndex(terrain); 
             }
 
-            if(y > 0 && y < constants.layoutMapHeight - 1 && neighbours.leftMap != null) {
+            if(y > 0 && y < constants.layoutMapHeight + 1 && neighbours.leftMap != null) {
                 LayoutCoordinate coordinate = new LayoutCoordinate(constants.layoutMapWidth - 1, (y - 1), neighbours.leftMap);
 
                 TerrainType terrain = neighbours.leftMap.map.GetTerrainAt(coordinate);
