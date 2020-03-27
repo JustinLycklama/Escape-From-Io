@@ -14,7 +14,6 @@ public class PlayerBehaviour : MonoBehaviour {
     float cameraMovementSpeed = 200;
     float cameraRotateSpeed = 100;
 
-    Rect UIRect;
     SettingsPanel settingsPanel;
 
     public static Color tintColor = new Color(0, 1, 1);
@@ -24,39 +23,125 @@ public class PlayerBehaviour : MonoBehaviour {
 
     List<PlayerBehaviourUpdateDelegate> delegateList = new List<PlayerBehaviourUpdateDelegate>();
 
+    // Pan and Input Control
+    private Vector2? initialTouchPosition;
+
+    private Vector2? previousTouch = null;
+    private Vector2? residualDirection = null;
+
+    private float panFriction = 1.0f;
+
+    [SerializeField]
+    private float zoomOutMin = 1;
+    [SerializeField]
+    private float zoomOutMax = 8;
+
+    // Object selection
+    private Ray lastRay;
+    private RaycastHit? lastHit;
+
     private void Start() {
-        RectTransform localRect = Tag.UIArea.GetGameObject().GetComponent<RectTransform>();
-
-        Vector2 size = Vector2.Scale(localRect.rect.size, transform.lossyScale);
-        UIRect = new Rect((Vector2)localRect.transform.position - (size * 0.5f), size);
-
         settingsPanel = Script.Get<SettingsPanel>();
     }
 
     // Update is called once per frame
     void Update() {
 
-        MobileUIUpdates();
+        if(Input.anyKey) {
+            CheckHotkeyInput();
+        }
 
-        CheckButtonInput();
+        // We want as little as possible to be done here, first check to see if mouse down or up, and we are not over UI
+        if((Input.GetMouseButtonUp(0) || Input.GetMouseButtonDown(0)) && EventSystem.current.IsPointerOverGameObject()) {
+            return;
+        }
 
-        Vector2 mousePos = new Vector2(Input.mousePosition.x, Screen.height - Input.mousePosition.y);
-        if(!UIRect.Contains(mousePos)) {
+        bool cameraAction = false;
+
+        cameraAction |= CameraPan();
+        cameraAction |= CameraZoom();
+
+        if(!cameraAction && Input.GetMouseButtonUp(0)) {
             SelectGameObject();
         }
     }
 
-    Vector2? previousTouch = null;
+    /*
+     * Public
+     * */
 
-    Vector2? residualDirection = null;
-    float friction = 1.0f;
+    public void JumpCameraToTask(MasterGameTask masterGameTask) {
+        GameTask firsGameTaskWithActionItem = null;
+
+        foreach(GameTask gameTask in masterGameTask.childGameTasks) {
+            if(gameTask.actionItem != null) {
+                firsGameTaskWithActionItem = gameTask;
+                break;
+            }
+        }
+
+        if(firsGameTaskWithActionItem != null) {
+            JumpCameraToPosition(firsGameTaskWithActionItem.target.vector3);
+        }
+    }
+
+    public void JumpCameraToUnit(Unit unit) {
+        if(unit != null) {
+            JumpCameraToPosition(unit.transform.position);
+        }
+    }
+
+    public void JumpCameraToPosition(Vector3 position) {
+        Camera.main.transform.position = position + new Vector3(0, 250, -250);
+
+        //Camera.main.transform.position = position + new Vector3(0, 250, 250);
+        //Camera.main.transform.Rotate(new Vector3(0, 180, 0), Space.World);
+    }
+
+    /*
+     * Menu paused state if used when a non player has requested a pause. 
+     * When we return from our 'internal' paused state, we return to the state the player had, which could also be paused
+     * */
+    public void SetInternalPause(bool paused) {
+        if(paused) {
+            EnactPauseUpdate(true);
+        } else {
+            EnactPauseUpdate(lastPlayerPausedState);
+        }
+    }
+
+    public void SetPlayerPauseState(bool paused) {
+        lastPlayerPausedState = paused;
+        EnactPauseUpdate(paused);
+    }
 
 
-    public float zoomOutMin = 1;
-    public float zoomOutMax = 8;
+    /*
+     * Helpers
+     * */
 
-    void MobileUIUpdates() {
+    private void EnactPauseUpdate(bool paused) {
+        bool oldPausedState = gamePaused;
+        gamePaused = paused;
 
+        if(oldPausedState != gamePaused) {
+            NotifyAllPlayerBehaviourUpdate();
+        }
+    }
+
+    /*
+     * Input Checks
+     * */
+
+    private bool CameraPan() {
+
+        bool hasPanned = false;
+
+        if(initialTouchPosition.HasValue && previousTouch.HasValue) {
+            hasPanned = Vector2.Distance(initialTouchPosition.Value, previousTouch.Value) > 1;
+        }
+
+        // Setup Camera Vectors
         var cameraForward = Camera.main.transform.forward;
         cameraForward.y = 0f;
         cameraForward.Normalize();
@@ -65,20 +150,23 @@ public class PlayerBehaviour : MonoBehaviour {
         cameraForward.y = 0f;
         cameraForward.Normalize();
 
+        if (Input.GetMouseButtonDown(0)) {
+            initialTouchPosition = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
+        }
+
         if(Input.GetMouseButton(0) && Input.touchCount < 2) {
+
             Vector2 touch = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
 
             if (previousTouch.HasValue) {
                 Vector2 direction = (touch - previousTouch.Value) * 0.05f;
 
-                print("Drection " + direction);
-
                 cameraRight.x *= direction.x;
                 cameraForward.z *= direction.y;
 
                 var finalDirection = cameraForward + cameraRight;
-
                 Camera.main.transform.Translate(-finalDirection * cameraMovementSpeed * Time.deltaTime, Space.World);
+
                 residualDirection = direction;
             }
 
@@ -92,28 +180,30 @@ public class PlayerBehaviour : MonoBehaviour {
                 cameraForward.z *= residualDirection.Value.y;
 
                 var finalDirection = cameraForward + cameraRight;
-
                 Camera.main.transform.Translate(-finalDirection * cameraMovementSpeed * Time.deltaTime, Space.World);
 
+                // Apply pan friction
                 residualDirection -= residualDirection * 0.05f;
-
                 if(Mathf.Abs(residualDirection.Value.x) < 0.01 && Mathf.Abs(residualDirection.Value.y) < 0.01) {
                     residualDirection = null;
                 }
             }
         }
 
+        return hasPanned;
+    }
 
-        //if(Input.GetMouseButtonDown(0)) {
-        //    touchStart = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        //    print("Mouse Down");
-        //}
+    private bool CameraZoom() {
+        bool wasZooming = false;
 
         // Mouse Zoom
+        // Don't care about wasZooming with mouse wheel, it will not interfere with object clicks
         zoom(Input.GetAxis("Mouse ScrollWheel") * 100f);
 
         // Finger Pinch Zoom
         if(Input.touchCount == 2) {
+            wasZooming = true;
+
             Touch touchZero = Input.GetTouch(0);
             Touch touchOne = Input.GetTouch(1);
 
@@ -126,20 +216,14 @@ public class PlayerBehaviour : MonoBehaviour {
             float difference = currentMagnitude - prevMagnitude;
 
             zoom(difference * 0.01f);
-        } 
-        
-        //else if(Input.GetMouseButton(0)) {
-        //    Vector3 direction = touchStart - Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        //    Camera.main.transform.position += direction;
-        //    print("Mouse Dragging");
-        //}
+        }
 
-        
+        return wasZooming;
     }
 
-    void zoom(float increment) {
+    private void zoom(float increment) {
 
-        var cameraUp = Camera.main.transform.forward; 
+        var cameraUp = Camera.main.transform.forward;
         cameraUp.Normalize();
 
         cameraUp *= increment;
@@ -147,7 +231,58 @@ public class PlayerBehaviour : MonoBehaviour {
         Camera.main.transform.Translate(cameraUp * cameraMovementSpeed * Time.deltaTime, Space.World);
     }
 
-    void CheckButtonInput() {
+    private void SelectGameObject() {
+        //Debug.DrawRay(lastRay.origin, lastRay.direction * 1000, Color.yellow);
+
+        //if (lastHit != null) {
+        //    Debug.DrawRay(lastHit.Value.point, Vector3.up * 1000, Color.red);
+        //}       
+
+        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+        RaycastHit hit;
+
+        lastRay = ray;
+
+        if(Physics.Raycast(ray, out hit)) {
+            lastHit = hit;
+
+            GameObject objectHit = hit.transform.gameObject;
+            SelectionManager selectionManager = Script.Get<SelectionManager>();
+
+            Unit unit = objectHit.GetComponent<Unit>();
+            Building building = objectHit.GetComponent<Building>();
+
+            // Select a Terrain Selection
+            if(objectHit.GetComponent<MapContainer>() != null) {
+                BoxCollider boxCollider = hit.collider as BoxCollider;
+
+                Vector3 worldPosition = boxCollider.transform.TransformPoint(boxCollider.center);
+
+                MapCoordinate selectedCoordinate = MapCoordinate.FromWorldPosition(new WorldPosition(worldPosition));
+                LayoutCoordinate coordinate = new LayoutCoordinate(selectedCoordinate);
+
+                selectionManager.SelectTerrain(coordinate);
+            }
+
+            // Select a unit
+            else if(unit != null) {
+                if(!unit.initialized && building != null) {
+                    selectionManager.SelectSelectable(building);
+                } else {
+                    selectionManager.SelectSelectable(unit);
+                }
+            } else if(building != null) {
+                selectionManager.SelectSelectable(building);
+            }
+
+            // Deselect everything
+            else {
+                selectionManager.RemoveSelection();
+            }
+        }        
+    }
+
+    private void CheckHotkeyInput() {
 
         var cameraForward = Camera.main.transform.forward;
         cameraForward.y = 0f;
@@ -216,121 +351,6 @@ public class PlayerBehaviour : MonoBehaviour {
     public void RemoveHotKeyDelegate(HotkeyDelegate keyDelegate) {
         foreach(List<HotkeyDelegate> delegateList in hotKeyListMap.Values) {
             delegateList.Remove(keyDelegate);
-        }
-    }
-
-    Ray lastRay;
-    RaycastHit? lastHit;
-
-    void SelectGameObject() {
-        //Debug.DrawRay(lastRay.origin, lastRay.direction * 1000, Color.yellow);
-
-        //if (lastHit != null) {
-        //    Debug.DrawRay(lastHit.Value.point, Vector3.up * 1000, Color.red);
-        //}       
-
-        if(Input.GetMouseButtonDown(0)) {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-            RaycastHit hit;
-
-            lastRay = ray;
-
-            if(Physics.Raycast(ray, out hit)) {
-                lastHit = hit;
-
-                GameObject objectHit = hit.transform.gameObject;
-                SelectionManager selectionManager = Script.Get<SelectionManager>();
-
-                Unit unit = objectHit.GetComponent<Unit>();
-                Building building = objectHit.GetComponent<Building>();
-
-                // Select a Terrain Selection
-                if(objectHit.GetComponent<MapContainer>() != null) {
-                    BoxCollider boxCollider = hit.collider as BoxCollider;
-
-                    Vector3 worldPosition = boxCollider.transform.TransformPoint(boxCollider.center);
-
-                    MapCoordinate selectedCoordinate = MapCoordinate.FromWorldPosition(new WorldPosition(worldPosition));
-                    LayoutCoordinate coordinate = new LayoutCoordinate(selectedCoordinate);
-
-                    selectionManager.SelectTerrain(coordinate);
-                }
-
-                // Select a unit
-                else if(unit != null) {
-                    if (!unit.initialized && building != null) {
-                        selectionManager.SelectSelectable(building);
-                    } else {
-                        selectionManager.SelectSelectable(unit);
-                    }                   
-                } else if(building != null) {
-                    selectionManager.SelectSelectable(building);                    
-                }
-
-                // Deselect everything
-                else {
-                    selectionManager.RemoveSelection();
-                }
-            }
-        }
-    }
-
-
-    /*
-     * Public
-     * */
-
-    public void JumpCameraToTask(MasterGameTask masterGameTask) {
-        GameTask firsGameTaskWithActionItem = null;
-        
-        foreach(GameTask gameTask in masterGameTask.childGameTasks) {
-            if (gameTask.actionItem != null) {
-                firsGameTaskWithActionItem = gameTask;
-                break;
-            }
-        } 
-
-        if (firsGameTaskWithActionItem != null) {
-            JumpCameraToPosition(firsGameTaskWithActionItem.target.vector3);            
-        }
-    }
-
-    public void JumpCameraToUnit(Unit unit) {
-        if (unit != null) {
-            JumpCameraToPosition(unit.transform.position);
-        }
-    }
-
-    public void JumpCameraToPosition(Vector3 position) {
-        Camera.main.transform.position = position + new Vector3(0, 250, -250);
-
-        //Camera.main.transform.position = position + new Vector3(0, 250, 250);
-        //Camera.main.transform.Rotate(new Vector3(0, 180, 0), Space.World);
-    }
-
-    /*
-     * Menu paused state if used when a non player has requested a pause. 
-     * When we return from our 'internal' paused state, we return to the state the player had, which could also be paused
-     * */
-    public void SetInternalPause(bool paused) {
-        if (paused) {
-            EnactPauseUpdate(true);
-        } else {
-            EnactPauseUpdate(lastPlayerPausedState);
-        }
-    }
-
-    public void SetPlayerPauseState(bool paused) {
-        lastPlayerPausedState = paused;
-        EnactPauseUpdate(paused);
-    }
-
-    private void EnactPauseUpdate(bool paused) {
-        bool oldPausedState = gamePaused;
-        gamePaused = paused;
-
-        if(oldPausedState != gamePaused) {
-            NotifyAllPlayerBehaviourUpdate();
         }
     }
 
