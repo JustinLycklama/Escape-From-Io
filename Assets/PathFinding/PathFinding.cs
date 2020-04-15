@@ -16,10 +16,22 @@ public class PathFinding : MonoBehaviour {
         grid = GetComponent<PathfindingGrid>();
     }
 
-    // Since this is associated an ore to a future task, this cannot be done just as a check, must be done when unit is actually moving to task
-    public void FindSimplifiedPathToClosestGoal(Vector3 startPos, int movementPenaltyMultiplier, MineralType gatherGoal, Action<LookPoint[], ActionableItem, bool, int> callback) {
+    public void FindSimplifiedPathToClosestUnit(Vector3 startPos, int movementPenaltyMultiplier, Unit.FactionType attackTarget, Action<LookPoint[], ActionableItem, bool, int> callback) {
+        UnitManager unitManager = Script.Get<UnitManager>();
+        Unit[] allUnits = unitManager.GetAllPlayerUnits();
+
+        FindSimplifiedPathToClosestGoal(startPos, movementPenaltyMultiplier, allUnits, callback);
+    }
+
+    public void FindSimplifiedPathToClosestOre(Vector3 startPos, int movementPenaltyMultiplier, MineralType gatherGoal, Action<LookPoint[], ActionableItem, bool, int> callback) {
         GameResourceManager resourceManager = Script.Get<GameResourceManager>();
         Ore[] allOreInGame = resourceManager.GetAllAvailableOfType(gatherGoal);
+
+        FindSimplifiedPathToClosestGoal(startPos, movementPenaltyMultiplier, allOreInGame, callback);
+    }
+
+    // Since this is associating an object to a future task, this cannot be done just as a check, must be done when unit is actually moving to task
+    public void FindSimplifiedPathToClosestGoal(Vector3 startPos, int movementPenaltyMultiplier, ActionableItem[] objectList, Action<LookPoint[], ActionableItem, bool, int> callback) {
 
         int lowestLength = int.MaxValue;
         Node[] foundPath = null;
@@ -27,25 +39,27 @@ public class PathFinding : MonoBehaviour {
 
         int completedCalls = 0;
 
-        if (allOreInGame.Length == 0) {
+        if(objectList.Length == 0) {
             callback(null, null, false, 0);
         }
 
-        foreach(Ore ore in allOreInGame) {
-            StartCoroutine(FindPath(startPos, ore.transform.position, movementPenaltyMultiplier, (path, success) => {
+        foreach(ActionableItem obj in objectList) {
+            StartCoroutine(FindPath(startPos, obj.transform.position, movementPenaltyMultiplier, (path, success) => {
                 completedCalls++;
 
                 if(success && path.Length < lowestLength) {
                     foundPath = path;
-                    foundObject = ore;
+                    foundObject = obj;
                     lowestLength = path.Length;
                 }
 
-                if(completedCalls == allOreInGame.Length) {
+                if(completedCalls == objectList.Length) {
                     bool anyPathSuccess = (foundPath != null && foundPath.Length > 0);
 
                     // Give the found object the flag that a task will soon be associated
-                    foundObject.taskAlreadyDictated = true;
+                    if (foundObject != null) {
+                        foundObject.taskAlreadyDictated = true;
+                    }                    
 
                     int totalDistance = 0;
                     callback(anyPathSuccess ? SimplifyPath(foundPath, movementPenaltyMultiplier, out totalDistance) : null, foundObject, anyPathSuccess, totalDistance);

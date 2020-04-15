@@ -74,7 +74,7 @@ public class MiniMap : MonoBehaviour, BuildingsUpdateDelegate {
             DoUpdate(Camera.main, ObjectType.Camera);
 
             UnitManager unitManager = Script.Get<UnitManager>();
-            Unit[] miners = unitManager.GetUnitsOfType(MasterGameTask.ActionType.Mine);
+            Unit[] miners = unitManager.GetPlayerUnitsOfType(MasterGameTask.ActionType.Mine);
 
             foreach(Unit unit in miners) {
                 DoUpdate(unit, ObjectType.Builder);

@@ -8,6 +8,10 @@ public class AdvancedMiner : Unit {
 
     public MoenenGames.VoxelRobot.Weapon[] weaponSet;
 
+    protected override void UnitCustomInit() {
+
+    }
+
     protected override void Animate() {
         foreach(MoenenGames.VoxelRobot.Weapon weapon in weaponSet) {
             weapon.Animate();

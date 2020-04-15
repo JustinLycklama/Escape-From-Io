@@ -71,7 +71,7 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
         taskListLockMap = new Dictionary<MasterGameTask.ActionType, bool>();
         taskListStateMap = new Dictionary<MasterGameTask.ActionType, ListState>();
 
-        foreach(MasterGameTask.ActionType actionType in new MasterGameTask.ActionType[] { MasterGameTask.ActionType.Build, MasterGameTask.ActionType.Mine, MasterGameTask.ActionType.Move }) {
+        foreach(MasterGameTask.ActionType actionType in new MasterGameTask.ActionType[] { MasterGameTask.ActionType.Build, MasterGameTask.ActionType.Mine, MasterGameTask.ActionType.Move, MasterGameTask.ActionType.Attack }) {
             taskListMap[actionType] = new List<MasterGameTask>();
             delegateListMap[actionType] = new List<TaskQueueDelegate>();
 
@@ -88,6 +88,7 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
         Script.Get<UnitManager>().RegisterForNotifications(this, MasterGameTask.ActionType.Build);
         Script.Get<UnitManager>().RegisterForNotifications(this, MasterGameTask.ActionType.Mine);
         Script.Get<UnitManager>().RegisterForNotifications(this, MasterGameTask.ActionType.Move);
+        Script.Get<UnitManager>().RegisterForNotifications(this, MasterGameTask.ActionType.Attack);
     }
 
     private void OnDestroy() {
@@ -95,6 +96,7 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
             Script.Get<UnitManager>().EndNotifications(this, MasterGameTask.ActionType.Build);
             Script.Get<UnitManager>().EndNotifications(this, MasterGameTask.ActionType.Mine);
             Script.Get<UnitManager>().EndNotifications(this, MasterGameTask.ActionType.Move);
+            Script.Get<UnitManager>().EndNotifications(this, MasterGameTask.ActionType.Attack);
         } catch(System.NullReferenceException e) { }
     }
 
@@ -167,7 +169,7 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
         if (taskListMap[actionType].Count > 0) {
             if (taskListLockMap[actionType] == false) {
                 newState = ListState.Inefficient;
-            } else if (unitManager.GetUnitsOfType(actionType).Length == 0) {
+            } else if (unitManager.GetPlayerUnitsOfType(actionType).Length == 0) {
                 newState = ListState.Blocked;                
             } else {
                 newState = ListState.Smooth;
@@ -332,7 +334,7 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
                  * First check if we can take a task from a unit
                  * */
 
-                Unit[] allUnits = unitManager.GetAllUnits();
+                Unit[] allUnits = unitManager.GetAllPlayerUnits();
 
                 Unit[] unitsWithAccessableTasks = allUnits.Where(u => u.canTakeTaskFromUnit &&
 

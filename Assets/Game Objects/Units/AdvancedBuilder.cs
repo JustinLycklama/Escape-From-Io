@@ -6,6 +6,10 @@ public class AdvancedBuilder : Unit {
     public override int duration => 570;
     public override MasterGameTask.ActionType primaryActionType => MasterGameTask.ActionType.Build;
 
+    protected override void UnitCustomInit() {
+
+    }
+
     public override float SpeedForTask(MasterGameTask.ActionType actionType) {
         switch(actionType) {
             case MasterGameTask.ActionType.Mine:
@@ -23,3 +27,5 @@ public class AdvancedBuilder : Unit {
 
     }
 }
+
+

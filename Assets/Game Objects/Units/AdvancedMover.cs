@@ -6,6 +6,10 @@ public class AdvancedMover : Unit {
     public override int duration => 360;
     public override MasterGameTask.ActionType primaryActionType => MasterGameTask.ActionType.Move;
 
+    protected override void UnitCustomInit() {
+
+    }
+
     public override float SpeedForTask(MasterGameTask.ActionType actionType) {
         switch(actionType) {
             case MasterGameTask.ActionType.Mine:

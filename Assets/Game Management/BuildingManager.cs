@@ -143,7 +143,7 @@ public class BuildingManager : MonoBehaviour {
 
         UnitManager unitManager = Script.Get<UnitManager>();
 
-        Unit[] allUnits = unitManager.GetAllUnits();
+        Unit[] allUnits = unitManager.GetAllPlayerUnits();
 
         MapCoordinate centerOfLayout = new MapCoordinate(layoutCoordinate);
 

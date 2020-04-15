@@ -24,6 +24,7 @@ public class UnitManager : MonoBehaviour, TaskStatusUpdateDelegate {
                 unitCount[MasterGameTask.ActionType.Build] = 0;
                 unitCount[MasterGameTask.ActionType.Mine] = 0;
                 unitCount[MasterGameTask.ActionType.Move] = 0;
+                unitCount[MasterGameTask.ActionType.Attack] = 0;
             }
 
             return backingUnitCount;
@@ -37,7 +38,7 @@ public class UnitManager : MonoBehaviour, TaskStatusUpdateDelegate {
 
         unitListStateMap = new Dictionary<MasterGameTask.ActionType, Unit.UnitState>();
 
-        foreach(MasterGameTask.ActionType actionType in new MasterGameTask.ActionType[] { MasterGameTask.ActionType.Build, MasterGameTask.ActionType.Mine, MasterGameTask.ActionType.Move }) {
+        foreach(MasterGameTask.ActionType actionType in new MasterGameTask.ActionType[] { MasterGameTask.ActionType.Build, MasterGameTask.ActionType.Mine, MasterGameTask.ActionType.Move, MasterGameTask.ActionType.Attack }) {
             unitListMap[actionType] = new List<Unit>();
             delegateListMap[actionType] = new List<UnitManagerDelegate>();
 
@@ -50,15 +51,20 @@ public class UnitManager : MonoBehaviour, TaskStatusUpdateDelegate {
             unitCount[MasterGameTask.ActionType.Build] = 0;
             unitCount[MasterGameTask.ActionType.Mine] = 0;
             unitCount[MasterGameTask.ActionType.Move] = 0;
+            unitCount[MasterGameTask.ActionType.Attack] = 0;
         };
     }
 
-    public Unit[] GetAllUnits() {
-        return GetUnitsOfType(MasterGameTask.ActionType.Build).Concat(GetUnitsOfType(MasterGameTask.ActionType.Mine)).Concat(GetUnitsOfType(MasterGameTask.ActionType.Move)).ToArray() ?? new Unit[0];
+    public Unit[] GetAllPlayerUnits() {
+        return GetPlayerUnitsOfType(MasterGameTask.ActionType.Build)
+            .Concat(GetPlayerUnitsOfType(MasterGameTask.ActionType.Mine))
+            .Concat(GetPlayerUnitsOfType(MasterGameTask.ActionType.Move))
+            .Concat(GetPlayerUnitsOfType(MasterGameTask.ActionType.Attack))
+            .ToArray() ?? new Unit[0];
     }
 
-    public Unit[] GetUnitsOfType(MasterGameTask.ActionType type) {
-        return unitListMap[type].ToArray();
+    public Unit[] GetPlayerUnitsOfType(MasterGameTask.ActionType type) {
+        return unitListMap[type].Where(unit => unit.factionType == Unit.FactionType.Player).ToArray();
     }
 
     public void RegisterUnit(Unit unit) {

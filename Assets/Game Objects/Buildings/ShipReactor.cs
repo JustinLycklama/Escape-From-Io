@@ -23,7 +23,7 @@ public class ShipReactor : Building {
     protected override void CompleteBuilding() {
         ResearchSingleton.sharedInstance.unitDurationAddition = 60;
 
-        Unit[] allUnits = Script.Get<UnitManager>().GetAllUnits();
+        Unit[] allUnits = Script.Get<UnitManager>().GetAllPlayerUnits();
         foreach(Unit unit in allUnits) {
             unit.remainingDuration += ResearchSingleton.sharedInstance.unitDurationAddition;
         }

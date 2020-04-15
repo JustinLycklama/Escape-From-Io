@@ -23,6 +23,8 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
 
     private bool canSceneChange = false;
 
+    public bool gameInitialized { get; private set; } = false; 
+
     void Start() {
         initActionChunks = new Queue<Action>();
       
@@ -192,7 +194,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
 
         playerBehaviour.SetInternalPause(false);
 
-        Script.Get<MessageManager>().EnqueueMessage("Test", "This is an opening message!", null);
+        //Script.Get<MessageManager>().EnqueueMessage("Test", "This is an opening message!", null);
         //Script.Get<MessageManager>().EnqueueMessage("", "Second status message incoming", null);
 
 
@@ -210,9 +212,9 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
 
         while(true) {
 
-            if (unitManager.GetUnitsOfType(MasterGameTask.ActionType.Build).Length == 0 &&
-                unitManager.GetUnitsOfType(MasterGameTask.ActionType.Mine).Length == 0 &&
-                unitManager.GetUnitsOfType(MasterGameTask.ActionType.Move).Length == 0) {
+            if (unitManager.GetPlayerUnitsOfType(MasterGameTask.ActionType.Build).Length == 0 &&
+                unitManager.GetPlayerUnitsOfType(MasterGameTask.ActionType.Mine).Length == 0 &&
+                unitManager.GetPlayerUnitsOfType(MasterGameTask.ActionType.Move).Length == 0) {
 
                 Script.Get<PlayerBehaviour>().SetInternalPause(true);
                 yield return new WaitForSeconds(2);

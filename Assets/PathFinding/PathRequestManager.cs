@@ -12,7 +12,8 @@ struct PathRequest {
 
     public PathGridCoordinate? pathEndGrid;
     public LayoutCoordinate? pathEndLayout;
-    public MineralType? pathEndGoal;
+    public MineralType? pathEndGoalMineral;
+    public Unit.FactionType? pathEndGoalFaction;
 
     public Vector3 pathStart;
 
@@ -29,7 +30,8 @@ struct PathRequest {
         targetType = PathRequestTargetType.World;
         pathEndGrid = null;
         pathEndLayout = null;
-        pathEndGoal = null;
+        pathEndGoalMineral = null;
+        pathEndGoalFaction = null;
     }
 
     //public PathRequest(Vector3 _start, PathGridCoordinate _end, Action<WorldPosition[], bool> _callback) {
@@ -52,12 +54,13 @@ struct PathRequest {
         this.targetType = targetType;
         pathEndWorld = null;
         pathEndGrid = null;
-        pathEndGoal = null;
+        pathEndGoalMineral = null;
+        pathEndGoalFaction = null;
     }
 
     public PathRequest(Vector3 _start, int _movementPenaltyMultiplier, MineralType goalGatherType, Action<LookPoint[], ActionableItem, bool, int> _callback) {
         pathStart = _start;
-        pathEndGoal = goalGatherType;
+        pathEndGoalMineral = goalGatherType;
         callback = _callback;
         movementPenaltyMultiplier = _movementPenaltyMultiplier;
 
@@ -65,6 +68,20 @@ struct PathRequest {
         pathEndWorld = null;
         pathEndGrid = null;
         pathEndLayout = null;
+        pathEndGoalFaction = null;
+    }
+
+    public PathRequest(Vector3 _start, int _movementPenaltyMultiplier, Unit.FactionType attackTarget, Action<LookPoint[], ActionableItem, bool, int> _callback) {
+        pathStart = _start;
+        pathEndGoalFaction = attackTarget;
+        callback = _callback;
+        movementPenaltyMultiplier = _movementPenaltyMultiplier;
+
+        targetType = PathRequestTargetType.Unknown;
+        pathEndWorld = null;
+        pathEndGrid = null;
+        pathEndLayout = null;
+        pathEndGoalMineral = null;
     }
 }
 
@@ -105,7 +122,14 @@ public class PathRequestManager : MonoBehaviour {
                 request = new PathRequest(position, layoutCoordinate, movementPenaltyMultiplier, callback, task.pathRequestTargetType);
                 break;
             case PathRequestTargetType.Unknown:
-                request = new PathRequest(position, movementPenaltyMultiplier, task.gatherType, callback);
+                if (task.gatherType != null) {
+                    var gatherType = task.gatherType.Value;
+                    request = new PathRequest(position, movementPenaltyMultiplier, gatherType, callback);
+                } else if (task.attackTarget != null) {
+                    var attackTarget = task.attackTarget.Value;
+                    request = new PathRequest(position, movementPenaltyMultiplier, attackTarget, callback);
+                }
+
                 break;
         }
 
@@ -127,12 +151,22 @@ public class PathRequestManager : MonoBehaviour {
 
             switch(currentPathRequest.targetType) {
                 case PathRequestTargetType.Unknown:
-                    pathFinding.FindSimplifiedPathToClosestGoal(currentPathRequest.pathStart, currentPathRequest.movementPenaltyMultiplier, currentPathRequest.pathEndGoal.Value, (path, actionableItem, success, distance) => {
-                        currentPathRequest.callback(path, actionableItem, success, distance);
-                        isProcessingPath = false;
+                    if (currentPathRequest.pathEndGoalMineral != null) {
+                        pathFinding.FindSimplifiedPathToClosestOre(currentPathRequest.pathStart, currentPathRequest.movementPenaltyMultiplier, currentPathRequest.pathEndGoalMineral.Value, (path, actionableItem, success, distance) => {
+                            currentPathRequest.callback(path, actionableItem, success, distance);
+                            isProcessingPath = false;
 
-                        TryProcessNext();
-                    });
+                            TryProcessNext();
+                        });
+                    } else if (currentPathRequest.pathEndGoalFaction != null) {
+                        pathFinding.FindSimplifiedPathToClosestUnit(currentPathRequest.pathStart, currentPathRequest.movementPenaltyMultiplier, currentPathRequest.pathEndGoalFaction.Value, (path, actionableItem, success, distance) => {
+                            currentPathRequest.callback(path, actionableItem, success, distance);
+                            isProcessingPath = false;
+
+                            TryProcessNext();
+                        });
+                    }
+
                     break;
                 case PathRequestTargetType.World:
                     pathFinding.FindSimplifiedPath(currentPathRequest.pathStart, currentPathRequest.pathEndWorld.Value, currentPathRequest.movementPenaltyMultiplier,(path, success, distance) => {

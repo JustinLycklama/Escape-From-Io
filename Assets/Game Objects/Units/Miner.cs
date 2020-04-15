@@ -6,7 +6,11 @@ public class Miner : Unit {
     public override int duration => 480;
     public override MasterGameTask.ActionType primaryActionType => MasterGameTask.ActionType.Mine;
 
-    public MoenenGames.VoxelRobot.Weapon[] weaponSet; 
+    public MoenenGames.VoxelRobot.Weapon[] weaponSet;
+
+    protected override void UnitCustomInit() {
+
+    }
 
     protected override void Animate() {
         foreach(MoenenGames.VoxelRobot.Weapon weapon in weaponSet) {

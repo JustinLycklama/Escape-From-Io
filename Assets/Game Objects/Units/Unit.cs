@@ -65,11 +65,13 @@ public static class UnitStateExtensions {
 }
 
 // Unit is an actionable item when it is being built, other units can take actions on it by dropping resources and building it.
-public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, Followable, TaskLockUpdateDelegate {
+public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, Followable, TaskLockUpdateDelegate {
 
     public enum UnitState {
         Idle, Efficient, Inefficient
     }
+
+    public enum FactionType { Player, Enemy }
 
     // Initialization
     [HideInInspector]
@@ -98,18 +100,18 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
 
     //Path path;
     Path pathToDraw;
-    bool navigatingToTask;
+    protected bool navigatingToTask;
 
     // Status Tooltip
     public Transform statusLocation;
-    UnitStatusTooltip unitStatusTooltip;
+    protected UnitStatusTooltip unitStatusTooltip;
 
     // Tasks
     public float relativeDistanceToTask;
-    public MasterGameTask currentMasterTask { get; private set; }
+    public MasterGameTask currentMasterTask { get; protected set; }
 
     // The queue of all tasks to do for the current Master Task
-    Queue<GameTask> gameTasksQueue;
+    protected Queue<GameTask> gameTasksQueue;
 
     public GameTask takeableTask {
         get {
@@ -129,9 +131,11 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
         }
     }
 
+    public virtual FactionType factionType { get { return FactionType.Player; } }
+
     private int movementCostToTask = 0;
     private float currentPercentOfJournery = 0;
-    GameTask currentGameTask; // The current Game Task we are working on to complete the Master Task
+    protected GameTask currentGameTask; // The current Game Task we are working on to complete the Master Task
     private HashSet<int> refuseTaskSet; // Set of tasks we aready know we cannot perform
 
     public static int maxUnitUduration = 600;
@@ -155,7 +159,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
      * */
 
     public string title { get; private set; }
-    public string description => title;
+    public override string description => title;
 
     /*
      * Followable Interface
@@ -274,7 +278,9 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
         foundWaypoints = (waypoints, actionableItem, success, distance) => {
             StopAllCoroutines();
 
-            if(success) {                              
+            if(success) {
+                navigatingToTask = true;
+
                 // When requesting a path for an unknown resource (like ore) we will get the closest resource back as an actionable item
                 if(actionableItem != null) {
                     currentGameTask.actionItem = actionableItem;
@@ -307,11 +313,16 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
                 taskQueueManager.PutBackTask(currentMasterTask);
                 ResetTaskState();
             }
+
+            // let gameobject.actionItem get set before calling completion
+            foundWaypointsCompletionAction?.Invoke(success);
         };
 
-        ResetTaskState();
-        //StartCoroutine(FindTask());
+        UnitCustomInit();
+        ResetTaskState();        
     }
+
+    protected abstract void UnitCustomInit();
 
     public UnitState GetUnitState() {
         Unit.UnitState unitState = Unit.UnitState.Idle;
@@ -333,15 +344,15 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
 
     Action<bool> completedTaskAction;
     Action<bool> completedPath;
-    Action<LookPoint[], ActionableItem, bool, int> foundWaypoints;
+    protected Action<LookPoint[], ActionableItem, bool, int> foundWaypoints;
+    protected Action<bool> foundWaypointsCompletionAction;
 
-    private void DoTask(MasterGameTask task) {
+    protected void DoTask(MasterGameTask task) {
         currentMasterTask = task;
         currentMasterTask.assignedUnit = this;
 
         gameTasksQueue.Clear();
 
-        //navigatingToTask = true;
         foreach (GameTask gameTask in currentMasterTask.childGameTasks) {
             gameTasksQueue.Enqueue(gameTask);
         }
@@ -391,12 +402,16 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
             taskQueueManager.PutBackTask(currentMasterTask);
         }
 
-        buildableComponent.SetTransparentShaders();
-        buildableComponent.SetAlphaSolid();
+        Action<int, float> fadeOutBlock = null;
 
-        Action<int, float> fadeOutBlock = (seconds, percent) => {
-            buildableComponent.SetAlphaPercentage(1 - percent);
-        };
+        if (buildableComponent != null) {
+            buildableComponent.SetTransparentShaders();
+            buildableComponent.SetAlphaSolid();
+
+            fadeOutBlock = (seconds, percent) => {
+                buildableComponent.SetAlphaPercentage(1 - percent);
+            };
+        }
 
         Action destroyBlock = () => {
             Destroy();
@@ -407,7 +422,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
 
     // Pipeline Helpers
 
-    private void ResetTaskState() {
+    protected virtual void ResetTaskState() {
         currentMasterTask = null;
         currentGameTask = null;
 
@@ -621,6 +636,14 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
         }
     }
 
+
+    /*
+     * Actionable Item
+     * */
+    public override float performAction(GameTask task, float rate, Unit unit) {
+        return 1;
+    }
+
     /*
      * Selectable Interface
      * */
@@ -632,11 +655,13 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
             color = PlayerBehaviour.tintColor;
         }
 
-        foreach(Building.MeshBuildingTier meshTier in buildableComponent.meshTiers) {
-            foreach(MeshRenderer renderer in meshTier.meshRenderes) {
-                renderer.material.SetColor("_Color", color);
+        if (buildableComponent != null) {
+            foreach(Building.MeshBuildingTier meshTier in buildableComponent.meshTiers) {
+                foreach(MeshRenderer renderer in meshTier.meshRenderes) {
+                    renderer.material.SetColor("_Color", color);
+                }
             }
-        }
+        }        
     }
 
     DeletionWatch deletionWatcher;
@@ -665,7 +690,7 @@ public abstract class Unit : MonoBehaviour, Selectable, TerrainUpdateDelegate, F
         taskStatusDelegateList.Remove(notificationDelegate);
     }
 
-    private void NotifyAllTaskStatus() {
+    protected void NotifyAllTaskStatus() {
         foreach(TaskStatusUpdateDelegate updateDelegate in taskStatusDelegateList.ToArray()) {
             updateDelegate.NowPerformingTask(this, currentMasterTask, currentGameTask);
         }

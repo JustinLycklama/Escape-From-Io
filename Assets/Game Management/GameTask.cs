@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GameTask {
 
-    public enum ActionType { Build, Mine, PickUp, DropOff, FlattenPath };
+    public enum ActionType { Build, Mine, PickUp, DropOff, FlattenPath, Attack };
 
     public string description;
 
@@ -13,7 +13,10 @@ public class GameTask {
     public PathRequestTargetType pathRequestTargetType;
 
     // Target for Gather Action
-    public MineralType gatherType;
+    public MineralType? gatherType;
+
+    // Target for Attack Action
+    public Unit.FactionType? attackTarget;
 
     public ActionType action;
     public ActionableItem actionItem;
@@ -22,7 +25,7 @@ public class GameTask {
 
     public System.Func<bool> SatisfiesStartRequirements;
 
-    public GameTask(string description, WorldPosition target, ActionType action, ActionableItem actionItem, PathRequestTargetType targetType = PathRequestTargetType.World, MineralType gatherGoal = MineralType.Copper) {
+    public GameTask(string description, WorldPosition target, ActionType action, ActionableItem actionItem, PathRequestTargetType targetType = PathRequestTargetType.World, MineralType? gatherGoal = MineralType.Copper) {
         this.target = target;
         gatherType = gatherGoal;
         Init(description, action, actionItem, targetType);
@@ -30,6 +33,11 @@ public class GameTask {
 
     public GameTask(string description, MineralType gatherGoal, ActionType action, ActionableItem actionItem) {
         gatherType = gatherGoal;
+        Init(description, action, actionItem, PathRequestTargetType.Unknown);
+    }
+
+    public GameTask(string description, Unit.FactionType attackType, ActionType action, ActionableItem actionItem) {
+        attackTarget = attackType;
         Init(description, action, actionItem, PathRequestTargetType.Unknown);
     }
 
@@ -60,6 +68,8 @@ public static class GameTaskActionTypeExtensions {
                 return "Build";
             case MasterGameTask.ActionType.Move:
                 return "Move";
+            case MasterGameTask.ActionType.Attack:
+                return "Attack";
         }
 
         return "???";
@@ -73,6 +83,8 @@ public static class GameTaskActionTypeExtensions {
                 return "Builder";
             case MasterGameTask.ActionType.Move:
                 return "Mover";
+            case MasterGameTask.ActionType.Attack:
+                return "Attacker";
         }
 
         return "???";
@@ -95,7 +107,7 @@ public class MasterGameTask {
     public ActionableItem itemContingentOnTask;
 
     // Don't know if we need a type on the master...
-    public enum ActionType { Mine, Build, Move };
+    public enum ActionType { Mine, Build, Move, Attack };
     public ActionType actionType;
 
     public int taskNumber;

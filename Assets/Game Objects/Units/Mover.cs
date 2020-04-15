@@ -6,6 +6,10 @@ public class Mover : Unit {
     public override int duration => 280;
     public override MasterGameTask.ActionType primaryActionType => MasterGameTask.ActionType.Move;
 
+    protected override void UnitCustomInit() {
+
+    }
+
     public override float SpeedForTask(MasterGameTask.ActionType actionType) {
         switch(actionType) {
             case MasterGameTask.ActionType.Mine:
