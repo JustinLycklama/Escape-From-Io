@@ -162,7 +162,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
             SceneManagement.sharedInstance.ChangeScene(SceneManagement.State.GameFinish, null, null, this, null);
         };
 
-        Script.Get<MessageManager>().EnqueueMessage("GAME OVER", "No robots remain to fulfill your goals.\nYou remain trapped on Io...", okay);
+        //Script.Get<MessageManager>().EnqueueMessage("GAME OVER", "No robots remain to fulfill your goals.\nYou remain trapped on Io...", okay);
     }
 
     IEnumerator InitializeScene() {

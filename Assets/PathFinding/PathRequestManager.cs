@@ -5,13 +5,16 @@ using UnityEngine;
 
 public enum PathRequestTargetType { Unknown, World, Layout, PathGrid }
 
-struct PathRequest {
+public class PathRequest {
+    public bool isCancelled = false;
+
     public PathRequestTargetType targetType;
     
     public Vector3? pathEndWorld;
 
     public PathGridCoordinate? pathEndGrid;
     public LayoutCoordinate? pathEndLayout;
+    //public PathGridCoordinate? pathEndGridCoord;
     public MineralType? pathEndGoalMineral;
     public Unit.FactionType? pathEndGoalFaction;
 
@@ -58,6 +61,20 @@ struct PathRequest {
         pathEndGoalFaction = null;
     }
 
+    public PathRequest(Vector3 _start, PathGridCoordinate _end, int _movementPenaltyMultiplier, Action<LookPoint[], ActionableItem, bool, int> _callback, PathRequestTargetType targetType) {
+        pathStart = _start;
+        callback = _callback;
+        pathEndGrid = _end;
+        movementPenaltyMultiplier = _movementPenaltyMultiplier;
+
+
+        this.targetType = targetType;
+        pathEndWorld = null;
+        pathEndLayout = null;
+        pathEndGoalMineral = null;
+        pathEndGoalFaction = null;
+    }
+
     public PathRequest(Vector3 _start, int _movementPenaltyMultiplier, MineralType goalGatherType, Action<LookPoint[], ActionableItem, bool, int> _callback) {
         pathStart = _start;
         pathEndGoalMineral = goalGatherType;
@@ -83,6 +100,10 @@ struct PathRequest {
         pathEndLayout = null;
         pathEndGoalMineral = null;
     }
+
+    public void Cancel() {
+        isCancelled = true;
+    }
 }
 
 public class PathRequestManager : MonoBehaviour {
@@ -107,19 +128,23 @@ public class PathRequestManager : MonoBehaviour {
     //    instance.TryProcessNext();
     //}
 
-    public static void RequestPathForTask(Vector3 position, int movementPenaltyMultiplier, GameTask task, Action<LookPoint[], ActionableItem, bool, int> callback) {
+    public static PathRequest RequestPathForTask(Vector3 position, int movementPenaltyMultiplier, GameTask task, Action<LookPoint[], ActionableItem, bool, int> callback) {
 
-        PathRequest? request = null;
+        PathRequest request = null;
+
+        MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(task.target);
+        LayoutCoordinate layoutCoordinate = new LayoutCoordinate(mapCoordinate);
+        PathGridCoordinate pathGridCoordinate = PathGridCoordinate.fromMapCoordinate(mapCoordinate);
 
         switch(task.pathRequestTargetType) {
             case PathRequestTargetType.World:
                 request = new PathRequest(position, task.target.vector3, movementPenaltyMultiplier, callback);
                 break;
             case PathRequestTargetType.Layout:
-            case PathRequestTargetType.PathGrid:
-                MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(task.target);
-                LayoutCoordinate layoutCoordinate = new LayoutCoordinate(mapCoordinate);
                 request = new PathRequest(position, layoutCoordinate, movementPenaltyMultiplier, callback, task.pathRequestTargetType);
+                break;
+            case PathRequestTargetType.PathGrid:
+                request = new PathRequest(position, pathGridCoordinate, movementPenaltyMultiplier, callback, task.pathRequestTargetType);
                 break;
             case PathRequestTargetType.Unknown:
                 if (task.gatherType != null) {
@@ -133,9 +158,11 @@ public class PathRequestManager : MonoBehaviour {
                 break;
         }
 
-        if (request.HasValue) {
-            RequestPath(request.Value);
+        if (request != null) {
+            RequestPath(request);
         }
+
+        return request;
     }
 
     private static void RequestPath(PathRequest pathRequest) {
@@ -144,23 +171,31 @@ public class PathRequestManager : MonoBehaviour {
         instance.TryProcessNext();
     }
 
+
+
     void TryProcessNext() {
         if (!isProcessingPath && pathRequestQueue.Count > 0) {
             currentPathRequest = pathRequestQueue.Dequeue();
+
+            if (currentPathRequest.isCancelled == true) {
+                TryProcessNext();
+                return;
+            }
+
             isProcessingPath = true;
 
             switch(currentPathRequest.targetType) {
                 case PathRequestTargetType.Unknown:
                     if (currentPathRequest.pathEndGoalMineral != null) {
                         pathFinding.FindSimplifiedPathToClosestOre(currentPathRequest.pathStart, currentPathRequest.movementPenaltyMultiplier, currentPathRequest.pathEndGoalMineral.Value, (path, actionableItem, success, distance) => {
-                            currentPathRequest.callback(path, actionableItem, success, distance);
+                            if(!currentPathRequest.isCancelled) currentPathRequest.callback(path, actionableItem, success, distance);                                                        
                             isProcessingPath = false;
 
                             TryProcessNext();
                         });
                     } else if (currentPathRequest.pathEndGoalFaction != null) {
                         pathFinding.FindSimplifiedPathToClosestUnit(currentPathRequest.pathStart, currentPathRequest.movementPenaltyMultiplier, currentPathRequest.pathEndGoalFaction.Value, (path, actionableItem, success, distance) => {
-                            currentPathRequest.callback(path, actionableItem, success, distance);
+                            if(!currentPathRequest.isCancelled)  currentPathRequest.callback(path, actionableItem, success, distance);
                             isProcessingPath = false;
 
                             TryProcessNext();
@@ -170,7 +205,7 @@ public class PathRequestManager : MonoBehaviour {
                     break;
                 case PathRequestTargetType.World:
                     pathFinding.FindSimplifiedPath(currentPathRequest.pathStart, currentPathRequest.pathEndWorld.Value, currentPathRequest.movementPenaltyMultiplier,(path, success, distance) => {
-                        currentPathRequest.callback(path, null, success, distance);
+                        if(!currentPathRequest.isCancelled) currentPathRequest.callback(path, null, success, distance);
                         isProcessingPath = false;
 
                         TryProcessNext();
@@ -180,15 +215,15 @@ public class PathRequestManager : MonoBehaviour {
                     break;
                 case PathRequestTargetType.Layout:
                     pathFinding.FindSimplifiedPathForLayout(currentPathRequest.pathStart, currentPathRequest.pathEndLayout.Value, currentPathRequest.movementPenaltyMultiplier, (path, success, distance) => {
-                        currentPathRequest.callback(path, null, success, distance);
+                        if(!currentPathRequest.isCancelled) currentPathRequest.callback(path, null, success, distance);
                         isProcessingPath = false;
 
                         TryProcessNext();
                     });
                     break;
                 case PathRequestTargetType.PathGrid:
-                    pathFinding.FindSimplifiedPathForPathGrid(currentPathRequest.pathStart, currentPathRequest.pathEndLayout.Value, currentPathRequest.movementPenaltyMultiplier, (path, success, distance) => {
-                        currentPathRequest.callback(path, null, success, distance);
+                    pathFinding.FindSimplifiedPathForPathGrid(currentPathRequest.pathStart, currentPathRequest.pathEndGrid.Value, currentPathRequest.movementPenaltyMultiplier, (path, success, distance) => {
+                        if(!currentPathRequest.isCancelled) currentPathRequest.callback(path, null, success, distance);
                         isProcessingPath = false;
 
                         TryProcessNext();

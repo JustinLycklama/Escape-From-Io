@@ -71,18 +71,33 @@ public class PathFinding : MonoBehaviour {
     //public static List<PathGridCoordinate> staticGridCoordinatesSurroundingLayoutCoordinate;
 
     // For PathRequestTargetType NodeCoordiante 
-    public void FindSimplifiedPathForPathGrid(Vector3 startPos, LayoutCoordinate layoutCoordinate, int movementPenaltyMultiplier, Action<LookPoint[], bool, int> callback) {
+    public void FindSimplifiedPathForPathGrid(Vector3 startPos, PathGridCoordinate pathGridCoordinate, int movementPenaltyMultiplier, Action<LookPoint[], bool, int> callback) {
         Constants constants = Script.Get<Constants>();
-
-        PathGridCoordinate[][] pathGridCoordinatesOfLayout = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(layoutCoordinate);
+  
         List<PathGridCoordinate> pathGridCoordinates = new List<PathGridCoordinate>();
 
-        int middleCoordinate = Mathf.FloorToInt(constants.nodesPerLayoutPerAxis / 2f);        
+        int gridCoordinateCountWidth = constants.layoutMapWidth * constants.nodesPerLayoutPerAxis * constants.mapCountX;
+        int gridCoordinateCountHeight = constants.layoutMapHeight * constants.nodesPerLayoutPerAxis * constants.mapCountY;
 
-        pathGridCoordinates.Add(pathGridCoordinatesOfLayout[0][middleCoordinate]);
-        pathGridCoordinates.Add(pathGridCoordinatesOfLayout[middleCoordinate][0]);
-        pathGridCoordinates.Add(pathGridCoordinatesOfLayout[constants.nodesPerLayoutPerAxis - 1][middleCoordinate]);
-        pathGridCoordinates.Add(pathGridCoordinatesOfLayout[middleCoordinate][constants.nodesPerLayoutPerAxis - 1]);
+        // Left Side
+        if(pathGridCoordinate.xLowSample - 1 >= 0) {
+            pathGridCoordinates.Add(new PathGridCoordinate(pathGridCoordinate.xLowSample - 1, pathGridCoordinate.yLowSample));
+        }
+
+        // Top Side
+        if(pathGridCoordinate.yLowSample - 1 >= 0) {
+            pathGridCoordinates.Add(new PathGridCoordinate(pathGridCoordinate.xLowSample, pathGridCoordinate.yLowSample - 1));
+        }
+
+        // Right Side
+        if(pathGridCoordinate.xLowSample + 1 < gridCoordinateCountWidth - 1) {
+            pathGridCoordinates.Add(new PathGridCoordinate(pathGridCoordinate.xLowSample + 1, pathGridCoordinate.yLowSample));
+        }
+
+        // Bottom Side
+        if(pathGridCoordinate.yLowSample + 1 < gridCoordinateCountHeight - 1) {
+            pathGridCoordinates.Add(new PathGridCoordinate(pathGridCoordinate.xLowSample, pathGridCoordinate.yLowSample + 1));
+        }
 
         FindSimplifiedPathToAnyIncluding(pathGridCoordinates, startPos, movementPenaltyMultiplier, callback);
     }

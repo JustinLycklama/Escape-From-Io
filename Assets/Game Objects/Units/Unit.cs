@@ -99,7 +99,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
     public Transform oreLocation;
 
     //Path path;
-    Path pathToDraw;
+    protected Path pathToDraw;
     protected bool navigatingToTask;
 
     // Status Tooltip
@@ -268,15 +268,15 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
             navigatingToTask = false;
 
             // Don't bother showing completion bar for picking up and droping off
-            if(currentGameTask.action != GameTask.ActionType.DropOff && currentGameTask.action != GameTask.ActionType.PickUp) {
+            if(currentGameTask!= null && currentGameTask.action != GameTask.ActionType.DropOff && currentGameTask.action != GameTask.ActionType.PickUp) {
                 unitStatusTooltip.DisplayPercentageBar(true);
-            }        
-            
-            StartCoroutine(PerformTaskAction(completedTaskAction));
+            }
+
+            performTaskCoroutine = StartCoroutine(PerformTaskAction(completedTaskAction));
         };
 
         foundWaypoints = (waypoints, actionableItem, success, distance) => {
-            StopAllCoroutines();
+            StopActionCoroutines();
 
             if(success) {
                 navigatingToTask = true;
@@ -305,7 +305,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
                 LayoutCoordinate layoutCoordinate = new LayoutCoordinate(mapCoordinate);
 
-                StartCoroutine(FollowPath(path, completedPath));
+                FollowPathCoroutine = StartCoroutine(FollowPath(path, completedPath));
             } else {
                 // There is no path to task, we cannot do this.
                 refuseTaskSet.Add(currentMasterTask.taskNumber);
@@ -313,9 +313,6 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
                 taskQueueManager.PutBackTask(currentMasterTask);
                 ResetTaskState();
             }
-
-            // let gameobject.actionItem get set before calling completion
-            foundWaypointsCompletionAction?.Invoke(success);
         };
 
         UnitCustomInit();
@@ -342,10 +339,11 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
      * Task Pipeline
      * */
 
-    Action<bool> completedTaskAction;
-    Action<bool> completedPath;
+    protected Action<bool> completedTaskAction;
+    protected Action<bool> completedPath;
     protected Action<LookPoint[], ActionableItem, bool, int> foundWaypoints;
-    protected Action<bool> foundWaypointsCompletionAction;
+
+    protected PathRequest currentPathRequest;
 
     protected void DoTask(MasterGameTask task) {
         currentMasterTask = task;
@@ -360,13 +358,25 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         ContinueGameTaskQueue();
     }
 
-    private void ContinueGameTaskQueue() {
+    protected void RequestPath(Vector3 position, int movementPenaltyMultiplier, GameTask task, Action<LookPoint[], ActionableItem, bool, int> callback) {
+
+        if (currentPathRequest != null) {
+            currentPathRequest.Cancel();
+        }
+
+        currentPathRequest = PathRequestManager.RequestPathForTask(transform.position, movementPenaltyMultiplier, currentGameTask, (waypoints, actionableItem, success, distance) => {
+            currentPathRequest = null;
+            callback(waypoints, actionableItem, success, distance);
+        });
+    }
+
+    protected void ContinueGameTaskQueue() {
 
         if (gameTasksQueue.Count > 0) {
             currentGameTask = gameTasksQueue.Dequeue();
             unitStatusTooltip.SetTask(this, currentGameTask);
 
-            PathRequestManager.RequestPathForTask(transform.position, movementPenaltyMultiplier, currentGameTask, foundWaypoints);
+            RequestPath(transform.position, movementPenaltyMultiplier, currentGameTask, foundWaypoints);
         } else {
             currentMasterTask.MarkTaskFinished();
             ResetTaskState();
@@ -438,7 +448,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
     }
 
     private void InterruptInProgressActions() {
-        StopAllCoroutines();
+        StopActionCoroutines();
 
         // Our current task no longer has an associated action
         if(currentGameTask != null && currentGameTask.actionItem != null) {
@@ -449,13 +459,24 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         Script.Get<GameResourceManager>().ReturnAllToEnvironment(this);
     }
 
+    protected void StopActionCoroutines() {
+        if (performTaskCoroutine != null) {
+            StopCoroutine(performTaskCoroutine);
+        }
+
+        if(FollowPathCoroutine != null) {
+            StopCoroutine(FollowPathCoroutine);
+        }
+    }
+
     /*
      * Task Coroutines
      * */
 
     protected abstract void Animate();
 
-    IEnumerator PerformTaskAction(Action<bool> callBack) {
+    protected Coroutine performTaskCoroutine;
+    protected IEnumerator PerformTaskAction(Action<bool> callBack) {
 
         float speed = SpeedForTask(currentMasterTask.actionType) * ResearchSingleton.sharedInstance.unitActionMultiplier;
 
@@ -481,12 +502,15 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         }     
     }
 
-    IEnumerator FollowPath(Path path, System.Action<bool> callBack) {
+    protected Coroutine FollowPathCoroutine;    
+    protected IEnumerator FollowPath(Path path, System.Action<bool> callBack) {
 
         int pathIndex = 0;
         bool turningToStart = true;
 
         Vector3 startPoint = path.lookPoints[0].worldPosition.vector3;
+        startPoint.y = transform.position.y;
+
         Quaternion originalRotation = transform.rotation;
         Quaternion targetRotation = Quaternion.LookRotation(startPoint - transform.position);
 
@@ -497,6 +521,11 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         float basePercentOfJourney = 0;
 
         Vector3 previousWaypointPosition = transform.position;
+
+        // If we are not moving at all (with some grey area) then don't bother turning to it.
+        if (Vector3.Distance(startPoint, transform.position) < 5) {
+            turningToStart = false;
+        }
 
         while(turningToStart) {
 
@@ -515,11 +544,16 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
             yield return null;
         }
-        
+
         bool followingPath = true;
 
         // Used to slow as we approach target
         float speedPercent = 1;
+
+        // If we are only moving one space, and that space is very short, don't bother (fixes units spinning around when doing a task in same location)
+        if (path.lookPoints.Length == 1 && Vector3.Distance(path.lookPoints[pathIndex].worldPosition.vector3, transform.position) < 5) {
+            followingPath = false;
+        }
 
         while(followingPath) {
 
@@ -552,7 +586,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
             if(followingPath) {
                 if(pathIndex >= path.slowDownIndex && stoppingDistance > 0) {
                     speedPercent = Mathf.Clamp(path.turnBoundaries[path.finishLineIndex].DistanceFromPoint(position2D) / stoppingDistance, 0.15f, 1);
-                }               
+                }
 
                 WorldPosition lookPointWorldPos = path.lookPoints[pathIndex].worldPosition;
                 MapCoordinate lookPointMapCoordinate = MapCoordinate.FromWorldPosition(lookPointWorldPos);
@@ -591,10 +625,9 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         finalLookAtBalancedHeight.y = transform.position.y;
 
         targetRotation = Quaternion.LookRotation(finalLookAtBalancedHeight - transform.position);
-
+       
         totalTurnDistance = 0;
         degreesToTurn = (targetRotation.eulerAngles - originalRotation.eulerAngles).magnitude;
-
 
         while(lookingAtTarget) {
             // Don't move on pause
@@ -632,7 +665,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
         if (currentMasterTask != null && navigatingToTask == true && currentGameTask.target.vector3 != this.transform.position) {
             // Request a new path if the world has updated and we are already on the move
-            PathRequestManager.RequestPathForTask(transform.position, movementPenaltyMultiplier, currentGameTask, foundWaypoints);
+            RequestPath(transform.position, movementPenaltyMultiplier, currentGameTask, foundWaypoints);
         }
     }
 

@@ -82,6 +82,14 @@ public class UnitManager : MonoBehaviour, TaskStatusUpdateDelegate {
         unit.EndTaskStatusNotifications(this);
     }
 
+    public bool IsUnitEnabled(Unit unit) {
+        if (unit == null) {
+            return false;
+        }
+
+        return unitListMap[unit.primaryActionType].Contains(unit);
+    }
+
     private void RecalculateStatus(MasterGameTask.ActionType actionType) {
 
         if (unitListMap[actionType].Count == 0) {
