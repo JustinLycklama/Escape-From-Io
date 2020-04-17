@@ -139,10 +139,17 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
     private HashSet<int> refuseTaskSet; // Set of tasks we aready know we cannot perform
 
     public static int maxUnitUduration = 600;
+
     abstract public int duration { get; }
     public int unitDuration { get { return duration + ResearchSingleton.sharedInstance.unitDurationAddition; } }
+    public int unitHealth = 100;
 
+    [HideInInspector]
     public int remainingDuration = maxUnitUduration;
+
+    [HideInInspector]
+    public int remainingHealth;
+
     abstract public MasterGameTask.ActionType primaryActionType { get; }
 
     abstract public float SpeedForTask(MasterGameTask.ActionType actionType);
@@ -205,6 +212,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         unitStatusTooltip.SetTask(this, null);
         unitStatusTooltip.DisplayPercentageBar(false);
         unitStatusTooltip.SetRemainingDuration(unitDuration, (float)unitDuration / (float) maxUnitUduration);
+        unitStatusTooltip.SetRemainingHealth(unitHealth, 1.0f);
     }
 
     private void OnDestroy() {
@@ -238,12 +246,16 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
             this.remainingDuration = remainingTime;
             float percentOfMaxUnitTime = (float) remainingTime / (float) maxUnitUduration;
 
-            unitStatusTooltip.SetRemainingDuration(remainingTime, percentOfMaxUnitTime);
+            unitStatusTooltip?.SetRemainingDuration(remainingTime, percentOfMaxUnitTime);
 
             if (remainingTime == NotificationPanel.unitDurationWarning) {
                 Script.Get<NotificationPanel>().AddNotification(new NotificationItem(primaryActionType.TitleAsNoun() + " " + name.shortform + " only has " + NotificationPanel.unitDurationWarning.ToString() + "s remaining.", transform));
             }
         };
+
+        // Health
+        unitHealth = 100;
+        remainingHealth = unitHealth;
 
         // Shutdown
         Action durationCompletionBlock = () => {
@@ -395,17 +407,22 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         ResetTaskState();
     }
 
-    public void Destroy() {
+    public void DestroySelf() {
         deletionWatcher?.ObjectDeleted(this);
 
         transform.SetParent(null);
+
         Destroy(unitStatusTooltip.gameObject);
+        unitStatusTooltip = null;
+
         Destroy(gameObject);
     }
 
     private void Shutdown() {
         taskQueueManager.RestractTaskRequest(this);
         InterruptInProgressActions();
+
+
 
         // Put back current task
         if(currentMasterTask != null) {
@@ -424,7 +441,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         }
 
         Action destroyBlock = () => {
-            Destroy();
+            DestroySelf();
         };
 
         Script.Get<TimeManager>().AddNewTimer(3, fadeOutBlock, destroyBlock, 2);
@@ -472,13 +489,19 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
     /*
      * Task Coroutines
      * */
-
+        
+    // TODO: Combine Animate() with begin and completion delegates
     protected abstract void Animate();
+
+    protected virtual void BeginTaskActionDelegate() { }
+    protected virtual void CompleteTaskActionDelegate() { }
 
     protected Coroutine performTaskCoroutine;
     protected IEnumerator PerformTaskAction(Action<bool> callBack) {
 
         float speed = SpeedForTask(currentMasterTask.actionType) * ResearchSingleton.sharedInstance.unitActionMultiplier;
+
+        BeginTaskActionDelegate();
 
         while (true) {
 
@@ -495,12 +518,16 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
             if (completion >= 1) {
                 callBack(true);
+                CompleteTaskActionDelegate();
                 yield break;
             }
 
             yield return null;
         }     
     }
+
+    protected virtual void BeginWalkDelegate() { }
+    protected virtual void CompleteWalkDelegate() { }
 
     protected Coroutine FollowPathCoroutine;    
     protected IEnumerator FollowPath(Path path, System.Action<bool> callBack) {
@@ -556,6 +583,8 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         }
 
         while(followingPath) {
+
+            BeginWalkDelegate();
 
             // Don't move on pause
             if(playerBehaviour.gamePaused) {
@@ -618,6 +647,8 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
             yield return null;
         }
 
+        CompleteWalkDelegate();
+
         bool lookingAtTarget = true;
 
         originalRotation = transform.rotation;
@@ -673,8 +704,52 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
     /*
      * Actionable Item
      * */
+
+    float attackActionPercent = 0;
+    float attackModifierSpeed = 1f;
+
     public override float performAction(GameTask task, float rate, Unit unit) {
-        return 1;
+        switch(task.action) {
+
+            case GameTask.ActionType.Attack:
+                attackActionPercent += rate * attackModifierSpeed;
+
+                if(attackActionPercent >= 1) {
+                    attackActionPercent = 1;
+
+                    // The associatedTask is over
+                    AssociateTask(null);
+                    TakeDamage(5);
+
+                    //GameResourceManager resourceManager = Script.Get<GameResourceManager>();
+                    //resourceManager.GiveToUnit(this, unit);
+
+                    attackActionPercent = 0;
+
+                    return 1;
+                }
+
+                return attackActionPercent;
+            default:
+                break;
+        }
+
+        return 0;
+    }
+
+    private void TakeDamage(int damage) {
+
+        remainingHealth -= damage;
+
+        if (remainingHealth <= 0) {
+            remainingHealth = 0;
+
+            Script.Get<NotificationPanel>().AddNotification(new NotificationItem(primaryActionType.TitleAsNoun() + " " + primaryActionType.TitleAsNoun() + " has been destroyed", transform));
+            Script.Get<UnitManager>().DisableUnit(this);
+            Shutdown();
+        }
+
+        unitStatusTooltip.SetRemainingHealth(remainingHealth, (float)remainingHealth / (float)unitHealth);
     }
 
     /*

@@ -15,8 +15,13 @@ public class Golem : Unit
     private Unit followingUnit;
     private UnitManager unitManager;
 
+    [SerializeField]
+    private EarthElementalController animationController;
+
     protected override void UnitCustomInit() {
         //StartCoroutine(ExecuteAfterTime(10));
+
+        animationController.Idle();
 
         StartCoroutine(FollowAttackTarget());
 
@@ -67,15 +72,52 @@ public class Golem : Unit
         };
     }
 
+
+
+
     public override float SpeedForTask(MasterGameTask.ActionType actionType) {
-        return 1;
-        //throw new System.NotImplementedException();
+        switch(actionType) {
+            case MasterGameTask.ActionType.Attack:
+                return 1.5f;
+        }
+
+        return 0.1f;
     }
 
     protected override void Animate() {
         //throw new System.NotImplementedException();
     }
 
+
+    /*
+     * Action Delegates
+     * */
+
+    protected override void BeginWalkDelegate() {
+        base.BeginWalkDelegate();
+
+        animationController.Walk();
+    }
+
+    protected override void CompleteWalkDelegate() {
+        base.CompleteWalkDelegate();
+
+        animationController.Idle();
+    }
+
+    protected override void BeginTaskActionDelegate() {
+        base.BeginTaskActionDelegate();
+
+        if (NoiseGenerator.random.Next(0, 2) == 0) {
+            animationController.Atk01();
+        } else {
+            animationController.Atk02();
+        }        
+    }
+
+    protected override void CompleteTaskActionDelegate() {
+
+    }
 
     GameTask searchTask;
     GameTask targetTask;
@@ -103,11 +145,11 @@ public class Golem : Unit
 
             searchTask = null;
             targetTask = new GameTask("Attack: " + followingUnit.description, unitPosition, GameTask.ActionType.Attack, followingUnit, PathRequestTargetType.PathGrid);
-            masterAttackTask = new MasterGameTask(MasterGameTask.ActionType.Move, "Attack Master Task", new GameTask[] { targetTask }, null);
+            masterAttackTask = new MasterGameTask(MasterGameTask.ActionType.Attack, "Attack Master Task", new GameTask[] { targetTask }, null);
         } else {
             targetTask = null;
             searchTask = new GameTask("Attack Robot", FactionType.Player, GameTask.ActionType.Attack, null);
-            masterAttackTask = new MasterGameTask(MasterGameTask.ActionType.Move, "Attack Master Task", new GameTask[] { searchTask }, null);
+            masterAttackTask = new MasterGameTask(MasterGameTask.ActionType.Attack, "Attack Master Task", new GameTask[] { searchTask }, null);
         }
 
 

@@ -11,6 +11,7 @@ public class UnitStatusTooltip : MonoBehaviour, TrackingUIInterface { //TaskStat
 
     public PercentageBar durationBar;
     public PercentageBar percentageBar;
+    public PercentageBar healthBar;
 
     public Image backgroundSprite;
 
@@ -23,6 +24,11 @@ public class UnitStatusTooltip : MonoBehaviour, TrackingUIInterface { //TaskStat
     public CanvasGroup canvasGroup { get => canvas; }
 
     //private Unit unit;
+
+    private void Start() {
+        durationBar.setDetailTextHidden(true);
+        healthBar.setDetailTextHidden(true);
+    }
 
     private void Update() {
         this.UpdateTrackingPosition();
@@ -58,5 +64,10 @@ public class UnitStatusTooltip : MonoBehaviour, TrackingUIInterface { //TaskStat
     public void SetRemainingDuration(int duration, float percent) {
         durationBar.fillColorImage.color = ColorSingleton.sharedInstance.GreenToRedByPercent(percent);
         durationBar.SetPercent(percent, duration.ToString());
+    }
+
+    public void SetRemainingHealth(int health, float percent) {
+        healthBar.fillColorImage.color = ColorSingleton.sharedInstance.GreenToRedByPercent(percent);
+        healthBar.SetPercent(percent, health.ToString());
     }
 }

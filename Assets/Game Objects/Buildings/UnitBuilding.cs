@@ -21,7 +21,7 @@ public class UnitBuilding : Building
     }
 
     public override void Destroy() {
-        associatedUnit.Destroy();
+        associatedUnit.DestroySelf();
         base.Destroy();        
     }
 }

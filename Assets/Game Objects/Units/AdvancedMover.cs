@@ -12,7 +12,7 @@ public class AdvancedMover : Unit {
 
     public override float SpeedForTask(MasterGameTask.ActionType actionType) {
         switch(actionType) {
-            case MasterGameTask.ActionType.Mine:
+            case MasterGameTask.ActionType.Attack:
                 return 0.3f;
             case MasterGameTask.ActionType.Build:
                 return 0.3f;

@@ -23,7 +23,7 @@ public class PercentageBar : MonoBehaviour, TrackingUIInterface {
     public CanvasGroup canvasGroup { get => canvas; }
 
     private void Awake() {
-        SetDisplayType(DisplayType.Bar);       
+        SetDisplayType(DisplayType.Bar);
     }
 
     private void Update() {
@@ -44,6 +44,12 @@ public class PercentageBar : MonoBehaviour, TrackingUIInterface {
             case DisplayType.Itemized:
                 sliderBar.gameObject.SetActive(false);
                 break;
+        }
+    }
+
+    public void setDetailTextHidden(bool hidden) {
+        if (detailText.gameObject.activeSelf != !hidden) {
+            detailText.gameObject.SetActive(!hidden);
         }
     }
 
