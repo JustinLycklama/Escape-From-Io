@@ -1,0 +1,1989 @@
+fileFormatVersion: 2
+guid: 454dde309cfb6c34891a2ee04215a1f9
+timeCreated: 1479607512
+licenseType: Store
+ModelImporter:
+  serializedVersion: 19
+  fileIDToRecycleName:
+    100000: back_leg_nub
+    100002: back_leg_toe
+    100004: back_lower_leg
+    100006: back_upper_leg
+    100008: front_leg_nub
+    100010: front_leg_toe
+    100012: front_lower_leg
+    100014: front_upper_leg
+    100016: hips
+    100018: left_leg_nub
+    100020: left_leg_toe
+    100022: left_lower_leg
+    100024: left_shoulder
+    100026: left_upper_leg1
+    100028: left_weapon_mount
+    100030: left_weapon_nub
+    100032: //RootNode
+    100034: mech_destroyer1
+    100036: right_leg_nub
+    100038: right_leg_toe
+    100040: right_lower_leg
+    100042: right_shoulder
+    100044: right_upper_leg1
+    100046: right_weapon_mount
+    100048: right_weapon_nub
+    100050: torso
+    400000: back_leg_nub
+    400002: back_leg_toe
+    400004: back_lower_leg
+    400006: back_upper_leg
+    400008: front_leg_nub
+    400010: front_leg_toe
+    400012: front_lower_leg
+    400014: front_upper_leg
+    400016: hips
+    400018: left_leg_nub
+    400020: left_leg_toe
+    400022: left_lower_leg
+    400024: left_shoulder
+    400026: left_upper_leg1
+    400028: left_weapon_mount
+    400030: left_weapon_nub
+    400032: //RootNode
+    400034: mech_destroyer1
+    400036: right_leg_nub
+    400038: right_leg_toe
+    400040: right_lower_leg
+    400042: right_shoulder
+    400044: right_upper_leg1
+    400046: right_weapon_mount
+    400048: right_weapon_nub
+    400050: torso
+    4300000: mech_destroyer1
+    7400000: idle1
+    7400002: idle2
+    7400004: idle3
+    7400006: idle4
+    7400008: walk
+    7400010: run
+    7400012: stand attack left
+    7400014: stand attack right
+    7400016: crouch
+    7400018: crouch hold
+    7400020: crouch attack left
+    7400022: crouch attack right
+    7400024: stand
+    7400026: jump
+    7400028: jump hold
+    7400030: jump fall
+    7400032: hit1
+    7400034: hit2
+    7400036: death fall back
+    7400038: death fall forward
+    7400040: death fall on knees
+    7400042: t-pose
+    7400044: demo
+    9500000: //RootNode
+    13700000: mech_destroyer1
+  materials:
+    importMaterials: 1
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations:
+    - serializedVersion: 16
+      name: idle1
+      takeName: Take 001
+      firstFrame: 375
+      lastFrame: 430
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: hips
+        weight: 1
+      - path: hips/back_upper_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe/back_leg_nub
+        weight: 1
+      - path: hips/front_upper_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe/front_leg_nub
+        weight: 1
+      - path: hips/left_upper_leg1
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe/left_leg_nub
+        weight: 1
+      - path: hips/right_upper_leg1
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe/right_leg_nub
+        weight: 1
+      - path: hips/torso
+        weight: 1
+      - path: hips/torso/left_shoulder
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount/left_weapon_nub
+        weight: 1
+      - path: hips/torso/right_shoulder
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount/right_weapon_nub
+        weight: 1
+      - path: mech_destroyer1
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 1
+    - serializedVersion: 16
+      name: idle2
+      takeName: Take 001
+      firstFrame: 435
+      lastFrame: 515
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: hips
+        weight: 1
+      - path: hips/back_upper_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe/back_leg_nub
+        weight: 1
+      - path: hips/front_upper_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe/front_leg_nub
+        weight: 1
+      - path: hips/left_upper_leg1
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe/left_leg_nub
+        weight: 1
+      - path: hips/right_upper_leg1
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe/right_leg_nub
+        weight: 1
+      - path: hips/torso
+        weight: 1
+      - path: hips/torso/left_shoulder
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount/left_weapon_nub
+        weight: 1
+      - path: hips/torso/right_shoulder
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount/right_weapon_nub
+        weight: 1
+      - path: mech_destroyer1
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 1
+    - serializedVersion: 16
+      name: idle3
+      takeName: Take 001
+      firstFrame: 520
+      lastFrame: 600
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: hips
+        weight: 1
+      - path: hips/back_upper_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe/back_leg_nub
+        weight: 1
+      - path: hips/front_upper_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe/front_leg_nub
+        weight: 1
+      - path: hips/left_upper_leg1
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe/left_leg_nub
+        weight: 1
+      - path: hips/right_upper_leg1
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe/right_leg_nub
+        weight: 1
+      - path: hips/torso
+        weight: 1
+      - path: hips/torso/left_shoulder
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount/left_weapon_nub
+        weight: 1
+      - path: hips/torso/right_shoulder
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount/right_weapon_nub
+        weight: 1
+      - path: mech_destroyer1
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 1
+    - serializedVersion: 16
+      name: idle4
+      takeName: Take 001
+      firstFrame: 605
+      lastFrame: 670
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: hips
+        weight: 1
+      - path: hips/back_upper_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe/back_leg_nub
+        weight: 1
+      - path: hips/front_upper_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe/front_leg_nub
+        weight: 1
+      - path: hips/left_upper_leg1
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe/left_leg_nub
+        weight: 1
+      - path: hips/right_upper_leg1
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe/right_leg_nub
+        weight: 1
+      - path: hips/torso
+        weight: 1
+      - path: hips/torso/left_shoulder
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount/left_weapon_nub
+        weight: 1
+      - path: hips/torso/right_shoulder
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount/right_weapon_nub
+        weight: 1
+      - path: mech_destroyer1
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 1
+    - serializedVersion: 16
+      name: walk
+      takeName: Take 001
+      firstFrame: 10
+      lastFrame: 40
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: hips
+        weight: 1
+      - path: hips/back_upper_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe/back_leg_nub
+        weight: 1
+      - path: hips/front_upper_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe/front_leg_nub
+        weight: 1
+      - path: hips/left_upper_leg1
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe/left_leg_nub
+        weight: 1
+      - path: hips/right_upper_leg1
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe/right_leg_nub
+        weight: 1
+      - path: hips/torso
+        weight: 1
+      - path: hips/torso/left_shoulder
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount/left_weapon_nub
+        weight: 1
+      - path: hips/torso/right_shoulder
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount/right_weapon_nub
+        weight: 1
+      - path: mech_destroyer1
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 1
+    - serializedVersion: 16
+      name: run
+      takeName: Take 001
+      firstFrame: 45
+      lastFrame: 75
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: hips
+        weight: 1
+      - path: hips/back_upper_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe/back_leg_nub
+        weight: 1
+      - path: hips/front_upper_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe/front_leg_nub
+        weight: 1
+      - path: hips/left_upper_leg1
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe/left_leg_nub
+        weight: 1
+      - path: hips/right_upper_leg1
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe/right_leg_nub
+        weight: 1
+      - path: hips/torso
+        weight: 1
+      - path: hips/torso/left_shoulder
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount/left_weapon_nub
+        weight: 1
+      - path: hips/torso/right_shoulder
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount/right_weapon_nub
+        weight: 1
+      - path: mech_destroyer1
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 1
+    - serializedVersion: 16
+      name: stand attack left
+      takeName: Take 001
+      firstFrame: 80
+      lastFrame: 89
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: hips
+        weight: 1
+      - path: hips/back_upper_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe/back_leg_nub
+        weight: 1
+      - path: hips/front_upper_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe/front_leg_nub
+        weight: 1
+      - path: hips/left_upper_leg1
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe/left_leg_nub
+        weight: 1
+      - path: hips/right_upper_leg1
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe/right_leg_nub
+        weight: 1
+      - path: hips/torso
+        weight: 1
+      - path: hips/torso/left_shoulder
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount/left_weapon_nub
+        weight: 1
+      - path: hips/torso/right_shoulder
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount/right_weapon_nub
+        weight: 1
+      - path: mech_destroyer1
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 1
+    - serializedVersion: 16
+      name: stand attack right
+      takeName: Take 001
+      firstFrame: 90
+      lastFrame: 99
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: hips
+        weight: 1
+      - path: hips/back_upper_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe/back_leg_nub
+        weight: 1
+      - path: hips/front_upper_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe/front_leg_nub
+        weight: 1
+      - path: hips/left_upper_leg1
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe/left_leg_nub
+        weight: 1
+      - path: hips/right_upper_leg1
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe/right_leg_nub
+        weight: 1
+      - path: hips/torso
+        weight: 1
+      - path: hips/torso/left_shoulder
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount/left_weapon_nub
+        weight: 1
+      - path: hips/torso/right_shoulder
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount/right_weapon_nub
+        weight: 1
+      - path: mech_destroyer1
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 1
+    - serializedVersion: 16
+      name: crouch
+      takeName: Take 001
+      firstFrame: 100
+      lastFrame: 110
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: hips
+        weight: 1
+      - path: hips/back_upper_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe/back_leg_nub
+        weight: 1
+      - path: hips/front_upper_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe/front_leg_nub
+        weight: 1
+      - path: hips/left_upper_leg1
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe/left_leg_nub
+        weight: 1
+      - path: hips/right_upper_leg1
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe/right_leg_nub
+        weight: 1
+      - path: hips/torso
+        weight: 1
+      - path: hips/torso/left_shoulder
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount/left_weapon_nub
+        weight: 1
+      - path: hips/torso/right_shoulder
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount/right_weapon_nub
+        weight: 1
+      - path: mech_destroyer1
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 1
+    - serializedVersion: 16
+      name: crouch hold
+      takeName: Take 001
+      firstFrame: 110
+      lastFrame: 114
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: hips
+        weight: 1
+      - path: hips/back_upper_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe/back_leg_nub
+        weight: 1
+      - path: hips/front_upper_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe/front_leg_nub
+        weight: 1
+      - path: hips/left_upper_leg1
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe/left_leg_nub
+        weight: 1
+      - path: hips/right_upper_leg1
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe/right_leg_nub
+        weight: 1
+      - path: hips/torso
+        weight: 1
+      - path: hips/torso/left_shoulder
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount/left_weapon_nub
+        weight: 1
+      - path: hips/torso/right_shoulder
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount/right_weapon_nub
+        weight: 1
+      - path: mech_destroyer1
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 1
+    - serializedVersion: 16
+      name: crouch attack left
+      takeName: Take 001
+      firstFrame: 115
+      lastFrame: 124
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: hips
+        weight: 1
+      - path: hips/back_upper_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe/back_leg_nub
+        weight: 1
+      - path: hips/front_upper_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe/front_leg_nub
+        weight: 1
+      - path: hips/left_upper_leg1
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe/left_leg_nub
+        weight: 1
+      - path: hips/right_upper_leg1
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe/right_leg_nub
+        weight: 1
+      - path: hips/torso
+        weight: 1
+      - path: hips/torso/left_shoulder
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount/left_weapon_nub
+        weight: 1
+      - path: hips/torso/right_shoulder
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount/right_weapon_nub
+        weight: 1
+      - path: mech_destroyer1
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 1
+    - serializedVersion: 16
+      name: crouch attack right
+      takeName: Take 001
+      firstFrame: 125
+      lastFrame: 134
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: hips
+        weight: 1
+      - path: hips/back_upper_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe/back_leg_nub
+        weight: 1
+      - path: hips/front_upper_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe/front_leg_nub
+        weight: 1
+      - path: hips/left_upper_leg1
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe/left_leg_nub
+        weight: 1
+      - path: hips/right_upper_leg1
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe/right_leg_nub
+        weight: 1
+      - path: hips/torso
+        weight: 1
+      - path: hips/torso/left_shoulder
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount/left_weapon_nub
+        weight: 1
+      - path: hips/torso/right_shoulder
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount/right_weapon_nub
+        weight: 1
+      - path: mech_destroyer1
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 1
+    - serializedVersion: 16
+      name: stand
+      takeName: Take 001
+      firstFrame: 135
+      lastFrame: 145
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: hips
+        weight: 1
+      - path: hips/back_upper_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe/back_leg_nub
+        weight: 1
+      - path: hips/front_upper_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe/front_leg_nub
+        weight: 1
+      - path: hips/left_upper_leg1
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe/left_leg_nub
+        weight: 1
+      - path: hips/right_upper_leg1
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe/right_leg_nub
+        weight: 1
+      - path: hips/torso
+        weight: 1
+      - path: hips/torso/left_shoulder
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount/left_weapon_nub
+        weight: 1
+      - path: hips/torso/right_shoulder
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount/right_weapon_nub
+        weight: 1
+      - path: mech_destroyer1
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 1
+    - serializedVersion: 16
+      name: jump
+      takeName: Take 001
+      firstFrame: 145
+      lastFrame: 158
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: hips
+        weight: 1
+      - path: hips/back_upper_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe/back_leg_nub
+        weight: 1
+      - path: hips/front_upper_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe/front_leg_nub
+        weight: 1
+      - path: hips/left_upper_leg1
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe/left_leg_nub
+        weight: 1
+      - path: hips/right_upper_leg1
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe/right_leg_nub
+        weight: 1
+      - path: hips/torso
+        weight: 1
+      - path: hips/torso/left_shoulder
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount/left_weapon_nub
+        weight: 1
+      - path: hips/torso/right_shoulder
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount/right_weapon_nub
+        weight: 1
+      - path: mech_destroyer1
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 1
+    - serializedVersion: 16
+      name: jump hold
+      takeName: Take 001
+      firstFrame: 159
+      lastFrame: 162
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: hips
+        weight: 1
+      - path: hips/back_upper_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe/back_leg_nub
+        weight: 1
+      - path: hips/front_upper_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe/front_leg_nub
+        weight: 1
+      - path: hips/left_upper_leg1
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe/left_leg_nub
+        weight: 1
+      - path: hips/right_upper_leg1
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe/right_leg_nub
+        weight: 1
+      - path: hips/torso
+        weight: 1
+      - path: hips/torso/left_shoulder
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount/left_weapon_nub
+        weight: 1
+      - path: hips/torso/right_shoulder
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount/right_weapon_nub
+        weight: 1
+      - path: mech_destroyer1
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 1
+    - serializedVersion: 16
+      name: jump fall
+      takeName: Take 001
+      firstFrame: 163
+      lastFrame: 175
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: hips
+        weight: 1
+      - path: hips/back_upper_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe/back_leg_nub
+        weight: 1
+      - path: hips/front_upper_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe/front_leg_nub
+        weight: 1
+      - path: hips/left_upper_leg1
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe/left_leg_nub
+        weight: 1
+      - path: hips/right_upper_leg1
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe/right_leg_nub
+        weight: 1
+      - path: hips/torso
+        weight: 1
+      - path: hips/torso/left_shoulder
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount/left_weapon_nub
+        weight: 1
+      - path: hips/torso/right_shoulder
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount/right_weapon_nub
+        weight: 1
+      - path: mech_destroyer1
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 1
+    - serializedVersion: 16
+      name: hit1
+      takeName: Take 001
+      firstFrame: 180
+      lastFrame: 190
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: hips
+        weight: 1
+      - path: hips/back_upper_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe/back_leg_nub
+        weight: 1
+      - path: hips/front_upper_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe/front_leg_nub
+        weight: 1
+      - path: hips/left_upper_leg1
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe/left_leg_nub
+        weight: 1
+      - path: hips/right_upper_leg1
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe/right_leg_nub
+        weight: 1
+      - path: hips/torso
+        weight: 1
+      - path: hips/torso/left_shoulder
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount/left_weapon_nub
+        weight: 1
+      - path: hips/torso/right_shoulder
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount/right_weapon_nub
+        weight: 1
+      - path: mech_destroyer1
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 1
+    - serializedVersion: 16
+      name: hit2
+      takeName: Take 001
+      firstFrame: 195
+      lastFrame: 205
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: hips
+        weight: 1
+      - path: hips/back_upper_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe/back_leg_nub
+        weight: 1
+      - path: hips/front_upper_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe/front_leg_nub
+        weight: 1
+      - path: hips/left_upper_leg1
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe/left_leg_nub
+        weight: 1
+      - path: hips/right_upper_leg1
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe/right_leg_nub
+        weight: 1
+      - path: hips/torso
+        weight: 1
+      - path: hips/torso/left_shoulder
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount/left_weapon_nub
+        weight: 1
+      - path: hips/torso/right_shoulder
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount/right_weapon_nub
+        weight: 1
+      - path: mech_destroyer1
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 1
+    - serializedVersion: 16
+      name: death fall back
+      takeName: Take 001
+      firstFrame: 210
+      lastFrame: 235
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: hips
+        weight: 1
+      - path: hips/back_upper_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe/back_leg_nub
+        weight: 1
+      - path: hips/front_upper_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe/front_leg_nub
+        weight: 1
+      - path: hips/left_upper_leg1
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe/left_leg_nub
+        weight: 1
+      - path: hips/right_upper_leg1
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe/right_leg_nub
+        weight: 1
+      - path: hips/torso
+        weight: 1
+      - path: hips/torso/left_shoulder
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount/left_weapon_nub
+        weight: 1
+      - path: hips/torso/right_shoulder
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount/right_weapon_nub
+        weight: 1
+      - path: mech_destroyer1
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 1
+    - serializedVersion: 16
+      name: death fall forward
+      takeName: Take 001
+      firstFrame: 240
+      lastFrame: 270
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: hips
+        weight: 1
+      - path: hips/back_upper_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe/back_leg_nub
+        weight: 1
+      - path: hips/front_upper_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe/front_leg_nub
+        weight: 1
+      - path: hips/left_upper_leg1
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe/left_leg_nub
+        weight: 1
+      - path: hips/right_upper_leg1
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe/right_leg_nub
+        weight: 1
+      - path: hips/torso
+        weight: 1
+      - path: hips/torso/left_shoulder
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount/left_weapon_nub
+        weight: 1
+      - path: hips/torso/right_shoulder
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount/right_weapon_nub
+        weight: 1
+      - path: mech_destroyer1
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 1
+    - serializedVersion: 16
+      name: death fall on knees
+      takeName: Take 001
+      firstFrame: 275
+      lastFrame: 365
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: hips
+        weight: 1
+      - path: hips/back_upper_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe/back_leg_nub
+        weight: 1
+      - path: hips/front_upper_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe/front_leg_nub
+        weight: 1
+      - path: hips/left_upper_leg1
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe/left_leg_nub
+        weight: 1
+      - path: hips/right_upper_leg1
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe/right_leg_nub
+        weight: 1
+      - path: hips/torso
+        weight: 1
+      - path: hips/torso/left_shoulder
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount/left_weapon_nub
+        weight: 1
+      - path: hips/torso/right_shoulder
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount/right_weapon_nub
+        weight: 1
+      - path: mech_destroyer1
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 1
+    - serializedVersion: 16
+      name: t-pose
+      takeName: Take 001
+      firstFrame: 1
+      lastFrame: 5
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: hips
+        weight: 1
+      - path: hips/back_upper_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe/back_leg_nub
+        weight: 1
+      - path: hips/front_upper_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe/front_leg_nub
+        weight: 1
+      - path: hips/left_upper_leg1
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe/left_leg_nub
+        weight: 1
+      - path: hips/right_upper_leg1
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe/right_leg_nub
+        weight: 1
+      - path: hips/torso
+        weight: 1
+      - path: hips/torso/left_shoulder
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount/left_weapon_nub
+        weight: 1
+      - path: hips/torso/right_shoulder
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount/right_weapon_nub
+        weight: 1
+      - path: mech_destroyer1
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 1
+    - serializedVersion: 16
+      name: demo
+      takeName: Take 001
+      firstFrame: 10
+      lastFrame: 670
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 1
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: hips
+        weight: 1
+      - path: hips/back_upper_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe
+        weight: 1
+      - path: hips/back_upper_leg/back_lower_leg/back_leg_toe/back_leg_nub
+        weight: 1
+      - path: hips/front_upper_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe
+        weight: 1
+      - path: hips/front_upper_leg/front_lower_leg/front_leg_toe/front_leg_nub
+        weight: 1
+      - path: hips/left_upper_leg1
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe
+        weight: 1
+      - path: hips/left_upper_leg1/left_lower_leg/left_leg_toe/left_leg_nub
+        weight: 1
+      - path: hips/right_upper_leg1
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe
+        weight: 1
+      - path: hips/right_upper_leg1/right_lower_leg/right_leg_toe/right_leg_nub
+        weight: 1
+      - path: hips/torso
+        weight: 1
+      - path: hips/torso/left_shoulder
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount
+        weight: 1
+      - path: hips/torso/left_shoulder/left_weapon_mount/left_weapon_nub
+        weight: 1
+      - path: hips/torso/right_shoulder
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount
+        weight: 1
+      - path: hips/torso/right_shoulder/right_weapon_mount/right_weapon_nub
+        weight: 1
+      - path: mech_destroyer1
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 1
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 50
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
