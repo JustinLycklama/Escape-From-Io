@@ -55,16 +55,16 @@ public class UnitManager : MonoBehaviour, TaskStatusUpdateDelegate {
         };
     }
 
-    public Unit[] GetAllPlayerUnits() {
-        return GetPlayerUnitsOfType(MasterGameTask.ActionType.Build)
-            .Concat(GetPlayerUnitsOfType(MasterGameTask.ActionType.Mine))
-            .Concat(GetPlayerUnitsOfType(MasterGameTask.ActionType.Move))
-            .Concat(GetPlayerUnitsOfType(MasterGameTask.ActionType.Attack))
+    public Unit[] GetAllPlayerUnits(Unit.FactionType faction = Unit.FactionType.Player) {
+        return GetPlayerUnitsOfType(MasterGameTask.ActionType.Build, faction)
+            .Concat(GetPlayerUnitsOfType(MasterGameTask.ActionType.Mine, faction))
+            .Concat(GetPlayerUnitsOfType(MasterGameTask.ActionType.Move, faction))
+            .Concat(GetPlayerUnitsOfType(MasterGameTask.ActionType.Attack, faction))
             .ToArray() ?? new Unit[0];
     }
 
-    public Unit[] GetPlayerUnitsOfType(MasterGameTask.ActionType type) {
-        return unitListMap[type].Where(unit => unit.factionType == Unit.FactionType.Player).ToArray();
+    public Unit[] GetPlayerUnitsOfType(MasterGameTask.ActionType type, Unit.FactionType faction = Unit.FactionType.Player) {
+        return unitListMap[type].Where(unit => unit.factionType == faction).ToArray();
     }
 
     public void RegisterUnit(Unit unit) {

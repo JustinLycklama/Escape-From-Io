@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GameTask {
 
-    public enum ActionType { Build, Mine, PickUp, DropOff, FlattenPath, Attack };
+    public enum ActionType { Build, Mine, PickUp, DropOff, FlattenPath, AttackMele, AttackRanged };
 
     public string description;
 

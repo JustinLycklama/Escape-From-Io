@@ -62,12 +62,12 @@ public class UnitStatusTooltip : MonoBehaviour, TrackingUIInterface { //TaskStat
     }
 
     public void SetRemainingDuration(int duration, float percent) {
-        durationBar.fillColorImage.color = ColorSingleton.sharedInstance.GreenToRedByPercent(percent);
+        durationBar.fillColorImage.color = ColorSingleton.sharedInstance.DurationColorByPercent(percent);
         durationBar.SetPercent(percent, duration.ToString());
     }
 
     public void SetRemainingHealth(int health, float percent) {
-        healthBar.fillColorImage.color = ColorSingleton.sharedInstance.GreenToRedByPercent(percent);
+        healthBar.fillColorImage.color = ColorSingleton.sharedInstance.HealthColorByPercent(percent);
         healthBar.SetPercent(percent, health.ToString());
     }
 }

@@ -48,17 +48,20 @@ public static class UnitStateExtensions {
         return -1;
     }
 
-    static Color idleColor = new Color(0.4811321f, 0.388083f, 0.388083f);
+    //static Color idleColor = new Color(0.4811321f, 0.388083f, 0.388083f);
     public static Color ColorForState(this Unit.UnitState unitState) {        
 
         switch(unitState) {
             case Unit.UnitState.Idle:
-                return idleColor;
+                //return idleColor;
+                return ColorSingleton.sharedInstance.idleUnitColor;
             case Unit.UnitState.Efficient:
-                return Color.white;
+                //return Color.white;
+                return ColorSingleton.sharedInstance.efficientColor;
             case Unit.UnitState.Inefficient:
-                return Color.yellow;
-        }    
+                //return Color.yellow;
+                return ColorSingleton.sharedInstance.inefficientUnitColor;
+        }
 
         return Color.white;
     }
@@ -243,6 +246,10 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         // Duration
         this.remainingDuration = unitDuration;
         Action<int, float> durationUpdateBlock = (remainingTime, percentComplete) => {
+            if (this == null || gameObject == null || !gameObject.activeSelf) {
+                return;
+            }
+
             this.remainingDuration = remainingTime;
             float percentOfMaxUnitTime = (float) remainingTime / (float) maxUnitUduration;
 
@@ -261,7 +268,6 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         Action durationCompletionBlock = () => {
             Script.Get<NotificationPanel>().AddNotification(new NotificationItem(primaryActionType.TitleAsNoun() + " " + name.shortform + " has run out of power", transform));
 
-            unitManager.DisableUnit(this);
             Shutdown();
         };
 
@@ -422,7 +428,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         taskQueueManager.RestractTaskRequest(this);
         InterruptInProgressActions();
 
-
+        Script.Get<UnitManager>().DisableUnit(this);
 
         // Put back current task
         if(currentMasterTask != null) {
@@ -512,7 +518,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
             }
 
             float completion = currentGameTask.actionItem.performAction(currentGameTask, Time.deltaTime * speed, this);
-            unitStatusTooltip.percentageBar.SetPercent(completion);
+            unitStatusTooltip?.percentageBar.SetPercent(completion);
 
             Animate();
 
@@ -706,13 +712,33 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
      * */
 
     float attackActionPercent = 0;
-    float attackModifierSpeed = 1f;
+    const float attackModifierSpeed = 1f;
+    const float attackRangedModifierSpeed = 10f;
 
     public override float performAction(GameTask task, float rate, Unit unit) {
         switch(task.action) {
 
-            case GameTask.ActionType.Attack:
+            case GameTask.ActionType.AttackMele:
                 attackActionPercent += rate * attackModifierSpeed;
+
+                if(attackActionPercent >= 1) {
+                    attackActionPercent = 1;
+
+                    // The associatedTask is over
+                    AssociateTask(null);
+                    TakeDamage(5);
+
+                    //GameResourceManager resourceManager = Script.Get<GameResourceManager>();
+                    //resourceManager.GiveToUnit(this, unit);
+
+                    attackActionPercent = 0;
+
+                    return 1;
+                }
+
+                return attackActionPercent;
+            case GameTask.ActionType.AttackRanged:
+                attackActionPercent += rate * attackRangedModifierSpeed;
 
                 if(attackActionPercent >= 1) {
                     attackActionPercent = 1;

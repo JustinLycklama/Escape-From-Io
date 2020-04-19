@@ -18,7 +18,7 @@ public class PathFinding : MonoBehaviour {
 
     public void FindSimplifiedPathToClosestUnit(Vector3 startPos, int movementPenaltyMultiplier, Unit.FactionType attackTarget, Action<LookPoint[], ActionableItem, bool, int> callback) {
         UnitManager unitManager = Script.Get<UnitManager>();
-        Unit[] allUnits = unitManager.GetAllPlayerUnits();
+        Unit[] allUnits = unitManager.GetAllPlayerUnits(attackTarget);
 
         FindSimplifiedPathToClosestGoal(startPos, movementPenaltyMultiplier, allUnits, callback);
     }
@@ -68,9 +68,58 @@ public class PathFinding : MonoBehaviour {
         }
     }
 
-    //public static List<PathGridCoordinate> staticGridCoordinatesSurroundingLayoutCoordinate;
+    public void FindSimplifiedPathForPathGridAtDistanceOne(Vector3 startPos, PathGridCoordinate pathGridCoordinate, int movementPenaltyMultiplier, Action<LookPoint[], bool, int> callback) {
+        Constants constants = Script.Get<Constants>();
 
-    // For PathRequestTargetType NodeCoordiante 
+        List<PathGridCoordinate> pathGridCoordinates = new List<PathGridCoordinate>();
+
+        int gridCoordinateCountWidth = constants.layoutMapWidth * constants.nodesPerLayoutPerAxis * constants.mapCountX;
+        int gridCoordinateCountHeight = constants.layoutMapHeight * constants.nodesPerLayoutPerAxis * constants.mapCountY;
+
+        // Left Side
+        if(pathGridCoordinate.xLowSample - 2 >= 0) {
+            pathGridCoordinates.Add(new PathGridCoordinate(pathGridCoordinate.xLowSample - 2, pathGridCoordinate.yLowSample));
+        }
+
+        // Top Left 
+        if(pathGridCoordinate.yLowSample - 2 >= 0 && pathGridCoordinate.xLowSample - 2 >= 0) {
+            pathGridCoordinates.Add(new PathGridCoordinate(pathGridCoordinate.xLowSample - 2, pathGridCoordinate.yLowSample - 2));
+        }
+
+        // Top Side
+        if(pathGridCoordinate.yLowSample - 2 >= 0) {
+            pathGridCoordinates.Add(new PathGridCoordinate(pathGridCoordinate.xLowSample, pathGridCoordinate.yLowSample - 2));
+        }
+
+        // Top Right
+
+        if(pathGridCoordinate.yLowSample - 2 >= 0 && pathGridCoordinate.xLowSample + 2 < gridCoordinateCountWidth - 1) {
+            pathGridCoordinates.Add(new PathGridCoordinate(pathGridCoordinate.xLowSample + 2, pathGridCoordinate.yLowSample - 2));
+        }
+
+        // Right Side
+        if(pathGridCoordinate.xLowSample + 2 < gridCoordinateCountWidth - 1) {
+            pathGridCoordinates.Add(new PathGridCoordinate(pathGridCoordinate.xLowSample + 2, pathGridCoordinate.yLowSample));
+        }
+
+        // Bottom Right
+        if(pathGridCoordinate.xLowSample + 2 < gridCoordinateCountWidth - 1 && pathGridCoordinate.yLowSample + 2 < gridCoordinateCountHeight - 1) {
+            pathGridCoordinates.Add(new PathGridCoordinate(pathGridCoordinate.xLowSample + 2, pathGridCoordinate.yLowSample + 2));
+        }
+
+        // Bottom Side
+        if(pathGridCoordinate.yLowSample + 2 < gridCoordinateCountHeight - 1) {
+            pathGridCoordinates.Add(new PathGridCoordinate(pathGridCoordinate.xLowSample, pathGridCoordinate.yLowSample + 2));
+        }
+
+        // Bottom Left
+        if(pathGridCoordinate.yLowSample + 2 < gridCoordinateCountHeight - 1 && pathGridCoordinate.xLowSample - 2 >= 0) {
+            pathGridCoordinates.Add(new PathGridCoordinate(pathGridCoordinate.xLowSample - 2, pathGridCoordinate.yLowSample + 2));
+        }
+
+        FindSimplifiedPathToAnyIncluding(pathGridCoordinates, startPos, movementPenaltyMultiplier, callback);
+    }
+
     public void FindSimplifiedPathForPathGrid(Vector3 startPos, PathGridCoordinate pathGridCoordinate, int movementPenaltyMultiplier, Action<LookPoint[], bool, int> callback) {
         Constants constants = Script.Get<Constants>();
   

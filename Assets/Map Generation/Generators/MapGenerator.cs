@@ -490,7 +490,8 @@ public class MapGenerator : MonoBehaviour {
      * Map (2d array) Creation
      * */
 
-    int maxSavedCoordinateValues = 30;
+    // Used for inserting Alunar Rocks after map noise generation
+    int maxSavedCoordinateValues = 5;
     const int invalidMutatorValue = 20;
     struct MutatorCoordinateValues {
         public float mutator;

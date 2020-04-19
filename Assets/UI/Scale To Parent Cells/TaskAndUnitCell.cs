@@ -5,14 +5,17 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-
+using UCharts;
 
 public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDelegate, UnitManagerDelegate, GameButtonDelegate, TimeUpdateDelegate {
 
     public Text title;
+    public Text tasksTile;
 
-    public Text unitCountText;
-    public Text unitStatusText;
+    //public Text unitCountText;
+    //public Text unitStatusText;
+
+    public PieChart pieChart;
 
     public Toggle taskListLocked;
     public Text taskListLockedText;
@@ -21,7 +24,7 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
     public Image[] sidePairConnection;
 
     public MasterGameTask.ActionType actionType;
-    public Image unitBackgroundSprite;
+    //public Image unitBackgroundSprite;
     public Image taskBackgroundSprite;
 
     public List<PercentageBar> percentBars;
@@ -32,13 +35,33 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
     private Unit.UnitState unitListState = Unit.UnitState.Idle;
 
     private void Start() {
-        title.text = actionType.ToString();
+        title.text = actionType.ToString() + "Units";
+        tasksTile.text = actionType.ToString() + "Tasks";
 
         taskListLocked.buttonDelegate = this;
 
         Script.Get<TaskQueueManager>().RegisterForNotifications(this, actionType);
         Script.Get<UnitManager>().RegisterForNotifications(this, actionType);
         Script.Get<TimeManager>().RegisterForTimeUpdateNotifications(this);
+
+        for(int i = 0; i < percentBars.Count; i++) {
+            PercentageBar bar = percentBars[i];
+
+            bar.setDetailTextHidden(true);
+        }
+
+
+        var colors = new List<Color32> {
+            Unit.UnitState.Idle.ColorForState(), Unit.UnitState.Efficient.ColorForState(), Unit.UnitState.Inefficient.ColorForState()
+        };
+
+        pieChart.SetColors(colors);
+
+        var data = new List<PieChartDataNode> {
+            new PieChartDataNode("", 1), new PieChartDataNode("", 1), new PieChartDataNode("", 1)
+        };
+
+        pieChart.SetData(data);
 
         SecondUpdated();
     }
@@ -53,31 +76,31 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
 
 
     private void UpdateCellColor() {
-        unitBackgroundSprite.color = unitListState.ColorForState();                
+        //unitBackgroundSprite.color = unitListState.ColorForState();                
     }
 
     private void SetLockState(bool state) {
         taskListLocked.SetState(state);
 
         Unit.UnitState taskListColorState = state ? Unit.UnitState.Efficient : Unit.UnitState.Inefficient;
-        taskBackgroundSprite.color = taskListColorState.ColorForState();
+        //taskBackgroundSprite.color = taskListColorState.ColorForState();
 
-        Color mainPairConnectionColor = mainPairConnection.color;
-        Color sidePairConnectionColor = mainPairConnectionColor;
+        //Color mainPairConnectionColor = mainPairConnection.color;
+        //Color sidePairConnectionColor = mainPairConnectionColor;
 
-        if (state == true) {
-            mainPairConnectionColor.a = 1f;
-            sidePairConnectionColor.a = 0.1f;
-        } else {
-            mainPairConnectionColor.a = 0.5f;
-            sidePairConnectionColor.a = 0.8f;
-        }
+        //if (state == true) {
+        //    mainPairConnectionColor.a = 1f;
+        //    sidePairConnectionColor.a = 0.1f;
+        //} else {
+        //    mainPairConnectionColor.a = 0.5f;
+        //    sidePairConnectionColor.a = 0.8f;
+        //}
 
-        mainPairConnection.color = mainPairConnectionColor;
+        //mainPairConnection.color = mainPairConnectionColor;
 
-        foreach(Image image in sidePairConnection) {
-            image.color = sidePairConnectionColor;
-        }
+        //foreach(Image image in sidePairConnection) {
+        //    image.color = sidePairConnectionColor;
+        //}
 
         SetLockAndCount();
     }
@@ -133,8 +156,8 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
         this.unitList = unitList;
         this.unitListState = unitListState;
 
-        unitCountText.text = unitList.Length + " Unit" + ((unitList.Length == 1) ? "" : "s");
-        unitStatusText.text = unitListState.decription();
+        //unitCountText.text = unitList.Length + " Unit" + ((unitList.Length == 1) ? "" : "s");
+        //unitStatusText.text = unitListState.decription();
 
         UpdateCellColor();
 
@@ -162,7 +185,7 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
                 float percentComplete = (float) remainingDuration / (float)Unit.maxUnitUduration;
 
                 bar.SetPercent(percentComplete);
-                bar.fillColorImage.color = ColorSingleton.sharedInstance.GreenToRedByPercent(percentComplete);
+                bar.fillColorImage.color = ColorSingleton.sharedInstance.DurationColorByPercent(percentComplete);
             }
         }
     }

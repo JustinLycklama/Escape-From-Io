@@ -11,10 +11,12 @@ public class PathRequest {
     public PathRequestTargetType targetType;
     
     public Vector3? pathEndWorld;
-
     public PathGridCoordinate? pathEndGrid;
     public LayoutCoordinate? pathEndLayout;
-    //public PathGridCoordinate? pathEndGridCoord;
+
+    // If we are attempting to path to an object at distance, it means we want to move close to but not beside the object
+    public bool pathToObjectAtDistance = false;
+
     public MineralType? pathEndGoalMineral;
     public Unit.FactionType? pathEndGoalFaction;
 
@@ -61,12 +63,13 @@ public class PathRequest {
         pathEndGoalFaction = null;
     }
 
-    public PathRequest(Vector3 _start, PathGridCoordinate _end, int _movementPenaltyMultiplier, Action<LookPoint[], ActionableItem, bool, int> _callback, PathRequestTargetType targetType) {
+    public PathRequest(Vector3 _start, PathGridCoordinate _end, int _movementPenaltyMultiplier, Action<LookPoint[], ActionableItem, bool, int> _callback, PathRequestTargetType targetType, bool atDistance = false) {
         pathStart = _start;
         callback = _callback;
         pathEndGrid = _end;
         movementPenaltyMultiplier = _movementPenaltyMultiplier;
 
+        pathToObjectAtDistance = atDistance;
 
         this.targetType = targetType;
         pathEndWorld = null;
@@ -144,7 +147,7 @@ public class PathRequestManager : MonoBehaviour {
                 request = new PathRequest(position, layoutCoordinate, movementPenaltyMultiplier, callback, task.pathRequestTargetType);
                 break;
             case PathRequestTargetType.PathGrid:
-                request = new PathRequest(position, pathGridCoordinate, movementPenaltyMultiplier, callback, task.pathRequestTargetType);
+                request = new PathRequest(position, pathGridCoordinate, movementPenaltyMultiplier, callback, task.pathRequestTargetType, task.action == GameTask.ActionType.AttackRanged);
                 break;
             case PathRequestTargetType.Unknown:
                 if (task.gatherType != null) {
@@ -170,8 +173,6 @@ public class PathRequestManager : MonoBehaviour {
 
         instance.TryProcessNext();
     }
-
-
 
     void TryProcessNext() {
         if (!isProcessingPath && pathRequestQueue.Count > 0) {
@@ -222,12 +223,23 @@ public class PathRequestManager : MonoBehaviour {
                     });
                     break;
                 case PathRequestTargetType.PathGrid:
-                    pathFinding.FindSimplifiedPathForPathGrid(currentPathRequest.pathStart, currentPathRequest.pathEndGrid.Value, currentPathRequest.movementPenaltyMultiplier, (path, success, distance) => {
-                        if(!currentPathRequest.isCancelled) currentPathRequest.callback(path, null, success, distance);
-                        isProcessingPath = false;
 
-                        TryProcessNext();
-                    });
+                    if (currentPathRequest.pathToObjectAtDistance == true) {
+                        pathFinding.FindSimplifiedPathForPathGridAtDistanceOne(currentPathRequest.pathStart, currentPathRequest.pathEndGrid.Value, currentPathRequest.movementPenaltyMultiplier, (path, success, distance) => {
+                            if(!currentPathRequest.isCancelled) currentPathRequest.callback(path, null, success, distance);
+                            isProcessingPath = false;
+
+                            TryProcessNext();
+                        });
+                    } else {
+                        pathFinding.FindSimplifiedPathForPathGrid(currentPathRequest.pathStart, currentPathRequest.pathEndGrid.Value, currentPathRequest.movementPenaltyMultiplier, (path, success, distance) => {
+                            if(!currentPathRequest.isCancelled) currentPathRequest.callback(path, null, success, distance);
+                            isProcessingPath = false;
+
+                            TryProcessNext();
+                        });
+                    }
+                    
                     break;
             }
         }

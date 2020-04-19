@@ -54,7 +54,7 @@ public class UnitDetailPanel : MonoBehaviour, TimeUpdateDelegate {
         float percentComplete = (float)remainingDuration / (float)Unit.maxUnitUduration;
 
         durationBar.SetPercent(percentComplete);
-        durationBar.fillColorImage.color = ColorSingleton.sharedInstance.GreenToRedByPercent(percentComplete);
+        durationBar.fillColorImage.color = ColorSingleton.sharedInstance.DurationColorByPercent(percentComplete);
     }
 
     /*

@@ -100,7 +100,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8473070085985799603}
   - component: {fileID: 8473070085985799604}
-  - component: {fileID: 2393494691718008489}
+  - component: {fileID: 7226503491834041916}
   m_Layer: 0
   m_Name: Golem
   m_TagString: Untagged
@@ -140,7 +140,7 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0.5, z: 0}
---- !u!114 &2393494691718008489
+--- !u!114 &7226503491834041916
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -149,21 +149,21 @@ MonoBehaviour:
   m_GameObject: {fileID: 8473070085985799609}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 77e6291c3ea5ffa4e8b3876431135d37, type: 3}
+  m_Script: {fileID: 11500000, guid: 7977bae0aade9b74f9d6651dc59e1a2b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   taskAlreadyDictated: 0
   speed: 90
   turnSpeed: 10
   followPathTurnSpeed: 10
-  turnDistance: 5
+  turnDistance: 10
   stoppingDistance: 5
   movementPenaltyMultiplier: 0
   oreLocation: {fileID: 6024472807651729770}
   statusLocation: {fileID: 6020125750341505383}
   relativeDistanceToTask: 0
   unitHealth: 100
-  remainingDuration: 180
+  remainingDuration: 600
   remainingHealth: 0
   buildableComponent: {fileID: 0}
   followCameraLocation: {fileID: 2851565343799045522}
