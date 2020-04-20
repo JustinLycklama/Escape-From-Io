@@ -7,13 +7,16 @@ public class UnitStatusTooltip : MonoBehaviour, TrackingUIInterface { //TaskStat
     public Text taskDescription;
     //public Image taskEfficiencyImage;
 
-    public CanvasGroup unitInfoCanvas;
+    //public CanvasGroup unitInfoCanvas;
 
     public PercentageBar durationBar;
     public PercentageBar percentageBar;
     public PercentageBar healthBar;
 
     public Image backgroundSprite;
+
+    [SerializeField]
+    private Image unitIconImage;
 
     private RectTransform targetCanvas;
     //private RectTransform rectTransform;
@@ -53,8 +56,9 @@ public class UnitStatusTooltip : MonoBehaviour, TrackingUIInterface { //TaskStat
             efficiencyColor = unit.GetUnitState().ColorForState();
         }
 
-        unitInfoCanvas.alpha = unitState == Unit.UnitState.Idle ? 0.7f : 1;        
+        //unitInfoCanvas.alpha = unitState == Unit.UnitState.Idle ? 0.7f : 1;        
         backgroundSprite.color = efficiencyColor;
+        unitIconImage.sprite = Script.Get<UnitManager>().UnitIconForActionType(unit.primaryActionType);
     }
 
     public void DisplayPercentageBar(bool display) {

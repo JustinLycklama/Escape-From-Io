@@ -189,7 +189,7 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
      * UnitManagerDelegate Interface
      * */
 
-    public void NotifyUpdateUnitList(Unit[] unitList, MasterGameTask.ActionType actionType, Unit.UnitState unitListState) {
+    public void NotifyUpdateUnitList(Unit[] unitList, MasterGameTask.ActionType actionType) {
         RecalculateState(actionType);
     }
 

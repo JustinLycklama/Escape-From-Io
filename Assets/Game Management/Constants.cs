@@ -34,7 +34,7 @@ public class Tag {
     public static Tag AStar { get { return new Tag("AStar"); } }
     public static Tag UIManager { get { return new Tag("UIManager"); } }
     public static Tag UIOverlayPanel { get { return new Tag("UIOverlayPanel"); } }
-    public static Tag UIArea { get { return new Tag("UIArea"); } }
+    //public static Tag UIArea { get { return new Tag("UIArea"); } }
     public static Tag ResourceManager { get { return new Tag("ResourceManager"); } }
     public static Tag MiniMap { get { return new Tag("MiniMap"); } }
     public static Tag BuildingManager { get { return new Tag("BuildingManager"); } }

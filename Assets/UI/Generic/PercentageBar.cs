@@ -10,8 +10,6 @@ public class PercentageBar : MonoBehaviour, TrackingUIInterface {
     public Text detailText;
     public Image fillColorImage;
 
-    public bool isVertical;
-
     public enum DisplayType { Bar, Itemized }
     private DisplayType displayType;
 
@@ -26,10 +24,6 @@ public class PercentageBar : MonoBehaviour, TrackingUIInterface {
 
     private void Awake() {
         SetDisplayType(DisplayType.Bar);
-
-        if (isVertical) {
-            sliderBar.direction = Slider.Direction.BottomToTop;
-        }
     }
 
     private void Update() {

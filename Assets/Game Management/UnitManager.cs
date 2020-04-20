@@ -3,17 +3,28 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
+using UnityEngine.UI;
 
 public interface UnitManagerDelegate {
-    void NotifyUpdateUnitList(Unit[] unitList, MasterGameTask.ActionType actionType, Unit.UnitState unitListState);
+    void NotifyUpdateUnitList(Unit[] unitList, MasterGameTask.ActionType actionType);
 }
 
 public class UnitManager : MonoBehaviour, TaskStatusUpdateDelegate {
 
+    [Serializable]
+    private struct ActionIconObj {
+        public MasterGameTask.ActionType actionType;
+        public Sprite sprite;
+    }
+
+
+    [SerializeField]
+    private List<ActionIconObj> actionIconObjList;
+
     Dictionary<MasterGameTask.ActionType, List<Unit>> unitListMap;
     Dictionary<MasterGameTask.ActionType, List<UnitManagerDelegate>> delegateListMap;
 
-    Dictionary<MasterGameTask.ActionType, Unit.UnitState> unitListStateMap;
+    //Dictionary<MasterGameTask.ActionType, Unit.UnitState> unitListStateMap;
 
     public static Dictionary<MasterGameTask.ActionType, int> backingUnitCount;
     public static Dictionary<MasterGameTask.ActionType, int> unitCount {
@@ -36,13 +47,13 @@ public class UnitManager : MonoBehaviour, TaskStatusUpdateDelegate {
         unitListMap = new Dictionary<MasterGameTask.ActionType, List<Unit>>();
         delegateListMap = new Dictionary<MasterGameTask.ActionType, List<UnitManagerDelegate>>();
 
-        unitListStateMap = new Dictionary<MasterGameTask.ActionType, Unit.UnitState>();
+        //unitListStateMap = new Dictionary<MasterGameTask.ActionType, Unit.UnitState>();
 
         foreach(MasterGameTask.ActionType actionType in new MasterGameTask.ActionType[] { MasterGameTask.ActionType.Build, MasterGameTask.ActionType.Mine, MasterGameTask.ActionType.Move, MasterGameTask.ActionType.Attack }) {
             unitListMap[actionType] = new List<Unit>();
             delegateListMap[actionType] = new List<UnitManagerDelegate>();
 
-            unitListStateMap[actionType] = Unit.UnitState.Idle;
+            //unitListStateMap[actionType] = Unit.UnitState.Idle;
         }
     }
 
@@ -53,6 +64,10 @@ public class UnitManager : MonoBehaviour, TaskStatusUpdateDelegate {
             unitCount[MasterGameTask.ActionType.Move] = 0;
             unitCount[MasterGameTask.ActionType.Attack] = 0;
         };
+    }
+
+    public Sprite UnitIconForActionType(MasterGameTask.ActionType actionType) {
+        return actionIconObjList.Where(obj => obj.actionType == actionType).First().sprite;
     }
 
     public Unit[] GetAllPlayerUnits(Unit.FactionType faction = Unit.FactionType.Player) {
@@ -92,22 +107,22 @@ public class UnitManager : MonoBehaviour, TaskStatusUpdateDelegate {
 
     private void RecalculateStatus(MasterGameTask.ActionType actionType) {
 
-        if (unitListMap[actionType].Count == 0) {
-            unitListStateMap[actionType] = Unit.UnitState.Idle;
-        } else {
+        //if (unitListMap[actionType].Count == 0) {
+        //    unitListStateMap[actionType] = Unit.UnitState.Idle;
+        //} else {
 
-            Unit.UnitState lowestUnitState = Unit.UnitState.Efficient;
+        //    Unit.UnitState lowestUnitState = Unit.UnitState.Efficient;
 
-            foreach(Unit unit in unitListMap[actionType]) {
-                Unit.UnitState unitState = unit.GetUnitState();
+        //    foreach(Unit unit in unitListMap[actionType]) {
+        //        Unit.UnitState unitState = unit.GetUnitState();
 
-                if(unitState.ranking() < lowestUnitState.ranking()) {
-                    lowestUnitState = unitState;
-                }
-            }
+        //        if(unitState.ranking() < lowestUnitState.ranking()) {
+        //            lowestUnitState = unitState;
+        //        }
+        //    }
 
-            unitListStateMap[actionType] = lowestUnitState;
-        }
+        //    unitListStateMap[actionType] = lowestUnitState;
+        //}
 
         NotifyDelegates(actionType);
     }
@@ -138,7 +153,7 @@ public class UnitManager : MonoBehaviour, TaskStatusUpdateDelegate {
     public void RegisterForNotifications(UnitManagerDelegate notificationDelegate, MasterGameTask.ActionType ofType) {
         delegateListMap[ofType].Add(notificationDelegate);
 
-        notificationDelegate.NotifyUpdateUnitList(unitListMap[ofType].ToArray(), ofType, unitListStateMap[ofType]);
+        notificationDelegate.NotifyUpdateUnitList(unitListMap[ofType].ToArray(), ofType); //  unitListStateMap[forType]
     }
 
     public void EndNotifications(UnitManagerDelegate notificationDelegate, MasterGameTask.ActionType forType) {
@@ -147,7 +162,7 @@ public class UnitManager : MonoBehaviour, TaskStatusUpdateDelegate {
 
     private void NotifyDelegates(MasterGameTask.ActionType forType) {
         foreach(UnitManagerDelegate notificationDelegate in delegateListMap[forType]) {
-            notificationDelegate.NotifyUpdateUnitList(unitListMap[forType].ToArray(), forType, unitListStateMap[forType]);
+            notificationDelegate.NotifyUpdateUnitList(unitListMap[forType].ToArray(), forType); // unitListStateMap[forType]
         }
     }
 }

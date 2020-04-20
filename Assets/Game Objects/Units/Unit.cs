@@ -265,7 +265,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         remainingHealth = unitHealth;
 
         // Shutdown
-        Action durationCompletionBlock = () => {
+        Action durationCompletionBlock = () => {           
             Script.Get<NotificationPanel>().AddNotification(new NotificationItem(primaryActionType.TitleAsNoun() + " " + name.shortform + " has run out of power", transform));
 
             Shutdown();

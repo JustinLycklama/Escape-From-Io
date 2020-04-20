@@ -8,9 +8,10 @@ using UnityEngine.EventSystems;
 namespace UCharts {
 	public class PieChart : ChartBase 
 	{
-        public float thickness = 5;
-        private int segments = 720;
-		[SerializeField] private Color32 m_BorderColor;
+        public float thickness = 25;
+        //private int segments = 720;
+        private int segments = 120; // 90
+        [SerializeField] private Color32 m_BorderColor;
 		[SerializeField] List<PieChartDataNode> m_Data = new List<PieChartDataNode>();
 		[SerializeField] List<Color32> m_Colors = new List<Color32>();
 
