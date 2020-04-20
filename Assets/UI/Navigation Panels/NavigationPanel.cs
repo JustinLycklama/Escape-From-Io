@@ -3,48 +3,59 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class NavigationPanel : MonoBehaviour
+public class NavigationPanel : MonoBehaviour, GameButtonDelegate
 {
     [HideInInspector]
     public NavigationPanel backTrace;
     [HideInInspector]
     public Transform positionParent;
 
-    GameObject backButtonObject;
+    //private GameObject defaultBackButtonObject;
+
+    [SerializeField]
+    private GameButton backButton;
+
+    private UIManager uIManager;
 
     protected virtual void Awake() {
         if (positionParent == null) {
             positionParent = transform.parent; // Tag.UIArea.GetGameObject().transform;
         }
+    }
 
-        backButtonObject = new GameObject("BackButton");
-        backButtonObject.transform.SetParent(transform);
-        //backButtonObject.transform.
+    private void Start() {
+        uIManager = Script.Get<UIManager>();
 
-        Button backButton = backButtonObject.AddComponent<Button>();
-        backButton.onClick.AddListener(Script.Get<UIManager>().Pop);
+        /*if(backButton == null) {
+            var defaultBackButtonObject = new GameObject("BackButton");
+            defaultBackButtonObject.transform.SetParent(transform);
 
-        Text text = backButtonObject.AddComponent<Text>();
-        text.font = Resources.GetBuiltinResource(typeof(Font), "Arial.ttf") as Font;
-        text.text = "Back";
-        text.alignment = TextAnchor.MiddleCenter;
+            backButton = defaultBackButtonObject.AddComponent<GameButton>();
 
-        LayoutElement layoutElement = backButtonObject.AddComponent<LayoutElement>();
-        layoutElement.ignoreLayout = true;
+            LayoutElement layoutElement = defaultBackButtonObject.AddComponent<LayoutElement>();
+            layoutElement.ignoreLayout = true;
 
-        RectTransform rectTransform = backButtonObject.GetComponent<RectTransform>();
-        rectTransform.anchorMin = new Vector2(0, 1);
-        rectTransform.anchorMax = new Vector2(0, 1);
+            RectTransform rectTransform = defaultBackButtonObject.GetComponent<RectTransform>();
+            rectTransform.anchorMin = new Vector2(0, 1);
+            rectTransform.anchorMax = new Vector2(0, 1);
 
-        rectTransform.pivot = new Vector2(0, 1);
-        rectTransform.sizeDelta = new Vector2(50, 33);
+            rectTransform.pivot = new Vector2(0, 1);
+            rectTransform.sizeDelta = new Vector2(50, 33);
 
-        backButtonObject.SetActive(false);
+            Text text = defaultBackButtonObject.AddComponent<Text>();
+            text.font = Resources.GetBuiltinResource(typeof(Font), "Arial.ttf") as Font;
+            text.text = "Back";
+            text.alignment = TextAnchor.MiddleCenter;
+        }*/
+
+        if(backButton != null) {
+            backButton.buttonDelegate = this;
+        }        
     }
 
     private void OnEnable() {
-        if (backTrace == null && backButtonObject != null ) {
-            backButtonObject.SetActive(false);
+        if (backTrace == null && backButton != null ) {
+            backButton.gameObject.SetActive(false);
         }
     }
 
@@ -55,7 +66,7 @@ public class NavigationPanel : MonoBehaviour
         previousPanel.gameObject.SetActive(false);
         transform.SetParent(positionParent, false);
 
-        backButtonObject.SetActive(true);
+        backButton?.gameObject.SetActive(true);
     }
 
     // Returns panel we are popping to
@@ -66,5 +77,15 @@ public class NavigationPanel : MonoBehaviour
         Destroy(gameObject);
 
         return backTrace;
+    }
+
+    /*
+     * GameButtonDelegate
+     * */
+
+    public virtual void ButtonDidClick(GameButton button) {
+        if (button == backButton) {
+            uIManager.Pop();
+        }        
     }
 }

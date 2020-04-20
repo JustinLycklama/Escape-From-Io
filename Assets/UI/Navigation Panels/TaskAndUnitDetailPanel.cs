@@ -18,7 +18,7 @@ public class TaskAndUnitDetailPanel : NavigationPanel, TaskQueueDelegate, UnitMa
     public Text unitListTitle;
     public TableView unitListTableView;
 
-    public Image unitIconImage;
+    public UnitTypeIcon unitIconImage;
 
     protected override void Awake() {
         base.Awake();
@@ -43,7 +43,7 @@ public class TaskAndUnitDetailPanel : NavigationPanel, TaskQueueDelegate, UnitMa
         taskListTitle.text = actionType.TitleAsNoun() + " Tasks";
         unitListTitle.text = actionType.TitleAsNoun() + " Units";
 
-        unitIconImage.sprite = unitManager.UnitIconForActionType(actionType);
+        unitIconImage.SetActionType(actionType);
     }
 
     private void OnDestroy() {
@@ -57,7 +57,9 @@ public class TaskAndUnitDetailPanel : NavigationPanel, TaskQueueDelegate, UnitMa
      * ButtonDelegate Interface
      * */
 
-    public void ButtonDidClick(GameButton button) {    
+    public override void ButtonDidClick(GameButton button) {
+        base.ButtonDidClick(button);
+
         if (button == lockTaskListButton) {
             lockTaskListButton.SetState(!lockTaskListButton.state);
 

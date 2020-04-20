@@ -31,7 +31,7 @@ public class TableView : MonoBehaviour
             for(int i = cells.Count; i < requiredNumberOfCells; i++) {
                 GameObject newCell = Instantiate(cellPrototype);
 
-                newCell.transform.SetParent(layoutGroup.transform, true);
+                newCell.transform.SetParent(layoutGroup.transform, false);
                 cells.Add(newCell);
             }
         } else if(cells.Count > requiredNumberOfCells) {

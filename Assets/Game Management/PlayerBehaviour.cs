@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.UI;
+using System.Linq;
 
 public interface PlayerBehaviourUpdateDelegate {
     void PauseStateUpdated(bool paused);
@@ -11,10 +13,15 @@ public interface HotkeyDelegate {
 }
 
 public class PlayerBehaviour : MonoBehaviour {
+    //private const string UI_ELEMENT_TAG = "BlockingUIElement";
+
+    private int UI_Layer;
+
     float cameraMovementSpeed = 200;
     float cameraRotateSpeed = 100;
 
     SettingsPanel settingsPanel;
+    GraphicRaycaster graphicRaycaster;
 
     public static Color tintColor = new Color(0, 1, 1);
 
@@ -42,6 +49,13 @@ public class PlayerBehaviour : MonoBehaviour {
 
     private void Start() {
         settingsPanel = Script.Get<SettingsPanel>();
+        graphicRaycaster = Script.Get<UIManager>().GetComponent<GraphicRaycaster>();
+
+        UI_Layer = LayerMask.NameToLayer("UI");
+
+        //graphicRaycaster.
+        //Camera.main.GetComponent<PhysicsRaycaster>().eventMask = LayerMask.NameToLayer("UI");
+
     }
 
     // Update is called once per frame
@@ -51,17 +65,35 @@ public class PlayerBehaviour : MonoBehaviour {
             CheckHotkeyInput();
         }
 
+
         // We want as little as possible to be done here, first check to see if mouse down or up, and we are not over UI
-        if((Input.GetMouseButtonUp(0) || Input.GetMouseButtonDown(0)) && EventSystem.current.IsPointerOverGameObject()) {
+        if(
+            (Input.GetMouseButtonUp(0) || Input.GetMouseButtonDown(0)) &&
+            IsOverUI(Input.mousePosition)
+
+            //EventSystem.current.IsPointerOverGameObject()// &&
+            //EventSystem.current.currentSelectedGameObject != null &&
+            //EventSystem.current.currentSelectedGameObject.CompareTag(UI_ELEMENT_TAG)
+            ) {
+
+            print("isOver UI");
+
             return;
         }
 
-        bool cameraAction = false;
+        if (EventSystem.current.currentSelectedGameObject != null) {
+            print(EventSystem.current.currentSelectedGameObject.tag);
+        }
 
+        bool cameraAction = false;
+      
         cameraAction |= CameraPan();
         cameraAction |= CameraZoom();
 
-        if(!cameraAction && Input.GetMouseButtonUp(0)) {
+        if(/*!cameraAction && */Input.GetMouseButtonUp(0)) {
+            //print("Mouse Button Up");
+            initialTouchPosition = null;
+
             SelectGameObject();
         }
     }
@@ -132,6 +164,16 @@ public class PlayerBehaviour : MonoBehaviour {
     /*
      * Input Checks
      * */
+
+    public bool IsOverUI(Vector3 inputPosition) {
+        PointerEventData ped = new PointerEventData(null);
+        ped.position = inputPosition;
+        
+        List<RaycastResult> results = new List<RaycastResult>();
+        graphicRaycaster.Raycast(ped, results);
+
+        return results.Where(res => res.gameObject.layer == UI_Layer).Count() > 0;
+    }
 
     private bool CameraPan() {
 
