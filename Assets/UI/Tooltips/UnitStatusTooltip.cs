@@ -51,10 +51,12 @@ public class UnitStatusTooltip : MonoBehaviour, TrackingUIInterface { //TaskStat
         Unit.UnitState unitState = unit.GetUnitState();
 
         // Override color to display RED on inefficient units
-        Color efficiencyColor = Color.red;
-        if (unitState != Unit.UnitState.Inefficient) {
-            efficiencyColor = unit.GetUnitState().ColorForState();
-        }
+        //Color efficiencyColor = Color.red;
+        //if (unitState != Unit.UnitState.Inefficient) {
+        Color efficiencyColor = unit.GetUnitState().ColorForState();
+        //}
+
+        //Color efficiencyColor = new Color(statusColorColor.r * 2, statusColorColor.g * 2, statusColorColor.b * 2);
 
         //unitInfoCanvas.alpha = unitState == Unit.UnitState.Idle ? 0.7f : 1;        
         backgroundSprite.color = efficiencyColor;

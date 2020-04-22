@@ -99,14 +99,6 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
                 unit.transform.position = worldPos.vector3;
                 i++;
 
-                UnitBuilding unitBuilding = unit.GetComponent<UnitBuilding>();
-
-                if(unitBuilding != null) {
-                    unitBuilding.ProceedToCompleteBuilding();
-                } else {
-                    unit.Initialize();
-                }
-
                 if (i == startingUnits.Count - 1) {
                     unit.remainingDuration -= 75;
                 }
@@ -192,12 +184,25 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
         fadePanel.SetPercent(percent += incrementalPercent);     
         fadePanel.FadeOut(false, null);
 
-        playerBehaviour.SetInternalPause(false);
 
         //Script.Get<MessageManager>().EnqueueMessage("Test", "This is an opening message!", null);
         //Script.Get<MessageManager>().EnqueueMessage("", "Second status message incoming", null);
 
+        // Init Units with delay
+        foreach(Unit unit in startingUnits) {
 
+            UnitBuilding unitBuilding = unit.GetComponent<UnitBuilding>();
+
+            if(unitBuilding != null) {
+                unitBuilding.ProceedToCompleteBuilding();
+            } else {
+                unit.Initialize();
+            }
+
+            yield return new WaitForSeconds(0.75f);
+        }
+
+        playerBehaviour.SetInternalPause(false);
         StartCoroutine(StartMusic());
     }
 

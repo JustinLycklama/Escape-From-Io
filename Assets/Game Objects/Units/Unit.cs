@@ -48,18 +48,14 @@ public static class UnitStateExtensions {
         return -1;
     }
 
-    //static Color idleColor = new Color(0.4811321f, 0.388083f, 0.388083f);
     public static Color ColorForState(this Unit.UnitState unitState) {        
 
         switch(unitState) {
             case Unit.UnitState.Idle:
-                //return idleColor;
                 return ColorSingleton.sharedInstance.idleUnitColor;
             case Unit.UnitState.Efficient:
-                //return Color.white;
                 return ColorSingleton.sharedInstance.efficientColor;
             case Unit.UnitState.Inefficient:
-                //return Color.yellow;
                 return ColorSingleton.sharedInstance.inefficientUnitColor;
         }
 
@@ -205,17 +201,6 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
         gameTasksQueue = new Queue<GameTask>();
         refuseTaskSet = new HashSet<int>();
-
-        unitStatusTooltip = Instantiate(Resources.Load("UI/UnitStatusPanel", typeof(UnitStatusTooltip))) as UnitStatusTooltip;
-        unitStatusTooltip.transform.SetParent(Script.UIOverlayPanel.GetFromObject<RectTransform>());
-
-        unitStatusTooltip.toFollow = statusLocation;
-
-        unitStatusTooltip.SetTitle(title);
-        unitStatusTooltip.SetTask(this, null);
-        unitStatusTooltip.DisplayPercentageBar(false);
-        unitStatusTooltip.SetRemainingDuration(unitDuration, (float)unitDuration / (float) maxUnitUduration);
-        unitStatusTooltip.SetRemainingHealth(unitHealth, 1.0f);
     }
 
     private void OnDestroy() {
@@ -234,11 +219,23 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         Script.Get<MapsManager>().AddTerrainUpdateDelegate(this);    
         playerBehaviour = Script.Get<PlayerBehaviour>();
 
+        // Tooltip
+        unitStatusTooltip = Instantiate(Resources.Load("UI/UnitStatusPanel", typeof(UnitStatusTooltip))) as UnitStatusTooltip;
+        unitStatusTooltip.transform.SetParent(Script.UIOverlayPanel.GetFromObject<RectTransform>());
+
+        unitStatusTooltip.toFollow = statusLocation;
+
+        unitStatusTooltip.SetTitle(title);
+        unitStatusTooltip.SetTask(this, null);
+        unitStatusTooltip.DisplayPercentageBar(false);
+        unitStatusTooltip.SetRemainingDuration(unitDuration, (float)unitDuration / (float)maxUnitUduration);
+        unitStatusTooltip.SetRemainingHealth(unitHealth, 1.0f);
+
         // Name
         Name name = NameSingleton.sharedInstance.GenerateName();
 
         NotificationPanel notificationManager = Script.Get<NotificationPanel>();
-        notificationManager.AddNotification(new NotificationItem(title + " initialized and named: " + name.fullName, transform));
+        notificationManager.AddNotification(new NotificationItem("Bot initialized", NotificationType.NewUnit, transform, primaryActionType));
 
         unitStatusTooltip.SetTitle(primaryActionType.TitleAsNoun());
         title = name.fullName;
@@ -256,7 +253,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
             unitStatusTooltip?.SetRemainingDuration(remainingTime, percentOfMaxUnitTime);
 
             if (remainingTime == NotificationPanel.unitDurationWarning) {
-                Script.Get<NotificationPanel>().AddNotification(new NotificationItem(primaryActionType.TitleAsNoun() + " " + name.shortform + " only has " + NotificationPanel.unitDurationWarning.ToString() + "s remaining.", transform));
+                Script.Get<NotificationPanel>().AddNotification(new NotificationItem( "Bot only has " + NotificationPanel.unitDurationWarning.ToString() + "s remaining", NotificationType.Warning, transform, primaryActionType));
             }
         };
 
@@ -266,7 +263,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
         // Shutdown
         Action durationCompletionBlock = () => {           
-            Script.Get<NotificationPanel>().AddNotification(new NotificationItem(primaryActionType.TitleAsNoun() + " " + name.shortform + " has run out of power", transform));
+            Script.Get<NotificationPanel>().AddNotification(new NotificationItem("Bot has run out of power", NotificationType.UnitBattery, transform, primaryActionType));
 
             Shutdown();
         };
@@ -770,7 +767,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         if (remainingHealth <= 0) {
             remainingHealth = 0;
 
-            Script.Get<NotificationPanel>().AddNotification(new NotificationItem(primaryActionType.TitleAsNoun() + " " + primaryActionType.TitleAsNoun() + " has been destroyed", transform));
+            Script.Get<NotificationPanel>().AddNotification(new NotificationItem("Bot has been destroyed", NotificationType.UnitKilled, transform, primaryActionType));
             Script.Get<UnitManager>().DisableUnit(this);
             Shutdown();
         }

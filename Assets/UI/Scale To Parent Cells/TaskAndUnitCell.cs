@@ -22,11 +22,15 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
     private MasterGameTask.ActionType actionType;
 
     [SerializeField]
+    private Text iconTitle;
+    [SerializeField]
     private UnitTypeIcon unitIconImage;
 
 
     [SerializeField]
-    private Text title;
+    private Text unitsTitle;
+    [SerializeField]
+    private Text unitsCountText;
     [SerializeField]
     private List<PercentageBar> percentBars;
     [SerializeField]
@@ -67,8 +71,9 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
     //private Unit.UnitState unitListState = Unit.UnitState.Idle;
 
     private void Start() {
-        title.text = actionType.ToString() + "Units";
-        tasksTile.text = actionType.ToString() + "Tasks";
+        iconTitle.text = actionType.ToString();
+        unitsTitle.text = actionType.ToString() + " Bots";
+        tasksTile.text = actionType.ToString() + " Tasks";
 
         unitIconImage.SetActionType(actionType);
 
@@ -86,19 +91,12 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
 
 
         var colors = new List<Color32> {
-            Unit.UnitState.Idle.ColorForState(), Unit.UnitState.Efficient.ColorForState(), Unit.UnitState.Inefficient.ColorForState()
+            ColorForState(Unit.UnitState.Idle), ColorForState(Unit.UnitState.Inefficient), ColorForState(Unit.UnitState.Efficient)
         };
 
         pieChart.SetColors(colors);
 
-        var data = new List<PieChartDataNode> {
-            new PieChartDataNode("", 1), new PieChartDataNode("", 1), new PieChartDataNode("", 1)
-        };
-
-        pieChart.SetData(data);
-
         SecondUpdated();
-        //SetLockState(Script.Get<TaskQueueManager>().GetTaskListLockStatus(actionType));
     }
 
     private void OnDestroy() {
@@ -121,6 +119,8 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
         pieChart.SetData(new List<PieChartDataNode> {
             idleNode, inefficientNode, efficientNode
         });
+
+        unitsCountText.text = unitList.Length.ToString();
     }
 
     private void SetLockState(bool state) {
@@ -165,6 +165,19 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
         taskCountText.text = taskList.Length.ToString();
     }
 
+    public Color ColorForState(Unit.UnitState unitState) {
+
+        switch(unitState) {
+            case Unit.UnitState.Idle:
+                return ColorSingleton.sharedInstance.idleUnitColor;
+            case Unit.UnitState.Efficient:
+                return ColorSingleton.sharedInstance.efficientColor;
+            case Unit.UnitState.Inefficient:
+                return ColorSingleton.sharedInstance.inefficientUnitColor;
+        }
+
+        return Color.white;
+    }
 
     /*
      * ButtonDelegate Interface

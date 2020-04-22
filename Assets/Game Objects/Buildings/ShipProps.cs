@@ -20,6 +20,6 @@ public class ShipProps : Building {
     }
 
     protected override void CompleteBuilding() {
-        Script.Get<NotificationPanel>().AddNotification(new NotificationItem("Ship Frame Complete.", transform));
+        Script.Get<NotificationPanel>().AddNotification(new NotificationItem("Ship Frame Complete", NotificationType.TaskComplete, transform));
     }
 }

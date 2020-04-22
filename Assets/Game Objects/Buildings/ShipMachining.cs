@@ -23,6 +23,6 @@ public class ShipMachining : Building {
     protected override void CompleteBuilding() {
         ResearchSingleton.sharedInstance.unitActionMultiplier = 1.5f;
 
-        Script.Get<NotificationPanel>().AddNotification(new NotificationItem("Ship Machining Complete! Units Build, Mine and Clean 50% faster!", transform));
+        Script.Get<NotificationPanel>().AddNotification(new NotificationItem("Ship Machining Complete! Units Build, Mine and Clean 50% faster!", NotificationType.TaskComplete, transform));
     }
 }

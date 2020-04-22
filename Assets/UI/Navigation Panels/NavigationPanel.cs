@@ -23,7 +23,7 @@ public class NavigationPanel : MonoBehaviour, GameButtonDelegate
         }
     }
 
-    private void Start() {
+    protected virtual void Start() {
         uIManager = Script.Get<UIManager>();
 
         /*if(backButton == null) {

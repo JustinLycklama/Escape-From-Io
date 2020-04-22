@@ -2,15 +2,32 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
+
+public enum NotificationType {
+    NewUnit, TaskComplete, UnitBattery, UnitKilled, Warning
+}
 
 public class NotificationItem {
     public string text;
+    public NotificationType type;
+    public MasterGameTask.ActionType? relatedActionType;
+
     public Transform notificationPosition;
 
-    public NotificationItem(string text, Transform notificationPosition) {
+    public NotificationItem(string text, NotificationType type, Transform notificationPosition, MasterGameTask.ActionType? relatedActionType = null) {
         this.text = text;
+        this.type = type;
+        this.relatedActionType = relatedActionType;
+
         this.notificationPosition = notificationPosition;
     }
+}
+
+[Serializable]
+struct NotificationTypeIcon {
+    public NotificationType type;
+    public Sprite icon;
 }
 
 public class NotificationPanel : MonoBehaviour, TableViewDelegate {
@@ -26,6 +43,9 @@ public class NotificationPanel : MonoBehaviour, TableViewDelegate {
     HashSet<NotificationItem> fadingNotifications = new HashSet<NotificationItem>();
 
     Dictionary<NotificationItem, NotificationItemCell> cellForNotification = new Dictionary<NotificationItem, NotificationItemCell>();
+
+    [SerializeField]
+    private List<NotificationTypeIcon> notificationIcons;
 
     void Awake() {
         tableView.dataDelegate = this;
@@ -61,6 +81,17 @@ public class NotificationPanel : MonoBehaviour, TableViewDelegate {
 
         timeManager.AddNewTimer(notificationDuration, null, startFadeBlock);
         tableView.ReloadData();
+    }
+
+    public Sprite IconForNotificationType(NotificationType type) {
+
+        foreach (NotificationTypeIcon typeIcon in notificationIcons) {
+            if (typeIcon.type == type) {
+                return typeIcon.icon;
+            }
+        }
+
+        return null;
     }
 
     /*

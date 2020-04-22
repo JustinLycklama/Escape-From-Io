@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public class UnitDisplayCell : MonoBehaviour, TaskStatusUpdateDelegate, GameButtonDelegate {
 
-    public Text unitTitleText;
+    //public Text unitTitleText;
     public Text unitTypeText;
 
     public MasterAndGameTaskCell masterAndGameTaskCell;
@@ -27,7 +27,7 @@ public class UnitDisplayCell : MonoBehaviour, TaskStatusUpdateDelegate, GameButt
         this.unit = unit;
         unit.RegisterForTaskStatusNotifications(this);
 
-        unitTitleText.text = unit.description;
+        //unitTitleText.text = unit.description;
         unitTypeText.text = unit.primaryActionType.TitleAsNoun();
     }
 

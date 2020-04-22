@@ -19,18 +19,24 @@ public class ColorSingleton {
 
 
     // Pallet
+    public static Color LIGHT_GREY = new Color(0.4811321f, 0.388083f, 0.388083f);
 
     private static Color RED = new Color(1, 0.08551968f, 0);
     private static Color GREEN = new Color32(0, 217, 94, 255);
 
+    private static Color SOFT_RED = new Color32(176, 57, 53, 255);
+    private static Color SOFT_GREEN = new Color32(116, 180, 131, 255);
+    private static Color SOFT_ORANGE = new Color32(202, 134, 34, 255);
+
+
     private static Color BRIGHT_YELLOLW = new Color32(252, 236, 3, 255);
-    private static Color DARK_ORANGE = new Color32(219, 132, 2, 255);
+    public static Color DARK_ORANGE = new Color32(219, 132, 2, 255);
 
     // Public
 
-    public Color idleUnitColor = RED;
-    public Color inefficientUnitColor = BRIGHT_YELLOLW;
-    public Color efficientColor = GREEN;
+    public Color idleUnitColor = SOFT_RED;
+    public Color inefficientUnitColor = SOFT_ORANGE;
+    public Color efficientColor = SOFT_GREEN;
 
     private Color durationInitialColor = BRIGHT_YELLOLW;
     private Color durationFinalColor = DARK_ORANGE;

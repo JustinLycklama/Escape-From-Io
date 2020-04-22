@@ -10,7 +10,7 @@ namespace UCharts {
 	{
         public float thickness = 25;
         //private int segments = 720;
-        private int segments = 120; // 90
+        private int segments = 360; // 90
         [SerializeField] private Color32 m_BorderColor;
 		[SerializeField] List<PieChartDataNode> m_Data = new List<PieChartDataNode>();
 		[SerializeField] List<Color32> m_Colors = new List<Color32>();
