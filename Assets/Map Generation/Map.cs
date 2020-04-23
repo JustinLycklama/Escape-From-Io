@@ -173,6 +173,7 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
 
             action.description = "Cancel";
             action.layoutCoordinate = coordinate;
+            action.shouldPopUIAfterAction = false;
 
             action.performAction = (LayoutCoordinate layoutCoordinate) => {
                 associatedTasksCoordinateMap[layoutCoordinate.x, layoutCoordinate.y].CancelTask();
@@ -444,7 +445,6 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
      * MasterTaskUpdateDelegate Interface
      * */
 
-
     public void RepeatCountUpdated(MasterGameTask masterGameTask, int count) { }
 
     public void TaskCancelled(MasterGameTask masterGameTask) {
@@ -458,6 +458,9 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
             AssociateTask(null, gameTaskLocationMap[masterGameTask]);
         }
     }
+
+    public void TaskBlockerRemoved(MasterGameTask masterGameTask) { }
+    public void TaskUnitAssigned(MasterGameTask masterGameTask) { }
 
     /*
      * Map Version Of TaskStatusNotifiable Interface

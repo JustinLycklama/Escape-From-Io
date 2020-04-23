@@ -47,6 +47,8 @@ public class PlayerBehaviour : MonoBehaviour {
     private Ray lastRay;
     private RaycastHit? lastHit;
 
+    bool mouseIsDownOverUI = false;
+
     private void Start() {
         settingsPanel = Script.Get<SettingsPanel>();
         graphicRaycaster = Script.Get<UIManager>().GetComponent<GraphicRaycaster>();
@@ -66,9 +68,20 @@ public class PlayerBehaviour : MonoBehaviour {
         }
 
 
+        bool mouseDown = Input.GetMouseButtonDown(0);
+        bool mouseUp = Input.GetMouseButtonUp(0);
+
+        if (mouseIsDownOverUI) {
+            if (mouseUp) {
+                mouseIsDownOverUI = false;
+            }
+
+            return;
+        }
+
         // We want as little as possible to be done here, first check to see if mouse down or up, and we are not over UI
         if(
-            (Input.GetMouseButtonUp(0) || Input.GetMouseButtonDown(0)) &&
+            mouseDown &&
             IsOverUI(Input.mousePosition)
 
             //EventSystem.current.IsPointerOverGameObject()// &&
@@ -76,13 +89,11 @@ public class PlayerBehaviour : MonoBehaviour {
             //EventSystem.current.currentSelectedGameObject.CompareTag(UI_ELEMENT_TAG)
             ) {
 
-            print("isOver UI");
+            if(mouseDown) {
+                mouseIsDownOverUI = true;
+            }
 
             return;
-        }
-
-        if (EventSystem.current.currentSelectedGameObject != null) {
-            print(EventSystem.current.currentSelectedGameObject.tag);
         }
 
         bool cameraAction = false;
@@ -90,7 +101,8 @@ public class PlayerBehaviour : MonoBehaviour {
         cameraAction |= CameraPan();
         cameraAction |= CameraZoom();
 
-        if(/*!cameraAction && */Input.GetMouseButtonUp(0)) {
+        if(!cameraAction && mouseUp) {
+
             //print("Mouse Button Up");
             initialTouchPosition = null;
 

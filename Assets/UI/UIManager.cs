@@ -13,7 +13,7 @@ public class UIManager : MonoBehaviour, SelectionManagerDelegate
 
         public Blueprint(string fileName,  Type type) : base(folder+fileName, type) { }
 
-        public static Blueprint PercentageBar = new Blueprint("PercentageBar", typeof(PercentageBar));
+        //public static Blueprint PercentageBar = new Blueprint("PercentageBar", typeof(PercentageBar));
         public static Blueprint CostPanel = new Blueprint("CostPanelTooltip", typeof(CostPanelTooltip));
         public static Blueprint TaskAndUnitDetail = new Blueprint("TaskAndUnitDetailPanel", typeof(TaskAndUnitDetailPanel));
         public static Blueprint BlueprintPanel = new Blueprint("BlueprintPanel", typeof(BlueprintPanel));

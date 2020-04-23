@@ -4,42 +4,79 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class MasterAndGameTaskCell : MonoBehaviour {
-    public Text taskDescription;
-    //public Text unitAsigneeText;
+
+    [SerializeField]
+    private Image backgroundImage;
+
+    [SerializeField]
+    private Text masterTaskDescription;
+
+    [SerializeField]
+    private Text gameTaskDescription;
+    [SerializeField]
+    private GameObject gameTaskContainer;
+
+    [SerializeField]
+    private Sprite blackAndWhiteImage;
+
+
+
+    [SerializeField]
+    private Color blockingColor;
+
+    [SerializeField]
+    private Color highlightColor;
+
+    [SerializeField]
+    private Image highlightArea;
 
     MasterGameTask task;
     GameTask gameTask;
 
-    private string defaultText = "No Current Task"; 
+    public string defaultText = "No Task"; 
 
     private void Awake() {
-        taskDescription.text = defaultText;
+        masterTaskDescription.text = defaultText;
+        gameTaskDescription.text = "";
+
+        gameTaskContainer.SetActive(false);
     }
 
+
     public void SetTask(MasterGameTask task, GameTask gameTask) {
+
         this.task = task;
         this.gameTask = gameTask;
 
-        if (task == null && gameTask == null) {
-            taskDescription.text = defaultText;
+        string masterTaskText = task?.description;
+        string gameTaskText = null;
+
+        if(task != null && task.blockerTasks.Count > 0) {
+            masterTaskText = task.blockerTasks[0].description;
+            gameTaskText = "Blocking Task";
+
+            highlightArea.color = blockingColor;
         } else {
-            string description = "";
+            masterTaskText = task?.description;
+            gameTaskText = gameTask?.description;
 
-            if (task != null) {
-                description += task.description;
-            }
-
-            if (gameTask != null) {
-                description += (description.Length > 0 && gameTask.description.Length > 0) ? " - " : "" + gameTask.description;
-            }
-
-            taskDescription.text = description;
+            highlightArea.color = highlightColor;
         }
 
-        //if (task != null && task.assignedUnit != null) {
-        //    unitAsigneeText.text = "Assigned to " + task.assignedUnit.description;
-        //} else {
-        //    unitAsigneeText.text = "";
-        //}
+        masterTaskDescription.text = masterTaskText ?? defaultText;
+        gameTaskDescription.text = gameTaskText ?? "";
+
+        var gameTaskDescriptionEnabled = gameTaskText != null;
+        if(gameTaskContainer.activeSelf != gameTaskDescriptionEnabled) {
+            gameTaskContainer.SetActive(gameTaskDescriptionEnabled);
+        }
+    }
+
+    public void SetBlackAndWhite() {
+        backgroundImage.sprite = blackAndWhiteImage;
+    }
+
+    public void Colorize(Color color) {
+        backgroundImage.color = color;
     }
 }

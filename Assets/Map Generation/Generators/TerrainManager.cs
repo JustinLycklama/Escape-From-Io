@@ -165,6 +165,7 @@ public class TerrainManager : MonoBehaviour {
                         UserAction action = new UserAction();
 
                         action.tutorialIdentifier = UserAction.TutorialIdentifier.Clean;
+                        action.associatedActionTypes = new List<MasterGameTask.ActionType> { MasterGameTask.ActionType.Build };
 
                         action.description = "Clean " + coordinate.mapContainer.map.GetTerrainAt(coordinate).name;
                         action.layoutCoordinate = coordinate;
@@ -176,7 +177,7 @@ public class TerrainManager : MonoBehaviour {
                             MapCoordinate mapCoordinate = new MapCoordinate(layoutCoordinate);
                             WorldPosition worldPosition = new WorldPosition(mapCoordinate);
 
-                            GameTask cleaningTask = new GameTask("Cleaning", worldPosition, GameTask.ActionType.FlattenPath, layoutCoordinate.mapContainer.map, PathRequestTargetType.PathGrid);
+                            GameTask cleaningTask = new GameTask(null, worldPosition, GameTask.ActionType.FlattenPath, layoutCoordinate.mapContainer.map, PathRequestTargetType.PathGrid);
                             MasterGameTask masterCleaningTask = new MasterGameTask(MasterGameTask.ActionType.Build, "Clean " + layoutCoordinateMap.GetTerrainAt(layoutCoordinate).name, new GameTask[] { cleaningTask });
 
                             queue.QueueTask(masterCleaningTask);
@@ -190,6 +191,7 @@ public class TerrainManager : MonoBehaviour {
                         UserAction action = new UserAction();
 
                         action.tutorialIdentifier = UserAction.TutorialIdentifier.Path;
+                        action.associatedActionTypes = new List<MasterGameTask.ActionType> { MasterGameTask.ActionType.Move, MasterGameTask.ActionType.Build };
 
                         action.description = "Create Path";
                         action.layoutCoordinate = coordinate;
@@ -209,6 +211,7 @@ public class TerrainManager : MonoBehaviour {
                     unitAction.layoutCoordinate = coordinate;
 
                     unitAction.tutorialIdentifier = UserAction.TutorialIdentifier.BuildUnit;
+                    unitAction.associatedActionTypes = new List<MasterGameTask.ActionType> { MasterGameTask.ActionType.Move, MasterGameTask.ActionType.Build };
 
                     unitAction.blueprintList = new ConstructionBlueprint[] {
                         Unit.Blueprint.Miner, Unit.Blueprint.Mover, Unit.Blueprint.Builder,
@@ -222,6 +225,7 @@ public class TerrainManager : MonoBehaviour {
                     buildingAction.layoutCoordinate = coordinate;
 
                     buildingAction.tutorialIdentifier = UserAction.TutorialIdentifier.BuildBuilding;
+                    buildingAction.associatedActionTypes = new List<MasterGameTask.ActionType> { MasterGameTask.ActionType.Move, MasterGameTask.ActionType.Build };
 
                     buildingAction.blueprintList = new ConstructionBlueprint[] { Building.Blueprint.Tower, Building.Blueprint.SensorTower, Building.Blueprint.AdvUnitBuilding }; //Building.Blueprint.Refinery,
 
@@ -230,6 +234,8 @@ public class TerrainManager : MonoBehaviour {
                     UserAction shipAction = new UserAction();
                     shipAction.description = "Build Ship Parts";
                     shipAction.layoutCoordinate = coordinate;
+
+                    shipAction.associatedActionTypes = new List<MasterGameTask.ActionType> { MasterGameTask.ActionType.Move, MasterGameTask.ActionType.Build };
 
                     shipAction.blueprintList = new ConstructionBlueprint[] { Building.Blueprint.StationShipFrame, Building.Blueprint.Thrusters, Building.Blueprint.Reactor, Building.Blueprint.Machining, Building.Blueprint.Telemerty, Building.Blueprint.StationShip }; //Building.Blueprint.Refinery,
 
@@ -243,6 +249,7 @@ public class TerrainManager : MonoBehaviour {
                     UserAction action = new UserAction();
 
                     action.tutorialIdentifier = UserAction.TutorialIdentifier.Mine;
+                    action.associatedActionTypes = new List<MasterGameTask.ActionType> { MasterGameTask.ActionType.Mine };
 
                     action.description = "Mine " + coordinate.mapContainer.map.GetTerrainAt(coordinate).name;
                     action.layoutCoordinate = coordinate;
@@ -254,7 +261,7 @@ public class TerrainManager : MonoBehaviour {
                         MapCoordinate mapCoordinate = new MapCoordinate(layoutCoordinate);
                         WorldPosition worldPosition = new WorldPosition(mapCoordinate);
 
-                        GameTask miningTask = new GameTask("Mining", worldPosition, GameTask.ActionType.Mine, layoutCoordinateMap, PathRequestTargetType.Layout);
+                        GameTask miningTask = new GameTask(null, worldPosition, GameTask.ActionType.Mine, layoutCoordinateMap, PathRequestTargetType.Layout);
                         MasterGameTask masterMiningTask = new MasterGameTask(MasterGameTask.ActionType.Mine, "Mine " + layoutCoordinateMap.GetTerrainAt(layoutCoordinate).name, new GameTask[] { miningTask });
 
                         queue.QueueTask(masterMiningTask);

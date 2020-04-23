@@ -225,8 +225,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
         unitStatusTooltip.toFollow = statusLocation;
 
-        unitStatusTooltip.SetTitle(title);
-        unitStatusTooltip.SetTask(this, null);
+        unitStatusTooltip.SetPrimaryActionType(primaryActionType);
         unitStatusTooltip.DisplayPercentageBar(false);
         unitStatusTooltip.SetRemainingDuration(unitDuration, (float)unitDuration / (float)maxUnitUduration);
         unitStatusTooltip.SetRemainingHealth(unitHealth, 1.0f);
@@ -237,7 +236,6 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         NotificationPanel notificationManager = Script.Get<NotificationPanel>();
         notificationManager.AddNotification(new NotificationItem("Bot initialized", NotificationType.NewUnit, transform, primaryActionType));
 
-        unitStatusTooltip.SetTitle(primaryActionType.TitleAsNoun());
         title = name.fullName;
 
         // Duration
@@ -362,7 +360,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
     protected void DoTask(MasterGameTask task) {
         currentMasterTask = task;
-        currentMasterTask.assignedUnit = this;
+        currentMasterTask.SetAssignedUnit(this);
 
         gameTasksQueue.Clear();
 
@@ -389,7 +387,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
         if (gameTasksQueue.Count > 0) {
             currentGameTask = gameTasksQueue.Dequeue();
-            unitStatusTooltip.SetTask(this, currentGameTask);
+            unitStatusTooltip.SetTask(this, currentMasterTask, currentGameTask);
 
             RequestPath(transform.position, movementPenaltyMultiplier, currentGameTask, foundWaypoints);
         } else {
@@ -459,7 +457,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         gameTasksQueue.Clear();
 
         NotifyAllTaskStatus();
-        unitStatusTooltip.SetTask(this, null);
+        unitStatusTooltip.SetTask(this, null, null);
         unitStatusTooltip.DisplayPercentageBar(false);
 
         taskQueueManager.RequestNextDoableTask(this, (masterGameTask) => {
@@ -697,10 +695,13 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
     public void NotifyTerrainUpdate(LayoutCoordinate layoutCoordinate) {
         refuseTaskSet.Clear();
 
-        if (currentMasterTask != null && navigatingToTask == true && currentGameTask.target.vector3 != this.transform.position) {
-            // Request a new path if the world has updated and we are already on the move
-            RequestPath(transform.position, movementPenaltyMultiplier, currentGameTask, foundWaypoints);
-        }
+        // The idea is to find a shorter path if one has become available... but I think this is messing up the associatedTask to 'unknown' objects, specifically the ore.
+        // We become associated and then find a new path without unassociating
+
+        //if (currentMasterTask != null && navigatingToTask == true && currentGameTask.target.vector3 != this.transform.position) {
+        //    // Request a new path if the world has updated and we are already on the move
+        //    RequestPath(transform.position, movementPenaltyMultiplier, currentGameTask, foundWaypoints);
+        //}
     }
 
 

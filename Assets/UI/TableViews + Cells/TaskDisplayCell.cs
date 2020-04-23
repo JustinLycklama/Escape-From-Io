@@ -70,4 +70,6 @@ public class TaskDisplayCell : MonoBehaviour, GameButtonDelegate, MasterTaskUpda
 
     public void TaskCancelled(MasterGameTask masterGameTask) { }
     public void TaskFinished(MasterGameTask masterGameTask) { }
+    public void TaskBlockerRemoved(MasterGameTask masterGameTask) { }
+    public void TaskUnitAssigned(MasterGameTask masterGameTask) {}
 }

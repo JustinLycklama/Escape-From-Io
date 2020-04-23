@@ -200,14 +200,14 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
 
     // If a unit cannot handle a task, he can put it back
     public void PutBackTask(MasterGameTask task) {
-        task.assignedUnit = null;
+        task.SetAssignedUnit(null);
 
         taskListMap[task.actionType].Insert(0, task);
         NotifyDelegates(task.actionType);
     }
 
     public void QueueTask(MasterGameTask task) {
-        task.assignedUnit = null;
+        task.SetAssignedUnit(null);
 
         taskListMap[task.actionType].Add(task);
         NotifyDelegates(task.actionType);
@@ -228,7 +228,7 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
     }
 
     public void DeQueueTask(MasterGameTask task) {
-        task.assignedUnit = null;
+        task.SetAssignedUnit(null);
 
         taskListMap[task.actionType].Remove(task);
         NotifyDelegates(task.actionType);

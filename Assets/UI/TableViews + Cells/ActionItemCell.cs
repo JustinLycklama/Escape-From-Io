@@ -21,16 +21,31 @@ public class UserAction {
     public string description;
     public LayoutCoordinate layoutCoordinate;
 
+    public List<MasterGameTask.ActionType> associatedActionTypes = new List<MasterGameTask.ActionType>();
+
     // We can have a single action to perform, or a list of construction blueprints which will contain their own actions
     public Action<LayoutCoordinate> performAction;
 
     public ConstructionBlueprint[] blueprintList;
+
+    public bool shouldPopUIAfterAction = true;
 }
 
 public class ActionItemCell : Clickable, HotkeyDelegate {
-    public Text actionItemTitle;
-    UserAction action;
-    KeyCode? hotkey;
+    [SerializeField]
+    private Text actionItemTitle;
+
+    [SerializeField]
+    List<GameObject> unitIconContainers;
+
+    [SerializeField]
+    List<UnitTypeIcon> unitIcons;
+
+    //[SerializeField]
+    //private GameObject unitIconContainer;
+
+    private UserAction action;
+    private KeyCode? hotkey;
 
     const string defaultText = " - ";
 
@@ -42,6 +57,30 @@ public class ActionItemCell : Clickable, HotkeyDelegate {
 
     public void SetAction(UserAction action) {
         this.action = action;
+
+        List<MasterGameTask.ActionType> associatedTypes;
+
+        if (action == null) {
+            associatedTypes = new List<MasterGameTask.ActionType>();
+        } else {
+            associatedTypes = action.associatedActionTypes;
+        }
+
+        for (int i = 0; i < unitIcons.Count; i++) {
+            bool unitIconActive = (associatedTypes.Count > i);
+
+            GameObject unitIconContainer = unitIconContainers[i];
+
+            if(unitIconContainer.gameObject.activeSelf != unitIconActive) {
+                unitIconContainer.gameObject.SetActive(unitIconActive);
+            }
+
+            UnitTypeIcon unitIcon = unitIcons[i];
+
+            if (unitIconActive) {
+                unitIcon.SetActionType(associatedTypes[i]);
+            }
+        }
 
         UpdateButtonState();
     }
@@ -96,7 +135,11 @@ public class ActionItemCell : Clickable, HotkeyDelegate {
 
         // We either have an action to perform, or a list of blueprints to display
         if(action.performAction != null) {
-            action.performAction(action.layoutCoordinate);
+            if(action.shouldPopUIAfterAction) {
+                Script.Get<UIManager>().PopToRoot();
+            }
+
+            action.performAction(action.layoutCoordinate);          
         } else if(action.blueprintList != null) {
             BlueprintPanel blueprintPanel = Script.Get<UIManager>().Push(UIManager.Blueprint.BlueprintPanel) as BlueprintPanel;
             blueprintPanel.SetData(action.description, action.blueprintList, action.layoutCoordinate);

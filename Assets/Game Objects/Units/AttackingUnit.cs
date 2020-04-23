@@ -86,7 +86,7 @@ public abstract class AttackingUnit : Unit
         gameTasksQueue.Clear();
 
         NotifyAllTaskStatus();
-        unitStatusTooltip.SetTask(this, null);
+        unitStatusTooltip.SetTask(this, null, null);
         unitStatusTooltip.DisplayPercentageBar(false);
 
         MasterGameTask masterAttackTask;
@@ -95,8 +95,8 @@ public abstract class AttackingUnit : Unit
             var unitPosition = new WorldPosition(followingUnit.transform.position);
 
             searchTask = null;
-            targetTask = new GameTask("Attack: " + followingUnit.description, unitPosition, attackType, followingUnit, PathRequestTargetType.PathGrid);
-            masterAttackTask = new MasterGameTask(MasterGameTask.ActionType.Attack, "Attack Master Task", new GameTask[] { targetTask }, null);
+            targetTask = new GameTask(null, unitPosition, attackType, followingUnit, PathRequestTargetType.PathGrid);
+            masterAttackTask = new MasterGameTask(MasterGameTask.ActionType.Attack, "Attack:\n" + followingUnit.description, new GameTask[] { targetTask }, null);
         } else {
             targetTask = null;
 
@@ -106,8 +106,8 @@ public abstract class AttackingUnit : Unit
                 attackFaction = FactionType.Enemy;
             }
 
-            searchTask = new GameTask("Attack", attackFaction, attackType, null);
-            masterAttackTask = new MasterGameTask(MasterGameTask.ActionType.Attack, "Attack Master Task", new GameTask[] { searchTask }, null);
+            searchTask = new GameTask(null, attackFaction, attackType, null);
+            masterAttackTask = new MasterGameTask(MasterGameTask.ActionType.Attack, "Looking For Target", new GameTask[] { searchTask }, null);
         }
 
         DoTask(masterAttackTask);

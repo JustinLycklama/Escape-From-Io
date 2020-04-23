@@ -255,12 +255,12 @@ public class GameResourceManager : MonoBehaviour {
 
         foreach(MineralType mineralType in cost.costMap.Keys) {
 
-            GameTask oreTask = new GameTask("Find Ore", mineralType, GameTask.ActionType.PickUp, null);
+            GameTask oreTask = new GameTask("Pick Up", mineralType, GameTask.ActionType.PickUp, null);
             oreTask.SatisfiesStartRequirements = () => {
                 return Script.Get<GameResourceManager>().AnyMineralAvailable(mineralType);
             };
 
-            GameTask dropTask = new GameTask("Deposit Ore", depositPosition, GameTask.ActionType.DropOff, actionableItem, PathRequestTargetType.PathGrid);
+            GameTask dropTask = new GameTask("Deposit", depositPosition, GameTask.ActionType.DropOff, actionableItem, PathRequestTargetType.PathGrid);
 
             string collectMasterTitle = "Collect " + mineralType.ToString() + " for " + actionableItem.description;
             MasterGameTask masterCollectTask = new MasterGameTask(MasterGameTask.ActionType.Move, collectMasterTitle, new GameTask[] { oreTask, dropTask }, null, asLastPriority);
@@ -270,7 +270,7 @@ public class GameResourceManager : MonoBehaviour {
             blockingBuildTasks.Add(masterCollectTask);
         }
 
-        GameTask buildTask = new GameTask("Construction", depositPosition, GameTask.ActionType.Build, actionableItem, PathRequestTargetType.PathGrid);
+        GameTask buildTask = new GameTask(null, depositPosition, GameTask.ActionType.Build, actionableItem, PathRequestTargetType.PathGrid);
         MasterGameTask masterBuildTask = new MasterGameTask(MasterGameTask.ActionType.Build, "Build " + actionableItem.description, new GameTask[] { buildTask }, blockingBuildTasks, asLastPriority);
 
         masterBuildTask.itemContingentOnTask = actionableItem;

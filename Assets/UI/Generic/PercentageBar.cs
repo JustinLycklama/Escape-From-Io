@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PercentageBar : MonoBehaviour, TrackingUIInterface {
+public class PercentageBar : MonoBehaviour/*, TrackingUIInterface*/ {
 
     public Slider sliderBar;
     public Text detailText;
@@ -26,9 +26,9 @@ public class PercentageBar : MonoBehaviour, TrackingUIInterface {
         SetDisplayType(DisplayType.Bar);
     }
 
-    private void Update() {
-        this.UpdateTrackingPosition();
-    }
+    //private void Update() {
+    //    this.UpdateTrackingPosition();
+    //}
 
     private void SetDisplayType(DisplayType type) {
         displayType = type;

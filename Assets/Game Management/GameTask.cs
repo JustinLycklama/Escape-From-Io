@@ -95,13 +95,15 @@ public interface MasterTaskUpdateDelegate {
     void RepeatCountUpdated(MasterGameTask masterGameTask, int count);
     void TaskCancelled(MasterGameTask masterGameTask);
     void TaskFinished(MasterGameTask masterGameTask);
+    void TaskBlockerRemoved(MasterGameTask masterGameTask);
+    void TaskUnitAssigned(MasterGameTask masterGameTask);
 }
 
 public class MasterGameTask {
 
     private static int gameTaskCounter = 0;
 
-    public Unit assignedUnit;
+    public Unit assignedUnit { get; private set; }
 
     // This item cannot exist without the task
     public ActionableItem itemContingentOnTask;
@@ -152,6 +154,14 @@ public class MasterGameTask {
             foreach(MasterGameTask blocker in blockers) {
                 blocker.taskBlockedByThis = this;
             }
+        }
+    }
+
+    public void SetAssignedUnit(Unit unit) {
+        assignedUnit = unit;
+
+        foreach(MasterTaskUpdateDelegate updateDelegate in delegateList.ToArray()) {
+            updateDelegate.TaskUnitAssigned(this);
         }
     }
 
@@ -247,7 +257,11 @@ public class MasterGameTask {
     }
 
     public void UnblockTask(MasterGameTask blockerTask) {
-        blockerTasks.Remove(blockerTask);       
+        blockerTasks.Remove(blockerTask);
+
+        foreach(MasterTaskUpdateDelegate updateDelegate in delegateList.ToArray()) {
+            updateDelegate.TaskBlockerRemoved(this);
+        }
     }
 
     public bool SatisfiesStartRequirements() {

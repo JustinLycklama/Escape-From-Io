@@ -2,28 +2,28 @@
 using UnityEngine.UI;
 
 public class UnitStatusTooltip : MonoBehaviour, TrackingUIInterface { //TaskStatusUpdateDelegate
-
-    public Text title;
-    public Text taskDescription;
-    //public Image taskEfficiencyImage;
-
-    //public CanvasGroup unitInfoCanvas;
-
-    public PercentageBar durationBar;
-    public PercentageBar percentageBar;
-    public PercentageBar healthBar;
-
-    public Image backgroundSprite;
+    
+    [SerializeField]
+    private MasterAndGameTaskCell masterAndGameTaskCell;
 
     [SerializeField]
-    private Image unitIconImage;
+    private PercentageBar durationBar;
+    [SerializeField]
+    private PercentageBar healthBar;
+    [SerializeField]
+    public PercentageBar percentageBar;
+
+    [SerializeField]
+    private UnitTypeIcon unitIcon;
 
     private RectTransform targetCanvas;
     //private RectTransform rectTransform;
 
     // TrackingUIInterface
     public Transform toFollow { get; set; }
-    public CanvasGroup canvas;
+
+    [SerializeField]
+    private CanvasGroup canvas;
     public CanvasGroup canvasGroup { get => canvas; }
 
     //private Unit unit;
@@ -31,24 +31,28 @@ public class UnitStatusTooltip : MonoBehaviour, TrackingUIInterface { //TaskStat
     private void Start() {
         durationBar.setDetailTextHidden(true);
         healthBar.setDetailTextHidden(true);
+
+        masterAndGameTaskCell.SetBlackAndWhite();
     }
 
     private void Update() {
         this.UpdateTrackingPosition();
     }
 
-    public void SetTitle(string title) {
-        this.title.text = title;
+    public void SetPrimaryActionType(MasterGameTask.ActionType actionType ) {
+        unitIcon.SetActionType(actionType);
     }
 
-    public void SetTask(Unit unit, GameTask task) {
-        if (task == null) {
-            taskDescription.text = "Idle";
-        } else {
-            taskDescription.text = task.description;
-        }
+    public void SetTask(Unit unit, MasterGameTask masterGameTask, GameTask gameTask) {
+        //if (task == null) {
+        //    taskDescription.text = "Idle";
+        //} else {
+        //    taskDescription.text = task.description;
+        //}
 
-        Unit.UnitState unitState = unit.GetUnitState();
+        masterAndGameTaskCell.SetTask(masterGameTask, gameTask);
+
+        //Unit.UnitState unitState = unit.GetUnitState();
 
         // Override color to display RED on inefficient units
         //Color efficiencyColor = Color.red;
@@ -59,8 +63,7 @@ public class UnitStatusTooltip : MonoBehaviour, TrackingUIInterface { //TaskStat
         //Color efficiencyColor = new Color(statusColorColor.r * 2, statusColorColor.g * 2, statusColorColor.b * 2);
 
         //unitInfoCanvas.alpha = unitState == Unit.UnitState.Idle ? 0.7f : 1;        
-        backgroundSprite.color = efficiencyColor;
-        unitIconImage.sprite = Script.Get<UnitManager>().UnitIconForActionType(unit.primaryActionType);
+        masterAndGameTaskCell.Colorize(efficiencyColor);
     }
 
     public void DisplayPercentageBar(bool display) {
