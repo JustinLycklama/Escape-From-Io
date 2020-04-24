@@ -8,8 +8,16 @@ public class UnitDisplayCell : MonoBehaviour, TaskStatusUpdateDelegate, GameButt
     //public Text unitTitleText;
     public Text unitTypeText;
 
-    public MasterAndGameTaskCell masterAndGameTaskCell;
     public GameButton cellButton;
+
+    [SerializeField]
+    private PercentageBar durationBar;
+    [SerializeField]
+    private PercentageBar healthBar;
+
+    [SerializeField]
+    public MasterAndGameTaskCell masterAndGameTaskCell;
+
 
     private Unit unit;
 
@@ -51,6 +59,6 @@ public class UnitDisplayCell : MonoBehaviour, TaskStatusUpdateDelegate, GameButt
 
     public void ButtonDidClick(GameButton button) {
         Script.Get<PlayerBehaviour>().JumpCameraToUnit(unit);
-        Script.Get<SelectionManager>().SelectSelectable(unit);
+        //Script.Get<SelectionManager>().SelectSelectable(unit);
     }
 }
