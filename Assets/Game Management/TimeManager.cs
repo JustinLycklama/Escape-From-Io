@@ -20,7 +20,11 @@ public class TimeManager : MonoBehaviour, PlayerBehaviourUpdateDelegate {
         public Action completionBlock;
     }
 
+    [HideInInspector]
     public float globalTimer { get; private set; }
+
+    [HideInInspector]
+    public TimeSpan currentDiscreteTime { get; private set; }
 
     // Update Blocks
     HashSet<TimeUpdateObject> timeObjects = new HashSet<TimeUpdateObject>();
@@ -32,6 +36,8 @@ public class TimeManager : MonoBehaviour, PlayerBehaviourUpdateDelegate {
 
     private void Start() {
         globalTimer = Time.time;
+        currentDiscreteTime = new TimeSpan();
+
         Script.Get<PlayerBehaviour>().RegisterForPlayerBehaviourNotifications(this);
     }
 
@@ -53,6 +59,8 @@ public class TimeManager : MonoBehaviour, PlayerBehaviourUpdateDelegate {
         int newGlobalComparison = Mathf.FloorToInt(globalTimer);
 
         if (oldGlobalComparison != newGlobalComparison) {
+            currentDiscreteTime = currentDiscreteTime.Add(new TimeSpan(0, 0, 1));
+
             foreach(TimeUpdateDelegate updateDelegate in delegateList) {
                 updateDelegate.SecondUpdated();
             }

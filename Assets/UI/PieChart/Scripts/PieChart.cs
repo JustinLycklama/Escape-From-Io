@@ -67,12 +67,12 @@ namespace UCharts {
         {
             float outer = -rectTransform.pivot.x * rectTransform.rect.width;
             float inner = -rectTransform.pivot.x * rectTransform.rect.width + this.thickness;
-     
-			var outer1 = -rectTransform.pivot.x * rectTransform.rect.width * 0.6f;
-			var inner1 = -rectTransform.pivot.x * rectTransform.rect.width * 0.6f + this.thickness;
+
+            var outer1 = -rectTransform.pivot.x * rectTransform.rect.width * 0.6f;
+            var inner1 = -rectTransform.pivot.x * rectTransform.rect.width * 0.6f + this.thickness;
 
             vh.Clear();
-     
+
             Vector2 prevX = Vector2.zero;
             Vector2 prevY = Vector2.zero;
             Vector2 uv0 = new Vector2(0, 0);
@@ -83,56 +83,53 @@ namespace UCharts {
             Vector2 pos1;
             Vector2 pos2;
             Vector2 pos3;
-			
-			float f = m_fillAmount;
-			float degrees = 360f / segments;
-			int fa = (int)((segments + 1) * f);
 
-			var dataIndex = 0;
-			var total = 0f;
-			var currentValue = m_Data[0].Value;
-			m_Data.ForEach(s => total += s.Value);
-			var fillColor = m_Colors[0];
-			for (int i = 0; i < fa; i++)
-			{
-				float rad = Mathf.Deg2Rad * (i * degrees);
-				float c = Mathf.Cos(rad);
-				float s = Mathf.Sin(rad);
+            float f = m_fillAmount;
+            float degrees = 360f / segments;
+            int fa = (int)((segments + 1) * f);
 
-				uv0 = new Vector2(0, 1);
-				uv1 = new Vector2(1, 1);
-				uv2 = new Vector2(1, 0);
-				uv3 = new Vector2(0, 0);
+            var dataIndex = 0;
+            var total = 0f;
+            var currentValue = m_Data[0].Value;
+            m_Data.ForEach(s => total += s.Value);
+            var fillColor = m_Colors[0];
+            for(int i = 0; i < fa; i++) {
+                float rad = Mathf.Deg2Rad * (i * degrees);
+                float c = Mathf.Cos(rad);
+                float s = Mathf.Sin(rad);
 
-				
-				pos0 = prevX;
-				pos1 = new Vector2(outer * c, outer * s);
+                uv0 = new Vector2(0, 1);
+                uv1 = new Vector2(1, 1);
+                uv2 = new Vector2(1, 0);
+                uv3 = new Vector2(0, 0);
 
-				pos2 = new Vector2(inner * c, inner * s);
-				pos3 = prevY;
 
-				
-				if (i > currentValue / total * segments)
-				{
-					if (dataIndex < m_Data.Count - 1)
-					{
-						dataIndex += 1;
-						currentValue += m_Data[dataIndex].Value;
-						fillColor = m_Colors[dataIndex % m_Colors.Count];
-					}
-				}
-				// draw fill
-				vh.AddUIVertexQuad(SetVbo(new[] { pos0, pos1, pos2*inner1/inner, pos3*inner1/inner }, new[] { uv0, uv1, uv2, uv3 }, fillColor));
+                pos0 = prevX;
+                pos1 = new Vector2(outer * c, outer * s);
 
-				// draw outer circle
-				vh.AddUIVertexQuad(SetVbo(new[] { pos0, pos1, pos2, pos3 }, new[] { uv0, uv1, uv2, uv3 }, m_BorderColor));
+                pos2 = new Vector2(inner * c, inner * s);
+                pos3 = prevY;
 
-				// draw inner cirlce
-				vh.AddUIVertexQuad(SetVbo(new[] { pos0*outer1/outer, pos1 * outer1/outer, pos2*inner1/inner, pos3*inner1/inner }, new[] { uv0, uv1, uv2, uv3 }, m_BorderColor));
 
-				prevX = pos1;
-				prevY = pos2;
-			}
+                if(i > currentValue / total * segments) {
+                    if(dataIndex < m_Data.Count - 1) {
+                        dataIndex += 1;
+                        currentValue += m_Data[dataIndex].Value;
+                        fillColor = m_Colors[dataIndex % m_Colors.Count];
+                    }
+                }
+                // draw fill
+                vh.AddUIVertexQuad(SetVbo(new[] { pos0, pos1, pos2 * inner1 / inner, pos3 * inner1 / inner }, new[] { uv0, uv1, uv2, uv3 }, fillColor));
+
+                // draw outer circle
+                vh.AddUIVertexQuad(SetVbo(new[] { pos0, pos1, pos2, pos3 }, new[] { uv0, uv1, uv2, uv3 }, m_BorderColor));
+
+                // draw inner cirlce
+                vh.AddUIVertexQuad(SetVbo(new[] { pos0 * outer1 / outer, pos1 * outer1 / outer, pos2 * inner1 / inner, pos3 * inner1 / inner }, new[] { uv0, uv1, uv2, uv3 }, m_BorderColor));
+
+                prevX = pos1;
+                prevY = pos2;
+            }
         }
 	}
 

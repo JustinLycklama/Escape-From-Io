@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ShipThrusters : Building {
     public override string title => "Thrusters";
-    protected override float constructionModifierSpeed => 0.20f;
+    public override float constructionModifierSpeed => 0.20f;
 
     protected override void Awake() {
         base.Awake();

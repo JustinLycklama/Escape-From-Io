@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class SensorTower : Building, TerrainUpdateDelegate {
     public override string title => "Azure Sensor";
-    protected override float constructionModifierSpeed => 0.20f;
+    public override float constructionModifierSpeed => 0.20f;
 
     private KeyValuePair<int, int>? closestLunarRock = null;
 

@@ -7,31 +7,34 @@ using UnityEngine.UI;
 public class TimePanel : MonoBehaviour, TimeUpdateDelegate, PlayerBehaviourUpdateDelegate {
     public Text timeLabel;
 
-    [HideInInspector]
-    public TimeSpan currentTime;
-
     private Color defaultColor;
 
+    private TimeManager timeManager;
+    private PlayerBehaviour playerBehaviour;
+
     private void Awake() {
-        currentTime = new TimeSpan();
         defaultColor = timeLabel.color;
     }
 
     private void Start() {
+        timeManager = Script.Get<TimeManager>();
+        playerBehaviour = Script.Get<PlayerBehaviour>();
+
         DisplayTime();
-        Script.Get<TimeManager>().RegisterForTimeUpdateNotifications(this);
-        Script.Get<PlayerBehaviour>().RegisterForPlayerBehaviourNotifications(this);
+
+        timeManager.RegisterForTimeUpdateNotifications(this);
+        playerBehaviour.RegisterForPlayerBehaviourNotifications(this);
     }
 
     private void OnDestroy() {
         try {
-            Script.Get<TimeManager>().EndTimeUpdateNotifications(this);
-            Script.Get<PlayerBehaviour>().EndPlayerBehaviourNotifications(this);
+            timeManager.EndTimeUpdateNotifications(this);
+            playerBehaviour.EndPlayerBehaviourNotifications(this);
         } catch(System.NullReferenceException e) { }
     }
 
     private void DisplayTime() {
-        timeLabel.text = currentTime.ToString();
+        timeLabel.text = timeManager.currentDiscreteTime.ToString();
     }
 
     /*
@@ -39,7 +42,6 @@ public class TimePanel : MonoBehaviour, TimeUpdateDelegate, PlayerBehaviourUpdat
      * */
 
     public void SecondUpdated() {
-        currentTime = currentTime.Add(new TimeSpan(0, 0, 1));
         DisplayTime();
     }
 

@@ -9,7 +9,7 @@ public class UnitBuilding : Building
     public override string title => associatedUnit.title;
     public override string description => associatedUnit.title;
 
-    protected override float constructionModifierSpeed => 0.15f;
+    public override float constructionModifierSpeed  => 0.15f;
 
     protected override void CompleteBuilding() {
         associatedUnit.Initialize();

@@ -16,6 +16,8 @@ public class UnitStatusTooltip : MonoBehaviour, TrackingUIInterface { //TaskStat
     [SerializeField]
     private UnitTypeIcon unitIcon;
 
+    private Unit.FactionType faction;
+
     private RectTransform targetCanvas;
     //private RectTransform rectTransform;
 
@@ -39,8 +41,10 @@ public class UnitStatusTooltip : MonoBehaviour, TrackingUIInterface { //TaskStat
         this.UpdateTrackingPosition();
     }
 
-    public void SetPrimaryActionType(MasterGameTask.ActionType actionType ) {
-        unitIcon.SetActionType(actionType);
+    public void SetPrimaryActionAndFaction(MasterGameTask.ActionType actionType, Unit.FactionType faction) {
+        this.faction = faction;
+
+        unitIcon.SetActionType(actionType, faction);
     }
 
     public void SetTask(Unit unit, MasterGameTask masterGameTask, GameTask gameTask) {
@@ -59,6 +63,10 @@ public class UnitStatusTooltip : MonoBehaviour, TrackingUIInterface { //TaskStat
         //if (unitState != Unit.UnitState.Inefficient) {
         Color efficiencyColor = unit.GetUnitState().ColorForState();
         //}
+
+        if (faction == Unit.FactionType.Enemy) {
+            efficiencyColor = ColorSingleton.sharedInstance.enemyTaskColor;
+        }
 
         //Color efficiencyColor = new Color(statusColorColor.r * 2, statusColorColor.g * 2, statusColorColor.b * 2);
 

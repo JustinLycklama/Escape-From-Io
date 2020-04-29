@@ -40,11 +40,9 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
     BoxCollider[,][,] boxColliderArray;
 
 
-    // Moving away from creating a physical map using cubes, lets create a virtual FOW
-    //GameObject[,] fogOfWarMap;
-    bool[,] fogOfWarMap;
-
-
+    // TODO: Moving away from creating a physical map using cubes, lets create a virtual FOW
+    //bool[,] fogOfWarMap;
+    GameObject[,] fogOfWarMap;
 
     float[] textureIndexList;
 
@@ -348,7 +346,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         int width = constants.layoutMapWidth;
         int height = constants.layoutMapHeight;
 
-        fogOfWarMap = new bool[width, height];
+        fogOfWarMap = new GameObject[width, height];
 
         float boxSizeX = constants.featuresPerLayoutPerAxis;
         float boxSizeZ = constants.featuresPerLayoutPerAxis;
@@ -362,10 +360,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         for(int x = 0; x < width; x++) {
             for(int y = 0; y < height; y++) {
 
-                fogOfWarMap[x, y] = true;
-
-
-                /*if (fogOfWarMap[x, y] == null) {
+                if (fogOfWarMap[x, y] == null) {
                     GameObject newCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                     newCube.name = "Fog " + x + ", " + y;
 
@@ -392,7 +387,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                 cube.transform.position = cubePosition;// new Vector3((x * boxSizeX - halfTotalWidth) + boxSizeX / 2f, 0, (y * boxSizeZ - halfTotalHeight) + boxSizeZ / 2f);
 
                 cube.transform.localScale = new Vector3(boxSizeX * 11,  200, boxSizeZ * 11);
-                cube.transform.SetParent(this.transform, true);*/
+                cube.transform.SetParent(this.transform, true);
             }
         }
     }
@@ -693,25 +688,25 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                 totalCouroutinesStarted++;
 
 
-                //Material material = fogOfWarMap[x, y].GetComponent<MeshRenderer>().material;
-                //SetMaterialTransparent(material);
-                //Color color = material.color;
-                //color.a = 0.15f;
+                Material material = fogOfWarMap[x, y].GetComponent<MeshRenderer>().material;
+                SetMaterialTransparent(material);
+                Color color = material.color;
+                color.a = 0.15f;
 
-                //material.color = color;
+                material.color = color;
 
                 Action<int, float> durationUpdateBlock = (remainingTime, percentComplete) => {
                     // Fade out fog of war (fade in map)
 
-                    //color.a = 1f - percentComplete;
-                    //material.color = color;
+                    color.a = 1f - percentComplete;
+                    material.color = color;
                 };
 
                 int holdX = x;
                 int holdY = y;
 
                 Action durationCompletionBlock = () => {
-                    fogOfWarMap[holdX, holdY] = false;
+                    fogOfWarMap[holdX, holdY].SetActive(false);
                 };
 
                 Action boxEndAndAnimation = () => {

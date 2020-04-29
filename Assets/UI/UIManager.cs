@@ -65,7 +65,7 @@ public class UIManager : MonoBehaviour, SelectionManagerDelegate
      * */
 
     public void NotifyUpdateSelection(Selection selection) {
-        if (isRoot && selection.selectionType == Selection.SelectionType.Terrain) {
+        if (isRoot && selection != null && selection.selectionType == Selection.SelectionType.Terrain) {
             var currentSelectionPanel = Push(Blueprint.CurrentSelectionPanel) as CurrentSelectionPanel;
             currentSelectionPanel.NotifyUpdateSelection(selection);
         }        

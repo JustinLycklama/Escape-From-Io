@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ShipReactor : Building {
     public override string title => "Reactor";
-    protected override float constructionModifierSpeed => 0.20f;
+    public override float constructionModifierSpeed => 0.20f;
 
     protected override void Awake() {
         base.Awake();

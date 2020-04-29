@@ -36,7 +36,7 @@ public abstract class Building : ActionableItem, Selectable {
 
     [Serializable]
     public class MeshBuildingTier {
-        public MeshRenderer[] meshRenderes;
+        public Renderer[] meshRenderes;
 
         [Range(0, 1)]
         public float aproximateTopPercentage;
@@ -51,9 +51,9 @@ public abstract class Building : ActionableItem, Selectable {
     public override string description => title;
 
     public abstract string title { get; }
-    protected abstract float constructionModifierSpeed { get; }
+    public abstract float constructionModifierSpeed { get; }
 
-    private float layoutTerrainModifier;
+    public float layoutTerrainModifier;
 
     public bool buildingComplete = false;
 
@@ -69,6 +69,7 @@ public abstract class Building : ActionableItem, Selectable {
     // Building Shaders
     private Shader transparencyShader;
     private Shader tintableShader;
+    private Shader uniformTransparencyShader;
 
     public List<UserActionUpdateDelegate> userActionDelegateList = new List<UserActionUpdateDelegate>();
 
@@ -81,6 +82,7 @@ public abstract class Building : ActionableItem, Selectable {
         // Set transparent shader for all objects in the MeshRenderTier
         transparencyShader = Shader.Find("Custom/Buildable");
         tintableShader = Shader.Find("Custom/Tintable");
+        uniformTransparencyShader = Shader.Find("Custom/BuildableUniform");
 
         SetTransparentShaders();
 
@@ -153,7 +155,7 @@ public abstract class Building : ActionableItem, Selectable {
         }
 
         foreach(Building.MeshBuildingTier meshTier in meshTiers) {
-            foreach(MeshRenderer renderer in meshTier.meshRenderes) {
+            foreach(Renderer renderer in meshTier.meshRenderes) {
                 renderer.material.SetColor("_Color", color);
             }
         }
@@ -175,7 +177,14 @@ public abstract class Building : ActionableItem, Selectable {
      * */
 
     public void SetTransparentShaders() {
-        SetShaders(transparencyShader);
+
+        var uniform = (meshTiers[0].meshRenderes[0] is SkinnedMeshRenderer);
+
+        if (uniform) {
+            SetShaders(uniformTransparencyShader);
+        } else {
+            SetShaders(transparencyShader);
+        }        
     }
 
     public void SetTintableShaders() {
@@ -185,7 +194,7 @@ public abstract class Building : ActionableItem, Selectable {
 
     private void SetShaders(Shader shader) {
         foreach(MeshBuildingTier tier in meshTiers) {
-            foreach(MeshRenderer meshRenderer in tier.meshRenderes) {
+            foreach(Renderer meshRenderer in tier.meshRenderes) {
                 meshRenderer.material.shader = shader;
             }
         }
@@ -200,7 +209,7 @@ public abstract class Building : ActionableItem, Selectable {
             if(percent > tierBase && percent <= tier.aproximateTopPercentage) {
                 float localPercent = Mathf.InverseLerp(tierBase, tier.aproximateTopPercentage, percent);
 
-                foreach(MeshRenderer meshRenderer in tier.meshRenderes) {                                        
+                foreach(Renderer meshRenderer in tier.meshRenderes) {                                        
                     meshRenderer.material.SetFloat("percentComplete", localPercent);
                 }
 
@@ -215,7 +224,7 @@ public abstract class Building : ActionableItem, Selectable {
 
     public void SetAlphaSolid() {
         foreach(MeshBuildingTier tier in meshTiers) {           
-            foreach(MeshRenderer meshRenderer in tier.meshRenderes) {
+            foreach(Renderer meshRenderer in tier.meshRenderes) {
 
                 meshRenderer.material.SetFloat("percentComplete", 1);
             }            

@@ -27,16 +27,18 @@ public class ColorSingleton {
     private static Color SOFT_RED = new Color32(176, 57, 53, 255);
     private static Color SOFT_GREEN = new Color32(116, 180, 131, 255);
     private static Color SOFT_ORANGE = new Color32(202, 134, 34, 255);
-
+    private static Color SOFT_BLACK = new Color32(35, 43, 43, 255);
 
     private static Color BRIGHT_YELLOLW = new Color32(252, 236, 3, 255);
     public static Color DARK_ORANGE = new Color32(219, 132, 2, 255);
 
     // Public
 
-    public Color idleUnitColor = SOFT_RED;
+    public Color idleUnitColor = SOFT_BLACK;
     public Color inefficientUnitColor = SOFT_ORANGE;
     public Color efficientColor = SOFT_GREEN;
+
+    public Color enemyTaskColor = SOFT_RED;
 
     private Color durationInitialColor = BRIGHT_YELLOLW;
     private Color durationFinalColor = DARK_ORANGE;

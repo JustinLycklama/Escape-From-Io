@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ShipProps : Building {
     public override string title => "Starship Frame";
-    protected override float constructionModifierSpeed => 0.25f;
+    public override float constructionModifierSpeed => 0.25f;
 
     protected override void Awake() {
         base.Awake();

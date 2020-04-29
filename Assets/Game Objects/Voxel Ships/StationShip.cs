@@ -8,7 +8,7 @@ public class StationShip : Building, CanSceneChangeDelegate /*, BuildingsUpdateD
     private bool canSceneChange = false;
 
     public override string title => "Starship Frame";
-    protected override float constructionModifierSpeed => 0.15f;
+    public override float constructionModifierSpeed => 0.15f;
 
     private void OnDestroy() {
         //Script.Get<BuildingManager>()?.EndBuildingNotifications(this);

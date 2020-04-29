@@ -90,7 +90,9 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
                 coordinatesForSpawnCoordinate[0][1],
                 coordinatesForSpawnCoordinate[1][0],
                 coordinatesForSpawnCoordinate[2][1],
-                coordinatesForSpawnCoordinate[1][2]
+                coordinatesForSpawnCoordinate[1][2],
+                coordinatesForSpawnCoordinate[0][2],
+                coordinatesForSpawnCoordinate[2][0]                
             };
 
             int i = 0;

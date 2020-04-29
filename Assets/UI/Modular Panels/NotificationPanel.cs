@@ -5,7 +5,7 @@ using UnityEngine;
 using System.Linq;
 
 public enum NotificationType {
-    NewUnit, TaskComplete, UnitBattery, UnitKilled, Warning
+    NewUnit, NewEnemy, TaskComplete, UnitBattery, UnitKilled, EnemyKilled, Warning
 }
 
 public class NotificationItem {

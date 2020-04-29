@@ -20,6 +20,7 @@ public class UnitManager : MonoBehaviour, TaskStatusUpdateDelegate {
 
     [SerializeField]
     private List<ActionIconObj> actionIconObjList;
+    public Sprite enemyIcon;
 
     Dictionary<MasterGameTask.ActionType, List<Unit>> unitListMap;
     Dictionary<MasterGameTask.ActionType, List<UnitManagerDelegate>> delegateListMap;

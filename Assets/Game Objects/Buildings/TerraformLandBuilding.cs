@@ -5,7 +5,7 @@ using UnityEngine;
 public class TerraformLandBuilding : Building {
 
     public override string title => "TerraformLand";
-    protected override float constructionModifierSpeed => 0.05f;
+    public override float constructionModifierSpeed => 0.05f;
 
     LayoutCoordinate layoutCoordinate;
 

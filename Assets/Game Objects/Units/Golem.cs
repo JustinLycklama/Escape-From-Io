@@ -28,11 +28,19 @@ public class Golem : AttackingUnit
         //throw new System.NotImplementedException();
     }
 
-    protected override void UnitCustomInit() {
-        base.UnitCustomInit();
+    public void Start() {
+        animationController.IdleActivate();
+    }
 
-        animationController.Idle();
-    }        
+    public void ActiveAnimate() {
+        animationController.Activate();
+    }
+
+    //protected override void UnitCustomInit() {
+    //    base.UnitCustomInit();
+
+    //    //animationController.Idle();
+    //}
 
     /*
      * Action Delegates

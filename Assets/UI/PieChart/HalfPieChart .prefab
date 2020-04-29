@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 224913192921962126}
   - component: {fileID: 222968608523417114}
-  - component: {fileID: 114709905147094496}
+  - component: {fileID: 8130911398769056450}
   m_Layer: 0
   m_Name: 'HalfPieChart '
   m_TagString: Untagged
@@ -34,7 +34,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 586, y: -79}
+  m_AnchoredPosition: {x: 180, y: -136}
   m_SizeDelta: {x: 400, y: 400}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &222968608523417114
@@ -45,7 +45,7 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1289793192161934}
   m_CullTransparentMesh: 0
---- !u!114 &114709905147094496
+--- !u!114 &8130911398769056450
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -54,38 +54,38 @@ MonoBehaviour:
   m_GameObject: {fileID: 1289793192161934}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 399ec063977737a4ea505e1594b41b0c, type: 3}
+  m_Script: {fileID: 11500000, guid: fb590b99dfb9cb247935a8bf22baf6fa, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
+  m_Color: {r: 1, g: 0.9575472, b: 0.9575472, a: 1}
+  m_RaycastTarget: 0
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  thickness: 1
+  thickness: 5
   m_BorderColor:
     serializedVersion: 2
-    rgba: 4288980137
+    rgba: 0
   m_Data:
   - Text: 
     Value: 1
   - Text: 
     Value: 2
   - Text: 
+    Value: 2
+  - Text: 
     Value: 1
   - Text: 
-    Value: 3
-  - Text: 
-    Value: 3
+    Value: 1
   m_Colors:
   - serializedVersion: 2
-    rgba: 4281415106
+    rgba: 4278190080
   - serializedVersion: 2
-    rgba: 4284842708
+    rgba: 4280098277
   - serializedVersion: 2
-    rgba: 4289644433
+    rgba: 4293329151
   - serializedVersion: 2
-    rgba: 4286816116
+    rgba: 4294901785
   - serializedVersion: 2
-    rgba: 4280452810
+    rgba: 4293721856

@@ -101,6 +101,7 @@ GameObject:
   - component: {fileID: 8473070085985799603}
   - component: {fileID: 8473070085985799604}
   - component: {fileID: 7226503491834041916}
+  - component: {fileID: 5214751082282702138}
   m_Layer: 0
   m_Name: Golem
   m_TagString: Untagged
@@ -165,9 +166,30 @@ MonoBehaviour:
   unitHealth: 100
   remainingDuration: 600
   remainingHealth: 0
-  buildableComponent: {fileID: 0}
+  buildableComponent: {fileID: 5214751082282702138}
   followCameraLocation: {fileID: 2851565343799045522}
   animationController: {fileID: 647512358278250025}
+--- !u!114 &5214751082282702138
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8473070085985799609}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f382cb59fba3b80468fcc5959b82382b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  taskAlreadyDictated: 0
+  meshTiers:
+  - meshRenderes:
+    - {fileID: 4316675527932553902}
+    aproximateTopPercentage: 1
+  statusLocation: {fileID: 5006368064528993153}
+  layoutTerrainModifier: 0
+  buildingComplete: 0
+  associatedUnit: {fileID: 7226503491834041916}
 --- !u!1 &8641422366534146705
 GameObject:
   m_ObjectHideFlags: 0
@@ -285,3 +307,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e76369e7e49801749b27295699da9e11, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!137 &4316675527932553902 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 13774198, guid: ab935d5b399f80e4686c72e1e81fd00b,
+    type: 3}
+  m_PrefabInstance: {fileID: 4316675527946045400}
+  m_PrefabAsset: {fileID: 0}

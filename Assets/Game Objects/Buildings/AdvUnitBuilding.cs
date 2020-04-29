@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class AdvUnitBuilding : Building {
     public override string title => "Advanced Unit Building";
-    protected override float constructionModifierSpeed => 0.20f;
+    public override float constructionModifierSpeed => 0.20f;
 
     public GameObject towerHead;
 

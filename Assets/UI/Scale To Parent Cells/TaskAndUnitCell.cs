@@ -239,7 +239,7 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
 
     public void SecondUpdated() {
 
-        DateTime now = DateTime.Now;
+        //DateTime now = DateTime.Now;
 
         for(int i = 0; i < percentBars.Count; i++) {
             PercentageBar bar = percentBars[i];

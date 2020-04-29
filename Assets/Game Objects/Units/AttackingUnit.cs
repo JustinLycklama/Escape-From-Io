@@ -12,12 +12,12 @@ public abstract class AttackingUnit : Unit
     protected abstract GameTask.ActionType attackType { get; }
 
     protected override void UnitCustomInit() {
+
         // Update our path to target constantly
         StartCoroutine(FollowAttackTarget());
 
         // Occasionally update our search target
         StartCoroutine(ResetSearch());
-
 
         narrator = Script.Get<Narrator>();
         unitManager = Script.Get<UnitManager>();
@@ -80,6 +80,10 @@ public abstract class AttackingUnit : Unit
 
 
     private void ResetTaskStateWithNewFollow() {
+        if (this == null) {
+            return;
+        }
+
         currentMasterTask = null;
         currentGameTask = null;
 
@@ -96,7 +100,7 @@ public abstract class AttackingUnit : Unit
 
             searchTask = null;
             targetTask = new GameTask(null, unitPosition, attackType, followingUnit, PathRequestTargetType.PathGrid);
-            masterAttackTask = new MasterGameTask(MasterGameTask.ActionType.Attack, "Attack:\n" + followingUnit.description, new GameTask[] { targetTask }, null);
+            masterAttackTask = new MasterGameTask(MasterGameTask.ActionType.Attack, "Attack:\n" + followingUnit.title, new GameTask[] { targetTask }, null);
         } else {
             targetTask = null;
 
@@ -139,7 +143,7 @@ public abstract class AttackingUnit : Unit
             yield return new WaitForSeconds(updateFollowTargetDelay);
 
             // If we still have a task we are navigating to, keep updating position
-            if(currentGameTask != null && currentGameTask == targetTask && followingUnit!= null && navigatingToTask) {
+            if(currentGameTask != null && currentGameTask == targetTask && followingUnit != null && unitManager.IsUnitEnabled(followingUnit) && navigatingToTask) {
 
                 var unitPosition = new WorldPosition(followingUnit.transform.position);
                 currentGameTask.target = unitPosition;

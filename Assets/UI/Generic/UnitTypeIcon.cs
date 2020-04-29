@@ -9,16 +9,26 @@ public class UnitTypeIcon : MonoBehaviour
     private MasterGameTask.ActionType actionType;
 
     [SerializeField]
+    private Unit.FactionType factionType;
+
+    [SerializeField]
     private Image icon;
 
     private void Start() {
-        SetActionType(actionType);
+        SetActionType(actionType, factionType);
     }
 
-    public void SetActionType(MasterGameTask.ActionType actionType) {
+    public void SetActionType(MasterGameTask.ActionType actionType, Unit.FactionType factionType = Unit.FactionType.Player) {
         this.actionType = actionType;
+        this.factionType = factionType;
 
-        icon.sprite = Script.Get<UnitManager>().UnitIconForActionType(actionType);
+        UnitManager unitManager = Script.Get<UnitManager>();
+
+        if (factionType == Unit.FactionType.Enemy) {
+            icon.sprite = unitManager.enemyIcon;
+        } else {
+            icon.sprite = unitManager.UnitIconForActionType(actionType);
+        }
     }
 
     public void SetEnabled(bool enabled) {

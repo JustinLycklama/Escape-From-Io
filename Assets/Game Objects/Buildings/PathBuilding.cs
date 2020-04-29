@@ -5,7 +5,7 @@ using UnityEngine;
 public class PathBuilding : Building {
 
     public override string title => "Path";
-    protected override float constructionModifierSpeed => 0.8f;    
+    public override float constructionModifierSpeed => 0.8f;    
 
     protected override void CompleteBuilding() {
         buildingLayoutCoordinate.mapContainer.map.UpdateTerrainAtLocation(buildingLayoutCoordinate, Script.Get<TerrainManager>().terrainTypeMap[TerrainType.Type.Path]);

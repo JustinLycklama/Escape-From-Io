@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class ShipTelemetry : Building {
     public override string title => "Telemetry";
-    protected override float constructionModifierSpeed => 0.20f;
+    public override float constructionModifierSpeed => 0.20f;
 
     protected override void Awake() {
         base.Awake();

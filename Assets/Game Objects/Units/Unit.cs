@@ -225,19 +225,23 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
         unitStatusTooltip.toFollow = statusLocation;
 
-        unitStatusTooltip.SetPrimaryActionType(primaryActionType);
+        unitStatusTooltip.SetPrimaryActionAndFaction(primaryActionType, factionType);
         unitStatusTooltip.DisplayPercentageBar(false);
         unitStatusTooltip.SetRemainingDuration(unitDuration, (float)unitDuration / (float)maxUnitUduration);
         unitStatusTooltip.SetRemainingHealth(unitHealth, 1.0f);
 
         // Name
-        Name name = NameSingleton.sharedInstance.GenerateName();
+        //Name name = NameSingleton.sharedInstance.GenerateName();
+        //title = name.fullName;
+
 
         NotificationPanel notificationManager = Script.Get<NotificationPanel>();
-        notificationManager.AddNotification(new NotificationItem("Bot initialized", NotificationType.NewUnit, transform, primaryActionType));
-
-        title = name.fullName;
-
+        if (factionType == FactionType.Player) {
+            notificationManager.AddNotification(new NotificationItem("Bot initialized", NotificationType.NewUnit, transform, primaryActionType));
+        } else {
+            notificationManager.AddNotification(new NotificationItem("Golem Appeared!", NotificationType.NewEnemy, transform, primaryActionType));
+        }
+        
         // Duration
         this.remainingDuration = unitDuration;
         Action<int, float> durationUpdateBlock = (remainingTime, percentComplete) => {
@@ -272,7 +276,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         taskQueueManager = Script.Get<TaskQueueManager>();
         taskQueueManager.RegisterForLockStatusUpdates(this);
 
-        completedTaskAction = (pathComplete) => {
+        completedTaskAction = (success) => {
             unitStatusTooltip.DisplayPercentageBar(false);
             ContinueGameTaskQueue();
         };
@@ -510,6 +514,12 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
             if(playerBehaviour.gamePaused) {
                 yield return null;
                 continue;
+            }
+
+            if (currentGameTask.actionItem == null) {
+                callBack(false);
+                CompleteTaskActionDelegate();
+                yield break;
             }
 
             float completion = currentGameTask.actionItem.performAction(currentGameTask, Time.deltaTime * speed, this);
@@ -762,13 +772,22 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
     }
 
     private void TakeDamage(int damage) {
+        if (remainingHealth <= 0) {
+            // We have already died
+            return;
+        }
 
         remainingHealth -= damage;
 
         if (remainingHealth <= 0) {
             remainingHealth = 0;
 
-            Script.Get<NotificationPanel>().AddNotification(new NotificationItem("Bot has been destroyed", NotificationType.UnitKilled, transform, primaryActionType));
+            if (factionType == FactionType.Player) {
+                Script.Get<NotificationPanel>().AddNotification(new NotificationItem("Bot has been destroyed", NotificationType.UnitKilled, transform, primaryActionType));
+            } else {
+                Script.Get<NotificationPanel>().AddNotification(new NotificationItem("Enemy has been destroyed", NotificationType.EnemyKilled, transform, primaryActionType));
+            }
+
             Script.Get<UnitManager>().DisableUnit(this);
             Shutdown();
         }

@@ -9,7 +9,9 @@ namespace UCharts {
 	public class HalfPieChart : ChartBase 
 	{
         public float thickness = 5;
-        private int segments = 360;
+        private int segments = 180;
+
+
 		[SerializeField] private Color32 m_BorderColor;
 		[SerializeField] List<PieChartDataNode> m_Data = new List<PieChartDataNode>();
 		[SerializeField] List<Color32> m_Colors = new List<Color32>();
@@ -45,6 +47,17 @@ namespace UCharts {
 				m_fillAmount = 0f;
 			}
 		}
+
+        public void SetColors(List<Color32> colors) {
+            m_Colors = colors;
+            PlayAnimation();
+        }
+
+        public void SetData(List<PieChartDataNode> data) {
+            m_Data = data;
+            SetVerticesDirty();
+        }
+
         protected override void OnPopulateMesh(VertexHelper vh)
         {
             float outer = -rectTransform.pivot.x * rectTransform.rect.width;
