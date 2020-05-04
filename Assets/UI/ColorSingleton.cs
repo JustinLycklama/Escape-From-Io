@@ -32,6 +32,8 @@ public class ColorSingleton {
     private static Color BRIGHT_YELLOLW = new Color32(252, 236, 3, 255);
     public static Color DARK_ORANGE = new Color32(219, 132, 2, 255);
 
+    private static Color AQUA = new Color(0, 1, 1);
+
     // Public
 
     public Color idleUnitColor = SOFT_BLACK;
@@ -40,19 +42,19 @@ public class ColorSingleton {
 
     public Color enemyTaskColor = SOFT_RED;
 
+    public Color disabledRedColor = new Color(1, 0.1686274f, 0.0431372f);
+
+    public Color highlightColor = AQUA;
+
     private Color durationInitialColor = BRIGHT_YELLOLW;
     private Color durationFinalColor = DARK_ORANGE;
-
-    private Color healthInitialColor = GREEN;
-    private Color healthFinalColor = RED;
-
-
-    public Color disabledRedColor = new Color(1, 0.1686274f, 0.0431372f);
 
     public Color DurationColorByPercent(float percent) {
         return Color.Lerp(durationFinalColor, durationInitialColor, percent);
     }
 
+    private Color healthInitialColor = GREEN;
+    private Color healthFinalColor = RED;
     public Color HealthColorByPercent(float percent) {
         return Color.Lerp(healthFinalColor, healthInitialColor, percent);
     }

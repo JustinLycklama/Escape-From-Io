@@ -151,7 +151,7 @@ public abstract class Building : ActionableItem, Selectable {
     public void SetSelected(bool selected) {
         Color color = Color.white;
         if(selected) {
-            color = PlayerBehaviour.tintColor;
+            color = ColorSingleton.sharedInstance.highlightColor;
         }
 
         foreach(Building.MeshBuildingTier meshTier in meshTiers) {
@@ -177,6 +177,10 @@ public abstract class Building : ActionableItem, Selectable {
      * */
 
     public void SetTransparentShaders() {
+
+        if (meshTiers != null && meshTiers.Length == 0) {
+            return;
+        }
 
         var uniform = (meshTiers[0].meshRenderes[0] is SkinnedMeshRenderer);
 

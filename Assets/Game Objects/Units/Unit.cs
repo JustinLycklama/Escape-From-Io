@@ -221,7 +221,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
         // Tooltip
         unitStatusTooltip = Instantiate(Resources.Load("UI/UnitStatusPanel", typeof(UnitStatusTooltip))) as UnitStatusTooltip;
-        unitStatusTooltip.transform.SetParent(Script.UIOverlayPanel.GetFromObject<RectTransform>());
+        unitStatusTooltip.transform.SetParent(Script.UIOverlayPanel.GetFromObject<RectTransform>(), true);
 
         unitStatusTooltip.toFollow = statusLocation;
 
@@ -803,7 +803,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
         Color color = Color.white;
         if(selected) {
-            color = PlayerBehaviour.tintColor;
+            color = ColorSingleton.sharedInstance.highlightColor;
         }
 
         if (buildableComponent != null) {
