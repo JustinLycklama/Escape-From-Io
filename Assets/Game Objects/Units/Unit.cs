@@ -223,7 +223,8 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         unitStatusTooltip = Instantiate(Resources.Load("UI/UnitStatusPanel", typeof(UnitStatusTooltip))) as UnitStatusTooltip;
         unitStatusTooltip.transform.SetParent(Script.UIOverlayPanel.GetFromObject<RectTransform>(), true);
 
-        unitStatusTooltip.toFollow = statusLocation;
+        unitStatusTooltip.followPosition = statusLocation;
+        unitStatusTooltip.followingObject = transform;
 
         unitStatusTooltip.SetPrimaryActionAndFaction(primaryActionType, factionType);
         unitStatusTooltip.DisplayPercentageBar(false);
@@ -283,9 +284,11 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
         completedPath = (pathComplete) => {
             navigatingToTask = false;
+            AnimateState(AnimationState.Idle);
 
-            // Don't bother showing completion bar for picking up and droping off
-            if(currentGameTask!= null && currentGameTask.action != GameTask.ActionType.DropOff && currentGameTask.action != GameTask.ActionType.PickUp) {
+            // Only show progress for building, mining and cleaning
+            if(currentGameTask != null && 
+            (currentGameTask.action == GameTask.ActionType.Mine || currentGameTask.action == GameTask.ActionType.Build || currentGameTask.action == GameTask.ActionType.FlattenPath)) {
                 unitStatusTooltip.DisplayPercentageBar(true);
             }
 
@@ -423,9 +426,11 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         Destroy(gameObject);
     }
 
-    private void Shutdown() {
+    protected virtual void Shutdown() {
         taskQueueManager.RestractTaskRequest(this);
         InterruptInProgressActions();
+
+        AnimateState(AnimationState.Die);
 
         Script.Get<UnitManager>().DisableUnit(this);
 
@@ -436,7 +441,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
         Action<int, float> fadeOutBlock = null;
 
-        if (buildableComponent != null) {
+        if(buildableComponent != null) {
             buildableComponent.SetTransparentShaders();
             buildableComponent.SetAlphaSolid();
 
@@ -449,7 +454,16 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
             DestroySelf();
         };
 
-        Script.Get<TimeManager>().AddNewTimer(3, fadeOutBlock, destroyBlock, 2);
+
+        TimeManager timeManager = Script.Get<TimeManager>();
+        
+        // Allow time for showdown animation
+        timeManager.AddNewTimer(2, null, () => {
+            // Then fade and destroy object
+            timeManager.AddNewTimer(3, fadeOutBlock, destroyBlock, 2);
+        });
+
+
     }
 
     // Pipeline Helpers
@@ -472,6 +486,8 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
     private void InterruptInProgressActions() {
         StopActionCoroutines();
 
+        unitStatusTooltip.DisplayPercentageBar(false);
+
         // Our current task no longer has an associated action
         if(currentGameTask != null && currentGameTask.actionItem != null) {
             currentGameTask.actionItem.AssociateTask(null);
@@ -492,21 +508,33 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
     }
 
     /*
+     * Animation States
+     * */
+
+    public enum AnimationState {
+        Idle, TurnLeft, TurnRight, Walk, WalkTurnRight, WalkTurnLeft, PerformCoreAction, Pickup, Die
+    }
+
+    protected abstract void AnimateState(AnimationState state, float fate = 1.0f);
+
+
+    /*
      * Task Coroutines
      * */
-        
-    // TODO: Combine Animate() with begin and completion delegates
-    protected abstract void Animate();
 
-    protected virtual void BeginTaskActionDelegate() { }
-    protected virtual void CompleteTaskActionDelegate() { }
+    // TODO: Combine Animate() with begin and completion delegates
+
+    //protected virtual void BeginTaskActionDelegate() { }
+    //protected virtual void CompleteTaskActionDelegate() { }
 
     protected Coroutine performTaskCoroutine;
     protected IEnumerator PerformTaskAction(Action<bool> callBack) {
 
         float speed = SpeedForTask(currentMasterTask.actionType) * ResearchSingleton.sharedInstance.unitActionMultiplier;
 
-        BeginTaskActionDelegate();
+        //BeginTaskActionDelegate();
+
+        AnimateState(AnimationState.PerformCoreAction);
 
         while (true) {
 
@@ -518,18 +546,20 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
             if (currentGameTask.actionItem == null) {
                 callBack(false);
-                CompleteTaskActionDelegate();
+                AnimateState(AnimationState.Idle);
+                //CompleteTaskActionDelegate();
                 yield break;
             }
 
             float completion = currentGameTask.actionItem.performAction(currentGameTask, Time.deltaTime * speed, this);
             unitStatusTooltip?.percentageBar.SetPercent(completion);
 
-            Animate();
+            //Animate();
 
             if (completion >= 1) {
                 callBack(true);
-                CompleteTaskActionDelegate();
+                AnimateState(AnimationState.Idle);
+                //CompleteTaskActionDelegate();
                 yield break;
             }
 
@@ -537,8 +567,8 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         }     
     }
 
-    protected virtual void BeginWalkDelegate() { }
-    protected virtual void CompleteWalkDelegate() { }
+    //protected virtual void BeginWalkDelegate() { }
+    //protected virtual void CompleteWalkDelegate() { }
 
     protected Coroutine FollowPathCoroutine;    
     protected IEnumerator FollowPath(Path path, System.Action<bool> callBack) {
@@ -576,6 +606,8 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
             if(totalTurnDistance == 1) {
                 turningToStart = false;
             } else {
+                AnimateState(totalTurnDistance > 0 ? AnimationState.TurnLeft : AnimationState.TurnRight);
+
                 totalTurnDistance = Mathf.Clamp01(totalTurnDistance + ((Time.deltaTime * turnSpeed) / degreesToTurn * 180));
                 transform.rotation = Quaternion.Slerp(originalRotation, targetRotation, totalTurnDistance);
             }
@@ -594,8 +626,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         }
 
         while(followingPath) {
-
-            BeginWalkDelegate();
+            //BeginWalkDelegate();
 
             // Don't move on pause
             if(playerBehaviour.gamePaused) {
@@ -639,6 +670,8 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
                 float localSpeed = Mathf.Pow(currentTerrain.walkSpeedMultiplier, movementPenaltyMultiplier) * unitSpeed;
 
+                AnimateState(AnimationState.Walk, Mathf.InverseLerp(10, 100, localSpeed));
+
                 float height = Script.Get<MapsManager>().GetHeightAt(lookPointMapCoordinate) * lookPointMapCoordinate.mapContainer.transform.lossyScale.y; //  + (0.5f * transform.localScale.y)
                 Vector3 lookPoint = new Vector3(lookPointWorldPos.vector3.x, height, lookPointWorldPos.vector3.z);
 
@@ -658,7 +691,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
             yield return null;
         }
 
-        CompleteWalkDelegate();
+        //CompleteWalkDelegate();
 
         bool lookingAtTarget = true;
 
@@ -684,6 +717,8 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
                 callBack(true);
                 yield break; // Stop Coroutine
             } else {
+                AnimateState(totalTurnDistance > 0 ? AnimationState.TurnLeft : AnimationState.TurnRight);
+
                 totalTurnDistance = Mathf.Clamp01(totalTurnDistance + ((Time.deltaTime * turnSpeed) / degreesToTurn * 180));
                 transform.rotation = Quaternion.Slerp(originalRotation, targetRotation, totalTurnDistance);
             }
@@ -721,7 +756,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
     float attackActionPercent = 0;
     const float attackModifierSpeed = 1f;
-    const float attackRangedModifierSpeed = 10f;
+    const float attackRangedModifierSpeed = 1f;
 
     public override float performAction(GameTask task, float rate, Unit unit) {
         switch(task.action) {

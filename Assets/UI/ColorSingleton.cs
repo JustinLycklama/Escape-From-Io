@@ -29,8 +29,8 @@ public class ColorSingleton {
     private static Color SOFT_ORANGE = new Color32(202, 134, 34, 255);
     private static Color SOFT_BLACK = new Color32(35, 43, 43, 255);
 
-    private static Color BRIGHT_YELLOLW = new Color32(252, 236, 3, 255);
-    public static Color DARK_ORANGE = new Color32(219, 132, 2, 255);
+    private static Color BRIGHT_YELLOLW = new Color32(235, 225, 87, 255);
+    public static Color DARK_ORANGE = new Color32(199, 119, 0, 255);
 
     private static Color AQUA = new Color(0, 1, 1);
 

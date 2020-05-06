@@ -12,11 +12,11 @@ public class AdvancedMiner : Unit {
 
     }
 
-    protected override void Animate() {
-        foreach(MoenenGames.VoxelRobot.Weapon weapon in weaponSet) {
-            weapon.Animate();
-        }
-    }
+    //protected override void Animate() {
+    //    foreach(MoenenGames.VoxelRobot.Weapon weapon in weaponSet) {
+    //        weapon.Animate();
+    //    }
+    //}
 
     public override float SpeedForTask(MasterGameTask.ActionType actionType) {
         switch(actionType) {
@@ -29,5 +29,9 @@ public class AdvancedMiner : Unit {
         }
 
         return 0.1f;
+    }
+
+    protected override void AnimateState(AnimationState state, float rate = 1.0f) {
+        //throw new System.NotImplementedException();
     }
 }

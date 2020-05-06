@@ -4,41 +4,11 @@ using UnityEngine;
 
 public class EarthElementalController : AnimationController
 {
-    // Start is called before the first frame update
-    void Start() {
-        //animator.speed = 1.5f;
-    }
+    [SerializeField]
+    private GameObject mainInstanceMesh;
 
-    // Base Animation Actions
-    public override void Idle() {
-        animator.speed = 1.0f;
-        animator.Play("idle");
-    }
-
-    public override void Walk() {
-        animator.speed = 1.5f;
-        animator.Play("walk");
-    }
-
-    public override void Hit() {
-        animator.Play("hit");
-    }
-
-
-    public override void Atk01() {
-        animator.speed = 1.0f;
-        animator.Play("attack01");
-    }
-
-    public override void Die() {
-        animator.Play("die");
-    }
-
-    // Extra Actions
-    public void Atk02() {
-        animator.speed = 1.0f;
-        animator.Play("attack02");
-    }
+    [SerializeField]
+    private GameObject instanceDieMesh;
 
     public void Activate() {
         animator.Play("activate");
@@ -48,7 +18,83 @@ public class EarthElementalController : AnimationController
         animator.Play("idleActivate");
     }
 
-    public void Run() {
-        animator.Play("run");
+    public void DieEvent() {
+
+        instanceDieMesh.SetActive(true);
+
+        GameObject dieMesh = (GameObject)Instantiate(instanceDieMesh, transform.position, transform.rotation);
+        dieMesh.transform.localScale = transform.localScale;
+        dieMesh.transform.parent = transform.parent.parent;
+        dieMesh.SetActive(true);
+
+        mainInstanceMesh.SetActive(false);
+
+        dieMesh.transform.localScale = new Vector3(1, 1, 1);
+
+        //if(Demo.curmat == 0) {
+        //    GameObject G = (GameObject)Instantiate(Demo.DieAnim[0], Istancer.position, Istancer.rotation);
+        //    Demo.instanceDieMesh = G;
+        //    Demo.instanceDieMesh.transform.parent = Demo.T;
+        //    G.SetActive(true);
+        //} else {
+        //    GameObject G = (GameObject)Instantiate(Demo.DieAnim[1], Istancer.position, Istancer.rotation);
+        //    Demo.instanceDieMesh = G;
+        //    G.SetActive(true);
+        //}
+        //EartElemental.SetActive(false);
+    }
+
+    public override string StringConstantForState(Unit.AnimationState state) {
+        switch(state) {
+            case Unit.AnimationState.Idle:
+                return "idle";
+            case Unit.AnimationState.TurnLeft:
+                break;
+            case Unit.AnimationState.TurnRight:
+                break;
+            case Unit.AnimationState.Walk:
+                return "walk";
+            case Unit.AnimationState.WalkTurnRight:
+                break;
+            case Unit.AnimationState.WalkTurnLeft:
+                break;
+            case Unit.AnimationState.PerformCoreAction:
+                if(NoiseGenerator.random.Next(0, 2) == 0) {
+                    return "attack01";
+                } else {
+                    return "attack02";
+                }
+            case Unit.AnimationState.Pickup:
+                break;
+            case Unit.AnimationState.Die:
+                return "die";
+        }
+
+        return "";
+    }
+
+    public override float AnimationModifierForState(Unit.AnimationState state) {
+        switch(state) {
+            case Unit.AnimationState.Idle:
+                break;
+            case Unit.AnimationState.TurnLeft:
+                break;
+            case Unit.AnimationState.TurnRight:
+                break;
+            case Unit.AnimationState.Walk:
+                return 1.5f;
+            case Unit.AnimationState.WalkTurnRight:
+                break;
+            case Unit.AnimationState.WalkTurnLeft:
+                break;
+            case Unit.AnimationState.PerformCoreAction:
+                break;
+            case Unit.AnimationState.Pickup:
+                break;
+            case Unit.AnimationState.Die:
+                break;
+        }
+
+        return 1.0f;
     }
 }

@@ -18,14 +18,10 @@ public class Golem : AttackingUnit
     public override float SpeedForTask(MasterGameTask.ActionType actionType) {
         switch(actionType) {
             case MasterGameTask.ActionType.Attack:
-                return 1.5f;
+                return 1f;
         }
 
         return 0f;
-    }
-
-    protected override void Animate() {
-        //throw new System.NotImplementedException();
     }
 
     public void Start() {
@@ -46,29 +42,33 @@ public class Golem : AttackingUnit
      * Action Delegates
      * */
 
-    protected override void BeginWalkDelegate() {
-        base.BeginWalkDelegate();
+    //protected override void BeginWalkDelegate() {
+    //    base.BeginWalkDelegate();
 
-        animationController.Walk();
-    }
+    //    animationController.Walk();
+    //}
 
-    protected override void CompleteWalkDelegate() {
-        base.CompleteWalkDelegate();
+    //protected override void CompleteWalkDelegate() {
+    //    base.CompleteWalkDelegate();
 
-        animationController.Idle();
-    }
+    //    animationController.Idle();
+    //}
 
-    protected override void BeginTaskActionDelegate() {
-        base.BeginTaskActionDelegate();
+    //protected override void BeginTaskActionDelegate() {
+    //    base.BeginTaskActionDelegate();
 
-        if(NoiseGenerator.random.Next(0, 2) == 0) {
-            animationController.Atk01();
-        } else {
-            animationController.Atk02();
-        }
-    }
+    //    if(NoiseGenerator.random.Next(0, 2) == 0) {
+    //        animationController.Atk01();
+    //    } else {
+    //        animationController.Atk02();
+    //    }
+    //}
 
-    protected override void CompleteTaskActionDelegate() {
+    //protected override void CompleteTaskActionDelegate() {
 
+    //}
+
+    protected override void AnimateState(AnimationState state, float rate = 1.0f) {
+        animationController.AnimateState(state, rate);
     }
 }

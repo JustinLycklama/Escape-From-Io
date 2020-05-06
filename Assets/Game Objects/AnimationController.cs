@@ -7,13 +7,23 @@ public abstract class AnimationController : MonoBehaviour
     [SerializeField]
     protected Animator animator;
 
-    public abstract void Idle();
+    Unit.AnimationState currentState = Unit.AnimationState.Die; // Don't start at idle, so idle can be set
 
-    public abstract void Walk();
+    private void Start() {
+        AnimateState(Unit.AnimationState.Idle);
+    }
 
-    public abstract void Hit();
+    public virtual void AnimateState(Unit.AnimationState state, float rate = 1.0f) {
+        animator.speed = AnimationModifierForState(state) * rate;
 
-    public abstract void Atk01();
+        if (currentState == state) {
+            return;
+        }
 
-    public abstract void Die();
+        animator.Play(StringConstantForState(state));
+        currentState = state;
+    }
+
+    public abstract string StringConstantForState(Unit.AnimationState state);
+    public abstract float AnimationModifierForState(Unit.AnimationState state);
 }

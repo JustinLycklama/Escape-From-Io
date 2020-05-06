@@ -12,56 +12,52 @@ public class Defender : AttackingUnit
 
     protected override GameTask.ActionType attackType => GameTask.ActionType.AttackRanged;
 
+    [SerializeField]
+    private MechAnimationController mechAnimationController;
+
+    protected override void AnimateState(AnimationState state, float rate) {
+        mechAnimationController.AnimateState(state, rate);
+    }
+
     public override float SpeedForTask(MasterGameTask.ActionType actionType) {
         switch(actionType) {
             case MasterGameTask.ActionType.Attack:
-                return 1.5f;
+                return 2f;
         }
 
         return 0f;
     }
 
-    protected override void Animate() {
-        //throw new System.NotImplementedException();
-    }
+    //protected override void UnitCustomInit() {
+    //    base.UnitCustomInit();
 
-    protected override void UnitCustomInit() {
-        base.UnitCustomInit();
+    //    //animationController.Idle();
+    //}
 
-        //animationController.Idle();
-    }
+    ///*
+    // * Action Delegates
+    // * */
 
-    /*
-     * Action Delegates
-     * */
+    //protected override void BeginWalkDelegate() {
+    //    base.BeginWalkDelegate();
 
-    protected override void BeginWalkDelegate() {
-        base.BeginWalkDelegate();
+    //    //animationController.Walk();
+    //}
 
-        //animationController.Walk();
-    }
+    //protected override void CompleteWalkDelegate() {
+    //    base.CompleteWalkDelegate();
 
-    protected override void CompleteWalkDelegate() {
-        base.CompleteWalkDelegate();
+    //    //animationController.Idle();
+    //}
 
-        //animationController.Idle();
-    }
+    //protected override void BeginTaskActionDelegate() {
+    //    base.BeginTaskActionDelegate();
 
-    protected override void BeginTaskActionDelegate() {
-        base.BeginTaskActionDelegate();
-
-        //if(NoiseGenerator.random.Next(0, 2) == 0) {
-        //    animationController.Atk01();
-        //} else {
-        //    animationController.Atk01();
-            //animationController.Atk02();
-        //}
-    }
-
-    protected override void CompleteTaskActionDelegate() {
-        base.CompleteTaskActionDelegate();
-
-
-
-    }
+    //    //if(NoiseGenerator.random.Next(0, 2) == 0) {
+    //    //    animationController.Atk01();
+    //    //} else {
+    //    //    animationController.Atk01();
+    //        //animationController.Atk02();
+    //    //}
+    //}
 }

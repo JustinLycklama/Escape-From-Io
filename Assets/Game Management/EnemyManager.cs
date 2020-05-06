@@ -97,11 +97,15 @@ public class EnemyManager : MonoBehaviour, TimeUpdateDelegate
             return;
         }
 
-        Unit anyUnit = units[0];
+        int i = NoiseGenerator.random.Next(units.Length);
+        Unit anyUnit = units[i];       
+
         var targetPosition = new WorldPosition(anyUnit.transform.position);
 
         GameObject golemObject = Blueprint.Golem.ConstructAt(targetPosition);
         Golem golem = golemObject.GetComponent<Golem>();
+
+        golem.transform.SetParent(unitManager.transform, true);
 
         GameTask buildingTask = new GameTask("", targetPosition, GameTask.ActionType.Build, golem.buildableComponent);
 

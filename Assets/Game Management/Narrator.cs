@@ -92,7 +92,9 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
                 coordinatesForSpawnCoordinate[2][1],
                 coordinatesForSpawnCoordinate[1][2],
                 coordinatesForSpawnCoordinate[0][2],
-                coordinatesForSpawnCoordinate[2][0]                
+                coordinatesForSpawnCoordinate[2][0],
+                coordinatesForSpawnCoordinate[0][0],
+                coordinatesForSpawnCoordinate[2][2]
             };
 
             int i = 0;
@@ -201,7 +203,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
                 unit.Initialize();
             }
 
-            yield return new WaitForSeconds(0.75f);
+            //yield return new WaitForSeconds(0.75f);
         }
 
         playerBehaviour.SetInternalPause(false);

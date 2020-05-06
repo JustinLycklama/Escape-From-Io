@@ -23,8 +23,8 @@ public class AdvancedBuilder : Unit {
         return 0.1f;
     }
 
-    protected override void Animate() {
-
+    protected override void AnimateState(AnimationState state, float rate = 1.0f) {
+        //throw new System.NotImplementedException();
     }
 }
 

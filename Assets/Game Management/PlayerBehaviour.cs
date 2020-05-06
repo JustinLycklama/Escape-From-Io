@@ -22,7 +22,7 @@ public class PlayerBehaviour : MonoBehaviour {
 
 
     private float maxCameraZoomPosition = 350;
-    private float minCameraZoomPosition = 210;
+    private float minCameraZoomPosition = 150;
 
     //private float cameraRotateSpeed = 100;
 

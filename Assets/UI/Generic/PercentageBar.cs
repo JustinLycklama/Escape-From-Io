@@ -18,9 +18,9 @@ public class PercentageBar : MonoBehaviour/*, TrackingUIInterface*/ {
     private string unitOfMeasure;
 
     // TrackingUIInterface
-    public Transform toFollow { get; set; }
-    public CanvasGroup canvas;
-    public CanvasGroup canvasGroup { get => canvas; }
+    //public Transform toFollow { get; set; }
+    //public CanvasGroup canvas;
+    //public CanvasGroup canvasGroup { get => canvas; }
 
     private void Awake() {
         SetDisplayType(DisplayType.Bar);

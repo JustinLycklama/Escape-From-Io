@@ -118,7 +118,7 @@ Transform:
   m_GameObject: {fileID: 8473070085985799609}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 20, y: 20, z: 20}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 6020125750341505383}
   - {fileID: 5006368064528993153}
@@ -231,6 +231,16 @@ PrefabInstance:
       propertyPath: m_Name
       value: EarthElemental
       objectReference: {fileID: 0}
+    - target: {fileID: 3682682851683285489, guid: ab935d5b399f80e4686c72e1e81fd00b,
+        type: 3}
+      propertyPath: mainInstanceMesh
+      value: 
+      objectReference: {fileID: 4316675527946166932}
+    - target: {fileID: 3682682851683285489, guid: ab935d5b399f80e4686c72e1e81fd00b,
+        type: 3}
+      propertyPath: instanceDieMesh
+      value: 
+      objectReference: {fileID: 148490, guid: 2e91cb820faf53f46ac7c2d98258d475, type: 3}
     - target: {fileID: 400130, guid: ab935d5b399f80e4686c72e1e81fd00b, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -277,15 +287,27 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 400130, guid: ab935d5b399f80e4686c72e1e81fd00b, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.85
+      value: 17
       objectReference: {fileID: 0}
     - target: {fileID: 400130, guid: ab935d5b399f80e4686c72e1e81fd00b, type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.85
+      value: 17
       objectReference: {fileID: 0}
     - target: {fileID: 400130, guid: ab935d5b399f80e4686c72e1e81fd00b, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.85
+      value: 17
+      objectReference: {fileID: 0}
+    - target: {fileID: 189772, guid: ab935d5b399f80e4686c72e1e81fd00b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 127654, guid: ab935d5b399f80e4686c72e1e81fd00b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 104544, guid: ab935d5b399f80e4686c72e1e81fd00b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: ab935d5b399f80e4686c72e1e81fd00b, type: 3}
@@ -307,6 +329,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e76369e7e49801749b27295699da9e11, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &4316675527946166932 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 189772, guid: ab935d5b399f80e4686c72e1e81fd00b,
+    type: 3}
+  m_PrefabInstance: {fileID: 4316675527946045400}
+  m_PrefabAsset: {fileID: 0}
 --- !u!137 &4316675527932553902 stripped
 SkinnedMeshRenderer:
   m_CorrespondingSourceObject: {fileID: 13774198, guid: ab935d5b399f80e4686c72e1e81fd00b,

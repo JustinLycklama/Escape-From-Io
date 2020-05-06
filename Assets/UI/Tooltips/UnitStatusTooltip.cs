@@ -22,7 +22,8 @@ public class UnitStatusTooltip : MonoBehaviour, TrackingUIInterface { //TaskStat
     //private RectTransform rectTransform;
 
     // TrackingUIInterface
-    public Transform toFollow { get; set; }
+    public Transform followPosition { get; set; }
+    public Transform followingObject { get; set; }
 
     [SerializeField]
     private CanvasGroup canvas;

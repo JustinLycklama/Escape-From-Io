@@ -6,8 +6,15 @@ public class Mover : Unit {
     public override int duration => 280;
     public override MasterGameTask.ActionType primaryActionType => MasterGameTask.ActionType.Move;
 
+    [SerializeField]
+    private MechAnimationController mechAnimationController;
+
     protected override void UnitCustomInit() {
 
+    }
+
+    protected override void AnimateState(AnimationState state, float rate) {
+        mechAnimationController.AnimateState(state, rate);
     }
 
     public override float SpeedForTask(MasterGameTask.ActionType actionType) {
@@ -21,9 +28,5 @@ public class Mover : Unit {
         }
 
         return 0.1f;
-    }
-
-    protected override void Animate() {
-
     }
 }

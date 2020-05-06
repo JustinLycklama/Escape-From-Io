@@ -8,14 +8,21 @@ public class Miner : Unit {
 
     public MoenenGames.VoxelRobot.Weapon[] weaponSet;
 
+    [SerializeField]
+    private MechAnimationController mechAnimationController;
+
     protected override void UnitCustomInit() {
 
     }
 
-    protected override void Animate() {
-        foreach(MoenenGames.VoxelRobot.Weapon weapon in weaponSet) {
-            weapon.Animate();
-        }
+    //protected override void Animate() {
+    //    foreach(MoenenGames.VoxelRobot.Weapon weapon in weaponSet) {
+    //        weapon.Animate();
+    //    }
+    //}
+
+    protected override void AnimateState(AnimationState state, float rate) {
+        mechAnimationController.AnimateState(state, rate);
     }
 
     public override float SpeedForTask(MasterGameTask.ActionType actionType) {
@@ -30,4 +37,5 @@ public class Miner : Unit {
 
         return 0.1f;
     }
+
 }

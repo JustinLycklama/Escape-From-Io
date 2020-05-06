@@ -691,7 +691,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                 Material material = fogOfWarMap[x, y].GetComponent<MeshRenderer>().material;
                 SetMaterialTransparent(material);
                 Color color = material.color;
-                color.a = 0.15f;
+                color.a = 1.0f;
 
                 material.color = color;
 

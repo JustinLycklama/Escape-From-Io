@@ -4,29 +4,85 @@ using UnityEngine;
 
 public class MechAnimationController : AnimationController {
 
-    // Base Animation Actions
-    public override void Idle() {
-        animator.speed = 1.0f;
-        animator.Play("idle1");
+    [SerializeField]
+    private Animator weaponAnimator;
+
+    [SerializeField]
+    private ParticleSystem[] particles = new ParticleSystem[0];
+
+    private Unit.AnimationState weaponState = Unit.AnimationState.Idle;
+    private float lastShotTime = 0;
+
+    public override void AnimateState(Unit.AnimationState state, float rate = 1.0f) {
+        base.AnimateState(state, rate);
+
+        //if (weaponState == state) {
+        //    return;
+        //}
+
+        if(weaponAnimator != null && state == Unit.AnimationState.PerformCoreAction) {
+            //if (Time.fixedTime > lastShotTime + 5) {
+            weaponAnimator.speed = 1.0f;
+            weaponAnimator.Play("Shoot_Single");
+                print("Shoot!");
+
+                //lastShotTime = Time.fixedTime;
+
+                for(int i = 0; i < particles.Length; i++) {
+                    particles[i].Play();
+                }
+        }
+            //}
+
+        //weaponState = state;
     }
 
-    public override void Walk() {
-        animator.speed = 1.5f;
-        animator.Play("walk");
+    public override string StringConstantForState(Unit.AnimationState state) {
+        switch(state) {
+            case Unit.AnimationState.Idle:
+                return "Idle";
+            case Unit.AnimationState.TurnLeft:
+                return "Turn_45deg_L";
+            case Unit.AnimationState.TurnRight:
+                return "Turn_45deg_R";
+            case Unit.AnimationState.Walk:
+                return "Walk";
+            case Unit.AnimationState.WalkTurnRight:
+                break;
+            case Unit.AnimationState.WalkTurnLeft:
+                break;
+            case Unit.AnimationState.PerformCoreAction:
+                return "Idle";
+            case Unit.AnimationState.Pickup:
+                break;
+            case Unit.AnimationState.Die:
+                return "Death";
+        }
+
+        return "";
     }
 
-    public override void Hit() {
-        animator.Play("hit1");
-    }
+    public override float AnimationModifierForState(Unit.AnimationState state) {
+        switch(state) {
+            case Unit.AnimationState.Idle:
+                break;
+            case Unit.AnimationState.TurnLeft:
+            case Unit.AnimationState.TurnRight:
+                return 2.5f;
+            case Unit.AnimationState.Walk:
+                return 5.0f;
+            case Unit.AnimationState.WalkTurnRight:
+                break;
+            case Unit.AnimationState.WalkTurnLeft:
+                break;
+            case Unit.AnimationState.PerformCoreAction:
+                return 10.0f;
+            case Unit.AnimationState.Pickup:
+                break;
+            case Unit.AnimationState.Die:
+                break;
+        }
 
-    public override void Atk01() {
-        animator.speed = 1.0f;
-        animator.Play("stand attack left");
+        return 1.0f;
     }
-
-    public override void Die() {
-        animator.Play("death fall back");
-    }
-
-    // Extra Actions
 }

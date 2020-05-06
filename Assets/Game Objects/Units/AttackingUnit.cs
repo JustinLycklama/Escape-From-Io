@@ -11,13 +11,17 @@ public abstract class AttackingUnit : Unit
 
     protected abstract GameTask.ActionType attackType { get; }
 
+    private Coroutine followTargetCoroutine;
+    private Coroutine resetSearchCoroutine;
+    private Coroutine resetTaskStateDelayed;
+
     protected override void UnitCustomInit() {
 
         // Update our path to target constantly
-        StartCoroutine(FollowAttackTarget());
+        followTargetCoroutine = StartCoroutine(FollowAttackTarget());
 
         // Occasionally update our search target
-        StartCoroutine(ResetSearch());
+        resetSearchCoroutine = StartCoroutine(ResetSearch());
 
         narrator = Script.Get<Narrator>();
         unitManager = Script.Get<UnitManager>();
@@ -68,8 +72,26 @@ public abstract class AttackingUnit : Unit
     GameTask searchTask;
     GameTask targetTask;
 
+    protected override void Shutdown() {
+        base.Shutdown();
+
+        followingUnit = null;
+
+        if(followTargetCoroutine != null) {
+            StopCoroutine(followTargetCoroutine);
+        }
+
+        if(resetSearchCoroutine != null) {
+            StopCoroutine(resetSearchCoroutine);
+        }    
+
+        if(resetTaskStateDelayed != null) {
+            StopCoroutine(resetTaskStateDelayed);
+        }
+    }
+
     protected override void ResetTaskState() {
-        StartCoroutine(ResetTaskStateDelayed());
+        resetTaskStateDelayed = StartCoroutine(ResetTaskStateDelayed());
     }
 
     IEnumerator ResetTaskStateDelayed() {
@@ -80,7 +102,7 @@ public abstract class AttackingUnit : Unit
 
 
     private void ResetTaskStateWithNewFollow() {
-        if (this == null) {
+        if (this.gameObject == null) {
             return;
         }
 

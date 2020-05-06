@@ -105,7 +105,8 @@ public abstract class Building : ActionableItem, Selectable {
 
         costPanel = UIManager.Blueprint.CostPanel.Instantiate() as CostPanelTooltip;
         costPanel.transform.SetParent(Script.UIOverlayPanel.GetFromObject<RectTransform>());
-        costPanel.toFollow = statusLocation;
+        costPanel.followPosition = statusLocation;
+        costPanel.followingObject = transform;
 
         costPanel.SetCost(cost);
         costPanel.SetTallyMode(true);

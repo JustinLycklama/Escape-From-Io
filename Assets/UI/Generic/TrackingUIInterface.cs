@@ -3,22 +3,23 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public interface TrackingUIInterface {
-    Transform toFollow { get; set; }
+    Transform followPosition { get; set; }
+    Transform followingObject { get; set; }
     CanvasGroup canvasGroup { get; }
 }
 
 public static class TrackingUIInterfaceExtension {
 
-    private static float outerCircleRadius = 400;
-    private static float innerCircleRadius = 150;
+    private static float outerCircleRadius = 100;
+    private static float innerCircleRadius = 50;
 
     public static void UpdateTrackingPosition(this TrackingUIInterface trackingInterface) {
-        if(trackingInterface.toFollow == null) {
+        if(trackingInterface.followPosition == null) {
             return;
         }
 
         // Translate the world position into viewport space.
-        Vector3 screenPoint = Camera.main.WorldToScreenPoint(trackingInterface.toFollow.position);
+        Vector3 screenPoint = Camera.main.WorldToScreenPoint(trackingInterface.followPosition.position);
 
         // Used to scale up UI
         float sizeOnScreen = 10;
@@ -56,8 +57,6 @@ public static class TrackingUIInterfaceExtension {
 
         behaviour.transform.localScale = Vector3.one * (1.0f / magnitude);
 
-        Vector2 interfacePoint = new Vector2(screenPoint.x, screenPoint.y);
-
         // Canvas local coordinates are relative to its center, 
         // so we offset by half. We also discard the depth.
         screenPoint -= 0.5f * Vector3.one;
@@ -66,8 +65,18 @@ public static class TrackingUIInterfaceExtension {
         behaviour.transform.position = screenPoint;
 
         // Fade with distance to center
-        Vector2 screenCenter = new Vector2(Screen.width / 2.0f, Screen.height / 2.0f);
+        Vector2 viewPoint;
 
+
+        Vector3 followObjectPoint = Camera.main.WorldToScreenPoint(trackingInterface.followingObject.position);
+        Vector2 interfacePoint = new Vector2(followObjectPoint.x, followObjectPoint.y);
+
+        if(Application.isMobilePlatform) {
+            viewPoint = new Vector2(Screen.width / 2.0f, Screen.height / 2.0f);
+        } else {
+            viewPoint = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
+        }
+            
         if (forceHideInterface) {
             if(trackingInterface.canvasGroup.alpha > 0) {
                 trackingInterface.canvasGroup.alpha = 0;
@@ -76,7 +85,7 @@ public static class TrackingUIInterfaceExtension {
             return;
         }
 
-        float distanceFromCenter = Vector2.Distance(screenCenter, interfacePoint);
+        float distanceFromCenter = Vector2.Distance(viewPoint, interfacePoint);
 
         if(distanceFromCenter > outerCircleRadius) {
             trackingInterface.canvasGroup.alpha = 0;

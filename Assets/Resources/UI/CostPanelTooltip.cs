@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class CostPanelTooltip : CostPanel, TrackingUIInterface {
-    public Transform toFollow { get; set; }
+    public Transform followPosition { get; set; }
+    public Transform followingObject { get; set; }
     public CanvasGroup canvas;
     public CanvasGroup canvasGroup { get => canvas; }
 
