@@ -28,7 +28,7 @@ public class UserAction {
 
     public ConstructionBlueprint[] blueprintList;
 
-    public bool shouldPopUIAfterAction = true;
+    public bool shouldDeselectAfterAction = true;
 }
 
 public class ActionItemCell : Clickable, HotkeyDelegate {
@@ -44,6 +44,8 @@ public class ActionItemCell : Clickable, HotkeyDelegate {
     //[SerializeField]
     //private GameObject unitIconContainer;
 
+    private PlayerBehaviour playerBehaviour;
+
     private UserAction action;
     private KeyCode? hotkey;
 
@@ -53,6 +55,11 @@ public class ActionItemCell : Clickable, HotkeyDelegate {
         base.Awake();
 
         actionItemTitle.text = defaultText;
+        playerBehaviour = Script.Get<PlayerBehaviour>();
+    }
+
+    private void OnDestroy() {
+        playerBehaviour?.RemoveHotKeyDelegate(this);
     }
 
     public void SetAction(UserAction action) {
@@ -86,7 +93,6 @@ public class ActionItemCell : Clickable, HotkeyDelegate {
     }
 
     public void SetHotKey(KeyCode hotkey) {
-        PlayerBehaviour playerBehaviour = Script.Get<PlayerBehaviour>();
 
         if(this.hotkey != null) {
             playerBehaviour.RemoveHotKeyDelegate(this);
@@ -135,8 +141,8 @@ public class ActionItemCell : Clickable, HotkeyDelegate {
 
         // We either have an action to perform, or a list of blueprints to display
         if(action.performAction != null) {
-            if(action.shouldPopUIAfterAction) {
-                Script.Get<UIManager>().PopToRoot();
+            if(action.shouldDeselectAfterAction) {
+                Script.Get<SelectionManager>().RemoveSelection();
             }
 
             action.performAction(action.layoutCoordinate);          

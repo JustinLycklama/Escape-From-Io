@@ -173,7 +173,7 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
 
             action.description = "Cancel";
             action.layoutCoordinate = coordinate;
-            action.shouldPopUIAfterAction = false;
+            action.shouldDeselectAfterAction = false;
 
             action.performAction = (LayoutCoordinate layoutCoordinate) => {
                 associatedTasksCoordinateMap[layoutCoordinate.x, layoutCoordinate.y].CancelTask();

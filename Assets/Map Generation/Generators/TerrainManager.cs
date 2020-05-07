@@ -214,7 +214,7 @@ public class TerrainManager : MonoBehaviour {
                     unitAction.associatedActionTypes = new List<MasterGameTask.ActionType> { MasterGameTask.ActionType.Move, MasterGameTask.ActionType.Build };
 
                     unitAction.blueprintList = new ConstructionBlueprint[] {
-                        Unit.Blueprint.Miner, Unit.Blueprint.Mover, Unit.Blueprint.Builder,
+                        Unit.Blueprint.Miner, Unit.Blueprint.Mover, Unit.Blueprint.Builder, Unit.Blueprint.Defender,
                         Unit.Blueprint.AdvancedMiner, Unit.Blueprint.AdvancedMover, Unit.Blueprint.AdvancedBuilder
                     };
 
@@ -227,7 +227,7 @@ public class TerrainManager : MonoBehaviour {
                     buildingAction.tutorialIdentifier = UserAction.TutorialIdentifier.BuildBuilding;
                     buildingAction.associatedActionTypes = new List<MasterGameTask.ActionType> { MasterGameTask.ActionType.Move, MasterGameTask.ActionType.Build };
 
-                    buildingAction.blueprintList = new ConstructionBlueprint[] { Building.Blueprint.Tower, Building.Blueprint.SensorTower, Building.Blueprint.AdvUnitBuilding }; //Building.Blueprint.Refinery,
+                    buildingAction.blueprintList = new ConstructionBlueprint[] { Building.Blueprint.Tower, Building.Blueprint.SensorTower, Building.Blueprint.AdvUnitBuilding, Building.Blueprint.DefenseTower }; //Building.Blueprint.Refinery,
 
                     actionList.Add(buildingAction);
 

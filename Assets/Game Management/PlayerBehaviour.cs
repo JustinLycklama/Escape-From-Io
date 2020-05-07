@@ -3,6 +3,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Linq;
+using System.Collections;
 
 public interface PlayerBehaviourUpdateDelegate {
     void PauseStateUpdated(bool paused);
@@ -17,14 +18,22 @@ public class PlayerBehaviour : MonoBehaviour {
 
     private int UI_Layer;
 
-    private float maxCameraMovementSpeed = 200;
-    private float minCameraMovementSpeed = 100;
+    private const float maxCameraMovementSpeed = 200;
+    private const float minCameraMovementSpeed = 100;
 
+    private const float maxCameraAutoPanSpeed = 3;
+    private const float minCameraAutoPanSpeed = 0.25f;
 
-    private float maxCameraZoomPosition = 350;
-    private float minCameraZoomPosition = 150;
+    private const float maxCameraAutoPanDistance = 200;
+    private const float minCameraAutoPanDistance = 5;
 
-    //private float cameraRotateSpeed = 100;
+    [SerializeField]
+    private AnimationCurve cameraAutoPanCurve;
+
+    private const float maxCameraZoomPosition = 350;
+    private const float minCameraZoomPosition = 150;
+
+    private const float cameraRotateSpeed = 100;
 
     SettingsPanel settingsPanel;
     GraphicRaycaster graphicRaycaster;
@@ -41,12 +50,6 @@ public class PlayerBehaviour : MonoBehaviour {
     private Vector2? residualDirection = null;
 
     private float panFriction = 1.0f;
-
-    [SerializeField]
-    private float zoomOutMin = 1;
-    [SerializeField]
-    private float zoomOutMax = 8;
-
 
     private float minJoystickThreshold = 0.2f;
 
@@ -108,7 +111,7 @@ public class PlayerBehaviour : MonoBehaviour {
         UI_Layer = LayerMask.NameToLayer("UI");
 
         hotkeysEnabled = !Application.isMobilePlatform;
-        joystickEnabled = true; //Application.isMobilePlatform;
+        joystickEnabled = Application.isMobilePlatform;
 
         panContolPanel.SetJoystickEnabled(joystickEnabled);
 
@@ -140,7 +143,7 @@ public class PlayerBehaviour : MonoBehaviour {
                 mouseIsDownOverUI = false;
             }
 
-            print("MouseStill Over UI");
+            //print("MouseStill Over UI");
 
             return;
         }
@@ -148,14 +151,19 @@ public class PlayerBehaviour : MonoBehaviour {
         // We want as little as possible to be done here, first check to see if mouse down or up, and we are not over UI
         if(mouseDown && IsOverUI(Input.mousePosition)) {
             mouseIsDownOverUI = true;
-            print("MouseDown Over UI");
+            //print("MouseDown Over UI");
             return;
         }
 
         bool cameraAction = false;
 
-        cameraAction |= CameraTouchPanInput();
+        //cameraAction |= CameraTouchPanInput();
         cameraAction |= CameraZoom();
+
+        // If we are manually moving the camera while the auto pan is happening, stop auto pan
+        if(cameraAction && panCameraRoutine != null) {
+            StopCoroutine(panCameraRoutine);
+        }
 
         if(!cameraAction && mouseUp) {
 
@@ -181,8 +189,9 @@ public class PlayerBehaviour : MonoBehaviour {
     }
 
     private void HotkeyInput() {
-        if(!hotkeysEnabled || !Input.anyKey) {
-            return;
+        if(!hotkeysEnabled /*|| !Input.anyKey*/) {
+            print("SkipHotkeys");
+            return;            
         }
 
         if(Input.GetKeyUp(KeyCode.Escape)) {
@@ -193,8 +202,8 @@ public class PlayerBehaviour : MonoBehaviour {
             SetPlayerPauseState(!gamePaused);
         }
 
-        foreach(KeyCode vKey in System.Enum.GetValues(typeof(KeyCode))) {
-            if(Input.GetKeyUp(vKey) && hotKeyListMap.ContainsKey(vKey)) {
+        foreach(KeyCode vKey in hotKeyListMap.Keys) {
+            if (Input.GetKeyUp(vKey)) {
                 foreach(HotkeyDelegate keyDelegate in hotKeyListMap[vKey]) {
                     keyDelegate.HotKeyPressed(vKey);
                 }
@@ -202,41 +211,53 @@ public class PlayerBehaviour : MonoBehaviour {
         }
     }
 
+    List<Vector3> panVectors = new List<Vector3>();
     private void StaticPanInput() {
 
+        panVectors.Clear();
+
         if (joystickEnabled) {
+            print("Joystick enabled");
+
+
             float vertical = panContolPanel.joystick.Vertical;
             if(Mathf.Abs(vertical) > minJoystickThreshold) {
                 int sign = vertical > 0 ? 1 : -1;
                 float verticalMovement = Mathf.Lerp(minCameraMovementSpeed, maxCameraMovementSpeed, Mathf.Abs(vertical));
-                Camera.main.transform.Translate(sign * cameraForward * verticalMovement * Time.deltaTime, Space.World);
+                //Camera.main.transform.Translate(sign * cameraForward * verticalMovement * Time.deltaTime, Space.World);
+                panVectors.Add(sign * cameraForward * verticalMovement);
             }
 
             float horizontal = panContolPanel.joystick.Horizontal;
             if(Mathf.Abs(horizontal) > minJoystickThreshold) {
                 int sign = horizontal > 0 ? 1 : -1;
                 float horizontalMovement = Mathf.Lerp(minCameraMovementSpeed, maxCameraMovementSpeed, Mathf.Abs(horizontal));
-                Camera.main.transform.Translate(sign * cameraRight * horizontalMovement * Time.deltaTime, Space.World);
+                //Camera.main.transform.Translate(sign * cameraRight * horizontalMovement * Time.deltaTime, Space.World);
+                panVectors.Add(sign * cameraRight * horizontalMovement);
             }
+        } else {            
+            if(Input.GetKey(KeyCode.D)) {
+                panVectors.Add(cameraRight * maxCameraMovementSpeed);
+            }
+            if(Input.GetKey(KeyCode.A)) {
+                panVectors.Add(-cameraRight * maxCameraMovementSpeed);
+            }
+            if(Input.GetKey(KeyCode.S)) {
+                panVectors.Add(-cameraForward * maxCameraMovementSpeed);
+            }
+            if(Input.GetKey(KeyCode.W)) {
+                panVectors.Add(cameraForward * maxCameraMovementSpeed);
+            }
+        }
 
-            //return;
-        } 
+        // If we are manually panning while auto pan is on, stop auto pan
+        if(panVectors.Count > 0 && panCameraRoutine != null) {
+            StopCoroutine(panCameraRoutine);
+        }
 
-        // Camera Move
-        if(Input.GetKey(KeyCode.D)) {
-            Pan(cameraRight * maxCameraMovementSpeed);
+        foreach(Vector3 vector in panVectors) {
+            PanByVector(vector);
         }
-        if(Input.GetKey(KeyCode.A)) {
-            Pan(-cameraRight * maxCameraMovementSpeed);        
-        }
-        if(Input.GetKey(KeyCode.S)) {
-            Pan(-cameraForward * maxCameraMovementSpeed);        
-        }
-        if(Input.GetKey(KeyCode.W)) {
-            Pan(cameraForward * maxCameraMovementSpeed);
-        }
-        
-
 
         //// Camera Rotate
         //if(Input.GetKey(KeyCode.RightArrow)) {
@@ -325,7 +346,7 @@ public class PlayerBehaviour : MonoBehaviour {
         //Camera.main.transform.Translate(-finalDirection * maxCameraMovementSpeed * Time.deltaTime, Space.World);
 
         print("Pan: " + residualDirection);
-        Pan(-finalDirection * maxCameraMovementSpeed);
+        PanByVector(-finalDirection * maxCameraMovementSpeed);
 
         // Apply pan friction
         residualDirection -= residualDirection * 0.05f;
@@ -363,13 +384,20 @@ public class PlayerBehaviour : MonoBehaviour {
     }
 
     // Enact motion on camera
-    private void Pan(Vector3 vector) {
+    private void PanByVector(Vector3 vector) {
 
         Vector3 translation = vector * Time.deltaTime;
         Vector3 cameraAnticipatedLocation = Camera.main.transform.position + vector;
 
         if (IsPositionWithinBoundary(cameraAnticipatedLocation)) {
             Camera.main.transform.Translate(translation, Space.World);
+        }
+    }
+
+    private void PanToLocation(Vector3 position) {
+
+        if(IsPositionWithinBoundary(position)) {
+            Camera.main.transform.position = position;
         }
     }
 
@@ -453,7 +481,7 @@ public class PlayerBehaviour : MonoBehaviour {
      * Public
      * */
 
-    public void JumpCameraToTask(MasterGameTask masterGameTask) {
+    public void PanCameraToTask(MasterGameTask masterGameTask) {
         GameTask firsGameTaskWithActionItem = null;
 
         foreach(GameTask gameTask in masterGameTask.childGameTasks) {
@@ -464,21 +492,69 @@ public class PlayerBehaviour : MonoBehaviour {
         }
 
         if(firsGameTaskWithActionItem != null) {
-            JumpCameraToPosition(firsGameTaskWithActionItem.target.vector3);
+            PanCameraToPosition(firsGameTaskWithActionItem.target.vector3);
         }
     }
 
-    public void JumpCameraToUnit(Unit unit) {
+    public void PanCameraToUnit(Unit unit) {
         if(unit != null) {
-            JumpCameraToPosition(unit.transform.position);
+            PanCameraToPosition(unit.transform.position);
         }
     }
 
-    public void JumpCameraToPosition(Vector3 position) {
-        Camera.main.transform.position = position + new Vector3(0, 250, -250);
+    public void InitCameraPosition(Vector3 position) {
+        Camera.main.transform.position = new Vector3(0, (minCameraZoomPosition + maxCameraZoomPosition) / 2.0f, 0);
 
-        //Camera.main.transform.position = position + new Vector3(0, 250, 250);
-        //Camera.main.transform.Rotate(new Vector3(0, 180, 0), Space.World);
+        PanCameraToPosition(position, false);
+    }
+
+    public void PanCameraToPosition(Vector3 position, bool animated = true) {
+
+        float percentageOfMaxHeight = Mathf.InverseLerp(minCameraZoomPosition, maxCameraZoomPosition, Camera.main.transform.position.y);
+        // Adjust camera ange here
+        float CameraPullBack = -Mathf.Lerp(minCameraZoomPosition, maxCameraZoomPosition, percentageOfMaxHeight);
+
+        Vector3 newCameraPosition = position + new Vector3(0, Camera.main.transform.position.y, CameraPullBack);
+
+        if (animated) {
+            if (panCameraRoutine != null) {
+                StopCoroutine(panCameraRoutine);            
+            }
+
+            panCameraRoutine = StartCoroutine(PanCameraAnimated(newCameraPosition));
+        } else {
+            PanToLocation(newCameraPosition);
+        }
+
+    }
+
+    private Coroutine panCameraRoutine;
+    private IEnumerator PanCameraAnimated(Vector3 targetPosition) {
+
+        Vector3 originalPosition = Camera.main.transform.position;
+        float distance = Vector3.Distance(originalPosition, targetPosition);
+
+        Vector3 direction = targetPosition - originalPosition;
+        float totalDistance = 0;
+
+        while(distance > minCameraAutoPanDistance) {
+            float percentOfDistance = Mathf.InverseLerp(minCameraAutoPanDistance, maxCameraAutoPanDistance, distance);
+            float cameraSpeed = Mathf.Lerp(minCameraAutoPanSpeed, maxCameraAutoPanSpeed, percentOfDistance);
+
+            print("Speed " + cameraSpeed);
+
+            totalDistance += cameraSpeed * Time.deltaTime;
+
+            if (totalDistance > 1) {
+                totalDistance = 1;
+            }
+
+            PanToLocation(Vector3.Lerp(originalPosition, targetPosition, totalDistance));
+
+            yield return null;
+
+            distance = Vector3.Distance(Camera.main.transform.position, targetPosition);
+        }
     }
 
     /*

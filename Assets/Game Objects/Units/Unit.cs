@@ -265,7 +265,11 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         remainingHealth = unitHealth;
 
         // Shutdown
-        Action durationCompletionBlock = () => {           
+        Action durationCompletionBlock = () => {
+            if(this == null || gameObject == null || !gameObject.activeSelf) {
+                return;
+            }
+
             Script.Get<NotificationPanel>().AddNotification(new NotificationItem("Bot has run out of power", NotificationType.UnitBattery, transform, primaryActionType));
 
             Shutdown();
@@ -472,6 +476,8 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         currentMasterTask = null;
         currentGameTask = null;
 
+        AnimateState(AnimationState.Idle);
+
         gameTasksQueue.Clear();
 
         NotifyAllTaskStatus();
@@ -579,11 +585,11 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         Vector3 startPoint = path.lookPoints[0].worldPosition.vector3;
         startPoint.y = transform.position.y;
 
-        Quaternion originalRotation = transform.rotation;
-        Quaternion targetRotation = Quaternion.LookRotation(startPoint - transform.position);
+        Quaternion originalRotation = Quaternion.identity;
+        Quaternion targetRotation = Quaternion.identity;
 
         float totalTurnDistance = 0;
-        float degreesToTurn = (targetRotation.eulerAngles - originalRotation.eulerAngles).magnitude;
+        float degreesToTurn = 0;
 
         currentPercentOfJournery = 0;
         float basePercentOfJourney = 0;
@@ -593,6 +599,15 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         // If we are not moving at all (with some grey area) then don't bother turning to it.
         if (Vector3.Distance(startPoint, transform.position) < 5) {
             turningToStart = false;
+        } else {
+            originalRotation = transform.rotation;
+            targetRotation = Quaternion.LookRotation(startPoint - transform.position);
+
+            totalTurnDistance = 0;
+            degreesToTurn = (targetRotation.eulerAngles - originalRotation.eulerAngles).magnitude;
+
+            currentPercentOfJournery = 0;
+            basePercentOfJourney = 0;
         }
 
         while(turningToStart) {
@@ -603,7 +618,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
                 continue;
             }
 
-            if(totalTurnDistance == 1) {
+            if(totalTurnDistance >= 1) {
                 turningToStart = false;
             } else {
                 AnimateState(totalTurnDistance > 0 ? AnimationState.TurnLeft : AnimationState.TurnRight);
@@ -806,7 +821,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         return 0;
     }
 
-    private void TakeDamage(int damage) {
+    public void TakeDamage(int damage) {
         if (remainingHealth <= 0) {
             // We have already died
             return;
@@ -843,7 +858,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
         if (buildableComponent != null) {
             foreach(Building.MeshBuildingTier meshTier in buildableComponent.meshTiers) {
-                foreach(MeshRenderer renderer in meshTier.meshRenderes) {
+                foreach(Renderer renderer in meshTier.meshRenderes) {
                     renderer.material.SetColor("_Color", color);
                 }
             }
@@ -940,6 +955,13 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
             new BlueprintCost(new Dictionary<MineralType, int>(){
                 { MineralType.Copper, 3 },
                 { MineralType.Silver, 2 }                
+            }));
+
+
+        public static Blueprint Defender = new Blueprint("Defender", typeof(Defender), "BuilderIcon", "Defender", "A basic Defending Automaton.",
+            new BlueprintCost(new Dictionary<MineralType, int>(){
+                { MineralType.Copper, 1 },
+                { MineralType.Silver, 3 }
             }));
 
         public static Blueprint AdvancedMiner = new Blueprint("AdvancedMiner", typeof(AdvancedMiner), "MinerIcon", "Adv. Miner", "Faster at Mining than the basic.", 

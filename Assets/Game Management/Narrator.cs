@@ -5,8 +5,6 @@ using UnityEngine;
 
 public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListener {
 
-    public AudioSource audioSource;
-
     PathfindingGrid grid;
     MapGenerator mapGenerator;
     MapsManager mapsManager;
@@ -118,7 +116,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
             building.ProceedToCompleteBuilding();
             Script.Get<BuildingManager>().AddBuildingAtLocation(building, mapGenerator.spawnCoordinate);
 
-            Script.Get<PlayerBehaviour>().JumpCameraToPosition(spawnWorldPosition.vector3);
+            Script.Get<PlayerBehaviour>().InitCameraPosition(spawnWorldPosition.vector3);
         });
 
         initActionChunks.Enqueue(() => {
@@ -213,7 +211,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
     IEnumerator StartMusic() {
         yield return new WaitForSeconds(2.5f);
 
-        audioSource.Play();
+        Script.Get<AudioManager>().PlayAudio(AudioManager.Type.Background1);       
     }
 
     IEnumerator CheckForNoRobots() {
@@ -249,6 +247,6 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
      * */
 
     public void WillSwitchScene() {
-        audioSource.Stop();
+        //audioSource.Stop();
     }
 }

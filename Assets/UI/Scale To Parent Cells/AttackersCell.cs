@@ -3,10 +3,18 @@ using System.Collections.Generic;
 using UnityEngine;
 using UCharts;
 using System.Linq;
+using UnityEngine.UI;
 
 public class AttackersCell : MonoBehaviour, UnitManagerDelegate, GameButtonDelegate, TimeUpdateDelegate {
+
+    [SerializeField]
+    private Text unitsCountText;
+
     [SerializeField]
     private List<PercentageBar> defenderPercentBars;
+
+    [SerializeField]
+    private Text enemyCountText;
 
     [SerializeField]
     private HalfPieChart frequencyChart;
@@ -57,7 +65,13 @@ public class AttackersCell : MonoBehaviour, UnitManagerDelegate, GameButtonDeleg
      * */
 
     public void NotifyUpdateUnitList(Unit[] unitList, MasterGameTask.ActionType actionType) {
-        soonToExpireUnits = unitList.OrderBy(unit => unit.remainingDuration).Take(defenderPercentBars.Count).ToList();
+
+        Unit[] playerUnits = unitList.Where(u => { return u.factionType == Unit.FactionType.Player; }).ToArray();
+        soonToExpireUnits = playerUnits.OrderBy(unit => unit.remainingDuration).Take(defenderPercentBars.Count).ToList();
+        unitsCountText.text = playerUnits.Length.ToString();
+
+        Unit[] enemyUnits = unitList.Where(u => { return u.factionType == Unit.FactionType.Enemy; }).ToArray();
+        enemyCountText.text = enemyUnits.Length.ToString();
     }
 
     /*

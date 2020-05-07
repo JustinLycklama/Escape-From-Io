@@ -183,13 +183,15 @@ public abstract class Building : ActionableItem, Selectable {
             return;
         }
 
-        var uniform = (meshTiers[0].meshRenderes[0] is SkinnedMeshRenderer);
+        SetShaders(uniformTransparencyShader);
 
-        if (uniform) {
-            SetShaders(uniformTransparencyShader);
-        } else {
-            SetShaders(transparencyShader);
-        }        
+        //var uniform = (meshTiers[0].meshRenderes[0] is SkinnedMeshRenderer);
+
+        //if (uniform) {
+        //    SetShaders(uniformTransparencyShader);
+        //} else {
+        //    SetShaders(transparencyShader);
+        //}        
     }
 
     public void SetTintableShaders() {
@@ -274,7 +276,7 @@ public abstract class Building : ActionableItem, Selectable {
         switch(task.action) {
             case GameTask.ActionType.Build:
                 float previousPercent = percentComplete;
-                percentComplete += rate * constructionModifierSpeed * layoutTerrainModifier;
+                percentComplete += rate * constructionModifierSpeed; // * layoutTerrainModifier;
 
                 if(percentComplete > 1) {
                     percentComplete = 1;
@@ -362,10 +364,17 @@ public abstract class Building : ActionableItem, Selectable {
                 { MineralType.Gold, 1 }
             }));
 
+        public static Blueprint DefenseTower = new Blueprint("DefenderTower", typeof(DefenderTower), "TowerIcon", "Defender Turret", "Attacks Enemies",
+            new BlueprintCost(new Dictionary<MineralType, int>(){
+                        //{ MineralType.Copper, 1 },
+                        { MineralType.Silver, 4 },
+                        { MineralType.Gold, 1 }
+            }));
+
         public static Blueprint AdvUnitBuilding = new Blueprint("AdvUnitBuilding", typeof(AdvUnitBuilding), "TowerIcon", "Adv. Units Building", "Advanced units can be built adjacent to this.", 
             new BlueprintCost(new Dictionary<MineralType, int>(){
-                { MineralType.Silver, 5 },                                
-                { MineralType.Azure, 2 }
+                { MineralType.Silver, 5 }                              
+                //{ MineralType.Azure, 2 }
             }));
 
         public static Blueprint Refinery = new Blueprint("Refinery", typeof(Refinery), "MinerIcon", "Refinery", "",

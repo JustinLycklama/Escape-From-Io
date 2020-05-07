@@ -28,12 +28,6 @@ public class Defender : AttackingUnit
         return 0f;
     }
 
-    //protected override void UnitCustomInit() {
-    //    base.UnitCustomInit();
-
-    //    //animationController.Idle();
-    //}
-
     ///*
     // * Action Delegates
     // * */

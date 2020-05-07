@@ -32,7 +32,6 @@ public class UIManager : MonoBehaviour, SelectionManagerDelegate
         }
     }
 
-
     public NavigationPanel Push(Blueprint blueprint) {
         NavigationPanel panel = blueprint.Instantiate() as NavigationPanel;
         panel.PushOntoStackFrom(currentTopPanel);

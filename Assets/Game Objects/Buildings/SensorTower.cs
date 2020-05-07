@@ -2,15 +2,14 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SensorTower : Building, TerrainUpdateDelegate {
+public class SensorTower : RotatingBuilding, TerrainUpdateDelegate {
+
     public override string title => "Azure Sensor";
     public override float constructionModifierSpeed => 0.20f;
 
     private KeyValuePair<int, int>? closestLunarRock = null;
 
     Vector2 buildingPos;
-
-    public GameObject towerObject;
 
     protected override void Start() {
         base.Start();
@@ -72,7 +71,9 @@ public class SensorTower : Building, TerrainUpdateDelegate {
 
 
     private void ResetTower() {
-        StartCoroutine(AttemptToRotate(new Vector3(0, 0, 0), 2));
+        //Quaternion endRotation = Quaternion.Euler(angles);
+
+        //StartCoroutine(AttemptToRotate(new Vector3(0, 0, 0), 2));
     }
 
     private void RotateToNearestAzure() {
@@ -98,32 +99,9 @@ public class SensorTower : Building, TerrainUpdateDelegate {
                 yRotation = -90;
             }
         }
-        
-        StartCoroutine(AttemptToRotate(new Vector3(0, yRotation, 90), 2));
-    }
 
-    IEnumerator AttemptToRotate(Vector3 angles, float duration) {
-        yield return new WaitUntil(delegate {
-            return rotating == false;
-        });
-
-        rotating = true;
-        StartCoroutine(Rotate(angles, duration));
-    }
-
-    bool rotating;
-    private IEnumerator Rotate(Vector3 angles, float duration) {
-
-        Quaternion startRotation = towerObject.transform.rotation;
-        Quaternion endRotation = Quaternion.Euler(angles);
-
-        for(float t = 0; t < duration; t += Time.deltaTime) {
-            towerObject.transform.rotation = Quaternion.Lerp(startRotation, endRotation, t / duration);
-            yield return null;
-        }
-
-        towerObject.transform.rotation = endRotation;
-        rotating = false;
+        Quaternion targetRotation = Quaternion.Euler(new Vector3(0, yRotation, 0));
+        AttemptToRotate(targetRotation);
     }
 
     /*

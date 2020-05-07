@@ -9,7 +9,7 @@ public abstract class AnimationController : MonoBehaviour
 
     Unit.AnimationState currentState = Unit.AnimationState.Die; // Don't start at idle, so idle can be set
 
-    private void Start() {
+    protected virtual void Start() {
         AnimateState(Unit.AnimationState.Idle);
     }
 

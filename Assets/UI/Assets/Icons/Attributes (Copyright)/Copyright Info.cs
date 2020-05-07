@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class CopyrightInfo : MonoBehaviour
 {
+    // Cool shaders
+    // https://thedevelopers.tech/ultimate_10_plus_shaders.html
+
+
     // Icons made by<a href="https://www.flaticon.com/authors/freepik" title="Freepik"> Freepik</a> from<a href="https://www.flaticon.com/" title="Flaticon"> www.flaticon.com</a>
     // drill.png
 

@@ -18,8 +18,10 @@ public class EnemyManager : MonoBehaviour, TimeUpdateDelegate
     private const int minTimeBeforeEnemy = 0;
     private const int decisionFrequency = 10;
 
-    private const float minEnemyPerMinute = 0.5f;
-    private const float maxEnemyPerMinute = 6;
+    private const float maxUnitToFrequencyRatio = 40.0f; // at 40 units, frequency will be 1
+
+    private const float minEnemyPerMinute = 0.2f;
+    private const float maxEnemyPerMinute = 4;
 
     private const float minEnemyStrength = 1;
     private const float maxEnemyStrength = 10;
@@ -149,7 +151,7 @@ public class EnemyManager : MonoBehaviour, TimeUpdateDelegate
       * */
 
     public void SecondUpdated() {
-        frequency = Mathf.Clamp(unitManager.GetAllPlayerUnits().Length / 20.0f, 0.1f, 1);
+        frequency = Mathf.Clamp(unitManager.GetAllPlayerUnits().Length / maxUnitToFrequencyRatio, 0.1f, 1);
         evolution = Mathf.Clamp01(evolution + evoPerSecond);
 
         if (timeManager.currentDiscreteTime.TotalSeconds > minTimeBeforeEnemy &&

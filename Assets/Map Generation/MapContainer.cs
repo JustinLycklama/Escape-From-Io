@@ -453,9 +453,6 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                 LayoutCoordinate coordinate = new LayoutCoordinate(constants.layoutMapWidth - 1, (y - 1), neighbours.leftMap);
 
                 TerrainType terrain = neighbours.leftMap.map.GetTerrainAt(coordinate);
-
-                print("Left Terrain Type: " + terrain.type);
-
                 textureIndexList[y * mapWidthWithOverhang] = texGen.RegionTypeTextureIndex(terrain);
             }
 
@@ -710,7 +707,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                 };
 
                 Action boxEndAndAnimation = () => {
-                    Script.Get<TimeManager>().AddNewTimer(1, durationUpdateBlock, durationCompletionBlock, 2);
+                    Script.Get<TimeManager>().AddNewTimer(1, durationUpdateBlock, durationCompletionBlock, 3); // was 2
                     createBoxEnded();
                 };
 

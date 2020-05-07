@@ -42,7 +42,7 @@
 			fixed4 c = tex2D(_MainTex, IN.uv_MainTex) * _Color;
 			o.Albedo = c.rgb;
 					
-			o.Alpha = percentComplete;			
+			o.Alpha = clamp(percentComplete, 0.2, 1);			
 		}
 		ENDCG
 	

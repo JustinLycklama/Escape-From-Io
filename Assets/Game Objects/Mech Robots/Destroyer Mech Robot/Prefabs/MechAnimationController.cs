@@ -13,28 +13,27 @@ public class MechAnimationController : AnimationController {
     private Unit.AnimationState weaponState = Unit.AnimationState.Idle;
     private float lastShotTime = 0;
 
+    private AudioManager audioManager;
+
+    protected override void Start() {
+        base.Start();
+        audioManager = Script.Get<AudioManager>();
+    }
+
     public override void AnimateState(Unit.AnimationState state, float rate = 1.0f) {
-        base.AnimateState(state, rate);
-
-        //if (weaponState == state) {
-        //    return;
-        //}
-
-        if(weaponAnimator != null && state == Unit.AnimationState.PerformCoreAction) {
-            //if (Time.fixedTime > lastShotTime + 5) {
+        if(weaponAnimator != null && state == Unit.AnimationState.PerformCoreAction &&
+            weaponAnimator.GetCurrentAnimatorStateInfo(0).IsName(StringConstantForState(state))) {
             weaponAnimator.speed = 1.0f;
             weaponAnimator.Play("Shoot_Single");
-                print("Shoot!");
 
-                //lastShotTime = Time.fixedTime;
+            audioManager.PlayAudio(AudioManager.Type.DefenderShot, transform.position);
 
-                for(int i = 0; i < particles.Length; i++) {
-                    particles[i].Play();
-                }
+            for(int i = 0; i < particles.Length; i++) {
+                particles[i].Play();
+            }
+        } else {
+            base.AnimateState(state, rate);
         }
-            //}
-
-        //weaponState = state;
     }
 
     public override string StringConstantForState(Unit.AnimationState state) {

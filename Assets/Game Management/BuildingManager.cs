@@ -253,9 +253,11 @@ public class BuildingManager : MonoBehaviour {
                             if(subX < 0 || subY < 0 || subX >= width || subY >= height) {
                                 return;
                             }
-
-                            statusMap[subX, subY] |= BuildingEffectStatus.Light;
-                            effectedIndicies.Add(new KeyValuePair<int, int>(subX, subY));
+                            
+                            if ((statusMap[subX, subY] & BuildingEffectStatus.Light) == 0) {
+                                statusMap[subX, subY] |= BuildingEffectStatus.Light;
+                                effectedIndicies.Add(new KeyValuePair<int, int>(subX, subY));
+                            }                            
                         }
                         );
                 }           
@@ -340,8 +342,10 @@ public class BuildingManager : MonoBehaviour {
                 int clampedX = Mathf.Clamp(x, 0, maxX);
                 int clampedY = Mathf.Clamp(y, 0, maxY);
 
-                statusMap[clampedX, clampedY] |= status;
-                effectedIndicies.Add(new KeyValuePair<int, int>(clampedX, clampedY));
+                if((statusMap[subX, subY] & BuildingEffectStatus.Light) == 0) {
+                    statusMap[subX, subY] |= BuildingEffectStatus.Light;
+                    effectedIndicies.Add(new KeyValuePair<int, int>(subX, subY));
+                }
             }
         }
 
@@ -390,6 +394,9 @@ public class BuildingManager : MonoBehaviour {
     }
 
     public void NotifyStatusEffectUpdate(List<KeyValuePair<int, int>> effectedIndicies) {
+
+        print("Effected Indicies: " + effectedIndicies.Count);
+
         foreach(StatusEffectUpdateDelegate updateDelegate in statusEffectUpdateDelegateList) {
                 updateDelegate.StatusEffectMapUpdated(statusMap, effectedIndicies);
         }

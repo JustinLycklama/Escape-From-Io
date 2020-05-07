@@ -30,7 +30,10 @@ public class SelectionManager : MonoBehaviour, DeletionWatch {
     List<SelectionManagerDelegate> delegateList = new List<SelectionManagerDelegate>();
 
     private void UpdateSelection(Selection newSelection) {
-        RemoveSelection();
+        if(currentSelection != null) {
+            currentSelection.Deselect(this);
+        }
+
         Script.Get<UIManager>().PopToRoot();
 
         currentSelection = newSelection;
@@ -62,11 +65,7 @@ public class SelectionManager : MonoBehaviour, DeletionWatch {
     }
 
     public void RemoveSelection() {
-        if (currentSelection == null) {
-            return;
-        }
-
-        currentSelection.Deselect(this);      
+        UpdateSelection(null);      
     }
 
     public void RegisterForNotifications(SelectionManagerDelegate notificationDelegate) {

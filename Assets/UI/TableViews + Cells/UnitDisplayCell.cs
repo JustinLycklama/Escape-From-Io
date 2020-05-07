@@ -58,7 +58,7 @@ public class UnitDisplayCell : MonoBehaviour, TaskStatusUpdateDelegate, GameButt
      * */
 
     public void ButtonDidClick(GameButton button) {
-        Script.Get<PlayerBehaviour>().JumpCameraToUnit(unit);
+        Script.Get<PlayerBehaviour>().PanCameraToUnit(unit);
         //Script.Get<SelectionManager>().SelectSelectable(unit);
     }
 }

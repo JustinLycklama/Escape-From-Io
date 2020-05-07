@@ -44,7 +44,7 @@ public class TaskDisplayCell : MonoBehaviour, GameButtonDelegate, MasterTaskUpda
         if (button == linkToTaskButton) {
             PlayerBehaviour playerBehaviour = Script.Get<PlayerBehaviour>();
 
-            playerBehaviour.JumpCameraToTask(task);
+            playerBehaviour.PanCameraToTask(task);
         } else if (button == cancelTaskButton) {
             task.CancelTask();
 

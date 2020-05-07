@@ -56,6 +56,6 @@ public class NotificationItemCell : MonoBehaviour, GameButtonDelegate {
 
     public void ButtonDidClick(GameButton button) {
         if(notificationItem != null && notificationItem.notificationPosition != null)
-            Script.Get<PlayerBehaviour>().JumpCameraToPosition(notificationItem.notificationPosition.position);
+            Script.Get<PlayerBehaviour>().PanCameraToPosition(notificationItem.notificationPosition.position);
     }
 }

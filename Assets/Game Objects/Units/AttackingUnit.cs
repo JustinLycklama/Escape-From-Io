@@ -15,6 +15,8 @@ public abstract class AttackingUnit : Unit
     private Coroutine resetSearchCoroutine;
     private Coroutine resetTaskStateDelayed;
 
+    private const float updateFollowTargetDelay = 0.30f;
+
     protected override void UnitCustomInit() {
 
         // Update our path to target constantly
@@ -157,8 +159,6 @@ public abstract class AttackingUnit : Unit
         }        
     }
 
-    float updateFollowTargetDelay = 0.30f;
-
     IEnumerator FollowAttackTarget() {
 
         while(true) {
@@ -185,7 +185,7 @@ public abstract class AttackingUnit : Unit
                         StopActionCoroutines();
                         FollowPathCoroutine = StartCoroutine(FollowPath(path, completedPath));
                     } else {
-                        currentPathRequest.Cancel();
+                        //currentPathRequest.Cancel();
                         //ResetTaskState();
                     }
                 });
