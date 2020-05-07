@@ -6,7 +6,7 @@ using UnityEngine.UI;
 
 
 
-public class UIManager : MonoBehaviour, SelectionManagerDelegate
+public class UIManager : MonoBehaviour, SelectionManagerDelegate, HotkeyDelegate
 {
     public class Blueprint : PrefabBlueprint {
         private static string folder = "UI/";
@@ -26,6 +26,9 @@ public class UIManager : MonoBehaviour, SelectionManagerDelegate
     public NavigationPanel currentTopPanel;
 
     private SelectionManager selectionManager;
+    private PlayerBehaviour playerBehaviour;
+
+
     private bool isRoot {
         get {
             return currentTopPanel.backTrace == null;
@@ -47,16 +50,29 @@ public class UIManager : MonoBehaviour, SelectionManagerDelegate
     }
 
     public void Pop() {
+        if (currentTopPanel.backTrace == null) {
+            return;
+        }
+
         currentTopPanel = currentTopPanel.PopFromStack();
+
+        // if we are at the root now, deselect everything
+        if (currentTopPanel.backTrace == null) {
+            selectionManager.RemoveSelection(false);
+        }
     }
 
     private void Start() {
         selectionManager = Script.Get<SelectionManager>();
         selectionManager.RegisterForNotifications(this);
+
+        playerBehaviour = Script.Get<PlayerBehaviour>();
+        playerBehaviour.AddHotKeyDelegate(KeyCode.Q, this);
     }
 
     private void OnDestroy() {
         selectionManager.EndNotifications(this);
+        playerBehaviour.RemoveHotKeyDelegate(this);
     }
 
     /*
@@ -68,6 +84,14 @@ public class UIManager : MonoBehaviour, SelectionManagerDelegate
             var currentSelectionPanel = Push(Blueprint.CurrentSelectionPanel) as CurrentSelectionPanel;
             currentSelectionPanel.NotifyUpdateSelection(selection);
         }        
+    }
+
+    /*
+     * HotkeyDelegate Interface
+     * */
+
+    public void HotKeyPressed(KeyCode key) {
+        Pop();
     }
 
     //public void SetSelection(Selection selection) {

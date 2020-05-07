@@ -109,6 +109,7 @@ public abstract class Building : ActionableItem, Selectable {
         costPanel.followingObject = transform;
 
         costPanel.SetCost(cost);
+        costPanel.SetTitle(title);
         costPanel.SetTallyMode(true);
     }
 

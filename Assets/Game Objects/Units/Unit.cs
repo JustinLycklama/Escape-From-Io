@@ -424,9 +424,12 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
         transform.SetParent(null);
 
-        Destroy(unitStatusTooltip.gameObject);
-        unitStatusTooltip = null;
-
+        // unitStatusTooltip created only on Initialize Robot
+        if(unitStatusTooltip != null) {
+            Destroy(unitStatusTooltip.gameObject);
+            unitStatusTooltip = null;
+        }
+        
         Destroy(gameObject);
     }
 

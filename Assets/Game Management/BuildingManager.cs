@@ -342,9 +342,9 @@ public class BuildingManager : MonoBehaviour {
                 int clampedX = Mathf.Clamp(x, 0, maxX);
                 int clampedY = Mathf.Clamp(y, 0, maxY);
 
-                if((statusMap[subX, subY] & BuildingEffectStatus.Light) == 0) {
-                    statusMap[subX, subY] |= BuildingEffectStatus.Light;
-                    effectedIndicies.Add(new KeyValuePair<int, int>(subX, subY));
+                if((statusMap[clampedX, clampedY] & BuildingEffectStatus.Light) == 0) {
+                    statusMap[clampedX, clampedY] |= BuildingEffectStatus.Light;
+                    effectedIndicies.Add(new KeyValuePair<int, int>(clampedX, clampedY));
                 }
             }
         }

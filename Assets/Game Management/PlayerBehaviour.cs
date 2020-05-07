@@ -21,8 +21,8 @@ public class PlayerBehaviour : MonoBehaviour {
     private const float maxCameraMovementSpeed = 200;
     private const float minCameraMovementSpeed = 100;
 
-    private const float maxCameraAutoPanSpeed = 3;
-    private const float minCameraAutoPanSpeed = 0.25f;
+    private const float maxCameraAutoPanSpeed = 2;
+    private const float minCameraAutoPanSpeed = 0.5f;
 
     private const float maxCameraAutoPanDistance = 200;
     private const float minCameraAutoPanDistance = 5;
@@ -59,6 +59,11 @@ public class PlayerBehaviour : MonoBehaviour {
     [SerializeField]
     private PanControlsPanel panContolPanel;
 
+    [SerializeField]
+    private Image crosshairImage;
+
+    private bool isJoystickPanning = false;
+
     // Object selection
     private Ray lastRay;
     private RaycastHit? lastHit;
@@ -94,7 +99,7 @@ public class PlayerBehaviour : MonoBehaviour {
             newBoundary.width *= mapsManager.transform.localScale.x;
             newBoundary.height *= mapsManager.transform.localScale.z;
 
-            newBoundary.y -= 300;
+            newBoundary.y -= 200;
             newBoundary.height -= 200;
 
             _boundary = newBoundary;
@@ -111,7 +116,7 @@ public class PlayerBehaviour : MonoBehaviour {
         UI_Layer = LayerMask.NameToLayer("UI");
 
         hotkeysEnabled = !Application.isMobilePlatform;
-        joystickEnabled = Application.isMobilePlatform;
+        joystickEnabled = true; // Application.isMobilePlatform;
 
         panContolPanel.SetJoystickEnabled(joystickEnabled);
 
@@ -122,11 +127,36 @@ public class PlayerBehaviour : MonoBehaviour {
         cameraRight = Camera.main.transform.right;
         cameraRight.y = 0f;
         cameraRight.Normalize();
+
+        if (joystickEnabled) {
+            StartCoroutine(AutoClickWhileJoystick());
+        } else {
+            crosshairImage.gameObject.SetActive(false);
+        }
     }
 
-    //struct FrameInputData {
+    private IEnumerator AutoClickWhileJoystick() {
 
-    //}
+        Color fullColor = crosshairImage.color;
+
+        Color fadedColor = fullColor;
+        fadedColor.a = 0.25f;
+
+        while(true) {
+            if (!isJoystickPanning) {
+                crosshairImage.color = fadedColor;
+            }
+
+            yield return new WaitUntil(() => { return isJoystickPanning; });
+
+            crosshairImage.color = fullColor;
+
+            Ray ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
+            SelectGameObject(ray);
+
+            yield return new WaitForSeconds(0.25f);
+        }
+    }
 
     void Update() {
 
@@ -169,8 +199,8 @@ public class PlayerBehaviour : MonoBehaviour {
 
             //print("Mouse Button Up");
             //initialTouchPosition = null;
-
-            SelectGameObject();
+            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            SelectGameObject(ray);
         }
     }
 
@@ -219,7 +249,6 @@ public class PlayerBehaviour : MonoBehaviour {
         if (joystickEnabled) {
             print("Joystick enabled");
 
-
             float vertical = panContolPanel.joystick.Vertical;
             if(Mathf.Abs(vertical) > minJoystickThreshold) {
                 int sign = vertical > 0 ? 1 : -1;
@@ -235,6 +264,9 @@ public class PlayerBehaviour : MonoBehaviour {
                 //Camera.main.transform.Translate(sign * cameraRight * horizontalMovement * Time.deltaTime, Space.World);
                 panVectors.Add(sign * cameraRight * horizontalMovement);
             }
+
+            isJoystickPanning = panVectors.Count > 0;
+
         } else {            
             if(Input.GetKey(KeyCode.D)) {
                 panVectors.Add(cameraRight * maxCameraMovementSpeed);
@@ -360,7 +392,9 @@ public class PlayerBehaviour : MonoBehaviour {
 
         // Mouse Zoom
         // Don't care about wasZooming with mouse wheel, it will not interfere with object clicks
-        Zoom(Input.GetAxis("Mouse ScrollWheel") * 100f);
+        if (!IsOverUI(Input.mousePosition)) {
+            Zoom(Input.GetAxis("Mouse ScrollWheel") * 100f);
+        }        
 
         // Finger Pinch Zoom
         if(Input.touchCount == 2) {
@@ -426,14 +460,13 @@ public class PlayerBehaviour : MonoBehaviour {
         return false;
     }
 
-    private void SelectGameObject() {
+    private void SelectGameObject(Ray ray) {
         //Debug.DrawRay(lastRay.origin, lastRay.direction * 1000, Color.yellow);
 
         //if (lastHit != null) {
         //    Debug.DrawRay(lastHit.Value.point, Vector3.up * 1000, Color.red);
         //}       
 
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit hit;
 
         lastRay = ray;
