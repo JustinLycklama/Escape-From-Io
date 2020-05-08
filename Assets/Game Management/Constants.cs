@@ -42,6 +42,7 @@ public class Tag {
     public static Tag FadePanel { get { return new Tag("FadePanel"); } }
     public static Tag SettingsPanel { get { return new Tag("SettingsPanel"); } }
     public static Tag AudioManager { get { return new Tag("AudioManager"); } }
+    public static Tag ParticleDisplayer { get { return new Tag("ParticleDisplayer"); } }
 
     public GameObject GetGameObject() {
         GameObject cachedObject;
@@ -103,6 +104,7 @@ public class Script {
     public static Script MessageManager { get { return new Script(Tag.UIManager, typeof(MessageManager)); } }
     public static Script EnemyManager { get { return new Script(Tag.UnitManager, typeof(EnemyManager)); } }
     public static Script AudioManager { get { return new Script(Tag.AudioManager, typeof(AudioManager)); } }
+    public static Script ParticleDisplayer { get { return new Script(Tag.ParticleDisplayer, typeof(ParticlesDisplayer)); } }
 
     public static Script[] allScripts = new Script[] { Constants, PlayerBehaviour, MapsManager, UIManager, TaskQueue, MapGenerator, PathfindingGrid,
         SelectionManager, UnitManager, TextureGenerator, TerrainManager, ResourceManager, MiniMap, BuildingManager, TimeManager, NotificationManager, FadePanel,

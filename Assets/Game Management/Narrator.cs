@@ -10,6 +10,8 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
     MapsManager mapsManager;
     Constants constants;
     PlayerBehaviour playerBehaviour;
+    NotificationPanel notificationManager;
+
 
     public List<Unit> startingUnits;
     Queue<Action> initActionChunks;
@@ -32,6 +34,9 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
             mapsManager = Script.Get<MapsManager>();
             constants = GetComponent<Constants>();
             playerBehaviour = Script.Get<PlayerBehaviour>();
+            notificationManager = Script.Get<NotificationPanel>();
+
+            notificationManager.SetSupressNotifications(true);
 
             // Kickoff premade noise if it exists
             Tag.MapGenerator.GetGameObject().GetComponent<PremadeNoiseGenerator>();
@@ -128,8 +133,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
 
         SceneManagement.sharedInstance.RegisterForSceneUpdates(this);
 
-        //NotificationPanel notificationManager = Script.Get<NotificationPanel>();
-
+        
         //TimeManager timeManager = Script.Get<TimeManager>();
 
         //System.Action<int, float> createNotificationBlock = (seconds, percent) => {
@@ -205,6 +209,8 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
         }
 
         playerBehaviour.SetInternalPause(false);
+        notificationManager.SetSupressNotifications(false);
+
         StartCoroutine(StartMusic());
     }
 

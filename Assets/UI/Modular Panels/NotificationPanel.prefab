@@ -286,6 +286,7 @@ GameObject:
   - component: {fileID: 2693997977483350984}
   - component: {fileID: 2731135664793265619}
   - component: {fileID: 8518724023467850137}
+  - component: {fileID: 3099886633226643037}
   m_Layer: 2
   m_Name: NotificationPanel
   m_TagString: NotificationManager
@@ -335,21 +336,28 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tableView: {fileID: 3607226862331640887}
-  notificationIcons:
+  notificationVFX:
   - type: 0
-    icon: {fileID: 21300000, guid: a58381f9ce0ea834bb180b5057dd858a, type: 3}
+    vfxPrefab: {fileID: 6623342638307004807, guid: a0adf1c130d189b4393c12a4aea37596,
+      type: 3}
   - type: 1
-    icon: {fileID: 21300000, guid: a3868f3200b90d74fbc3d856db2a49c0, type: 3}
+    vfxPrefab: {fileID: 3226129101708083057, guid: d696c45b9db71f14083b300f9fbb8b28,
+      type: 3}
   - type: 2
-    icon: {fileID: 21300000, guid: ab3c02a5055908d4fbb1a93daf458b60, type: 3}
+    vfxPrefab: {fileID: 6623342638307004807, guid: a0adf1c130d189b4393c12a4aea37596,
+      type: 3}
   - type: 3
-    icon: {fileID: 21300000, guid: c034f193548df7d40ab57e5c783c356b, type: 3}
+    vfxPrefab: {fileID: 5971057564375876265, guid: ba1a4da4c8fbcfe44a38f7bc8ee36bb1,
+      type: 3}
   - type: 4
-    icon: {fileID: 21300000, guid: a3868f3200b90d74fbc3d856db2a49c0, type: 3}
+    vfxPrefab: {fileID: 7736199105928762257, guid: 3bf62692e26d1ad47813bfc8eced6194,
+      type: 3}
   - type: 5
-    icon: {fileID: 21300000, guid: 77d04e4ac3f3d614c8fcad8b17c823cd, type: 3}
+    vfxPrefab: {fileID: 8908916794864061128, guid: e9c19def9289bd54da161cc1d70c2383,
+      type: 3}
   - type: 6
-    icon: {fileID: 21300000, guid: 77d04e4ac3f3d614c8fcad8b17c823cd, type: 3}
+    vfxPrefab: {fileID: 8120988585695040443, guid: e2c1be541b1da5c4185beb06ab3232a8,
+      type: 3}
 --- !u!114 &8518724023467850137
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -375,6 +383,18 @@ MonoBehaviour:
   m_ChildControlHeight: 1
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
+--- !u!114 &3099886633226643037
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7810784535423709154}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3312d7739989d2b4e91e6319e9a96d76, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &7833701137864980384
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -518,10 +538,20 @@ PrefabInstance:
       propertyPath: m_SizeDelta.x
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6825649533900144782, guid: 11fc55547a3f2e7499cf54b6179ecd8d,
+        type: 3}
+      propertyPath: m_ChildAlignment
+      value: 4
+      objectReference: {fileID: 0}
     - target: {fileID: 6825649533738130944, guid: 11fc55547a3f2e7499cf54b6179ecd8d,
         type: 3}
       propertyPath: m_Layer
       value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6825649534099950472, guid: 11fc55547a3f2e7499cf54b6179ecd8d,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6825649532622395915, guid: 11fc55547a3f2e7499cf54b6179ecd8d,
         type: 3}
@@ -531,6 +561,11 @@ PrefabInstance:
     - target: {fileID: 6825649532622395915, guid: 11fc55547a3f2e7499cf54b6179ecd8d,
         type: 3}
       propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6825649534099950474, guid: 11fc55547a3f2e7499cf54b6179ecd8d,
+        type: 3}
+      propertyPath: m_Colors.m_NormalColor.a
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []

@@ -15,79 +15,117 @@ public class NotificationItem {
 
     public Transform notificationPosition;
 
+    public bool isNew;
+
     public NotificationItem(string text, NotificationType type, Transform notificationPosition, MasterGameTask.ActionType? relatedActionType = null) {
         this.text = text;
         this.type = type;
         this.relatedActionType = relatedActionType;
 
         this.notificationPosition = notificationPosition;
+
+        isNew = true;
     }
 }
 
 [Serializable]
-struct NotificationTypeIcon {
+struct NotificationTypeVFX {
     public NotificationType type;
-    public Sprite icon;
+    public GameObject vfxPrefab;
 }
 
 public class NotificationPanel : MonoBehaviour, TableViewDelegate {
 
     public static int unitDurationWarning = 30;
 
-    static int notificationDuration = 5;
-    static int fadeDuration = 2;    
+    private const float notificationDelay = 2f;
 
-    public TableView tableView;
-
-    List<NotificationItem> notificationItems = new List<NotificationItem>();
-    HashSet<NotificationItem> fadingNotifications = new HashSet<NotificationItem>();
-
-    Dictionary<NotificationItem, NotificationItemCell> cellForNotification = new Dictionary<NotificationItem, NotificationItemCell>();
+    private const int notificationDuration = 5;
+    private const int fadeDuration = 2;    
 
     [SerializeField]
-    private List<NotificationTypeIcon> notificationIcons;
+    private List<NotificationTypeVFX> notificationVFX;
+
+    private bool supressNotifications = false;
+
+    private TimeManager timeManager;
+
+    private Queue<NotificationItem> newNotificationQueue = new Queue<NotificationItem>();
+
+    // Tableview Info
+    public TableView tableView;
+
+    private List<NotificationItem> notificationItems = new List<NotificationItem>();
+    private HashSet<NotificationItem> fadingNotifications = new HashSet<NotificationItem>();
+
+    private Dictionary<NotificationItem, NotificationItemCell> cellForNotification = new Dictionary<NotificationItem, NotificationItemCell>();
 
     void Awake() {
         tableView.dataDelegate = this;
     }
 
-    public void AddNotification(NotificationItem notificationItem) {
+    private void Start() {
+        timeManager = Script.Get<TimeManager>();
 
-        TimeManager timeManager = Script.Get<TimeManager>();
-
-        notificationItems.Insert(0, notificationItem);
-
-        // Continue the fade
-        Action<int, float> continueFadeBlock = (time, percent) => {
-            if(cellForNotification.ContainsKey(notificationItem)) {
-                cellForNotification[notificationItem].canvasGroup.alpha = 1 - percent;
-            }
-        };
-
-        // Complete the fade
-        Action completeFadeBlock = () => {
-            notificationItems.Remove(notificationItem);
-            fadingNotifications.Remove(notificationItem);
-            tableView.ReloadData();
-        };
-
-        // Begin to fade
-        Action startFadeBlock = () => {
-            fadingNotifications.Add(notificationItem);
-            tableView.ReloadData();
-
-            timeManager.AddNewTimer(fadeDuration, continueFadeBlock, completeFadeBlock, 2);
-        };
-
-        timeManager.AddNewTimer(notificationDuration, null, startFadeBlock);
-        tableView.ReloadData();
+        StartCoroutine(UnravelNotificationQueue());
     }
 
-    public Sprite IconForNotificationType(NotificationType type) {
+    private IEnumerator UnravelNotificationQueue() {
+        while(true) {
 
-        foreach (NotificationTypeIcon typeIcon in notificationIcons) {
-            if (typeIcon.type == type) {
-                return typeIcon.icon;
+            yield return new WaitForSeconds(notificationDelay);
+
+            if (newNotificationQueue.Count == 0) {
+                continue;
+            }
+
+            NotificationItem notificationItem = newNotificationQueue.Dequeue();
+            notificationItems.Insert(0, notificationItem);
+
+            // Continue the fade
+            Action<int, float> continueFadeBlock = (time, percent) => {
+                if(cellForNotification.ContainsKey(notificationItem)) {
+                    cellForNotification[notificationItem].canvasGroup.alpha = 1 - percent;
+                }
+            };
+
+            // Complete the fade
+            Action completeFadeBlock = () => {
+                notificationItems.Remove(notificationItem);
+                fadingNotifications.Remove(notificationItem);
+                tableView.ReloadData();
+            };
+
+            // Begin to fade
+            Action startFadeBlock = () => {
+                fadingNotifications.Add(notificationItem);
+                tableView.ReloadData();
+
+                timeManager.AddNewTimer(fadeDuration, continueFadeBlock, completeFadeBlock, 2);
+            };
+
+            timeManager.AddNewTimer(notificationDuration, null, startFadeBlock);
+            tableView.ReloadData();
+        }
+    }
+
+    public void SetSupressNotifications(bool state) {
+        supressNotifications = state;
+    }
+
+    public void AddNotification(NotificationItem notificationItem) {
+        if (supressNotifications) {
+            return;
+        }
+
+        newNotificationQueue.Enqueue(notificationItem);
+    }
+
+    public GameObject VFXForNotificationType(NotificationType type) {
+
+        foreach (NotificationTypeVFX typeVFX in notificationVFX) {
+            if (typeVFX.type == type) {
+                return typeVFX.vfxPrefab;
             }
         }
 

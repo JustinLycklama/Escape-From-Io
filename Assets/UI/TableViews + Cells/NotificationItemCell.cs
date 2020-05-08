@@ -11,10 +11,19 @@ public class NotificationItemCell : MonoBehaviour, GameButtonDelegate {
     [SerializeField]
     private GameButton gameButton;
 
-    [SerializeField]
-    private Image typeIcon;
+    //[SerializeField]
+    //private Image typeIcon;
     [SerializeField]
     private UnitTypeIcon unitTypeIcon;
+
+    [SerializeField]
+    private GameObject vfxPrefab;
+    [SerializeField]
+    private Transform vfxParent;
+    [SerializeField]
+    private Transform vfxPosition;
+
+    private GameObject vfxPrefabInstance;
 
     private NotificationItem notificationItem;
 
@@ -32,6 +41,7 @@ public class NotificationItemCell : MonoBehaviour, GameButtonDelegate {
 
     private void Start() {
         gameButton.buttonDelegate = this;
+        vfxPosition.position = new Vector3(vfxPosition.position.x, vfxPosition.position.y, -5);
     }
 
     public void SetNotification(NotificationItem notificationItem) {
@@ -47,7 +57,15 @@ public class NotificationItemCell : MonoBehaviour, GameButtonDelegate {
             unitTypeIcon.SetActionType(notificationItem.relatedActionType.Value);
         }
 
-        typeIcon.sprite = notificationPanel.IconForNotificationType(notificationItem.type);
+        if(notificationItem.isNew) {
+            GameObject vfxPrefab = notificationPanel.VFXForNotificationType(notificationItem.type);
+
+            if(vfxPrefabInstance == null && vfxPrefab != null) {
+                vfxPrefabInstance = Instantiate(vfxPrefab, vfxPosition.position, Quaternion.identity, vfxParent);
+            }
+
+            notificationItem.isNew = false;
+        }        
     }
 
     /*
