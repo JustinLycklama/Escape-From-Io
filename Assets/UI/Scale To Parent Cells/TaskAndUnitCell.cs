@@ -26,6 +26,8 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
     [SerializeField]
     private UnitTypeIcon unitIconImage;
 
+    [SerializeField]
+    private GameButton unitListButton;
 
     [SerializeField]
     private Text unitsTitle;
@@ -46,7 +48,16 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
     [SerializeField]
     private GameButton taskListLockButton;
     [SerializeField]
+    private Toggle taskListLockToggle;
+
+    [SerializeField]
     private Image taskListLockBackground;
+
+    [SerializeField]
+    private Color defaultColor;
+    [SerializeField]
+    private Color disabledColor;
+
 
     [SerializeField]
     private Sprite openIcon;
@@ -77,7 +88,9 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
 
         unitIconImage.SetActionType(actionType);
 
+        unitListButton.buttonDelegate = this;
         taskListLockButton.buttonDelegate = this;
+        taskListLockToggle.buttonDelegate = this;
 
         Script.Get<TaskQueueManager>().RegisterForNotifications(this, actionType);
         Script.Get<UnitManager>().RegisterForNotifications(this, actionType);
@@ -148,10 +161,12 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
 
         foreach(TaskIconFlow flow in taskIconFlowList.Where(flow => flow.actionType != actionType)) {
             flow.flowImage.sprite = !state ? openIcon : lockedIcon;
+            flow.flowImage.color =  new Color(flow.flowImage.color.r, flow.flowImage.color.g, flow.flowImage.color.b, state ? 0.45f : 1.0f);
             flow.typeIcon.SetEnabled(!state);
         }
 
-        //taskListLockBackground.color = new Color(taskListLockBackground.color.r, taskListLockBackground.color.g, taskListLockBackground.color.b, state ? 1.0f : 0.75f);
+        taskListLockBackground.color = state ? defaultColor : disabledColor;
+        taskListLockToggle.SetState(state);
 
         SetLockAndCount();
     }
@@ -179,13 +194,20 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
         return Color.white;
     }
 
+    private void PushDetailPanel() {
+        TaskAndUnitDetailPanel detailPanel = Script.Get<UIManager>().Push(UIManager.Blueprint.TaskAndUnitDetail) as TaskAndUnitDetailPanel;
+        detailPanel.SetActionType(actionType);
+    }
+
     /*
      * ButtonDelegate Interface
      * */
 
     public void ButtonDidClick(GameButton button) {
 
-        if(button == taskListLockButton) {
+        if (button == unitListButton) {
+            PushDetailPanel();
+        } else if(button == taskListLockButton || button == taskListLockToggle) {
             TaskQueueManager taskQueueManager = Script.Get<TaskQueueManager>();
             var newState = !taskQueueManager.GetTaskListLockStatus(actionType);
 
@@ -199,8 +221,7 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
      * */
 
     public void OnPointerClick(PointerEventData eventData) {
-        TaskAndUnitDetailPanel detailPanel = Script.Get<UIManager>().Push(UIManager.Blueprint.TaskAndUnitDetail) as TaskAndUnitDetailPanel;
-        detailPanel.SetActionType(actionType);
+        PushDetailPanel();
     }
 
     /*

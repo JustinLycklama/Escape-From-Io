@@ -116,7 +116,7 @@ public class PlayerBehaviour : MonoBehaviour {
         UI_Layer = LayerMask.NameToLayer("UI");
 
         hotkeysEnabled = !Application.isMobilePlatform;
-        joystickEnabled = true; // Application.isMobilePlatform;
+        joystickEnabled = Application.isMobilePlatform;
 
         panContolPanel.SetJoystickEnabled(joystickEnabled);
 
