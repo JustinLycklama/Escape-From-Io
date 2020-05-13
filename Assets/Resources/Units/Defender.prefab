@@ -110,7 +110,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   taskAlreadyDictated: 0
   speed: 90
-  turnSpeed: 3
+  turnSpeed: 4
   followPathTurnSpeed: 10
   turnDistance: 10
   stoppingDistance: 5
@@ -141,6 +141,10 @@ MonoBehaviour:
   meshTiers:
   - meshRenderes:
     - {fileID: 3430528269540365221}
+    - {fileID: 3430528269526597733}
+    - {fileID: 3430528269526597735}
+    - {fileID: 3430528269526597729}
+    - {fileID: 3430528269526597731}
     aproximateTopPercentage: 0.33
   - meshRenderes:
     - {fileID: 1951369255753567457}
@@ -303,6 +307,30 @@ MonoBehaviour:
 --- !u!137 &3430528269540365221 stripped
 SkinnedMeshRenderer:
   m_CorrespondingSourceObject: {fileID: 812292134672976636, guid: b4b56823cef2d8844a7835e0d5d6fe52,
+    type: 3}
+  m_PrefabInstance: {fileID: 2656692967496309081}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &3430528269526597733 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 812292134688577852, guid: b4b56823cef2d8844a7835e0d5d6fe52,
+    type: 3}
+  m_PrefabInstance: {fileID: 2656692967496309081}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &3430528269526597735 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 812292134688577854, guid: b4b56823cef2d8844a7835e0d5d6fe52,
+    type: 3}
+  m_PrefabInstance: {fileID: 2656692967496309081}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &3430528269526597729 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 812292134688577848, guid: b4b56823cef2d8844a7835e0d5d6fe52,
+    type: 3}
+  m_PrefabInstance: {fileID: 2656692967496309081}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &3430528269526597731 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 812292134688577850, guid: b4b56823cef2d8844a7835e0d5d6fe52,
     type: 3}
   m_PrefabInstance: {fileID: 2656692967496309081}
   m_PrefabAsset: {fileID: 0}

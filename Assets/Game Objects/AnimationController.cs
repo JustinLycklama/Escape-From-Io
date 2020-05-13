@@ -28,6 +28,9 @@ public abstract class AnimationController : MonoBehaviour, PlayerBehaviourUpdate
             return;
         }
 
+        //print("AnimateSpeed: " + animator.speed);
+        //print("Animate State: " + StringConstantForState(state, isCarry));
+
         animator.Play(StringConstantForState(state, isCarry));
         currentState = state;
     }

@@ -213,6 +213,12 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         } catch(NullReferenceException) { }
     }
 
+    public void OnDrawGizmos() {
+        if(pathToDraw != null) {
+            pathToDraw.DrawWithGizmos();
+        }
+    }
+
     public void Initialize() {
         initialized = true;
 
@@ -585,71 +591,36 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
     protected Coroutine FollowPathCoroutine;    
     protected IEnumerator FollowPath(Path path, System.Action<bool> callBack) {
 
-        bool isCarrying = resourceManager.isHoldingResources(this);
-
-        int pathIndex = 0;
-        bool turningToStart = true;
-
         Vector3 startPoint = path.lookPoints[0].worldPosition.vector3;
         startPoint.y = transform.position.y;
-
-        Quaternion originalRotation = Quaternion.identity;
-        Quaternion targetRotation = Quaternion.identity;
-
-        float totalTurnDistance = 0;
-        float degreesToTurn = 0;
-
-        currentPercentOfJournery = 0;
-        float basePercentOfJourney = 0;
-
-        Vector3 previousWaypointPosition = transform.position;
-
+  
         // If we are not moving at all (with some grey area) then don't bother turning to it.
-        if (Vector3.Distance(startPoint, transform.position) < 5) {
-            turningToStart = false;
-        } else {
-            originalRotation = transform.rotation;
-            targetRotation = Quaternion.LookRotation(startPoint - transform.position);
-
-            totalTurnDistance = 0;
-            degreesToTurn = (targetRotation.eulerAngles - originalRotation.eulerAngles).magnitude;
-
-            currentPercentOfJournery = 0;
-            basePercentOfJourney = 0;
+        if(Vector3.Distance(startPoint, transform.position) > 5) {
+            yield return StartCoroutine(TurnInPlace(startPoint - transform.position));
         }
 
-        while(turningToStart) {
-
-            // Don't move on pause
-            if(playerBehaviour.gamePaused) {
-                yield return null;
-                continue;
-            }
-
-            if(totalTurnDistance >= 1) {
-                turningToStart = false;
-            } else {
-                AnimateState(totalTurnDistance > 0 ? AnimationState.TurnLeft : AnimationState.TurnRight, Mathf.InverseLerp(10, 100, turnSpeed), isCarrying);
-
-                totalTurnDistance = Mathf.Clamp01(totalTurnDistance + ((Time.deltaTime * turnSpeed) / degreesToTurn * 180));
-                transform.rotation = Quaternion.Slerp(originalRotation, targetRotation, totalTurnDistance);
-            }
-
-            yield return null;
-        }
-
-        bool followingPath = true;
+        // Keep track of our waypoints
+        int pathIndex = 0;
+        Vector3 previousWaypointPosition = transform.position;    
 
         // Used to slow as we approach target
         float speedPercent = 1;
 
+        // Keep track of our total journey
+        currentPercentOfJournery = 0;
+        float basePercentOfJourney = 0;
+
+        // Animate differently if unit is carying something
+        bool isCarrying = resourceManager.isHoldingResources(this);
+
+        bool followingPath = true;
+
         // If we are only moving one space, and that space is very short, don't bother (fixes units spinning around when doing a task in same location)
-        if (path.lookPoints.Length == 1 && Vector3.Distance(path.lookPoints[pathIndex].worldPosition.vector3, transform.position) < 5) {
+        if(path.lookPoints.Length == 1 && Vector3.Distance(path.lookPoints[pathIndex].worldPosition.vector3, transform.position) < 5) {
             followingPath = false;
         }
 
         while(followingPath) {
-            //BeginWalkDelegate();
 
             // Don't move on pause
             if(playerBehaviour.gamePaused) {
@@ -698,7 +669,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
                 float height = Script.Get<MapsManager>().GetHeightAt(lookPointMapCoordinate) * lookPointMapCoordinate.mapContainer.transform.lossyScale.y; //  + (0.5f * transform.localScale.y)
                 Vector3 lookPoint = new Vector3(lookPointWorldPos.vector3.x, height, lookPointWorldPos.vector3.z);
 
-                targetRotation = Quaternion.LookRotation(lookPoint - transform.position);
+                Quaternion targetRotation = Quaternion.LookRotation(lookPoint - transform.position);
                 transform.rotation =  Quaternion.Lerp(transform.rotation, targetRotation, Time.deltaTime * followPathTurnSpeed);
                 transform.Translate(Vector3.forward * Time.deltaTime * localSpeed * speedPercent, Space.Self);
 
@@ -714,45 +685,56 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
             yield return null;
         }
 
-        //CompleteWalkDelegate();
-
-        bool lookingAtTarget = true;
-
-        originalRotation = transform.rotation;
         Vector3 finalLookAtBalancedHeight = path.finalLookAt.vector3;
         finalLookAtBalancedHeight.y = transform.position.y;
 
-        targetRotation = Quaternion.LookRotation(finalLookAtBalancedHeight - transform.position);
-       
-        totalTurnDistance = 0;
-        degreesToTurn = (targetRotation.eulerAngles - originalRotation.eulerAngles).magnitude;
+        yield return StartCoroutine(TurnInPlace(finalLookAtBalancedHeight - transform.position));
 
-        while(lookingAtTarget) {
+        callBack(true);
+    }
+
+    private IEnumerator TurnInPlace(Vector3 lookAt) {
+        //Quaternion originalRotation = transform.rotation;
+        Quaternion targetRotation = Quaternion.LookRotation(lookAt);
+        
+        //float degreesToTurn = (targetRotation.eulerAngles - originalRotation.eulerAngles).magnitude;
+        //float totalTurnDistance = 0;
+
+        // Use the cross product to determine if we are moving left or right
+        Vector3 cross = Vector3.Cross(transform.forward, lookAt);
+
+        // Alter animation if unit is carrying something
+        bool isCarrying = resourceManager.isHoldingResources(this);
+
+        //print("degreesToTurn: " + degreesToTurn);
+
+        while(true) {
+
             // Don't move on pause
             if(playerBehaviour.gamePaused) {
                 yield return null;
                 continue;
             }
 
-            if(totalTurnDistance == 1) {
-                lookingAtTarget = false;
+            float degreesToTurn = (targetRotation.eulerAngles - transform.rotation.eulerAngles).magnitude;
 
-                callBack(true);
-                yield break; // Stop Coroutine
+            if(degreesToTurn > 1) {
+                AnimateState(cross.y > 0 ? AnimationState.TurnRight : AnimationState.TurnLeft, Mathf.InverseLerp(-5, 5, turnSpeed), isCarrying);
+
+                //float additionalDistance = ((Time.deltaTime * turnSpeed) / degreesToTurn * 180);
+
+                //print("additionalDistance: " + additionalDistance);
+
+                //totalTurnDistance = Mathf.Clamp01(totalTurnDistance + additionalDistance);
+                //transform.rotation = Quaternion.Slerp(originalRotation, targetRotation, totalTurnDistance);
+
+                transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, turnSpeed * Time.deltaTime * 90);
+
             } else {
-                AnimateState(totalTurnDistance > 0 ? AnimationState.TurnLeft : AnimationState.TurnRight, Mathf.InverseLerp(10, 100, turnSpeed), isCarrying);
-
-                totalTurnDistance = Mathf.Clamp01(totalTurnDistance + ((Time.deltaTime * turnSpeed) / degreesToTurn * 180));
-                transform.rotation = Quaternion.Slerp(originalRotation, targetRotation, totalTurnDistance);
+                yield break;
             }
 
             yield return null;
-        }
-    }
-
-    public void OnDrawGizmos() {
-        if (pathToDraw != null) {
-            pathToDraw.DrawWithGizmos();
         }
     }
 

@@ -64,7 +64,7 @@ public class MechAnimationController : AnimationController {
                 break;
             case Unit.AnimationState.TurnLeft:
             case Unit.AnimationState.TurnRight:
-                return 2.5f;
+                return 5.0f;
             case Unit.AnimationState.Walk:
                 return 5.0f;
             case Unit.AnimationState.WalkTurnRight:

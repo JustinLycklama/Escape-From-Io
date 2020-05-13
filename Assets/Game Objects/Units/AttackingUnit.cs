@@ -90,6 +90,11 @@ public abstract class AttackingUnit : Unit
     }
 
     protected override void ResetTaskState() {
+
+        if (resetTaskStateDelayed != null) {
+            StopCoroutine(resetTaskStateDelayed);
+        }
+
         resetTaskStateDelayed = StartCoroutine(ResetTaskStateDelayed());
     }
 
@@ -98,7 +103,6 @@ public abstract class AttackingUnit : Unit
 
         ResetTaskStateWithNewFollow();
     }
-
 
     private void ResetTaskStateWithNewFollow() {
         if (this.gameObject == null) {

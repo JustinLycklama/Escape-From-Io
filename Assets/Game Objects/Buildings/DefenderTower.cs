@@ -78,12 +78,11 @@ public class DefenderTower : RotatingBuilding {
     private IEnumerator RotateToTarget() {
 
         while(true) {
-            yield return new WaitForSeconds(1);
+            yield return new WaitForSeconds(0.5f);
 
             if (target == null) {
                 continue;
             }
-
 
             Action shootAction = () => {
                 if (Time.time > lastShotTime + shotCooldown) {
@@ -100,16 +99,7 @@ public class DefenderTower : RotatingBuilding {
                         for(int i = 0; i < particles.Length; i++) {
                             particles[i].Play();
                         }
-
-
                     }
-
-
-
-
-
-
-
                 }
             };
 

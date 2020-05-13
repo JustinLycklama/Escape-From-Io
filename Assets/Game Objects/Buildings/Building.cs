@@ -2,36 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-//public class BuildingManager {
-
-//    public static BuildingManager sharedInstance = new BuildingManager();
-
-//    public class Blueprint {
-
-//        public Blueprint(string fileName, string description, Type type) {
-//            this.fileName = fileName;
-//            this.description = description;
-//            this.type = type;
-
-//            this.resource = Resources.Load(fileName, type);
-//        }
-
-//        public string fileName { get; set; }
-//        public string description { get; set; }
-//        public Type type { get; set; }
-
-//        public UnityEngine.Object resource;
-
-//        public static Blueprint Tower = new Blueprint("Tower", "Light Tower", typeof(Tower));
-//        public static Blueprint Refinery = new Blueprint("Refinery", "Refinery", typeof(Refinery));
-
-//    }
-
-//    public Blueprint[] AvailableBuildings() {
-//        return new Blueprint[] { Blueprint.Tower, Blueprint.Tower };
-//    }
-//}
-
 public abstract class Building : ActionableItem, Selectable {
 
     [Serializable]
@@ -367,16 +337,15 @@ public abstract class Building : ActionableItem, Selectable {
             }));
 
         public static Blueprint DefenseTower = new Blueprint("DefenderTower", typeof(DefenderTower), "TowerIcon", "Defender Turret", "Attacks Enemies",
-            new BlueprintCost(new Dictionary<MineralType, int>(){
-                        //{ MineralType.Copper, 1 },
+            new BlueprintCost(new Dictionary<MineralType, int>(){                        
                         { MineralType.Silver, 4 },
                         { MineralType.Gold, 1 }
             }));
 
         public static Blueprint AdvUnitBuilding = new Blueprint("AdvUnitBuilding", typeof(AdvUnitBuilding), "TowerIcon", "Adv. Units Building", "Advanced units can be built adjacent to this.", 
             new BlueprintCost(new Dictionary<MineralType, int>(){
-                { MineralType.Silver, 5 }                              
-                //{ MineralType.Azure, 2 }
+                { MineralType.Silver, 4 },
+                { MineralType.Azure, 2 }
             }));
 
         public static Blueprint Refinery = new Blueprint("Refinery", typeof(Refinery), "MinerIcon", "Refinery", "",

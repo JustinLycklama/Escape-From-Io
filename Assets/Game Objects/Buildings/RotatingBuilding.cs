@@ -35,20 +35,7 @@ public abstract class RotatingBuilding : Building {
 
     private IEnumerator Rotate(Quaternion targetRotation, Action completion = null) {
 
-        rotating = true;
-
-        Quaternion originalRotation = rotatingComponent.transform.rotation;
-
-        float totalTurnDistance = 0;
-        float degreesToTurn = (targetRotation.eulerAngles - originalRotation.eulerAngles).magnitude;
-
-        bool turning = true;
-
-        if(degreesToTurn < 5) {
-            turning = false;
-        }
-
-        while(turning) {
+        while(true) {
 
             // Don't move on pause
             if(playerBehaviour.gamePaused) {
@@ -56,18 +43,18 @@ public abstract class RotatingBuilding : Building {
                 continue;
             }
 
-            if(totalTurnDistance >= 1) {
-                turning = false;
+            float degreesToTurn = (targetRotation.eulerAngles - rotatingComponent.transform.rotation.eulerAngles).magnitude;
+
+            if(degreesToTurn > 1) {
+
+                rotatingComponent.transform.rotation = Quaternion.RotateTowards(rotatingComponent.transform.rotation, targetRotation, turnSpeed * Time.deltaTime * 90);
+
             } else {
-                totalTurnDistance = Mathf.Clamp01(totalTurnDistance + ((Time.deltaTime * turnSpeed) / degreesToTurn * 180));
-                rotatingComponent.transform.rotation = Quaternion.Slerp(originalRotation, targetRotation, totalTurnDistance);
+                break;
             }
 
             yield return null;
         }
-
-        rotatingComponent.transform.rotation = targetRotation;
-        rotating = false;
 
         completion?.Invoke();
     }
