@@ -7,7 +7,7 @@ public class Miner : Unit {
     public override MasterGameTask.ActionType primaryActionType => MasterGameTask.ActionType.Mine;
 
     [SerializeField]
-    private MechAnimationController mechAnimationController;
+    private MechAnimationController mechAnimationController = null;
 
     protected override void UnitCustomInit() {
 

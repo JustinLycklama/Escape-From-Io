@@ -5,13 +5,10 @@ using UnityEngine;
 public class MechAnimationController : AnimationController {
 
     [SerializeField]
-    private Animator weaponAnimator;
+    private Animator weaponAnimator = null;
 
     [SerializeField]
     private ParticleSystem[] particles = new ParticleSystem[0];
-
-    private Unit.AnimationState weaponState = Unit.AnimationState.Idle;
-    private float lastShotTime = 0;
 
     private AudioManager audioManager;
 

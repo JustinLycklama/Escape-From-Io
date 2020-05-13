@@ -5,7 +5,7 @@ using UnityEngine;
 public class Golem : AttackingUnit
 {
     [SerializeField]
-    private EarthElementalController animationController;
+    private EarthElementalController animationController = null;
 
     public override FactionType factionType { get { return FactionType.Enemy; } }
     public override int duration => 60 * 5;

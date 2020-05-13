@@ -10,7 +10,7 @@ public class MapGenerator : MonoBehaviour {
     public DrawMode drawMode;
 
     [SerializeField]
-    private PremadeNoiseGenerator premadeLayoutMap;
+    private PremadeNoiseGenerator premadeLayoutMap = null;
 
     [Range(0, 1)]
     public float groundFeaturesImpactOnLayout;

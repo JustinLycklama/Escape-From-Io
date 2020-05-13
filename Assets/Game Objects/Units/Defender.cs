@@ -13,7 +13,7 @@ public class Defender : AttackingUnit
     protected override GameTask.ActionType attackType => GameTask.ActionType.AttackRanged;
 
     [SerializeField]
-    private MechAnimationController mechAnimationController;
+    private MechAnimationController mechAnimationController = null;
 
     protected override void AnimateState(AnimationState state, float rate, bool isCarry = false) {
         mechAnimationController.AnimateState(state, rate);

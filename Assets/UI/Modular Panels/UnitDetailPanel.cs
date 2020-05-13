@@ -30,7 +30,7 @@ public class UnitDetailPanel : MonoBehaviour, TimeUpdateDelegate {
     private void OnDestroy() {
         try {
             Script.Get<TimeManager>().EndTimeUpdateNotifications(this);
-        } catch(System.NullReferenceException e) { }
+        } catch(System.NullReferenceException) { }
     }
 
     public void SetUnit(Unit unit) {

@@ -7,7 +7,7 @@ public class Builder : Unit {
     public override MasterGameTask.ActionType primaryActionType => MasterGameTask.ActionType.Build;
 
     [SerializeField]
-    private MechAnimationController mechAnimationController;
+    private MechAnimationController mechAnimationController = null;
 
     protected override void UnitCustomInit() {
 

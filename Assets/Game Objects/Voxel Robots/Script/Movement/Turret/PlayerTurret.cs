@@ -6,8 +6,8 @@
 
 
 
-		[SerializeField]
-		private float RotateSpeed = 720f;
+		//[SerializeField]
+		//private float RotateSpeed = 720f;
 
 
 

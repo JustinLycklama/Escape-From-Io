@@ -51,7 +51,7 @@ public class PathfindingGrid : MonoBehaviour, TerrainUpdateDelegate, StatusEffec
         try {
             Script.Get<MapsManager>().RemoveTerrainUpdateDelegate(this);
             Script.Get<BuildingManager>().EndStatusEffectNotifications(this);
-        } catch(System.NullReferenceException e) { }
+        } catch(System.NullReferenceException) { }
     }
 
     public int maxSize {

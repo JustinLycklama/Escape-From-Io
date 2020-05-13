@@ -7,21 +7,19 @@ public class NotificationItemCell : MonoBehaviour, GameButtonDelegate {
     public CanvasGroup canvasGroup;
 
     [SerializeField]
-    private Text text;
+    private Text text = null;
     [SerializeField]
-    private GameButton gameButton;
+    private GameButton gameButton = null;
 
     //[SerializeField]
     //private Image typeIcon;
     [SerializeField]
-    private UnitTypeIcon unitTypeIcon;
+    private UnitTypeIcon unitTypeIcon = null;
 
     [SerializeField]
-    private GameObject vfxPrefab;
+    private Transform vfxParent = null;
     [SerializeField]
-    private Transform vfxParent;
-    [SerializeField]
-    private Transform vfxPosition;
+    private Transform vfxPosition = null;
 
     private GameObject vfxPrefabInstance;
 

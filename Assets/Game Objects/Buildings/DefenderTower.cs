@@ -11,7 +11,7 @@ public class DefenderTower : RotatingBuilding {
     public override float constructionModifierSpeed => 0.2f;
 
     [SerializeField]
-    private Animator weaponAnimator;
+    private Animator weaponAnimator = null;
 
     private Unit target;
     private UnitManager unitManager;

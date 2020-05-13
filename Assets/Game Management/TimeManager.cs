@@ -44,7 +44,7 @@ public class TimeManager : MonoBehaviour, PlayerBehaviourUpdateDelegate {
     private void OnDestroy() {
         try {
             Script.Get<PlayerBehaviour>().EndPlayerBehaviourNotifications(this);
-        } catch(System.NullReferenceException e) { }
+        } catch(NullReferenceException) { }
     }
 
     void Update() {

@@ -24,7 +24,7 @@ public static class NoiseGenerator {
         get {
             if(_random == null) {
                 int seed = System.Guid.NewGuid().GetHashCode();
-                seed = 1904886234;
+                //seed = 1904886234;
 
                 MonoBehaviour.print("Seed: " + seed);
 

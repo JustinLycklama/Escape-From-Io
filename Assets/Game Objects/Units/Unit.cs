@@ -210,7 +210,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         try {
             Script.Get<MapsManager>().RemoveTerrainUpdateDelegate(this);
             taskQueueManager.EndLockUpdates(this);
-        } catch(System.NullReferenceException e) { }
+        } catch(NullReferenceException) { }
     }
 
     public void Initialize() {
@@ -899,18 +899,18 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
      * TaskStatusNotifiable Interface
      * */
 
-    public void RegisterForTaskStatusNotifications(TaskStatusUpdateDelegate notificationDelegate) {
+    public override void RegisterForTaskStatusNotifications(TaskStatusUpdateDelegate notificationDelegate) {
         taskStatusDelegateList.Add(notificationDelegate);
 
         // Let the subscriber know our status immediately
         notificationDelegate.NowPerformingTask(this, currentMasterTask, currentGameTask);
     }
 
-    public void EndTaskStatusNotifications(TaskStatusUpdateDelegate notificationDelegate) {
+    public override void EndTaskStatusNotifications(TaskStatusUpdateDelegate notificationDelegate) {
         taskStatusDelegateList.Remove(notificationDelegate);
     }
 
-    protected void NotifyAllTaskStatus() {
+    protected override void NotifyAllTaskStatus() {
         foreach(TaskStatusUpdateDelegate updateDelegate in taskStatusDelegateList.ToArray()) {
             updateDelegate.NowPerformingTask(this, currentMasterTask, currentGameTask);
         }

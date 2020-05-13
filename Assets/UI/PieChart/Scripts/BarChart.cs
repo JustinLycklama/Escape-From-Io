@@ -5,14 +5,5 @@ using UnityEngine;
 namespace UCharts{
 	public class BarChart : ChartBase 
 	{
-		void Start () 
-		{
-			
-		}
-		
-		void Update ()
-		{
-			
-		}
 	}
 }

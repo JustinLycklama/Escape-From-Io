@@ -12,7 +12,7 @@ namespace UCharts {
         private int segments = 180;
 
 
-		[SerializeField] private Color32 m_BorderColor;
+		[SerializeField] private Color32 m_BorderColor = Color.white;
 		[SerializeField] List<PieChartDataNode> m_Data = new List<PieChartDataNode>();
 		[SerializeField] List<Color32> m_Colors = new List<Color32>();
 

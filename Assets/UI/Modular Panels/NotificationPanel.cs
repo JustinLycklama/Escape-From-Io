@@ -30,8 +30,10 @@ public class NotificationItem {
 
 [Serializable]
 struct NotificationTypeVFX {
+#pragma warning disable 0649
     public NotificationType type;
     public GameObject vfxPrefab;
+#pragma warning restore 0649
 }
 
 public class NotificationPanel : MonoBehaviour, TableViewDelegate {
@@ -44,7 +46,7 @@ public class NotificationPanel : MonoBehaviour, TableViewDelegate {
     private const int fadeDuration = 2;    
 
     [SerializeField]
-    private List<NotificationTypeVFX> notificationVFX;
+    private List<NotificationTypeVFX> notificationVFX = null;
 
     private bool supressNotifications = false;
 

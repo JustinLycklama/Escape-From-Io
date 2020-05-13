@@ -11,7 +11,7 @@ public class CostPanelTooltip : CostPanel, TrackingUIInterface {
     public CanvasGroup canvasGroup { get => canvas; }
 
     [SerializeField]
-    private Text title;
+    private Text title = null;
 
     private void Update() {
         this.UpdateTrackingPosition();

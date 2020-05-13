@@ -6,9 +6,9 @@ using UnityEngine.UI;
 
 public class InGameMessagePanel : MonoBehaviour, GameButtonDelegate, IPointerClickHandler {
     [SerializeField]
-    private Text title;
+    private Text title = null;
     [SerializeField]
-    private Text contents;
+    private Text contents = null;
 
     [SerializeField]
     public GameButton continueButton;

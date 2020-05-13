@@ -97,7 +97,7 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
             Script.Get<UnitManager>().EndNotifications(this, MasterGameTask.ActionType.Mine);
             Script.Get<UnitManager>().EndNotifications(this, MasterGameTask.ActionType.Move);
             Script.Get<UnitManager>().EndNotifications(this, MasterGameTask.ActionType.Attack);
-        } catch(System.NullReferenceException e) { }
+        } catch(NullReferenceException) { }
     }
 
     public void RegisterForNotifications(TaskQueueDelegate notificationDelegate, MasterGameTask.ActionType ofType) {

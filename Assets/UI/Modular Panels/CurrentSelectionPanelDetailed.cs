@@ -10,15 +10,15 @@ public class CurrentSelectionPanelDetailed : NavigationPanel, SelectionManagerDe
     const string noSelectionText = "None";
 
     [SerializeField]
-    private Text title;
+    private Text title = null;
 
     [SerializeField]
-    private PercentageBar percentageBar;
+    private PercentageBar percentageBar = null;
 
     [SerializeField]
-    private UnitDetailPanel unitDetailPanel;
+    private UnitDetailPanel unitDetailPanel = null;
     [SerializeField]
-    private TerrainDetailPanel terrainDetailPanel;
+    private TerrainDetailPanel terrainDetailPanel = null;
     
     //public MasterAndGameTaskCell taskItemCell;
 
@@ -27,7 +27,8 @@ public class CurrentSelectionPanelDetailed : NavigationPanel, SelectionManagerDe
 
     //public CameraPanel cameraPanel;
 
-    void Start() {
+    override protected void Start() {
+        base.Start();
         title.text = noSelectionText;
         Script.Get<SelectionManager>().RegisterForNotifications(this);
 

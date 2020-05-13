@@ -8,19 +8,19 @@ using UnityEngine.UI;
 public class AttackersCell : MonoBehaviour, UnitManagerDelegate, GameButtonDelegate, TimeUpdateDelegate {
 
     [SerializeField]
-    private Text unitsCountText;
+    private Text unitsCountText = null;
 
     [SerializeField]
-    private List<PercentageBar> defenderPercentBars;
+    private List<PercentageBar> defenderPercentBars = null;
 
     [SerializeField]
-    private Text enemyCountText;
+    private Text enemyCountText = null;
 
     [SerializeField]
-    private HalfPieChart frequencyChart;
+    private HalfPieChart frequencyChart = null;
 
     [SerializeField]
-    private HalfPieChart evolutionChart;
+    private HalfPieChart evolutionChart = null;
 
     private List<Unit> soonToExpireUnits = new List<Unit>();
 
@@ -38,7 +38,7 @@ public class AttackersCell : MonoBehaviour, UnitManagerDelegate, GameButtonDeleg
         try {
             Script.Get<UnitManager>().EndNotifications(this, actionType);
             Script.Get<TimeManager>().EndTimeUpdateNotifications(this);
-        } catch(System.NullReferenceException e) { }
+        } catch(System.NullReferenceException) { }
     }
 
     /*

@@ -29,7 +29,7 @@ public class SettingsPanel : MonoBehaviour, PlayerBehaviourUpdateDelegate, GameB
         try {
             playerBehaviour.EndPlayerBehaviourNotifications(this);
             playerBehaviour.RemoveHotKeyDelegate(this);
-        } catch(System.NullReferenceException e) { }
+        } catch(System.NullReferenceException) { }
     }
 
     public void CloseWindows() {

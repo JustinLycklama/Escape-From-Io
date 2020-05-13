@@ -4,17 +4,17 @@ using UnityEngine.UI;
 public class UnitStatusTooltip : MonoBehaviour, TrackingUIInterface { //TaskStatusUpdateDelegate
     
     [SerializeField]
-    private MasterAndGameTaskCell masterAndGameTaskCell;
+    private MasterAndGameTaskCell masterAndGameTaskCell = null;
 
     [SerializeField]
-    private PercentageBar durationBar;
+    private PercentageBar durationBar = null;
     [SerializeField]
-    private PercentageBar healthBar;
+    private PercentageBar healthBar = null;
     [SerializeField]
     public PercentageBar percentageBar;
 
     [SerializeField]
-    private UnitTypeIcon unitIcon;
+    private UnitTypeIcon unitIcon = null;
 
     private Unit.FactionType faction;
 
@@ -26,7 +26,7 @@ public class UnitStatusTooltip : MonoBehaviour, TrackingUIInterface { //TaskStat
     public Transform followingObject { get; set; }
 
     [SerializeField]
-    private CanvasGroup canvas;
+    private CanvasGroup canvas = null;
     public CanvasGroup canvasGroup { get => canvas; }
 
     //private Unit unit;

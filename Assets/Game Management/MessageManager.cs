@@ -9,9 +9,9 @@ public class MessageManager : MonoBehaviour, GameButtonDelegate, HotkeyDelegate
     private PlayerBehaviour playerBehaviour;
 
     [SerializeField]
-    private InGameMessagePanel majorPanel;
+    private InGameMessagePanel majorPanel = null;
     [SerializeField]
-    private InGameMessagePanel minorPanel;
+    private InGameMessagePanel minorPanel = null;
 
     Action currentMajorMessageAction = null;
     Queue<(string, string, Action)> nextMinorMessagesQueue = new Queue<(string, string, Action)>();

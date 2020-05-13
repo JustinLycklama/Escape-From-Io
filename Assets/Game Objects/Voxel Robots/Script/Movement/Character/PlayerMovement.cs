@@ -8,8 +8,8 @@
 
 
 
-		[SerializeField]
-		private bool MouseFacing = false;
+		//[SerializeField]
+		//private bool MouseFacing = false;
 
 
 		private float prevFTime = -1f;

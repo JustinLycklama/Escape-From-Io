@@ -13,13 +13,15 @@ public class UnitManager : MonoBehaviour, TaskStatusUpdateDelegate {
 
     [Serializable]
     private struct ActionIconObj {
+#pragma warning disable 0649
         public MasterGameTask.ActionType actionType;
         public Sprite sprite;
+#pragma warning restore 0649
     }
 
 
     [SerializeField]
-    private List<ActionIconObj> actionIconObjList;
+    private List<ActionIconObj> actionIconObjList = null;
     public Sprite enemyIcon;
 
     Dictionary<MasterGameTask.ActionType, List<Unit>> unitListMap;

@@ -6,8 +6,6 @@ public class AdvancedMiner : Unit {
     public override int duration => 600;
     public override MasterGameTask.ActionType primaryActionType => MasterGameTask.ActionType.Mine;
 
-    public MoenenGames.VoxelRobot.Weapon[] weaponSet;
-
     protected override void UnitCustomInit() {
 
     }

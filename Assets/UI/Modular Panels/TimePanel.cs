@@ -30,7 +30,7 @@ public class TimePanel : MonoBehaviour, TimeUpdateDelegate, PlayerBehaviourUpdat
         try {
             timeManager.EndTimeUpdateNotifications(this);
             playerBehaviour.EndPlayerBehaviourNotifications(this);
-        } catch(System.NullReferenceException e) { }
+        } catch(NullReferenceException) { }
     }
 
     private void DisplayTime() {

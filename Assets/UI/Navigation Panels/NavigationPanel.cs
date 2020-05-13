@@ -13,7 +13,7 @@ public class NavigationPanel : MonoBehaviour, GameButtonDelegate
     //private GameObject defaultBackButtonObject;
 
     [SerializeField]
-    private GameButton backButton;
+    private GameButton backButton = null;
 
     private UIManager uIManager;
 

@@ -16,58 +16,60 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
 
     [Serializable]
     private struct TaskIconFlow {
+#pragma warning disable 0649
         public MasterGameTask.ActionType actionType;
 
         public Image flowImage;
-        public UnitTypeIcon typeIcon;        
+        public UnitTypeIcon typeIcon;
+#pragma warning restore 0649
     }
 
 
     [SerializeField]
-    private MasterGameTask.ActionType actionType;
+    private MasterGameTask.ActionType actionType = MasterGameTask.ActionType.Mine;
 
     [SerializeField]
-    private Text iconTitle;
+    private Text iconTitle = null;
     [SerializeField]
-    private UnitTypeIcon unitIconImage;
+    private UnitTypeIcon unitIconImage = null;
 
     [SerializeField]
-    private GameButton unitListButton;
+    private GameButton unitListButton = null;
 
     [SerializeField]
-    private Text unitsTitle;
+    private Text unitsTitle = null;
     [SerializeField]
-    private Text unitsCountText;
+    private Text unitsCountText = null;
     [SerializeField]
-    private List<PercentageBar> percentBars;
+    private List<PercentageBar> percentBars = null;
     [SerializeField]
-    private PieChart pieChart;
+    private PieChart pieChart = null;
 
     [SerializeField]
-    private Text tasksTile;
+    private Text tasksTile = null;
     [SerializeField]
-    private Text taskCountText;
+    private Text taskCountText = null;
     [SerializeField]
-    private List<TaskIconFlow> taskIconFlowList;
+    private List<TaskIconFlow> taskIconFlowList = null;
 
     [SerializeField]
-    private GameButton taskListLockButton;
+    private GameButton taskListLockButton = null;
     [SerializeField]
-    private Toggle taskListLockToggle;
+    private Toggle taskListLockToggle = null;
 
     [SerializeField]
-    private Image taskListLockBackground;
+    private Image taskListLockBackground = null;
 
     [SerializeField]
-    private Color defaultColor;
+    private Color defaultColor = Color.white;
     [SerializeField]
-    private Color disabledColor;
+    private Color disabledColor = Color.white;
 
 
     [SerializeField]
-    private Sprite openIcon;
+    private Sprite openIcon = null;
     [SerializeField]
-    private Sprite lockedIcon;
+    private Sprite lockedIcon = null;
 
     //public Toggle taskListLocked;
     //public Text taskListLockedText;
@@ -122,7 +124,7 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
             Script.Get<TaskQueueManager>().EndNotifications(this, actionType);
             Script.Get<UnitManager>().EndNotifications(this, actionType);
             Script.Get<TimeManager>().EndTimeUpdateNotifications(this);
-        } catch(System.NullReferenceException e) { }
+        } catch(NullReferenceException) { }
     }
 
 

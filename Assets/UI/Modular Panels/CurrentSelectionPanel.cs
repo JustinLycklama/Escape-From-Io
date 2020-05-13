@@ -11,22 +11,22 @@ public class CurrentSelectionPanel : NavigationPanel, SelectionManagerDelegate, 
     const string noSelectionText = "None";
 
     [SerializeField]
-    private Text titleText;
+    private Text titleText = null;
 
     [SerializeField]
-    private CanvasGroup infoAreaCanvas;
+    private CanvasGroup infoAreaCanvas = null;
 
     [SerializeField]
-    private MasterAndGameTaskCell taskItemCell;
+    private MasterAndGameTaskCell taskItemCell = null;
     [SerializeField]
-    private GameObject arrowHolder;
+    private GameObject arrowHolder = null;
     [SerializeField]
-    private GameObject iconHolder;
+    private GameObject iconHolder = null;
     [SerializeField]
-    private UnitTypeIcon unitIcon;
+    private UnitTypeIcon unitIcon = null;
 
     [SerializeField]
-    private ActionsList actionsList;
+    private ActionsList actionsList = null;
 
 
     private MasterGameTask currentMasterTask;

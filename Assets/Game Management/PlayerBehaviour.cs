@@ -52,18 +52,16 @@ public class PlayerBehaviour : MonoBehaviour {
     private Vector2? previousTouch = null;
     private Vector2? residualDirection = null;
 
-    private float panFriction = 1.0f;
-
     private float minJoystickThreshold = 0.35f;
 
     private float mouseDownTime = 0;
     private float secondsBeforeTouchPan = 0.075f;
 
     [SerializeField]
-    private PanControlsPanel panContolPanel;
+    private PanControlsPanel panContolPanel = null;
 
     [SerializeField]
-    private Image crosshairImage;
+    private Image crosshairImage = null;
 
     private bool isJoystickPanning = false;
 
@@ -479,8 +477,6 @@ public class PlayerBehaviour : MonoBehaviour {
         RaycastHit hit;
 
         lastRay = ray;
-
-        print("Raycast to: " + terrainLayer.value);
 
         if(Physics.Raycast(ray, out hit, Mathf.Infinity, terrainLayer)) {
             lastHit = hit;

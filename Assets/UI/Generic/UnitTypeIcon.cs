@@ -12,7 +12,7 @@ public class UnitTypeIcon : MonoBehaviour
     private Unit.FactionType factionType;
 
     [SerializeField]
-    private Image icon;
+    private Image icon = null;
 
     private void Start() {
         SetActionType(actionType, factionType);

@@ -50,7 +50,7 @@ public class TaskAndUnitDetailPanel : NavigationPanel, TaskQueueDelegate, UnitMa
         try {
             Script.Get<TaskQueueManager>().EndNotifications(this, actionType);
             Script.Get<UnitManager>().EndNotifications(this, actionType);
-        } catch(System.NullReferenceException e) { }    
+        } catch(System.NullReferenceException) { }    
     }
 
     /*

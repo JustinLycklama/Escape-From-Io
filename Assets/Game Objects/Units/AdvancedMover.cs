@@ -7,7 +7,7 @@ public class AdvancedMover : Unit {
     public override MasterGameTask.ActionType primaryActionType => MasterGameTask.ActionType.Move;
 
     [SerializeField]
-    private DroneAnimationController animationController;
+    private DroneAnimationController animationController = null;
 
     protected override void UnitCustomInit() {
 

@@ -61,7 +61,6 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
 
         gameObject.isStatic = true;
         terrainLayer = LayerMask.NameToLayer("TerrainBoxCollider");
-        print("Terrain Layer: " + terrainLayer.value);
     }
 
     private void Start() {
@@ -71,7 +70,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
     private void OnDestroy() {
         try {
             Script.Get<SelectionManager>().EndNotifications(this);
-        } catch(System.NullReferenceException e) {}
+        } catch(NullReferenceException) {}
     }
 
     public void SetMapPosition(int mapX, int mapY, Rect mapRect) {

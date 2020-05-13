@@ -10,19 +10,21 @@ public class AudioManager : MonoBehaviour {
     }
 
     [SerializeField]
-    private AudioSource backgroundSource;
+    private AudioSource backgroundSource = null;
 
     [SerializeField]
-    private AudioSource sfx1;
+    private AudioSource sfx1 = null;
 
     [Serializable]
     private struct ClipType {
+#pragma warning disable 0649
         public Type type;
         public AudioClip audioClip;
+#pragma warning restore 0649
     }
 
     [SerializeField]
-    private ClipType[] clipTypes;
+    private ClipType[] clipTypes = null;
 
     // Start is called before the first frame update
     void Start() {

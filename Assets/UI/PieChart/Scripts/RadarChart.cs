@@ -19,7 +19,7 @@ namespace UCharts
         private float m_baseRotation = 0f;
 		[SerializeField] private float m_Size = 0;
 
-		[SerializeField] private Color32 m_Color0, m_Color1, m_BorderColor;
+		[SerializeField] private Color32 m_Color0 = Color.white, m_Color1 = Color.white, m_BorderColor = Color.white;
 
 		[SerializeField] List<RadarChartIndicator> m_Indicators = new List<RadarChartIndicator>();
 		[SerializeField] List<float> m_Data = new List<float>();

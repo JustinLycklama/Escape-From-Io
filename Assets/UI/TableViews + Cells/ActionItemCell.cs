@@ -33,13 +33,13 @@ public class UserAction {
 
 public class ActionItemCell : Clickable, HotkeyDelegate {
     [SerializeField]
-    private Text actionItemTitle;
+    private Text actionItemTitle = null;
 
     [SerializeField]
-    List<GameObject> unitIconContainers;
+    List<GameObject> unitIconContainers = null;
 
     [SerializeField]
-    List<UnitTypeIcon> unitIcons;
+    List<UnitTypeIcon> unitIcons = null;
 
     //[SerializeField]
     //private GameObject unitIconContainer;

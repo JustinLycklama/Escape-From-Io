@@ -6,29 +6,29 @@ using UnityEngine.UI;
 public class MasterAndGameTaskCell : MonoBehaviour {
 
     [SerializeField]
-    private Image backgroundImage;
+    private Image backgroundImage = null;
 
     [SerializeField]
-    private Text masterTaskDescription;
+    private Text masterTaskDescription = null;
 
     [SerializeField]
-    private Text gameTaskDescription;
+    private Text gameTaskDescription = null;
     [SerializeField]
-    private GameObject gameTaskContainer;
-
-    [SerializeField]
-    private Sprite blackAndWhiteImage;
-
-
+    private GameObject gameTaskContainer = null;
 
     [SerializeField]
-    private Color blockingColor;
+    private Sprite blackAndWhiteImage = null;
+
+
 
     [SerializeField]
-    private Color highlightColor;
+    private Color blockingColor = Color.white;
 
     [SerializeField]
-    private Image highlightArea;
+    private Color highlightColor = Color.white;
+
+    [SerializeField]
+    private Image highlightArea = null;
 
     MasterGameTask task;
     GameTask gameTask;

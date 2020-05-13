@@ -10,16 +10,16 @@ public class OverviewPanel : MonoBehaviour, GameButtonDelegate
 
 
     [SerializeField]
-    private GameButton transitionButton;
+    private GameButton transitionButton = null;
     [SerializeField]
-    private Image transitionButtonIcon;
+    private Image transitionButtonIcon = null;
     [SerializeField]
-    private Animation anim;
+    private Animation anim = null;
 
     [SerializeField]
-    private Sprite openIcon;
+    private Sprite openIcon = null;
     [SerializeField]
-    private Sprite closeIcon;
+    private Sprite closeIcon = null;
 
     private bool minimized = true;
 
