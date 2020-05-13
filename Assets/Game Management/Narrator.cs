@@ -11,7 +11,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
     Constants constants;
     PlayerBehaviour playerBehaviour;
     NotificationPanel notificationManager;
-
+    MessageManager messageManager;
 
     public List<Unit> startingUnits;
     Queue<Action> initActionChunks;
@@ -35,11 +35,20 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
             constants = GetComponent<Constants>();
             playerBehaviour = Script.Get<PlayerBehaviour>();
             notificationManager = Script.Get<NotificationPanel>();
+            messageManager = Script.Get<MessageManager>();
 
             notificationManager.SetSupressNotifications(true);
 
-            // Kickoff premade noise if it exists
-            Tag.MapGenerator.GetGameObject().GetComponent<PremadeNoiseGenerator>();
+            if(TutorialManager.isTutorial) {
+                Tag.MapGenerator.GetGameObject().GetComponent<PremadeNoiseGenerator>()?.SetupCustomMap();
+
+                // Tutorial only start with 3 units
+                for(int i = 3; i < startingUnits.Count; i++) {
+                    Destroy(startingUnits[i]);
+                }
+
+                startingUnits.RemoveRange(3, startingUnits.Count - 3);
+            }
 
             playerBehaviour.SetInternalPause(true);
         });
@@ -126,7 +135,6 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
 
         initActionChunks.Enqueue(() => {
             Script.Get<MiniMap>().Initialize();
-            StartCoroutine(CheckForNoRobots());
         });
 
         StartCoroutine(InitializeScene());
@@ -148,19 +156,23 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
         SceneManagement.sharedInstance.EndSceneUpdates(this);
     }
 
-    private void EndGameFailure() {
-        Action okay = () => {
-            FadePanel panel = Tag.FadePanel.GetGameObject().GetComponent<FadePanel>();
+    public void DoEndGameTransition() {
+        FadePanel panel = Tag.FadePanel.GetGameObject().GetComponent<FadePanel>();
 
-            Action completed = () => {
-                canSceneChange = true;
-            };
-
-            panel.FadeOut(true, completed);
-            SceneManagement.sharedInstance.ChangeScene(SceneManagement.State.GameFinish, null, null, this, null);
+        Action completed = () => {
+            canSceneChange = true;
         };
 
-        //Script.Get<MessageManager>().EnqueueMessage("GAME OVER", "No robots remain to fulfill your goals.\nYou remain trapped on Io...", okay);
+        panel.FadeOut(true, completed);
+        SceneManagement.sharedInstance.ChangeScene(SceneManagement.State.GameFinish, null, null, this, null);
+    }
+
+    private void EndGameFailure() {
+        Action okay = () => {
+            DoEndGameTransition();
+        };
+
+        Script.Get<MessageManager>().EnqueueMessage("GAME OVER", "No robots remain to fulfill your goals.\nYou remain trapped on Io...", okay);
     }
 
     IEnumerator InitializeScene() {
@@ -194,6 +206,8 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
         //Script.Get<MessageManager>().EnqueueMessage("Test", "This is an opening message!", null);
         //Script.Get<MessageManager>().EnqueueMessage("", "Second status message incoming", null);
 
+        //messageManager.SetMajorMessage("Hello!", MessageManager.ipsum, null);
+
         // Init Units with delay
         foreach(Unit unit in startingUnits) {
 
@@ -209,9 +223,15 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
         }
 
         playerBehaviour.SetInternalPause(false);
-        notificationManager.SetSupressNotifications(false);
-
         StartCoroutine(StartMusic());
+        StartCoroutine(CheckForNoRobots());
+
+        if(!TutorialManager.isTutorial) {
+            notificationManager.SetSupressNotifications(false);
+        } else {
+            yield return new WaitForSeconds(MapContainer.fogOfWarFadeDuration + 0.5f);
+            TutorialManager.sharedInstance.KickOffTutorial();
+        }
     }
 
     IEnumerator StartMusic() {

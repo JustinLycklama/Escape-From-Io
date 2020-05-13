@@ -134,6 +134,7 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
             NotifyDelegates(actionType);
         }
 
+        TutorialManager.sharedInstance.Fire(TutorialTrigger.TaskLockToggle);
         NotifyLockUpdates(actionType);
     }
 

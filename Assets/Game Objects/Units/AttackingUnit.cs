@@ -4,8 +4,6 @@ using UnityEngine;
 
 public abstract class AttackingUnit : Unit
 {
-    private Narrator narrator;
-
     private Unit followingUnit;
     private UnitManager unitManager;
 
@@ -25,7 +23,6 @@ public abstract class AttackingUnit : Unit
         // Occasionally update our search target
         resetSearchCoroutine = StartCoroutine(ResetSearch());
 
-        narrator = Script.Get<Narrator>();
         unitManager = Script.Get<UnitManager>();
 
         foundWaypoints = (waypoints, actionableItem, success, distance) => {
@@ -74,7 +71,7 @@ public abstract class AttackingUnit : Unit
     GameTask searchTask;
     GameTask targetTask;
 
-    protected override void Shutdown() {
+    public override void Shutdown() {
         base.Shutdown();
 
         followingUnit = null;

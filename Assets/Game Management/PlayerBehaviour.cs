@@ -19,7 +19,7 @@ public class PlayerBehaviour : MonoBehaviour {
     private int UI_Layer;
 
     private const float maxCameraMovementSpeed = 200;
-    private const float minCameraMovementSpeed = 100;
+    private const float minCameraMovementSpeed = 50;
 
     private const float maxCameraAutoPanSpeed = 2;
     private const float minCameraAutoPanSpeed = 0.5f;
@@ -35,11 +35,14 @@ public class PlayerBehaviour : MonoBehaviour {
 
     private const float cameraRotateSpeed = 100;
 
+    LayerMask terrainLayer;
+
     SettingsPanel settingsPanel;
     GraphicRaycaster graphicRaycaster;
 
     public bool gamePaused { get; private set; }
-    private bool lastPlayerPausedState = false;
+    private bool playerPausedState = false;
+    private bool internalPauseState = false;
 
     List<PlayerBehaviourUpdateDelegate> delegateList = new List<PlayerBehaviourUpdateDelegate>();
 
@@ -51,7 +54,7 @@ public class PlayerBehaviour : MonoBehaviour {
 
     private float panFriction = 1.0f;
 
-    private float minJoystickThreshold = 0.2f;
+    private float minJoystickThreshold = 0.35f;
 
     private float mouseDownTime = 0;
     private float secondsBeforeTouchPan = 0.075f;
@@ -73,8 +76,8 @@ public class PlayerBehaviour : MonoBehaviour {
     private bool hotkeysEnabled;
     private bool joystickEnabled;
 
-    Vector3 cameraForward;
-    Vector3 cameraRight;
+    private Vector3 cameraForward;
+    private Vector3 cameraRight;
 
     private Rect? _boundary = null;
     private Rect boundary {
@@ -114,6 +117,7 @@ public class PlayerBehaviour : MonoBehaviour {
         graphicRaycaster = Script.Get<UIManager>().GetComponent<GraphicRaycaster>();
 
         UI_Layer = LayerMask.NameToLayer("UI");
+        terrainLayer = ~LayerMask.NameToLayer("TerrainBoxCollider");
 
         hotkeysEnabled = !Application.isMobilePlatform;
         joystickEnabled = Application.isMobilePlatform;
@@ -154,7 +158,7 @@ public class PlayerBehaviour : MonoBehaviour {
             Ray ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
             SelectGameObject(ray);
 
-            yield return new WaitForSeconds(0.25f);
+            yield return new WaitForSeconds(0.15f);
         }
     }
 
@@ -251,6 +255,8 @@ public class PlayerBehaviour : MonoBehaviour {
 
             float vertical = panContolPanel.joystick.Vertical;
             if(Mathf.Abs(vertical) > minJoystickThreshold) {
+                vertical = Mathf.InverseLerp(minJoystickThreshold, 1, vertical);
+
                 int sign = vertical > 0 ? 1 : -1;
                 float verticalMovement = Mathf.Lerp(minCameraMovementSpeed, maxCameraMovementSpeed, Mathf.Abs(vertical));
                 //Camera.main.transform.Translate(sign * cameraForward * verticalMovement * Time.deltaTime, Space.World);
@@ -259,6 +265,9 @@ public class PlayerBehaviour : MonoBehaviour {
 
             float horizontal = panContolPanel.joystick.Horizontal;
             if(Mathf.Abs(horizontal) > minJoystickThreshold) {
+                horizontal = Mathf.InverseLerp(minJoystickThreshold, 1, horizontal);
+
+
                 int sign = horizontal > 0 ? 1 : -1;
                 float horizontalMovement = Mathf.Lerp(minCameraMovementSpeed, maxCameraMovementSpeed, Mathf.Abs(horizontal));
                 //Camera.main.transform.Translate(sign * cameraRight * horizontalMovement * Time.deltaTime, Space.World);
@@ -471,14 +480,16 @@ public class PlayerBehaviour : MonoBehaviour {
 
         lastRay = ray;
 
-        if(Physics.Raycast(ray, out hit)) {
+        print("Raycast to: " + terrainLayer.value);
+
+        if(Physics.Raycast(ray, out hit, Mathf.Infinity, terrainLayer)) {
             lastHit = hit;
 
             GameObject objectHit = hit.transform.gameObject;
             SelectionManager selectionManager = Script.Get<SelectionManager>();
 
-            Unit unit = objectHit.GetComponent<Unit>();
-            Building building = objectHit.GetComponent<Building>();
+            //Unit unit = objectHit.GetComponent<Unit>();
+            //Building building = objectHit.GetComponent<Building>();
 
             // Select a Terrain Selection
             if(objectHit.GetComponent<MapContainer>() != null) {
@@ -492,16 +503,16 @@ public class PlayerBehaviour : MonoBehaviour {
                 selectionManager.SelectTerrain(coordinate);
             }
 
-            // Select a unit
-            else if(unit != null) {
-                if(!unit.initialized && building != null) {
-                    selectionManager.SelectSelectable(building);
-                } else {
-                    selectionManager.SelectSelectable(unit);
-                }
-            } else if(building != null) {
-                selectionManager.SelectSelectable(building);
-            }
+            //// Select a unit
+            //else if(unit != null) {
+            //    if(!unit.initialized && building != null) {
+            //        selectionManager.SelectSelectable(building);
+            //    } else {
+            //        selectionManager.SelectSelectable(unit);
+            //    }
+            //} else if(building != null) {
+            //    selectionManager.SelectSelectable(building);
+            //}
 
             // Deselect everything
             else {
@@ -547,7 +558,8 @@ public class PlayerBehaviour : MonoBehaviour {
         // Adjust camera ange here
         float CameraPullBack = -Mathf.Lerp(minCameraZoomPosition, maxCameraZoomPosition, percentageOfMaxHeight);
 
-        Vector3 newCameraPosition = position + new Vector3(0, Camera.main.transform.position.y, CameraPullBack);
+        Vector3 newCameraPosition = position + new Vector3(0, 0, CameraPullBack);
+        newCameraPosition.y = Camera.main.transform.position.y;
 
         if (animated) {
             if (panCameraRoutine != null) {
@@ -595,25 +607,22 @@ public class PlayerBehaviour : MonoBehaviour {
      * When we return from our 'internal' paused state, we return to the state the player had, which could also be paused
      * */
     public void SetInternalPause(bool paused) {
-        if(paused) {
-            EnactPauseUpdate(true);
-        } else {
-            EnactPauseUpdate(lastPlayerPausedState);
-        }
+        internalPauseState = paused;
+        EnactPauseUpdate();
     }
 
     public void SetPlayerPauseState(bool paused) {
-        lastPlayerPausedState = paused;
-        EnactPauseUpdate(paused);
+        playerPausedState = paused;
+        EnactPauseUpdate();
     }
 
     /*
      * Helpers
      * */
 
-    private void EnactPauseUpdate(bool paused) {
+    private void EnactPauseUpdate() {
         bool oldPausedState = gamePaused;
-        gamePaused = paused;
+        gamePaused = playerPausedState || internalPauseState;
 
         if(oldPausedState != gamePaused) {
             NotifyAllPlayerBehaviourUpdate();

@@ -38,7 +38,7 @@ public class NotificationPanel : MonoBehaviour, TableViewDelegate {
 
     public static int unitDurationWarning = 30;
 
-    private const float notificationDelay = 2f;
+    private const float notificationDelay = 0.75f;
 
     private const int notificationDuration = 5;
     private const int fadeDuration = 2;    
@@ -98,6 +98,8 @@ public class NotificationPanel : MonoBehaviour, TableViewDelegate {
 
             // Begin to fade
             Action startFadeBlock = () => {
+                notificationItem.isNew = false;
+
                 fadingNotifications.Add(notificationItem);
                 tableView.ReloadData();
 

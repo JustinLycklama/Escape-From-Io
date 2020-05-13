@@ -8,12 +8,13 @@ public class Golem : AttackingUnit
     private EarthElementalController animationController;
 
     public override FactionType factionType { get { return FactionType.Enemy; } }
-
     public override int duration => 60 * 5;
-
     public override MasterGameTask.ActionType primaryActionType => MasterGameTask.ActionType.Attack;
 
     protected override GameTask.ActionType attackType => GameTask.ActionType.AttackMele;
+
+    private const float minScale = 0.45f;
+    private const float maxScale = 0.8f;
 
     public override float SpeedForTask(MasterGameTask.ActionType actionType) {
         switch(actionType) {
@@ -32,43 +33,13 @@ public class Golem : AttackingUnit
         animationController.Activate();
     }
 
-    //protected override void UnitCustomInit() {
-    //    base.UnitCustomInit();
+    public void SetEvolution(float evo) {
+        float scale = Mathf.Lerp(minScale, maxScale, evo);
 
-    //    //animationController.Idle();
-    //}
+        animationController.gameObject.transform.localScale = new Vector3(scale, scale, scale);
+    }
 
-    /*
-     * Action Delegates
-     * */
-
-    //protected override void BeginWalkDelegate() {
-    //    base.BeginWalkDelegate();
-
-    //    animationController.Walk();
-    //}
-
-    //protected override void CompleteWalkDelegate() {
-    //    base.CompleteWalkDelegate();
-
-    //    animationController.Idle();
-    //}
-
-    //protected override void BeginTaskActionDelegate() {
-    //    base.BeginTaskActionDelegate();
-
-    //    if(NoiseGenerator.random.Next(0, 2) == 0) {
-    //        animationController.Atk01();
-    //    } else {
-    //        animationController.Atk02();
-    //    }
-    //}
-
-    //protected override void CompleteTaskActionDelegate() {
-
-    //}
-
-    protected override void AnimateState(AnimationState state, float rate = 1.0f) {
+    protected override void AnimateState(AnimationState state, float rate = 1.0f, bool isCarry = false) {
         animationController.AnimateState(state, rate);
     }
 }

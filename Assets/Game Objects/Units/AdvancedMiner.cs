@@ -31,7 +31,7 @@ public class AdvancedMiner : Unit {
         return 0.1f;
     }
 
-    protected override void AnimateState(AnimationState state, float rate = 1.0f) {
+    protected override void AnimateState(AnimationState state, float rate = 1.0f, bool isCarry = false) {
         //throw new System.NotImplementedException();
     }
 }

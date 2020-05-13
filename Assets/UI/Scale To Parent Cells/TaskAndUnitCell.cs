@@ -9,6 +9,11 @@ using UCharts;
 
 public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDelegate, UnitManagerDelegate, GameButtonDelegate, TimeUpdateDelegate {
 
+    public enum TaskAndUnitCellTutorialIdentifier {
+        Details,
+        LockToggle
+    }
+
     [Serializable]
     private struct TaskIconFlow {
         public MasterGameTask.ActionType actionType;
@@ -168,17 +173,22 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
         taskListLockBackground.color = state ? defaultColor : disabledColor;
         taskListLockToggle.SetState(state);
 
-        SetLockAndCount();
+        UpdateLockAndCountUI();
     }
 
-    private void SetLockAndCount() {
-
+    private void UpdateLockAndCountUI() {
         //string stateText = taskListLocked.state ? "Paired" : "Open";
         //string count = taskList.Length.ToString();
 
         //taskListLockedText.text = $"{count} {stateText}";
-        taskCountText.text = taskList.Length.ToString();
-    }
+        taskCountText.text = taskList.Select(task => {
+            if (task.repeatCount > 0) {
+                return task.repeatCount;
+            }
+
+            return 1;
+        }).Sum().ToString();
+    }       
 
     public Color ColorForState(Unit.UnitState unitState) {
 
@@ -205,9 +215,26 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
 
     public void ButtonDidClick(GameButton button) {
 
+        var currentTutorialIdentifier = TutorialManager.isolateUserAction;
+
         if (button == unitListButton) {
+
+            // Skip if the tutorial is forcing us elsewhere
+            if(currentTutorialIdentifier != null &&
+                (currentTutorialIdentifier.actionType != actionType || currentTutorialIdentifier.cellIdentifier != TaskAndUnitCellTutorialIdentifier.Details)) {
+                return;
+            }
+
             PushDetailPanel();
+            TutorialManager.sharedInstance.Fire(TutorialTrigger.TaskAndUnitDetails);
         } else if(button == taskListLockButton || button == taskListLockToggle) {
+
+            // Skip if the tutorial is forcing us elsewhere
+            if(currentTutorialIdentifier != null &&
+                (currentTutorialIdentifier.actionType != actionType || currentTutorialIdentifier.cellIdentifier != TaskAndUnitCellTutorialIdentifier.LockToggle)) {
+                return;
+            }
+
             TaskQueueManager taskQueueManager = Script.Get<TaskQueueManager>();
             var newState = !taskQueueManager.GetTaskListLockStatus(actionType);
 
@@ -221,7 +248,7 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
      * */
 
     public void OnPointerClick(PointerEventData eventData) {
-        PushDetailPanel();
+        ButtonDidClick(unitListButton);
     }
 
     /*
@@ -230,7 +257,7 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
 
     public void NotifyUpdateTaskList(MasterGameTask[] taskList, MasterGameTask.ActionType actionType, TaskQueueManager.ListState listState) {
         this.taskList = taskList;        
-        SetLockAndCount();
+        UpdateLockAndCountUI();
 
         SetLockState(Script.Get<TaskQueueManager>().GetTaskListLockStatus(actionType));
 

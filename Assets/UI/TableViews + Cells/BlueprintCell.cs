@@ -50,9 +50,9 @@ public class BlueprintCell : MonoBehaviour, IPointerClickHandler, BuildingsUpdat
         disabled = blueprint.requirementsMet != null && !blueprint.requirementsMet(blueprintLayoutCoordinate);
         var disabledTextString = disabled ? blueprint.requirementsNotMetString : "";
 
-        var tutorialBlueprint = TutorialManager.isolateBlueprint;
+        var tutorialBlueprint = TutorialManager.isolateUserAction;
         if(tutorialBlueprint != null) {
-            disabled = disabled || tutorialBlueprint != blueprint;
+            disabled = disabled || tutorialBlueprint.blueprint != blueprint;
         }
 
         if(disabled) {

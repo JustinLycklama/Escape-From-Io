@@ -25,6 +25,9 @@ public class UIManager : MonoBehaviour, SelectionManagerDelegate, HotkeyDelegate
     [SerializeField]
     public NavigationPanel currentTopPanel;
 
+    [SerializeField]
+    public GameButton tutorialRepeatButton;
+
     private SelectionManager selectionManager;
     private PlayerBehaviour playerBehaviour;
 

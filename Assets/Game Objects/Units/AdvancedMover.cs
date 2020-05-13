@@ -6,6 +6,9 @@ public class AdvancedMover : Unit {
     public override int duration => 360;
     public override MasterGameTask.ActionType primaryActionType => MasterGameTask.ActionType.Move;
 
+    [SerializeField]
+    private DroneAnimationController animationController;
+
     protected override void UnitCustomInit() {
 
     }
@@ -23,8 +26,8 @@ public class AdvancedMover : Unit {
         return 0.1f;
     }
 
-    protected override void AnimateState(AnimationState state, float rate = 1.0f) {
-        throw new System.NotImplementedException();
+    protected override void AnimateState(AnimationState state, float rate = 1.0f, bool isCarry = false) {
+        animationController.AnimateState(state, rate, isCarry);
     }
 }
 

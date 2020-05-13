@@ -15,7 +15,7 @@ public class Defender : AttackingUnit
     [SerializeField]
     private MechAnimationController mechAnimationController;
 
-    protected override void AnimateState(AnimationState state, float rate) {
+    protected override void AnimateState(AnimationState state, float rate, bool isCarry = false) {
         mechAnimationController.AnimateState(state, rate);
     }
 

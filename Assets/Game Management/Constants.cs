@@ -104,11 +104,11 @@ public class Script {
     public static Script MessageManager { get { return new Script(Tag.UIManager, typeof(MessageManager)); } }
     public static Script EnemyManager { get { return new Script(Tag.UnitManager, typeof(EnemyManager)); } }
     public static Script AudioManager { get { return new Script(Tag.AudioManager, typeof(AudioManager)); } }
-    public static Script ParticleDisplayer { get { return new Script(Tag.ParticleDisplayer, typeof(ParticlesDisplayer)); } }
+    public static Script Narrator { get { return new Script(Tag.Narrator, typeof(Narrator)); } }
 
     public static Script[] allScripts = new Script[] { Constants, PlayerBehaviour, MapsManager, UIManager, TaskQueue, MapGenerator, PathfindingGrid,
         SelectionManager, UnitManager, TextureGenerator, TerrainManager, ResourceManager, MiniMap, BuildingManager, TimeManager, NotificationManager, FadePanel,
-        SettingsPanel, IntervalActionPipeline, MessageManager, EnemyManager, AudioManager}; 
+        SettingsPanel, IntervalActionPipeline, MessageManager, EnemyManager, AudioManager, Narrator}; 
 
     public static T Get<T> () where T : Component {
 

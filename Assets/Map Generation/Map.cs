@@ -111,6 +111,8 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
 
         UpdateUserActionsAt(layoutCoordinate);
         mapContainer.UpdateShaderTerrainTextures();
+
+        TutorialManager.sharedInstance.Fire(TutorialTrigger.TerraformComplete);
     }
 
     //Dictionary<LayoutCoordinate, UserAction[]> userActionDictionary = new Dictionary<LayoutCoordinate, UserAction[]>();

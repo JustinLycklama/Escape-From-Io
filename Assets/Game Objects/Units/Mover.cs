@@ -13,7 +13,7 @@ public class Mover : Unit {
 
     }
 
-    protected override void AnimateState(AnimationState state, float rate) {
+    protected override void AnimateState(AnimationState state, float rate, bool isCarry = false) {
         mechAnimationController.AnimateState(state, rate);
     }
 

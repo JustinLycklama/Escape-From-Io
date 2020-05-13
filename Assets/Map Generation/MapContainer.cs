@@ -43,10 +43,13 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
     // TODO: Moving away from creating a physical map using cubes, lets create a virtual FOW
     //bool[,] fogOfWarMap;
     GameObject[,] fogOfWarMap;
+    public static int fogOfWarFadeDuration = 1;
 
     float[] textureIndexList;
 
     public MapContainerNeighbours neighbours = new MapContainerNeighbours();
+
+    private LayerMask terrainLayer;
 
     private void Awake() {
         Constants constants = Script.Get<Constants>();
@@ -57,6 +60,8 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         textureIndexList = new float[mapWidthWithOverhang * mapHeightWithOverhang];
 
         gameObject.isStatic = true;
+        terrainLayer = LayerMask.NameToLayer("TerrainBoxCollider");
+        print("Terrain Layer: " + terrainLayer.value);
     }
 
     private void Start() {
@@ -243,6 +248,8 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                 //MapCoordinate mapCoordinate = new MapCoordinate(layoutCoordinate);
 
                 BoxCollider boxCollider = gameObject.AddComponent(typeof(BoxCollider)) as BoxCollider;
+
+                boxCollider.gameObject.layer = terrainLayer;
 
                 float wPos = (w * boxSizeX) + boxSizeX / 2f;
                 float hPos = (h * boxSizeY) + boxSizeY / 2f;
@@ -707,7 +714,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                 };
 
                 Action boxEndAndAnimation = () => {
-                    Script.Get<TimeManager>().AddNewTimer(1, durationUpdateBlock, durationCompletionBlock, 3); // was 2
+                    Script.Get<TimeManager>().AddNewTimer(fogOfWarFadeDuration, durationUpdateBlock, durationCompletionBlock, 3); // was 2
                     createBoxEnded();
                 };
 

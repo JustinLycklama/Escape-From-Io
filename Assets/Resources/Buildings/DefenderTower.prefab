@@ -39,7 +39,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8672968108728788097}
-  - component: {fileID: 8672968108728788100}
   - component: {fileID: 3358762210222919843}
   m_Layer: 0
   m_Name: DefenderTower
@@ -64,19 +63,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!65 &8672968108728788100
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8672968108728788154}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 2, z: 1}
-  m_Center: {x: 0, y: 1, z: 0}
 --- !u!114 &3358762210222919843
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -201,20 +187,20 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 0.25
       objectReference: {fileID: 0}
-    - target: {fileID: 2155320113460423948, guid: d7b0def9b39807d4588c9c97532f3aed,
+    - target: {fileID: 6810237234909647702, guid: d7b0def9b39807d4588c9c97532f3aed,
         type: 3}
-      propertyPath: m_IsActive
-      value: 1
+      propertyPath: startDelay.scalar
+      value: 0.1
       objectReference: {fileID: 0}
     - target: {fileID: 925005421203658596, guid: d7b0def9b39807d4588c9c97532f3aed,
         type: 3}
       propertyPath: m_LocalScale.x
       value: 100
       objectReference: {fileID: 0}
-    - target: {fileID: 6810237234909647702, guid: d7b0def9b39807d4588c9c97532f3aed,
+    - target: {fileID: 2155320113460423948, guid: d7b0def9b39807d4588c9c97532f3aed,
         type: 3}
-      propertyPath: startDelay.scalar
-      value: 0.1
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: d7b0def9b39807d4588c9c97532f3aed, type: 3}

@@ -6,8 +6,6 @@ public class Miner : Unit {
     public override int duration => 480;
     public override MasterGameTask.ActionType primaryActionType => MasterGameTask.ActionType.Mine;
 
-    public MoenenGames.VoxelRobot.Weapon[] weaponSet;
-
     [SerializeField]
     private MechAnimationController mechAnimationController;
 
@@ -21,7 +19,7 @@ public class Miner : Unit {
     //    }
     //}
 
-    protected override void AnimateState(AnimationState state, float rate) {
+    protected override void AnimateState(AnimationState state, float rate, bool isCarry = false) {
         mechAnimationController.AnimateState(state, rate);
     }
 

@@ -6,7 +6,7 @@ using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
 public class UserAction {
-    public enum TutorialIdentifier {
+    public enum UserActionTutorialIdentifier {
         None,
         DrillDown,
         BuildUnit,
@@ -16,7 +16,7 @@ public class UserAction {
         Path
     }
 
-    public TutorialIdentifier tutorialIdentifier = TutorialIdentifier.None;
+    public UserActionTutorialIdentifier tutorialIdentifier = UserActionTutorialIdentifier.None;
 
     public string description;
     public LayoutCoordinate layoutCoordinate;
@@ -121,8 +121,8 @@ public class ActionItemCell : Clickable, HotkeyDelegate {
         bool enabled = action != null;
         var currentTutorialIdentifier = TutorialManager.isolateUserAction;
 
-        if (currentTutorialIdentifier.HasValue) {
-            enabled = enabled && currentTutorialIdentifier.Value == action.tutorialIdentifier;
+        if (currentTutorialIdentifier != null) {
+            enabled = enabled && currentTutorialIdentifier.userActionIdentifier == action.tutorialIdentifier;
         }
 
         if(buttonEnabled != enabled) {

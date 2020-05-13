@@ -21,18 +21,18 @@ public abstract class AnimationController : MonoBehaviour, PlayerBehaviourUpdate
         playerBehaviour.EndPlayerBehaviourNotifications(this);
     }
 
-    public virtual void AnimateState(Unit.AnimationState state, float rate = 1.0f) {
+    public virtual void AnimateState(Unit.AnimationState state, float rate = 1.0f, bool isCarry = false) {
         animator.speed = AnimationModifierForState(state) * rate;
 
         if (currentState == state) {
             return;
         }
 
-        animator.Play(StringConstantForState(state));
+        animator.Play(StringConstantForState(state, isCarry));
         currentState = state;
     }
 
-    public abstract string StringConstantForState(Unit.AnimationState state);
+    public abstract string StringConstantForState(Unit.AnimationState state, bool isCarry = false);
     public abstract float AnimationModifierForState(Unit.AnimationState state);
 
     /*

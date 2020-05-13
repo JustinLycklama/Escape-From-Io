@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SettingsPanel : MonoBehaviour, PlayerBehaviourUpdateDelegate, GameButtonDelegate {
+public class SettingsPanel : MonoBehaviour, PlayerBehaviourUpdateDelegate, GameButtonDelegate, HotkeyDelegate {
     public GameButton settingsButton;
     public GameButton playButton;
     public GameButton pauseButton;
@@ -20,6 +20,7 @@ public class SettingsPanel : MonoBehaviour, PlayerBehaviourUpdateDelegate, GameB
     private void Start() {
         playerBehaviour = Script.Get<PlayerBehaviour>();
         playerBehaviour.RegisterForPlayerBehaviourNotifications(this);
+        playerBehaviour.AddHotKeyDelegate(KeyCode.Escape, this);
 
         menuWindow.gameObject.SetActive(false);
     }
@@ -27,6 +28,7 @@ public class SettingsPanel : MonoBehaviour, PlayerBehaviourUpdateDelegate, GameB
     private void OnDestroy() {
         try {
             playerBehaviour.EndPlayerBehaviourNotifications(this);
+            playerBehaviour.RemoveHotKeyDelegate(this);
         } catch(System.NullReferenceException e) { }
     }
 
@@ -57,5 +59,13 @@ public class SettingsPanel : MonoBehaviour, PlayerBehaviourUpdateDelegate, GameB
     public void PauseStateUpdated(bool paused) {
         playButton.SetHoverLock(!paused);
         pauseButton.SetHoverLock(paused);
+    }
+
+    /*
+     * HotkeyDelegate Interface
+     * */
+
+    public void HotKeyPressed(KeyCode key) {
+        ButtonDidClick(settingsButton);
     }
 }

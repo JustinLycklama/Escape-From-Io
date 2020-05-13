@@ -172,12 +172,19 @@ public class GameResourceManager : MonoBehaviour {
         return availableOreList.Where(ore => ore.associatedTask == null && ore.taskAlreadyDictated == false && ore.mineralType == gatherType).ToArray();
     }
 
-    public MineralType ConsumeInBuilding(Unit oreHolder, Building building) {
-
-        if(!unitOreDistribution.ContainsKey(oreHolder) || unitOreDistribution[oreHolder].Count == 0) {
-            throw new Exception();
+    public bool isHoldingResources(Unit unit) {
+        if(!unitOreDistribution.ContainsKey(unit) || unitOreDistribution[unit].Count == 0) {
+            return false;
         }
 
+        return true;
+    }
+
+    public MineralType ConsumeInBuilding(Unit oreHolder, Building building) {
+
+        if(!isHoldingResources(oreHolder)) {
+            throw new Exception();
+        }
         
         Ore anyOre = unitOreDistribution[oreHolder][0];
 

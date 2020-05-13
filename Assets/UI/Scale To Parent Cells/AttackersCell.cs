@@ -22,8 +22,6 @@ public class AttackersCell : MonoBehaviour, UnitManagerDelegate, GameButtonDeleg
     [SerializeField]
     private HalfPieChart evolutionChart;
 
-    private EnemyManager enemyManager;
-
     private List<Unit> soonToExpireUnits = new List<Unit>();
 
     private const MasterGameTask.ActionType actionType = MasterGameTask.ActionType.Attack;
@@ -32,8 +30,6 @@ public class AttackersCell : MonoBehaviour, UnitManagerDelegate, GameButtonDeleg
     // Start is called before the first frame update
     void Start()
     {
-        enemyManager = Script.Get<EnemyManager>();
-
         Script.Get<UnitManager>().RegisterForNotifications(this, actionType);
         Script.Get<TimeManager>().RegisterForTimeUpdateNotifications(this);
     }
@@ -81,10 +77,10 @@ public class AttackersCell : MonoBehaviour, UnitManagerDelegate, GameButtonDeleg
     public void SecondUpdated() {
 
         // Attackers modifiers
-        int frequencyPercent = Mathf.Clamp(Mathf.RoundToInt(enemyManager.frequency * 100), 0, 100);
+        int frequencyPercent = Mathf.Clamp(Mathf.RoundToInt(EnemyManager.frequency * 100), 0, 100);
         frequencyChart.SetData(new List<PieChartDataNode> { new PieChartDataNode("", frequencyPercent), new PieChartDataNode("", 100 - frequencyPercent) });
 
-        int evolutionPercent = Mathf.Clamp(Mathf.RoundToInt(enemyManager.evolution * 100), 0, 100);
+        int evolutionPercent = Mathf.Clamp(Mathf.RoundToInt(EnemyManager.evolution * 100), 0, 100);
         evolutionChart.SetData(new List<PieChartDataNode> { new PieChartDataNode("", evolutionPercent), new PieChartDataNode("", 100 - evolutionPercent) });
 
         // Defender's Percent bars

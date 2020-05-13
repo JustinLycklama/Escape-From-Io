@@ -79,6 +79,8 @@ public class BuildingManager : MonoBehaviour {
     public void AddBuildingAtLocation(Building building, LayoutCoordinate layoutCoordinate) {
         building.transform.SetParent(transform, true);
 
+        TutorialManager.sharedInstance.Fire(TutorialTrigger.BuildingAdded);
+
         // Don't record "PathBuilding" buildings for blocking purposes
         if(building.title != "Path") {
             locationBuildingMap[layoutCoordinate] = building;
@@ -106,6 +108,7 @@ public class BuildingManager : MonoBehaviour {
         //ModifyStatusCircularAroundPoint(x, y, building.BuildingStatusEffects(), building.BuildingStatusRange());
 
         NotifyBuildingUpdate(building, false);
+        TutorialManager.sharedInstance.Fire(TutorialTrigger.BuildingComplete);
     }
 
     public void RemoveBuilding(Building buildling) {
@@ -394,12 +397,8 @@ public class BuildingManager : MonoBehaviour {
     }
 
     public void NotifyStatusEffectUpdate(List<KeyValuePair<int, int>> effectedIndicies) {
-
-        print("Effected Indicies: " + effectedIndicies.Count);
-
         foreach(StatusEffectUpdateDelegate updateDelegate in statusEffectUpdateDelegateList) {
                 updateDelegate.StatusEffectMapUpdated(statusMap, effectedIndicies);
         }
     }
-
 }

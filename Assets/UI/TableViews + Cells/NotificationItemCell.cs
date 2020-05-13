@@ -63,8 +63,6 @@ public class NotificationItemCell : MonoBehaviour, GameButtonDelegate {
             if(vfxPrefabInstance == null && vfxPrefab != null) {
                 vfxPrefabInstance = Instantiate(vfxPrefab, vfxPosition.position, Quaternion.identity, vfxParent);
             }
-
-            notificationItem.isNew = false;
         }        
     }
 

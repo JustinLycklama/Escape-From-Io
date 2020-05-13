@@ -9,6 +9,9 @@ public class MapGenerator : MonoBehaviour {
     public enum DrawMode { NoiseMap, ColorMap, Mesh }
     public DrawMode drawMode;
 
+    [SerializeField]
+    private PremadeNoiseGenerator premadeLayoutMap;
+
     [Range(0, 1)]
     public float groundFeaturesImpactOnLayout;
 
@@ -251,9 +254,7 @@ public class MapGenerator : MonoBehaviour {
         totalLayoutHeight = mapLayoutHeight * constants.mapCountY;
 
         layoutNoiseMap = new float[0, 0];
-        bool success = false;
-
-        PremadeNoiseGenerator premadeLayoutMap = GetComponent<PremadeNoiseGenerator>();
+        bool success = false;      
 
         while(success == false) {
             RandomizeSeed();
@@ -490,8 +491,8 @@ public class MapGenerator : MonoBehaviour {
      * Map (2d array) Creation
      * */
 
-    // Used for inserting Alunar Rocks after map noise generation
-    int maxSavedCoordinateValues = 5;
+    // Used for inserting (Azure) Alunar Rocks after map noise generation
+    int maxSavedCoordinateValues = 30;
     const int invalidMutatorValue = 20;
     struct MutatorCoordinateValues {
         public float mutator;

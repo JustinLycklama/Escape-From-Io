@@ -79,6 +79,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
     // Manager References
     TaskQueueManager taskQueueManager;
     PlayerBehaviour playerBehaviour;
+    GameResourceManager resourceManager;
 
     // Pathfinding
     public float speed;
@@ -144,6 +145,8 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
     public int unitHealth = 100;
 
     [HideInInspector]
+    public bool skipDurationUpdates = false;
+    [HideInInspector]
     public int remainingDuration = maxUnitUduration;
 
     [HideInInspector]
@@ -196,7 +199,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
     private void Awake() {
         initialized = false;
 
-        title = primaryActionType.TitleAsNoun() + " #" + UnitManager.unitCount[primaryActionType].ToString();
+        title = primaryActionType.TitleAsNoun();
         UnitManager.unitCount[primaryActionType]++;
 
         gameTasksQueue = new Queue<GameTask>();
@@ -213,11 +216,14 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
     public void Initialize() {
         initialized = true;
 
+        TutorialManager.sharedInstance.Fire(TutorialTrigger.UnitCompleted);
+
         // Register
         UnitManager unitManager = Script.Get<UnitManager>();
         unitManager.RegisterUnit(this);
         Script.Get<MapsManager>().AddTerrainUpdateDelegate(this);    
         playerBehaviour = Script.Get<PlayerBehaviour>();
+        resourceManager = Script.Get<GameResourceManager>();
 
         // Tooltip
         unitStatusTooltip = Instantiate(Resources.Load("UI/UnitStatusPanel", typeof(UnitStatusTooltip))) as UnitStatusTooltip;
@@ -246,18 +252,11 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         // Duration
         this.remainingDuration = unitDuration;
         Action<int, float> durationUpdateBlock = (remainingTime, percentComplete) => {
-            if (this == null || gameObject == null || !gameObject.activeSelf) {
+            if (this == null || gameObject == null || !gameObject.activeSelf || skipDurationUpdates) {
                 return;
             }
 
-            this.remainingDuration = remainingTime;
-            float percentOfMaxUnitTime = (float) remainingTime / (float) maxUnitUduration;
-
-            unitStatusTooltip?.SetRemainingDuration(remainingTime, percentOfMaxUnitTime);
-
-            if (remainingTime == NotificationPanel.unitDurationWarning) {
-                Script.Get<NotificationPanel>().AddNotification(new NotificationItem( "Bot only has " + NotificationPanel.unitDurationWarning.ToString() + "s remaining", NotificationType.Warning, transform, primaryActionType));
-            }
+            SetRemainingDuration(remainingTime);
         };
 
         // Health
@@ -429,11 +428,13 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
             Destroy(unitStatusTooltip.gameObject);
             unitStatusTooltip = null;
         }
-        
-        Destroy(gameObject);
+
+        TutorialManager.sharedInstance.Fire(TutorialTrigger.UnitFinishedDestroySelf);
+
+        Destroy(gameObject);       
     }
 
-    protected virtual void Shutdown() {
+    public virtual void Shutdown() {
         taskQueueManager.RestractTaskRequest(this);
         InterruptInProgressActions();
 
@@ -503,7 +504,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         }
 
         // All resources we are carrying get put back
-        Script.Get<GameResourceManager>().ReturnAllToEnvironment(this);
+        resourceManager.ReturnAllToEnvironment(this);
     }
 
     protected void StopActionCoroutines() {
@@ -524,7 +525,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         Idle, TurnLeft, TurnRight, Walk, WalkTurnRight, WalkTurnLeft, PerformCoreAction, Pickup, Die
     }
 
-    protected abstract void AnimateState(AnimationState state, float fate = 1.0f);
+    protected abstract void AnimateState(AnimationState state, float rate = 1.0f, bool isCarry = false);
 
 
     /*
@@ -543,7 +544,9 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
         //BeginTaskActionDelegate();
 
-        AnimateState(AnimationState.PerformCoreAction);
+        bool isCarrying = resourceManager.isHoldingResources(this);
+        AnimateState(AnimationState.PerformCoreAction, 1.0f, isCarrying);
+
 
         while (true) {
 
@@ -581,6 +584,8 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
     protected Coroutine FollowPathCoroutine;    
     protected IEnumerator FollowPath(Path path, System.Action<bool> callBack) {
+
+        bool isCarrying = resourceManager.isHoldingResources(this);
 
         int pathIndex = 0;
         bool turningToStart = true;
@@ -624,7 +629,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
             if(totalTurnDistance >= 1) {
                 turningToStart = false;
             } else {
-                AnimateState(totalTurnDistance > 0 ? AnimationState.TurnLeft : AnimationState.TurnRight);
+                AnimateState(totalTurnDistance > 0 ? AnimationState.TurnLeft : AnimationState.TurnRight, Mathf.InverseLerp(10, 100, turnSpeed), isCarrying);
 
                 totalTurnDistance = Mathf.Clamp01(totalTurnDistance + ((Time.deltaTime * turnSpeed) / degreesToTurn * 180));
                 transform.rotation = Quaternion.Slerp(originalRotation, targetRotation, totalTurnDistance);
@@ -688,7 +693,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
                 float localSpeed = Mathf.Pow(currentTerrain.walkSpeedMultiplier, movementPenaltyMultiplier) * unitSpeed;
 
-                AnimateState(AnimationState.Walk, Mathf.InverseLerp(10, 100, localSpeed));
+                AnimateState(AnimationState.Walk, Mathf.InverseLerp(10, 100, localSpeed), isCarrying);
 
                 float height = Script.Get<MapsManager>().GetHeightAt(lookPointMapCoordinate) * lookPointMapCoordinate.mapContainer.transform.lossyScale.y; //  + (0.5f * transform.localScale.y)
                 Vector3 lookPoint = new Vector3(lookPointWorldPos.vector3.x, height, lookPointWorldPos.vector3.z);
@@ -735,7 +740,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
                 callBack(true);
                 yield break; // Stop Coroutine
             } else {
-                AnimateState(totalTurnDistance > 0 ? AnimationState.TurnLeft : AnimationState.TurnRight);
+                AnimateState(totalTurnDistance > 0 ? AnimationState.TurnLeft : AnimationState.TurnRight, Mathf.InverseLerp(10, 100, turnSpeed), isCarrying);
 
                 totalTurnDistance = Mathf.Clamp01(totalTurnDistance + ((Time.deltaTime * turnSpeed) / degreesToTurn * 180));
                 transform.rotation = Quaternion.Slerp(originalRotation, targetRotation, totalTurnDistance);
@@ -787,7 +792,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
                     // The associatedTask is over
                     AssociateTask(null);
-                    TakeDamage(5);
+                    TakeDamage(Mathf.Lerp(EnemyManager.minEnemyAttack, EnemyManager.maxEnemyAttack, EnemyManager.evolution));
 
                     //GameResourceManager resourceManager = Script.Get<GameResourceManager>();
                     //resourceManager.GiveToUnit(this, unit);
@@ -824,13 +829,13 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         return 0;
     }
 
-    public void TakeDamage(int damage) {
+    public void TakeDamage(float damage) {
         if (remainingHealth <= 0) {
             // We have already died
             return;
         }
 
-        remainingHealth -= damage;
+        remainingHealth -= Mathf.FloorToInt(damage);
 
         if (remainingHealth <= 0) {
             remainingHealth = 0;
@@ -846,6 +851,17 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         }
 
         unitStatusTooltip.SetRemainingHealth(remainingHealth, (float)remainingHealth / (float)unitHealth);
+    }
+
+    public void SetRemainingDuration(int remainingTime) {
+        this.remainingDuration = remainingTime;
+        float percentOfMaxUnitTime = (float)remainingTime / (float)maxUnitUduration;
+
+        unitStatusTooltip?.SetRemainingDuration(remainingTime, percentOfMaxUnitTime);
+
+        if(remainingTime == NotificationPanel.unitDurationWarning) {
+            Script.Get<NotificationPanel>().AddNotification(new NotificationItem("Bot only has " + NotificationPanel.unitDurationWarning.ToString() + "s remaining", NotificationType.Warning, transform, primaryActionType));
+        }
     }
 
     /*

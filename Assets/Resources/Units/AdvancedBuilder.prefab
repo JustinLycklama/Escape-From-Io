@@ -99,7 +99,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6819663893997079433}
-  - component: {fileID: 6819663893997079438}
   - component: {fileID: 3606553699785398249}
   - component: {fileID: 2802711064574047498}
   m_Layer: 0
@@ -128,19 +127,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!65 &6819663893997079438
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6819663893997079427}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0.5, z: 0}
 --- !u!114 &3606553699785398249
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -153,6 +139,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dc814e6cc4a467b419bad359cb5b3b91, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  taskAlreadyDictated: 0
   speed: 175
   turnSpeed: 3
   followPathTurnSpeed: 10
@@ -162,7 +149,9 @@ MonoBehaviour:
   oreLocation: {fileID: 8694496418313283408}
   statusLocation: {fileID: 8699261290107197277}
   relativeDistanceToTask: 0
+  unitHealth: 100
   remainingDuration: 480
+  remainingHealth: 0
   buildableComponent: {fileID: 2802711064574047498}
   followCameraLocation: {fileID: 910008489170447272}
 --- !u!114 &2802711064574047498
@@ -196,6 +185,7 @@ MonoBehaviour:
     - {fileID: 8495036445915105245}
     aproximateTopPercentage: 1
   statusLocation: {fileID: 7946607379296062907}
+  layoutTerrainModifier: 0
   buildingComplete: 0
   associatedUnit: {fileID: 3606553699785398249}
 --- !u!1 &8527435091751321781

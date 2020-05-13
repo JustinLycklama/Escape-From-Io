@@ -136,6 +136,8 @@ public class UnitManager : MonoBehaviour, TaskStatusUpdateDelegate {
 
         Script.Get<GameResourceManager>().CueueGatherTasksForCost(cost, worldPosition, unitBuilding);
 
+        TutorialManager.sharedInstance.Fire(TutorialTrigger.UnitAdded);
+
         NotifyDelegates(unitBuilding.associatedUnit.primaryActionType);
     }
 

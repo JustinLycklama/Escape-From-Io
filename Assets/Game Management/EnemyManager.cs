@@ -6,16 +6,13 @@ using UnityEngine;
 public class EnemyManager : MonoBehaviour, TimeUpdateDelegate
 {
 
-    public float frequency { get; private set; }
-    public float evolution { get; private set; }
-
+    public static float frequency { get; private set; }
+    public static float evolution { get; private set; }
 
     private TimeManager timeManager;
     private UnitManager unitManager;
 
-    private const float evoPerSecond = 1.0f / (20.0f * 60.0f);
-
-    private const int minTimeBeforeEnemy = 0;
+    private const int minTimeBeforeEnemy = 2 * 60;
     private const int decisionFrequency = 10;
 
     private const float maxUnitToFrequencyRatio = 40.0f; // at 40 units, frequency will be 1
@@ -23,11 +20,15 @@ public class EnemyManager : MonoBehaviour, TimeUpdateDelegate
     private const float minEnemyPerMinute = 0.2f;
     private const float maxEnemyPerMinute = 4;
 
-    private const float minEnemyStrength = 1;
-    private const float maxEnemyStrength = 10;
+    // At 25 mins, evo will top out at 1.0f;
+    private const float maxEvoTime = 60.0f * 25.0f;
+    private const float evoPerSecond = 1.0f / maxEvoTime;
 
-    private const float minEnemyHealth = 1;
-    private const float maxEnemyHealth = 10;
+    public static float minEnemyAttack = 1;
+    public static float maxEnemyAttack = 10;
+
+    //private const float minEnemyHealth = 1;
+    //private const float maxEnemyHealth = 10;
 
     private float falloverRemainder = 0;
 
@@ -41,12 +42,10 @@ public class EnemyManager : MonoBehaviour, TimeUpdateDelegate
 
         timeManager.RegisterForTimeUpdateNotifications(this);
 
-
-        frequency = 0.1f;
-        evolution = 0.1f;
+        frequency = 0f;
+        evolution = 0f;
 
         rnd = NoiseGenerator.random;
-
     }
 
     private void OnDestroy() {
@@ -54,6 +53,10 @@ public class EnemyManager : MonoBehaviour, TimeUpdateDelegate
     }
 
     private void DecideMonsterSpawnIntervals() {
+
+        if (TutorialManager.isTutorial) {
+            return;
+        }
 
         float perMinuteReductionFactor = 60.0f / decisionFrequency;
 
@@ -108,6 +111,7 @@ public class EnemyManager : MonoBehaviour, TimeUpdateDelegate
         Golem golem = golemObject.GetComponent<Golem>();
 
         golem.transform.SetParent(unitManager.transform, true);
+        golem.SetEvolution(evolution);
 
         GameTask buildingTask = new GameTask("", targetPosition, GameTask.ActionType.Build, golem.buildableComponent);
 

@@ -7,8 +7,8 @@ public class EarthElementalController : AnimationController
     [SerializeField]
     private GameObject mainInstanceMesh;
 
-    [SerializeField]
-    private GameObject instanceDieMesh;
+    //[SerializeField]
+    //private GameObject instanceDieMesh;
 
     public void Activate() {
         animator.Play("activate");
@@ -20,16 +20,16 @@ public class EarthElementalController : AnimationController
 
     public void DieEvent() {
 
-        instanceDieMesh.SetActive(true);
+        //instanceDieMesh.SetActive(true);
 
-        GameObject dieMesh = (GameObject)Instantiate(instanceDieMesh, transform.position, transform.rotation);
-        dieMesh.transform.localScale = transform.localScale;
-        dieMesh.transform.parent = transform.parent.parent;
-        dieMesh.SetActive(true);
+        //GameObject dieMesh = (GameObject)Instantiate(instanceDieMesh, transform.position, transform.rotation);
+        //dieMesh.transform.localScale = transform.localScale;
+        //dieMesh.transform.parent = transform.parent.parent;
+        //dieMesh.SetActive(true);
 
-        mainInstanceMesh.SetActive(false);
+        //mainInstanceMesh.SetActive(false);
 
-        dieMesh.transform.localScale = new Vector3(1, 1, 1);
+        //dieMesh.transform.localScale = new Vector3(1, 1, 1);
 
         //if(Demo.curmat == 0) {
         //    GameObject G = (GameObject)Instantiate(Demo.DieAnim[0], Istancer.position, Istancer.rotation);
@@ -44,7 +44,7 @@ public class EarthElementalController : AnimationController
         //EartElemental.SetActive(false);
     }
 
-    public override string StringConstantForState(Unit.AnimationState state) {
+    public override string StringConstantForState(Unit.AnimationState state, bool isCarry = false) {
         switch(state) {
             case Unit.AnimationState.Idle:
                 return "idle";

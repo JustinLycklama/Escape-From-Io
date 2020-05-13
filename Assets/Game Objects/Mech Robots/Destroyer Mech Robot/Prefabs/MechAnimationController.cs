@@ -20,7 +20,7 @@ public class MechAnimationController : AnimationController {
         audioManager = Script.Get<AudioManager>();
     }
 
-    public override void AnimateState(Unit.AnimationState state, float rate = 1.0f) {
+    public override void AnimateState(Unit.AnimationState state, float rate = 1.0f, bool isCarry = false) {
         if(weaponAnimator != null && state == Unit.AnimationState.PerformCoreAction &&
             weaponAnimator.GetCurrentAnimatorStateInfo(0).IsName(StringConstantForState(state))) {
             weaponAnimator.speed = 1.0f;
@@ -36,7 +36,7 @@ public class MechAnimationController : AnimationController {
         }
     }
 
-    public override string StringConstantForState(Unit.AnimationState state) {
+    public override string StringConstantForState(Unit.AnimationState state, bool isCarry = false) {
         switch(state) {
             case Unit.AnimationState.Idle:
                 return "Idle";

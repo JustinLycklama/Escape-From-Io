@@ -164,7 +164,7 @@ public class TerrainManager : MonoBehaviour {
 
                         UserAction action = new UserAction();
 
-                        action.tutorialIdentifier = UserAction.TutorialIdentifier.Clean;
+                        action.tutorialIdentifier = UserAction.UserActionTutorialIdentifier.Clean;
                         action.associatedActionTypes = new List<MasterGameTask.ActionType> { MasterGameTask.ActionType.Build };
 
                         action.description = "Clean " + coordinate.mapContainer.map.GetTerrainAt(coordinate).name;
@@ -190,7 +190,7 @@ public class TerrainManager : MonoBehaviour {
 
                         UserAction action = new UserAction();
 
-                        action.tutorialIdentifier = UserAction.TutorialIdentifier.Path;
+                        action.tutorialIdentifier = UserAction.UserActionTutorialIdentifier.Path;
                         action.associatedActionTypes = new List<MasterGameTask.ActionType> { MasterGameTask.ActionType.Move, MasterGameTask.ActionType.Build };
 
                         action.description = "Create Path";
@@ -210,7 +210,7 @@ public class TerrainManager : MonoBehaviour {
                     unitAction.description = "Build Unit";
                     unitAction.layoutCoordinate = coordinate;
 
-                    unitAction.tutorialIdentifier = UserAction.TutorialIdentifier.BuildUnit;
+                    unitAction.tutorialIdentifier = UserAction.UserActionTutorialIdentifier.BuildUnit;
                     unitAction.associatedActionTypes = new List<MasterGameTask.ActionType> { MasterGameTask.ActionType.Move, MasterGameTask.ActionType.Build };
 
                     unitAction.blueprintList = new ConstructionBlueprint[] {
@@ -224,7 +224,7 @@ public class TerrainManager : MonoBehaviour {
                     buildingAction.description = "Build Building";
                     buildingAction.layoutCoordinate = coordinate;
 
-                    buildingAction.tutorialIdentifier = UserAction.TutorialIdentifier.BuildBuilding;
+                    buildingAction.tutorialIdentifier = UserAction.UserActionTutorialIdentifier.BuildBuilding;
                     buildingAction.associatedActionTypes = new List<MasterGameTask.ActionType> { MasterGameTask.ActionType.Move, MasterGameTask.ActionType.Build };
 
                     buildingAction.blueprintList = new ConstructionBlueprint[] { Building.Blueprint.Tower, Building.Blueprint.SensorTower, Building.Blueprint.AdvUnitBuilding, Building.Blueprint.DefenseTower }; //Building.Blueprint.Refinery,
@@ -248,7 +248,7 @@ public class TerrainManager : MonoBehaviour {
                 if(terraformable != null) {
                     UserAction action = new UserAction();
 
-                    action.tutorialIdentifier = UserAction.TutorialIdentifier.Mine;
+                    action.tutorialIdentifier = UserAction.UserActionTutorialIdentifier.Mine;
                     action.associatedActionTypes = new List<MasterGameTask.ActionType> { MasterGameTask.ActionType.Mine };
 
                     action.description = "Mine " + coordinate.mapContainer.map.GetTerrainAt(coordinate).name;
@@ -263,6 +263,8 @@ public class TerrainManager : MonoBehaviour {
 
                         GameTask miningTask = new GameTask(null, worldPosition, GameTask.ActionType.Mine, layoutCoordinateMap, PathRequestTargetType.Layout);
                         MasterGameTask masterMiningTask = new MasterGameTask(MasterGameTask.ActionType.Mine, "Mine " + layoutCoordinateMap.GetTerrainAt(layoutCoordinate).name, new GameTask[] { miningTask });
+
+                        TutorialManager.sharedInstance.Fire(TutorialTrigger.SelectMine);
 
                         queue.QueueTask(masterMiningTask);
                         map.AssociateTask(masterMiningTask, layoutCoordinate);
