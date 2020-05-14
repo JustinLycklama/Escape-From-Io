@@ -229,7 +229,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
         if(!TutorialManager.isTutorial) {
             notificationManager.SetSupressNotifications(false);
         } else {
-            yield return new WaitForSeconds(MapContainer.fogOfWarFadeDuration + 0.5f);
+            yield return new WaitForSeconds(MapContainer.fogOfWarFadeOutDuration + 0.5f);
             TutorialManager.sharedInstance.KickOffTutorial();
         }
     }

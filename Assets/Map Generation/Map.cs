@@ -305,8 +305,13 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
 
             // Terraform complete
 
-            UpdateTerrainAtLocation(terraformTarget.coordinate, terraformTarget.terrainTypeTarget);
             TerraformHeightMap(terraformTarget);
+            UpdateTerrainAtLocation(terraformTarget.coordinate, terraformTarget.terrainTypeTarget);            
+
+            // Old Order
+            //UpdateTerrainAtLocation(terraformTarget.coordinate, terraformTarget.terrainTypeTarget);
+            //TerraformHeightMap(terraformTarget);
+
             terraformTargetCoordinateMap[coordinate.x, coordinate.y] = null;
 
             // Create Ore at location

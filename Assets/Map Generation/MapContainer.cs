@@ -39,10 +39,9 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
     public bool isBuildingBoxColliders = false;
     BoxCollider[,][,] boxColliderArray;
 
-    // TODO: Moving away from creating a physical map using cubes, lets create a virtual FOW
-    //bool[,] fogOfWarMap;
-    GameObject[,] fogOfWarMap;
-    public static int fogOfWarFadeDuration = 1;
+    FogOfWar[,] fogOfWarMap;
+    public static int fogOfWarFadeInDuration = 1;
+    public static int fogOfWarFadeOutDuration = 1;
 
     float[] textureIndexList;
 
@@ -107,7 +106,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
             //StartCoroutine(AddBoxColliders());
         }
 
-        SetupFogOfWar();
+        //SetupFogOfWar();
         SetupMaterialShader();
 
         map.transform.SetParent(this.transform, true);
@@ -352,7 +351,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         int width = constants.layoutMapWidth;
         int height = constants.layoutMapHeight;
 
-        fogOfWarMap = new GameObject[width, height];
+        fogOfWarMap = new FogOfWar[width, height];
 
         float boxSizeX = constants.featuresPerLayoutPerAxis;
         float boxSizeZ = constants.featuresPerLayoutPerAxis;
@@ -361,9 +360,22 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         float halfTotalHeight = boxSizeZ * height / 2f;
 
         Color materialColor = Color.black;
-        materialColor.a = 0;
+        materialColor.a = 0.0f;
 
-        GameObject prefab = Script.Get<MapsManager>().fogOfWarPrefab;
+        MapsManager mapsManager = Script.Get<MapsManager>();
+        MapGenerator mapGenerator = Script.Get<MapGenerator>();
+
+        GameObject prefab = mapsManager.fogOfWarPrefab;
+        //float[,] originalFinalNoiseMap = mapGenerator.GetOriginalFinalNosieMapForMap(this);
+
+        float[,] fullOriginalFinalNoiseMap = mapGenerator.GetFullOriginalNoiseMap();
+
+        //int tileSize = constants.featuresPerLayoutPerAxis;
+
+        const float featurePointOffset = 5f;
+
+        int featuresWidthPerMap = constants.layoutMapWidth * constants.featuresPerLayoutPerAxis;
+        int featuresHeightPerMap = constants.layoutMapHeight * constants.featuresPerLayoutPerAxis;
 
         for(int x = 0; x < width; x++) {
             for(int y = 0; y < height; y++) {
@@ -372,22 +384,59 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                     GameObject newCube = Instantiate(prefab);
                     newCube.name = "Fog " + x + ", " + y;
 
-                    fogOfWarMap[x, y] = newCube;
+                    fogOfWarMap[x, y] = newCube.GetComponent<FogOfWar>();
                 }
 
-                GameObject cube = fogOfWarMap[x, y];
+                FogOfWar fog = fogOfWarMap[x, y];
+
+                float xOffset = 0;
+                float yOffset = 0;
+
+                int startX = (mapX * featuresWidthPerMap) + (x * constants.featuresPerLayoutPerAxis);
+                int tileWidth = constants.featuresPerLayoutPerAxis;
+
+                int startY = (mapY * featuresHeightPerMap) + (y * constants.featuresPerLayoutPerAxis);
+                int tileHeight = constants.featuresPerLayoutPerAxis;
+
+                //if(startX != 0) {
+                //    startX -= 1;
+                //    tileWidth += 1;
+                //    xOffset -= featurePointOffset;
+                //}
+
+                //if(startY != 0) {
+                //    startY -= 1;
+                //    tileHeight += 1;
+                //    yOffset += featurePointOffset;
+                //}
+
+                //if(x != width -1 || mapX != constants.mapCountX - 1) {
+                //    tileWidth += 1;
+                //    xOffset += featurePointOffset;
+                //}
+
+                //if(y != height - 1 || mapY != constants.mapCountY - 1) {
+                //    tileHeight += 1;
+                //    yOffset -= featurePointOffset;
+                //}
+
+                float[,] tileNoiseMap = MapGenerator.RangeSubset(fullOriginalFinalNoiseMap, startX, startY, tileWidth, tileHeight);
+                MeshData fogMesh = MeshGenerator.GenerateTerrainMesh(tileNoiseMap);
+
+                fog.meshFilter.mesh = fogMesh.FinalizeMesh();
+                fog.meshRenderer.material.color = materialColor;
 
                 LayoutCoordinate layoutCoordinate = new LayoutCoordinate(x, y, this); // height - 1 - y
                 MapCoordinate mapCoordinate = new MapCoordinate(layoutCoordinate);
                 WorldPosition worldPosition = new WorldPosition(mapCoordinate);
 
                 Vector3 cubePosition = worldPosition.vector3;
-                cubePosition = new Vector3(cubePosition.x, 1.2f, cubePosition.z);
 
-                cube.transform.position = cubePosition;// new Vector3((x * boxSizeX - halfTotalWidth) + boxSizeX / 2f, 0, (y * boxSizeZ - halfTotalHeight) + boxSizeZ / 2f);
-
-                cube.transform.localScale = new Vector3(boxSizeX * 11,  200, boxSizeZ * 11);
-                cube.transform.SetParent(this.transform, true);
+                //fog.transform.position = cubePosition;// new Vector3((x * boxSizeX - halfTotalWidth) + boxSizeX / 2f, 0, (y * boxSizeZ - halfTotalHeight) + boxSizeZ / 2f);
+                 
+                fog.transform.SetParent(transform);
+                fog.transform.position = new Vector3(cubePosition.x + xOffset, 1f, cubePosition.z + yOffset);
+                fog.transform.localScale = new Vector3(1, 0.33f, 1); //new Vector3(boxSizeX * 11, 200, boxSizeZ * 11);
             }
         }
     }
@@ -639,6 +688,8 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         float halfTotalWidth = boxSizeX * width / 2f;
         float halfTotalHeight = boxSizeZ * height / 2f;
 
+        TimeManager timeManager = Script.Get<TimeManager>();
+
         int totalCouroutinesStarted = 0;
         Action createBoxEnded = () => {
             totalCouroutinesStarted--;
@@ -672,33 +723,45 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                 TerraformTarget terraformTarget = new TerraformTarget(coordinate, terrainType);
                 terraformTarget.percentage = 1.0f;
 
-                // Do terraform to original terrain type
-                map.UpdateTerrainAtLocation(terraformTarget.coordinate, terraformTarget.terrainTypeTarget);
-                map.TerraformHeightMap(terraformTarget);
+                Material material = fogOfWarMap[x, y].meshRenderer.material;
 
-                Material material = fogOfWarMap[x, y].GetComponent<MeshRenderer>().material;
-                //SetMaterialTransparent(material);
                 Color color = material.color;
-                color.a = 1.0f;
+                //color.a = 0.0f;
 
                 material.color = color;
 
-                Action<int, float> durationUpdateBlock = (remainingTime, percentComplete) => {
-                    // Fade out fog of war (fade in map)
-
-                    color.a = 1f - percentComplete;
+                Action<int, float> fadeInBlock = (remainingTime, percentComplete) => {
+                    color.a = percentComplete;
                     material.color = color;
+                };
+
+                Action<int, float> disolveBlock = (remainingTime, percentComplete) => {
+                    material.SetFloat("_Cutoff", percentComplete);
                 };
 
                 int holdX = x;
                 int holdY = y;
 
-                Action durationCompletionBlock = () => {
-                    fogOfWarMap[holdX, holdY].SetActive(false);
+                Action fadeOutCompletion = () => {
+
+                    fogOfWarMap[holdX, holdY].gameObject.SetActive(false);
                 };
 
                 Action boxEndAndAnimation = () => {
-                    Script.Get<TimeManager>().AddNewTimer(fogOfWarFadeDuration, durationUpdateBlock, durationCompletionBlock, 3); // was 2
+                    timeManager.AddNewTimer(fogOfWarFadeInDuration, fadeInBlock, () => {
+
+                        // Do terraform to original terrain type
+                        map.UpdateTerrainAtLocation(terraformTarget.coordinate, terraformTarget.terrainTypeTarget);
+                        map.TerraformHeightMap(terraformTarget);
+
+                        // Switch to disolve material
+                        material = fogOfWarMap[holdX, holdY].disolveMaterial;
+                        fogOfWarMap[holdX, holdY].meshRenderer.material = material;
+
+                        // And disolve back in
+                        timeManager.AddNewTimer(fogOfWarFadeOutDuration, disolveBlock, fadeOutCompletion, 3);
+                    }, 3);
+
                     createBoxEnded();
                 };
 
