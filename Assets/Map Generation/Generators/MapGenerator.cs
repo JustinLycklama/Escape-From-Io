@@ -218,6 +218,9 @@ public class MapGenerator : MonoBehaviour {
     float[,] layoutNoiseMap;
     TerrainType[,] terrainMap;
 
+    // Mutators for the original map - used for turning unknown tiles into starting tiles
+    float[,] originalLayoutNoiseMap;
+
     float[,] groundFeaturesNoiseMap;
     float[,] mountainFeaturesNoiseMap;
 
@@ -281,7 +284,8 @@ public class MapGenerator : MonoBehaviour {
         terrainManager.SetGroundMutatorMap(groundMutatorMap);
         terrainManager.SetMounainMutatorMap(mountainMutatorMap);
 
-        terrainMap = PlateauMap(layoutNoiseMap, spawnCoordX, spawnCoordY);
+        originalLayoutNoiseMap = (float[,])layoutNoiseMap.Clone();
+        terrainMap = PlateauLayoutMapWithUnknowns(spawnCoordX, spawnCoordY);
 
         /*
          * Generate Details
@@ -300,7 +304,8 @@ public class MapGenerator : MonoBehaviour {
 
         finalNoiseMap = CreateMapWithFeatures();
 
-        minMaxOfFinalMap = NoiseGenerator.NormalizeMap(finalNoiseMap);
+        minMaxOfFinalMap = NoiseGenerator.MinMaxForMap(originalLayoutNoiseMap);
+        NoiseGenerator.NormalizeMapUsingMinMax(finalNoiseMap, minMaxOfFinalMap);
 
         spawnCoordinate = new LayoutCoordinate(0, 0, mapsManager.mapContainers[0]);
     }
@@ -457,6 +462,13 @@ public class MapGenerator : MonoBehaviour {
                     int y = startYMapCoordinate + mapCoordinate.yLowSample;
 
                     float finalValue = MapAtXYWithFeatures(x, y, terraformTarget.terrainTypeTarget, heightAtNewRegion);
+
+                    if (finalValue < minMaxOfFinalMap.min || finalValue > minMaxOfFinalMap.max) {
+                        //todo:
+                        minMaxOfFinalMap = NoiseGenerator.NormalizeMap(finalNoiseMap);
+
+                    }
+
                     terraformTarget.heightTarget[width, height] = Mathf.InverseLerp(minMaxOfFinalMap.min, minMaxOfFinalMap.max, finalValue);
                 }
             }
@@ -508,11 +520,11 @@ public class MapGenerator : MonoBehaviour {
     public List<KeyValuePair<int, int>> listOfLunarLocations = new List<KeyValuePair<int, int>>();
 
     // Returns a 2d array of terrainTypes
-    public TerrainType[,] PlateauMap(float[,] map, int spawnX, int spawnY) {
-        int mapWidth = map.GetLength(0);
-        int mapHeight = map.GetLength(1);
+    public TerrainType[,] PlateauLayoutMapWithUnknowns(int spawnX, int spawnY) {
+        int mapWidth = layoutNoiseMap.GetLength(0);
+        int mapHeight = layoutNoiseMap.GetLength(1);
 
-        TerrainType[,] terrainMap = new TerrainType[map.GetLength(0), map.GetLength(1)];
+        TerrainType[,] terrainMap = new TerrainType[mapWidth, mapHeight];
         TerrainManager terrainManager = Script.Get<TerrainManager>();
 
         MutatorCoordinateValues[] coordinateValues = new MutatorCoordinateValues[maxSavedCoordinateValues];
@@ -526,12 +538,12 @@ public class MapGenerator : MonoBehaviour {
         for(int y = 0; y < mapHeight; y++) {
             for(int x = 0; x < mapWidth; x++) {
 
-                RegionType region = terrainManager.RegionTypeForValue(map[x, y]);
+                RegionType region = terrainManager.regionTypeMap[RegionType.Type.Unknown];
 
                 float mutatorValue;
 
                 terrainMap[x, y] = terrainManager.TerrainTypeForRegion(region, x, y, out mutatorValue);
-                map[x, y] = HeightAtRegion(region);
+                layoutNoiseMap[x, y] = HeightAtRegion(region);
 
                 if (maxSavedCoordinateValues > 0 && region.type == RegionType.Type.Mountain && mutatorValue < coordinateValues[maxSavedCoordinateValues - 1].mutator) {
                     if (Vector2.Distance(spawnCoord, new Vector2(x, y)) > 3) {
@@ -552,6 +564,15 @@ public class MapGenerator : MonoBehaviour {
         }
 
         return terrainMap;
+    }
+
+    public TerrainType PlateauCoordinateFromOriginalLayout(int x, int y) {
+        TerrainManager terrainManager = Script.Get<TerrainManager>();
+
+        RegionType region = terrainManager.RegionTypeForValue(originalLayoutNoiseMap[x, y]);
+
+        float mutatorValue;
+        return terrainManager.TerrainTypeForRegion(region, x, y, out mutatorValue);
     }
 
     private float HeightAtRegion(RegionType region) {
@@ -683,25 +704,25 @@ public class MapGenerator : MonoBehaviour {
      * Creating color maps from finished noise maps 
      * */
 
-    private Color[] CreateColorMap(float[,] noiseMap) {
+    //private Color[] CreateColorMap(float[,] noiseMap) {
 
-        int noiseMapWidth = noiseMap.GetLength(0);
-        int noiseMapHeight = noiseMap.GetLength(1);
+    //    int noiseMapWidth = noiseMap.GetLength(0);
+    //    int noiseMapHeight = noiseMap.GetLength(1);
 
-        TerrainType[] regions = Script.Get<TerrainManager>().terrainTypes;
+    //    TerrainType[] regions = Script.Get<TerrainManager>().terrainTypes;
 
-        Color[] colorMap = new Color[noiseMapWidth * noiseMapHeight];
-        for(int y = 0; y < noiseMapHeight; y++) {
-            for(int x = 0; x < noiseMapWidth; x++) {
+    //    Color[] colorMap = new Color[noiseMapWidth * noiseMapHeight];
+    //    for(int y = 0; y < noiseMapHeight; y++) {
+    //        for(int x = 0; x < noiseMapWidth; x++) {
 
-                float currentHeight = noiseMap[x, y];
-                RegionType region = Script.Get<TerrainManager>().RegionTypeForValue(currentHeight);
-                colorMap[y * noiseMapWidth + x] = region.color;
-            }
-        }
+    //            float currentHeight = noiseMap[x, y];
+    //            RegionType region = Script.Get<TerrainManager>().RegionTypeForValue(currentHeight);
+    //            colorMap[y * noiseMapWidth + x] = region.color;
+    //        }
+    //    }
 
-        return colorMap;
-    }
+    //    return colorMap;
+    //}
 
     private Color[] CreateColorMapWithTerrain(float[,] noiseMap, TerrainType[,] terrainTypeMap, MapContainer mapContainer) {
         Constants constants = Script.Get<Constants>();

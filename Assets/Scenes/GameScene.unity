@@ -2632,92 +2632,92 @@ PrefabInstance:
     - target: {fileID: 6223905402662283760, guid: 3d6cbb69048f43140ab6269ff5e3509b,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6223905402662283760, guid: 3d6cbb69048f43140ab6269ff5e3509b,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6223905402662283760, guid: 3d6cbb69048f43140ab6269ff5e3509b,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 225
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6223905402662283760, guid: 3d6cbb69048f43140ab6269ff5e3509b,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -50
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6223905402662283760, guid: 3d6cbb69048f43140ab6269ff5e3509b,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 90
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6223905402662283760, guid: 3d6cbb69048f43140ab6269ff5e3509b,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 100
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5941589934222247759, guid: 3d6cbb69048f43140ab6269ff5e3509b,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5941589934222247759, guid: 3d6cbb69048f43140ab6269ff5e3509b,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5941589934222247759, guid: 3d6cbb69048f43140ab6269ff5e3509b,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 135
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5941589934222247759, guid: 3d6cbb69048f43140ab6269ff5e3509b,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -50
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5941589934222247759, guid: 3d6cbb69048f43140ab6269ff5e3509b,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 90
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5941589934222247759, guid: 3d6cbb69048f43140ab6269ff5e3509b,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 100
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7826950439892956007, guid: 3d6cbb69048f43140ab6269ff5e3509b,
         type: 3}
       propertyPath: m_AnchorMin.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7826950439892956007, guid: 3d6cbb69048f43140ab6269ff5e3509b,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7826950439892956007, guid: 3d6cbb69048f43140ab6269ff5e3509b,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 45
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7826950439892956007, guid: 3d6cbb69048f43140ab6269ff5e3509b,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -50
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7826950439892956007, guid: 3d6cbb69048f43140ab6269ff5e3509b,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 90
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7826950439892956007, guid: 3d6cbb69048f43140ab6269ff5e3509b,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 100
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1702679924932025415, guid: 3d6cbb69048f43140ab6269ff5e3509b,
         type: 3}
@@ -13543,6 +13543,11 @@ MonoBehaviour:
     noiseMax: 1
     plateauAtBase: 0
     color: {r: 0.2264151, g: 0.17835529, b: 0.17835529, a: 0}
+  - type: 3
+    noiseBase: 0.1
+    noiseMax: 0.1
+    plateauAtBase: 1
+    color: {r: 0, g: 0, b: 0, a: 0}
   waterTerrainTypes:
   - name: 'Water '
     type: 0
@@ -13728,6 +13733,20 @@ MonoBehaviour:
     texture: {fileID: 2800000, guid: 94605a5bd1d816346b8f2214cdb18ed2, type: 3}
     bumpMap: {fileID: 2800000, guid: 99c9f4f9f55f11c44bc091a6e47f43a3, type: 3}
     textureScale: 100
+    mineralChances: []
+  unknownTerrainTypes:
+  - name: Unnown
+    type: 0
+    regionType: 0
+    mutatorNoiseBase: 0
+    mutatorNoiseMax: 1
+    walkable: 0
+    buildable: 0
+    walkSpeedMultiplier: 0
+    modificationSpeedModifier: 0
+    texture: {fileID: 2800000, guid: 60961d3cc0b0ddf45833dfaf36d8587d, type: 3}
+    bumpMap: {fileID: 2800000, guid: 60961d3cc0b0ddf45833dfaf36d8587d, type: 3}
+    textureScale: 1
     mineralChances: []
 --- !u!1 &3487370652182973963
 GameObject:

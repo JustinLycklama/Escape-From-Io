@@ -329,7 +329,7 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
     }
 
 
-    private void TerraformHeightMap(TerraformTarget terraformTarget) {
+    public void TerraformHeightMap(TerraformTarget terraformTarget) {
         MapGenerator mapGenerator = Script.Get<MapGenerator>();
         float[,] finalHeightMap = mapGenerator.TerraformHeightMap(terraformTarget);
 

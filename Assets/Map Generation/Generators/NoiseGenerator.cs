@@ -132,6 +132,13 @@ public static class NoiseGenerator {
     }
 
     public static MinMaxofNormalize NormalizeMap(float[,] noiseMap) {
+        MinMaxofNormalize minMax = MinMaxForMap(noiseMap);
+        NormalizeMapUsingMinMax(noiseMap, minMax);
+
+        return minMax;
+    }
+
+    public static MinMaxofNormalize MinMaxForMap(float[,] noiseMap) {
         int mapWidth = noiseMap.GetLength(0);
         int mapHeight = noiseMap.GetLength(1);
 
@@ -152,13 +159,17 @@ public static class NoiseGenerator {
             }
         }
 
-        // Normalize noise map
+        return new MinMaxofNormalize(minNoiseHeight, maxNoiseHeight);
+    }
+
+    public static void NormalizeMapUsingMinMax(float[,] noiseMap, MinMaxofNormalize minMax) {
+        int mapWidth = noiseMap.GetLength(0);
+        int mapHeight = noiseMap.GetLength(1);
+
         for(int y = 0; y < mapHeight; y++) {
             for(int x = 0; x < mapWidth; x++) {
-                noiseMap[x, y] = Mathf.InverseLerp(minNoiseHeight, maxNoiseHeight, noiseMap[x, y]);
+                noiseMap[x, y] = Mathf.InverseLerp(minMax.min, minMax.max, noiseMap[x, y]);
             }
         }
-
-        return new MinMaxofNormalize(minNoiseHeight, maxNoiseHeight);
     }
 }

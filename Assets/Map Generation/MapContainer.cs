@@ -39,7 +39,6 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
     public bool isBuildingBoxColliders = false;
     BoxCollider[,][,] boxColliderArray;
 
-
     // TODO: Moving away from creating a physical map using cubes, lets create a virtual FOW
     //bool[,] fogOfWarMap;
     GameObject[,] fogOfWarMap;
@@ -70,6 +69,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
     private void OnDestroy() {
         try {
             Script.Get<SelectionManager>().EndNotifications(this);
+            Script.Get<BuildingManager>().EndStatusEffectNotifications(this);
         } catch(NullReferenceException) {}
     }
 
@@ -274,14 +274,17 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
 
         //PathGridCoordinate[][] gridCoordinates = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(layoutCoordinate);
         MapCoordinate[,] mapCoordinates = MapCoordinate.MapCoordinatesFromLayoutCoordinate(layoutCoordinate);
-
         Dictionary<MapCoordinate, float> cachedHeights = CacheHightsAround(layoutCoordinate);
+    
+        int x = layoutCoordinate.x;
+        int y = (map.mapHeight / map.featuresPerLayoutPerAxis) - 1 - layoutCoordinate.y;
+
+        if (boxColliderArray[x, y] == null) {
+            return;
+        }
 
         for(int w = 0; w < numColliders; w++) {
             for(int h = 0; h < numColliders; h++) {
-
-                int x = layoutCoordinate.x;
-                int y = (map.mapHeight / map.featuresPerLayoutPerAxis) - 1 - layoutCoordinate.y;
 
                 BoxCollider boxCollider = boxColliderArray[x, y][w, h];
 
@@ -654,6 +657,9 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
 
         Constants constants = Script.Get<Constants>();
 
+        TerrainManager terrainManager = Script.Get<TerrainManager>();
+        MapGenerator mapGenerator = Script.Get<MapGenerator>();
+
         int width = constants.layoutMapWidth;
         int height = constants.layoutMapHeight;
 
@@ -690,6 +696,15 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                 isBuildingBoxColliders = true;
                 totalCouroutinesStarted++;
 
+                LayoutCoordinate coordinate = new LayoutCoordinate(x, y, this);
+                TerrainType terrainType = mapGenerator.PlateauCoordinateFromOriginalLayout(sampleX, sampleY);
+
+                TerraformTarget terraformTarget = new TerraformTarget(coordinate, terrainType);
+                terraformTarget.percentage = 1.0f;
+
+                // Do terraform to original terrain type
+                map.UpdateTerrainAtLocation(terraformTarget.coordinate, terraformTarget.terrainTypeTarget);
+                map.TerraformHeightMap(terraformTarget);
 
                 Material material = fogOfWarMap[x, y].GetComponent<MeshRenderer>().material;
                 SetMaterialTransparent(material);

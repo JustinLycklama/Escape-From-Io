@@ -14,6 +14,7 @@ public class TerrainManager : MonoBehaviour {
     public TerrainType[] waterTerrainTypes;
     public TerrainType[] landTerrainTypes;
     public TerrainType[] mountainTerrainTypes;
+    public TerrainType[] unknownTerrainTypes;
 
     private TerrainType[] cachedTypes;
     [HideInInspector]
@@ -283,7 +284,7 @@ public class TerrainManager : MonoBehaviour {
 
 [System.Serializable]
 public struct RegionType {
-    public enum Type { Water, Land, Mountain }
+    public enum Type { Water, Land, Mountain, Unknown }
     public Type type;
 
     public float noiseBase;
@@ -362,7 +363,7 @@ public class ChanceFactory {
 public struct TerrainType {
     public string name;
 
-    public enum Type { Water, Empty, Grass, Mud, Path, ScorchedEarth, LooseRock, Rock, HardRock, SolidRock, AlunarRock, Sand }
+    public enum Type { Unknown, Water, Empty, Grass, Mud, Path, ScorchedEarth, LooseRock, Rock, HardRock, SolidRock, AlunarRock, Sand }
     public Type type;
 
     [HideInInspector]
