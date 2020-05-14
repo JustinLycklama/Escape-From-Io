@@ -11,6 +11,8 @@ public class MapsManager : MonoBehaviour {
 
     public GameObject mapBoundaryObject;
 
+    public GameObject fogOfWarPrefab;
+
     [HideInInspector]
     public int horizontalMapCount;
     [HideInInspector]
@@ -81,7 +83,7 @@ public class MapsManager : MonoBehaviour {
 
         float mapBoundaryHeight = 5;
 
-        mapBoundaryObject.transform.localPosition = new Vector3(mapBoundaryObject.transform.localPosition.x, (mapBoundaryHeight /2.0f) * transform.localScale.y, mapBoundaryObject.transform.localPosition.z);
+        mapBoundaryObject.transform.localPosition = new Vector3(mapBoundaryObject.transform.localPosition.x, (mapBoundaryHeight /2.0f) * transform.localScale.y - 1, mapBoundaryObject.transform.localPosition.z);
         mapBoundaryObject.transform.localScale = new Vector3((mapWidth * horizontalMapCount + 2) * transform.localScale.x, mapBoundaryHeight * transform.localScale.y, (mapWidth * horizontalMapCount + 2) * transform.localScale.z);
 
         float mapEdgeX = mapsBoundaries.x - (mapsBoundaries.width / 2f);

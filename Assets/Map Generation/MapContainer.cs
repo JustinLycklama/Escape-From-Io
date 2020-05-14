@@ -343,14 +343,11 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
      * Fog of War
      * */
 
-    Shader transparencyShader;
-    Shader unlitShader;
+    //Shader transparencyShader;
+    //Shader unlitShader;
 
     private void SetupFogOfWar() {       
         Constants constants = Script.Get<Constants>();
-
-        transparencyShader = Shader.Find("Standard");
-        unlitShader = Shader.Find("Unlit/Color");
 
         int width = constants.layoutMapWidth;
         int height = constants.layoutMapHeight;
@@ -366,20 +363,14 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         Color materialColor = Color.black;
         materialColor.a = 0;
 
+        GameObject prefab = Script.Get<MapsManager>().fogOfWarPrefab;
+
         for(int x = 0; x < width; x++) {
             for(int y = 0; y < height; y++) {
 
                 if (fogOfWarMap[x, y] == null) {
-                    GameObject newCube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    GameObject newCube = Instantiate(prefab);
                     newCube.name = "Fog " + x + ", " + y;
-
-                    Material material = newCube.GetComponent<MeshRenderer>().material;
-
-                    material.shader = unlitShader;
-
-                    //SetMaterialTransparent(material);
-
-                    material.color = materialColor;
 
                     fogOfWarMap[x, y] = newCube;
                 }
@@ -399,27 +390,6 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                 cube.transform.SetParent(this.transform, true);
             }
         }
-    }
-
-    private void SetMaterialTransparent(Material material) {
-        material.shader = transparencyShader;
-
-        material.SetFloat("_Mode", 4f);
-
-        material.SetFloat("_Metallic", 1);
-        material.SetFloat("_Glossiness", 0);
-
-        material.SetFloat("_SpecularHighlights", 0);
-        material.SetFloat("_GlossyReflections", 0);
-        material.SetFloat("_GlossyReflections", 0);
-
-        material.SetInt("_SrcBlend", (int)UnityEngine.Rendering.BlendMode.SrcAlpha);
-        material.SetInt("_DstBlend", (int)UnityEngine.Rendering.BlendMode.OneMinusSrcAlpha);
-        material.SetInt("_ZWrite", 0);
-        material.DisableKeyword("_ALPHATEST_ON");
-        material.EnableKeyword("_ALPHABLEND_ON");
-        material.DisableKeyword("_ALPHAPREMULTIPLY_ON");
-        material.renderQueue = 3000;
     }
 
     /*
@@ -697,7 +667,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                 totalCouroutinesStarted++;
 
                 LayoutCoordinate coordinate = new LayoutCoordinate(x, y, this);
-                TerrainType terrainType = mapGenerator.PlateauCoordinateFromOriginalLayout(sampleX, sampleY);
+                TerrainType terrainType = mapGenerator.KnownTerrainTypeAtIndex(sampleX, sampleY);
 
                 TerraformTarget terraformTarget = new TerraformTarget(coordinate, terrainType);
                 terraformTarget.percentage = 1.0f;
@@ -707,7 +677,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                 map.TerraformHeightMap(terraformTarget);
 
                 Material material = fogOfWarMap[x, y].GetComponent<MeshRenderer>().material;
-                SetMaterialTransparent(material);
+                //SetMaterialTransparent(material);
                 Color color = material.color;
                 color.a = 1.0f;
 

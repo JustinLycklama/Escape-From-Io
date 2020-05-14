@@ -181,11 +181,15 @@ public class BuildingManager : MonoBehaviour {
         int startX = layoutCoordinate.mapContainer.mapX * constants.layoutMapWidth;
         int startY = layoutCoordinate.mapContainer.mapY * constants.layoutMapHeight;
 
-        if (statusMap == null) {
+        return StatusAtAbsoluteLocation(startX + layoutCoordinate.x, startY + layoutCoordinate.y);
+    }
+
+    public BuildingEffectStatus StatusAtAbsoluteLocation(int x, int y) {
+        if(statusMap == null) {
             return BuildingEffectStatus.None;
         }
 
-        return statusMap[startX + layoutCoordinate.x, startY + layoutCoordinate.y];
+        return statusMap[x, y];
     }
 
     public void RecalcluateSightStatuses() {
@@ -250,7 +254,13 @@ public class BuildingManager : MonoBehaviour {
                                 return true;
                             }
 
-                            return mapGenerator.GetTerrainAtAbsoluteXY(subX, subY).regionType == RegionType.Type.Mountain;
+                            RegionType.Type regionAtLocation = mapGenerator.GetTerrainAtAbsoluteXY(subX, subY).regionType;
+                            if (regionAtLocation == RegionType.Type.Unknown) {
+                                // If the region is unknown, lets find what it will end up being
+                                regionAtLocation = mapGenerator.KnownTerrainTypeAtIndex(subX, subY).regionType;
+                            }
+                           
+                            return regionAtLocation == RegionType.Type.Mountain;
                         },
                         (int subX, int subY) => {
                             if(subX < 0 || subY < 0 || subX >= width || subY >= height) {

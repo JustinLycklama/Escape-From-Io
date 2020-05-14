@@ -79,13 +79,22 @@ public class GameResourceManager : MonoBehaviour {
 
     public void RegisterMapForMinerals(Map map) {
         Constants constants = Script.Get<Constants>();
+        MapGenerator mapGenerator = Script.Get<MapGenerator>();
 
         System.Random rnd = NoiseGenerator.random;
+
+        int sampleXOffset = constants.layoutMapWidth * map.mapContainer.mapX;
+        int sampleYOffset = constants.layoutMapHeight * map.mapContainer.mapY;
 
         for(int y = 0; y < constants.layoutMapHeight; y++) {
             for(int x = 0; x < constants.layoutMapWidth; x++) {
                 LayoutCoordinate layoutCoordinate = new LayoutCoordinate(x, y, map.mapContainer);
                 TerrainType terrainType = map.GetTerrainAt(layoutCoordinate);
+
+                // Find what the terrain will be, if it is unknown
+                if (terrainType.regionType == RegionType.Type.Unknown) {
+                    terrainType = mapGenerator.KnownTerrainTypeAtIndex(x + sampleXOffset, y + sampleYOffset);
+                }
 
                 //terrainTypeCount[terrainType]++;
 

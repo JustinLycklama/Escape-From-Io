@@ -2309,7 +2309,7 @@ PrefabInstance:
     - target: {fileID: 666055285468826225, guid: e572017bd9b639b48b3cb3e9427b8e8d,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -10
       objectReference: {fileID: 0}
     - target: {fileID: 666055285468826225, guid: e572017bd9b639b48b3cb3e9427b8e8d,
         type: 3}
@@ -13736,7 +13736,7 @@ MonoBehaviour:
     mineralChances: []
   unknownTerrainTypes:
   - name: Unnown
-    type: 0
+    type: 12
     regionType: 0
     mutatorNoiseBase: 0
     mutatorNoiseMax: 1
@@ -14323,6 +14323,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mapBoundaryObject: {fileID: 329960508}
+  fogOfWarPrefab: {fileID: 3022622301524041339, guid: d4e5efe0dd6ad8c44bf82cbda0227593,
+    type: 3}
   horizontalMapCount: 0
   verticalMapCount: 0
   mapsBoundaries:

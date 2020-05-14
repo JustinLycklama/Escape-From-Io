@@ -21,7 +21,7 @@ public class TerrainManager : MonoBehaviour {
     public TerrainType[] terrainTypes {
         get {
             if (cachedTypes == null) {
-                cachedTypes = waterTerrainTypes.Concat(landTerrainTypes).Concat(mountainTerrainTypes).ToArray();
+                cachedTypes = waterTerrainTypes.Concat(landTerrainTypes).Concat(mountainTerrainTypes).Concat(unknownTerrainTypes).ToArray();
             }
 
             return cachedTypes;
@@ -59,6 +59,10 @@ public class TerrainManager : MonoBehaviour {
 
         for(int i = 0; i < mountainTerrainTypes.Length; i++) {
             mountainTerrainTypes[i].regionType = RegionType.Type.Mountain;
+        }
+
+        for(int i = 0; i < unknownTerrainTypes.Length; i++) {
+            unknownTerrainTypes[i].regionType = RegionType.Type.Unknown;
         }
 
         foreach(TerrainType terrainType in terrainTypes) {
@@ -363,7 +367,7 @@ public class ChanceFactory {
 public struct TerrainType {
     public string name;
 
-    public enum Type { Unknown, Water, Empty, Grass, Mud, Path, ScorchedEarth, LooseRock, Rock, HardRock, SolidRock, AlunarRock, Sand }
+    public enum Type { Water, Empty, Grass, Mud, Path, ScorchedEarth, LooseRock, Rock, HardRock, SolidRock, AlunarRock, Sand, Unknown }
     public Type type;
 
     [HideInInspector]

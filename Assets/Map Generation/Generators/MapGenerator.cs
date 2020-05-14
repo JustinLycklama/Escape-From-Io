@@ -218,8 +218,10 @@ public class MapGenerator : MonoBehaviour {
     float[,] layoutNoiseMap;
     TerrainType[,] terrainMap;
 
+
     // Mutators for the original map - used for turning unknown tiles into starting tiles
     float[,] originalLayoutNoiseMap;
+    TerrainType[,] originalLayoutTerrainMap;
 
     float[,] groundFeaturesNoiseMap;
     float[,] mountainFeaturesNoiseMap;
@@ -285,7 +287,17 @@ public class MapGenerator : MonoBehaviour {
         terrainManager.SetMounainMutatorMap(mountainMutatorMap);
 
         originalLayoutNoiseMap = (float[,])layoutNoiseMap.Clone();
-        terrainMap = PlateauLayoutMapWithUnknowns(spawnCoordX, spawnCoordY);
+        originalLayoutTerrainMap = PlateauLayoutMap(spawnCoordX, spawnCoordY);
+
+        int terrainMapWidth = layoutNoiseMap.GetLength(0);
+        int terrainMapHeight = layoutNoiseMap.GetLength(1);
+
+        terrainMap = new TerrainType[terrainMapWidth, terrainMapHeight];
+        for(int x = 0; x < terrainMapWidth; x++) {
+            for(int y = 0; y < terrainMapHeight; y++) {
+                terrainMap[x, y] = terrainManager.terrainTypeMap[TerrainType.Type.Unknown];
+            }
+        }
 
         /*
          * Generate Details
@@ -305,6 +317,18 @@ public class MapGenerator : MonoBehaviour {
         finalNoiseMap = CreateMapWithFeatures();
 
         minMaxOfFinalMap = NoiseGenerator.MinMaxForMap(originalLayoutNoiseMap);
+
+        NoiseGenerator.MinMaxofNormalize minMaxOfGround = NoiseGenerator.MinMaxForMap(groundFeaturesNoiseMap);
+        NoiseGenerator.MinMaxofNormalize minMaxOfMountain = NoiseGenerator.MinMaxForMap(mountainFeaturesNoiseMap);
+
+        minMaxOfFinalMap.min += minMaxOfGround.min * groundFeaturesImpactOnLayout * 2;
+        minMaxOfFinalMap.min += minMaxOfMountain.min * mountainFeaturesImpactOnLayout;
+
+        minMaxOfFinalMap.max += minMaxOfGround.max * groundFeaturesImpactOnLayout * 2;
+        minMaxOfFinalMap.max += minMaxOfMountain.max * mountainFeaturesImpactOnLayout;
+
+        print("Min: " + minMaxOfFinalMap.min + "  Max: " + minMaxOfFinalMap.max);
+
         NoiseGenerator.NormalizeMapUsingMinMax(finalNoiseMap, minMaxOfFinalMap);
 
         spawnCoordinate = new LayoutCoordinate(0, 0, mapsManager.mapContainers[0]);
@@ -463,11 +487,11 @@ public class MapGenerator : MonoBehaviour {
 
                     float finalValue = MapAtXYWithFeatures(x, y, terraformTarget.terrainTypeTarget, heightAtNewRegion);
 
-                    if (finalValue < minMaxOfFinalMap.min || finalValue > minMaxOfFinalMap.max) {
-                        //todo:
-                        minMaxOfFinalMap = NoiseGenerator.NormalizeMap(finalNoiseMap);
+                    //if (finalValue < minMaxOfFinalMap.min || finalValue > minMaxOfFinalMap.max) {
+                    //    //todo:
+                    //    minMaxOfFinalMap = NoiseGenerator.NormalizeMap(finalNoiseMap);
 
-                    }
+                    //}
 
                     terraformTarget.heightTarget[width, height] = Mathf.InverseLerp(minMaxOfFinalMap.min, minMaxOfFinalMap.max, finalValue);
                 }
@@ -520,7 +544,7 @@ public class MapGenerator : MonoBehaviour {
     public List<KeyValuePair<int, int>> listOfLunarLocations = new List<KeyValuePair<int, int>>();
 
     // Returns a 2d array of terrainTypes
-    public TerrainType[,] PlateauLayoutMapWithUnknowns(int spawnX, int spawnY) {
+    public TerrainType[,] PlateauLayoutMap(int spawnX, int spawnY) {
         int mapWidth = layoutNoiseMap.GetLength(0);
         int mapHeight = layoutNoiseMap.GetLength(1);
 
@@ -538,7 +562,7 @@ public class MapGenerator : MonoBehaviour {
         for(int y = 0; y < mapHeight; y++) {
             for(int x = 0; x < mapWidth; x++) {
 
-                RegionType region = terrainManager.regionTypeMap[RegionType.Type.Unknown];
+                RegionType region = terrainManager.RegionTypeForValue(layoutNoiseMap[x, y]);
 
                 float mutatorValue;
 
@@ -566,13 +590,8 @@ public class MapGenerator : MonoBehaviour {
         return terrainMap;
     }
 
-    public TerrainType PlateauCoordinateFromOriginalLayout(int x, int y) {
-        TerrainManager terrainManager = Script.Get<TerrainManager>();
-
-        RegionType region = terrainManager.RegionTypeForValue(originalLayoutNoiseMap[x, y]);
-
-        float mutatorValue;
-        return terrainManager.TerrainTypeForRegion(region, x, y, out mutatorValue);
+    public TerrainType KnownTerrainTypeAtIndex(int x, int y) {
+        return originalLayoutTerrainMap[x, y];
     }
 
     private float HeightAtRegion(RegionType region) {
@@ -597,6 +616,19 @@ public class MapGenerator : MonoBehaviour {
     // On MapCoordinate scale, but for the entire generation, not a single mapContainer
     private float MapAtXYWithFeatures(int x, int y, TerrainType? withAlternateTerrain = null, float? withAlternateLayoutValue = null) {
         Constants constants = Script.Get<Constants>();
+
+        Func<int, int, TerrainType> TerrainAtLocation = (subX, subY) => {
+
+            TerrainType currentTerrainType = terrainMap[subX, subY];
+
+            if(currentTerrainType.regionType == RegionType.Type.Unknown) {
+                // If the current type is unknown, use what the original value will be
+                currentTerrainType = originalLayoutTerrainMap[subX, subY];
+            }
+
+            return currentTerrainType;
+        };
+
         int featuresPerLayoutPerAxis = constants.featuresPerLayoutPerAxis;
 
         int dipRadius = 3;
@@ -610,7 +642,7 @@ public class MapGenerator : MonoBehaviour {
             thisTerrainType = withAlternateTerrain.Value;
         }
 
-        float mapAtXY = SampleAtXY(x, y, withAlternateTerrain, withAlternateLayoutValue);
+        float mapAtXY = SampleAtXY(x, y, thisTerrainType, withAlternateLayoutValue);
 
         float distanceToEdgeX = x % featuresPerLayoutPerAxis;
         float distanceToEdgeY = y % featuresPerLayoutPerAxis;
@@ -620,7 +652,7 @@ public class MapGenerator : MonoBehaviour {
             float baseline = Script.Get<TerrainManager>().regionTypeMap[thisTerrainType.regionType].noiseBase * (dipRadius - (i + 1)) / dipRadius;
 
             // Left
-            if((sampleX == 0) || (sampleX - 1 >= 0 && thisTerrainType.priority > terrainMap[sampleX - 1, sampleY].priority)) {
+            if((sampleX == 0) || (sampleX - 1 >= 0 && thisTerrainType.priority > TerrainAtLocation(sampleX - 1, sampleY).priority)) {
                 if(distanceToEdgeX == i) {
                     mapAtXY = baseline + (mapAtXY * ((i + 1)) / dipRadius);
                     continue;
@@ -628,7 +660,7 @@ public class MapGenerator : MonoBehaviour {
             }
 
             // Top
-            if((sampleY == 0) || (sampleY - 1 >= 0 && thisTerrainType.priority > terrainMap[sampleX, sampleY - 1].priority)) {
+            if((sampleY == 0) || (sampleY - 1 >= 0 && thisTerrainType.priority > TerrainAtLocation(sampleX, sampleY - 1).priority)) {
                 if(distanceToEdgeY == i) {
                     mapAtXY = baseline + (mapAtXY * ((i + 1)) / dipRadius);
                     continue;
@@ -636,7 +668,7 @@ public class MapGenerator : MonoBehaviour {
             }
 
             // Right
-            if((sampleX + 1 == terrainMap.GetLength(0)) || (sampleX + 1 < terrainMap.GetLength(0) && thisTerrainType.priority > terrainMap[sampleX + 1, sampleY].priority)) {
+            if((sampleX + 1 == terrainMap.GetLength(0)) || (sampleX + 1 < terrainMap.GetLength(0) && thisTerrainType.priority > TerrainAtLocation(sampleX + 1, sampleY).priority)) {
                 if((featuresPerLayoutPerAxis - distanceToEdgeX - 1) == i) {
                     mapAtXY = baseline + (mapAtXY * ((i + 1)) / dipRadius);
                     continue;
@@ -644,7 +676,7 @@ public class MapGenerator : MonoBehaviour {
             }
 
             //// Bottom
-            if((sampleY + 1 == terrainMap.GetLength(1)) || (sampleY + 1 < terrainMap.GetLength(1) && thisTerrainType.priority > terrainMap[sampleX, sampleY + 1].priority)) {
+            if((sampleY + 1 == terrainMap.GetLength(1)) || (sampleY + 1 < terrainMap.GetLength(1) && thisTerrainType.priority > TerrainAtLocation(sampleX, sampleY + 1).priority)) {
                 if(featuresPerLayoutPerAxis - distanceToEdgeY - 1 == i) {
                     mapAtXY = baseline + (mapAtXY * ((i + 1)) / dipRadius);
                     continue;
