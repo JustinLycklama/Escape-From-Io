@@ -135,7 +135,7 @@ public class MapGenerator : MonoBehaviour {
         }
 
         return subset;
-    }
+    }    
 
     int spawnCoordX;
     int spawnCoordY;
@@ -227,8 +227,6 @@ public class MapGenerator : MonoBehaviour {
     float[,] originalLayoutNoiseMap;
     TerrainType[,] originalLayoutTerrainMap;
 
-    float[,] originalFinalNoiseMap;
-
     // Min Max based on the original map
     NoiseGenerator.MinMaxofNormalize minMaxOfFinalMap;
 
@@ -317,7 +315,6 @@ public class MapGenerator : MonoBehaviour {
         mountainFeaturesNoiseMap = GenerateMountainFeaturesMap(totalFullWidth, totalFullHeight);
 
         finalNoiseMap = CreateMapWithFeatures(terrainMap);
-        originalFinalNoiseMap = CreateMapWithFeatures(originalLayoutTerrainMap);
 
         minMaxOfFinalMap = NoiseGenerator.MinMaxForMap(originalLayoutNoiseMap);
 
@@ -396,20 +393,8 @@ public class MapGenerator : MonoBehaviour {
         return noiseSubset;
     }
 
-    public float[,] GetFullOriginalNoiseMap() {
-        return originalFinalNoiseMap;
-    }
-
-    public float[,] GetOriginalFinalNosieMapForMap(MapContainer mapContainer) {
-        Constants constants = Script.Get<Constants>();
-
-        int startXLayout = mapContainer.mapX * mapLayoutWidth;
-        int startYLayout = mapContainer.mapY * mapLayoutHeight;
-
-        int startXFull = startXLayout * constants.featuresPerLayoutPerAxis;
-        int startYFull = startYLayout * constants.featuresPerLayoutPerAxis;
-
-        return RangeSubset(originalFinalNoiseMap, startXFull, startYFull, mapFullWidth, mapFullHeight);
+    public float[,] GetFinalNoiseMap() {
+        return finalNoiseMap;
     }
 
     // Returns the height in MAP COORDINATE position

@@ -305,12 +305,8 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
 
             // Terraform complete
 
+            UpdateTerrainAtLocation(terraformTarget.coordinate, terraformTarget.terrainTypeTarget);
             TerraformHeightMap(terraformTarget);
-            UpdateTerrainAtLocation(terraformTarget.coordinate, terraformTarget.terrainTypeTarget);            
-
-            // Old Order
-            //UpdateTerrainAtLocation(terraformTarget.coordinate, terraformTarget.terrainTypeTarget);
-            //TerraformHeightMap(terraformTarget);
 
             terraformTargetCoordinateMap[coordinate.x, coordinate.y] = null;
 
@@ -334,37 +330,16 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
     }
 
 
-    public void TerraformHeightMap(TerraformTarget terraformTarget) {
+    public void TerraformHeightMap(TerraformTarget terraformTarget, bool delayMeshUpdate = false) {
         MapGenerator mapGenerator = Script.Get<MapGenerator>();
         float[,] finalHeightMap = mapGenerator.TerraformHeightMap(terraformTarget);
 
         MeshGenerator.UpdateTerrainMesh(meshData, finalHeightMap, featuresPerLayoutPerAxis, terraformTarget.coordinate);
-        mapContainer.DrawMesh();
 
-        int layoutWidth = (mapWidth / featuresPerLayoutPerAxis);
-        int layoutHeight = (mapHeight / featuresPerLayoutPerAxis);
-
-        // Update neibour overhang
-        if(terraformTarget.coordinate.x == layoutWidth - 1) {
-
-            if(terraformTarget.coordinate.y == 0) {
-                if(mapContainer.neighbours.topRightMap != null) {
-                    mapContainer.neighbours.topRightMap.UpdateMapOverhang();
-                }
-            } else if(terraformTarget.coordinate.y == layoutHeight - 1) {
-                if(mapContainer.neighbours.bottomRightMap != null) {
-                    mapContainer.neighbours.bottomRightMap.UpdateMapOverhang();
-                }
-            }
-
-            if (mapContainer.neighbours.rightMap != null) {
-                mapContainer.neighbours.rightMap.UpdateMapOverhang();
-            }
-        }
-
-        if (terraformTarget.coordinate.y == layoutHeight - 1 && mapContainer.neighbours.bottomMap != null) {
-            mapContainer.neighbours.bottomMap.UpdateMapOverhang();
-        }
+        if (!delayMeshUpdate) {
+            mapContainer.DrawMesh();
+            mapContainer.UpdateNeibourOverhangsForCoordinate(terraformTarget.coordinate);
+        }        
     }
 
     private void PlaceMineralsAroundLocation(WorldPosition worldPosition, Dictionary<MineralType, int> mineralLists) {
