@@ -30,6 +30,7 @@ public abstract class Building : ActionableItem, Selectable {
     public LayoutCoordinate buildingLayoutCoordinate;
 
     public bool useDisolveShader = false; // Failed experiment, don't use
+    public bool allowFullTransparent = false;
 
     // Building status
     private float percentComplete = 0;
@@ -165,6 +166,10 @@ public abstract class Building : ActionableItem, Selectable {
         foreach(MeshBuildingTier tier in meshTiers) {
             foreach(Renderer meshRenderer in tier.meshRenderes) {
                 meshRenderer.material.shader = shader;
+
+                if(allowFullTransparent) {
+                    meshRenderer.material.SetFloat("minTransparency", 0f);
+                }
             }
         }
     }

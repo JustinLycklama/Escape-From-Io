@@ -16,6 +16,8 @@
 
 		float percentComplete;
 
+		float minTransparency = 0.2;
+
 		struct Input {
 			float2 uv_MainTex;
 
@@ -42,7 +44,7 @@
 			fixed4 c = tex2D(_MainTex, IN.uv_MainTex) * _Color;
 			o.Albedo = c.rgb;
 					
-			o.Alpha = clamp(percentComplete, 0.2, 1);			
+			o.Alpha = clamp(percentComplete, minTransparency, 1);
 		}
 		ENDCG
 	

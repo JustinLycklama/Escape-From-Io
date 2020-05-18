@@ -39,6 +39,9 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
     Building startingBuilding;
     GameTask buildBuilding;
 
+    [SerializeField]
+    private CanvasGroup uiCanvas;
+
     void Start() {
 
         SetupInitChunks();
@@ -89,6 +92,9 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
 
             notificationManager.SetSupressNotifications(true);
             playerBehaviour.SetInternalPause(true);
+
+            mapsManager.mapBoundaryObject.gameObject.SetActive(false);
+            uiCanvas.alpha = 0;
         });
 
         initActionChunks.Enqueue(() => {
@@ -141,6 +147,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
             buildBuilding = new GameTask("", new WorldPosition(), GameTask.ActionType.Build, null);
 
             startingBuilding = Instantiate(Building.Blueprint.Tower.resource) as Building;
+            startingBuilding.allowFullTransparent = true;
 
             startingBuilding.transform.SetParent(buildingManager.transform);
             startingBuilding.transform.position = spawnWorldPosition.vector3;
@@ -173,6 +180,8 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
                 WorldPosition worldPos = new WorldPosition(MapCoordinate.FromGridCoordinate(unitSpawnPositions[i]));
                 worldPos.y = 15f; // Hacky offset for Unknown tile
 
+                unit.buildableComponent.allowFullTransparent = true;
+
                 unit.transform.position = worldPos.vector3;
                 unit.gameObject.SetActive(false);
 
@@ -193,7 +202,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
         animationActionChunks = new Queue<(float, Func<float>)>();
 
         animationActionChunks.Enqueue((0.1f, () => {
-            return startingBuilding.performAction(buildBuilding, 2.5f * Time.deltaTime, null);
+            return startingBuilding.performAction(buildBuilding, 2f * Time.deltaTime, null);
         }
         ));
 
@@ -219,6 +228,12 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
             }
 
             return lowest;
+        }
+        ));
+
+        animationActionChunks.Enqueue((0.15f, () => {
+            uiCanvas.alpha += Time.deltaTime * 1.5f;
+            return uiCanvas.alpha;
         }
         ));
     }
@@ -251,13 +266,14 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
         fadePanel.SetPercent(percent += incrementalPercent);
         fadePanel.FadeOut(false, null);
 
-        yield return new WaitForSeconds(1.75f);
+        WorldPosition spawnWorldPosition = new WorldPosition(new MapCoordinate(mapGenerator.spawnCoordinate));
+        playerBehaviour.PanCameraToPosition(spawnWorldPosition.vector3, 0, false);
 
         /*
          * Init Animation Chunks
          * */
 
-        WorldPosition spawnWorldPosition = new WorldPosition(new MapCoordinate(mapGenerator.spawnCoordinate));
+        yield return new WaitForSeconds(1f);
 
         float animatePercent = 0;
         float animationBaseline = 0;
@@ -302,6 +318,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
 
         //    //yield return new WaitForSeconds(0.75f);
         //}
+        mapsManager.mapBoundaryObject.gameObject.SetActive(false);
 
         playerBehaviour.SetInternalPause(false);
         StartCoroutine(StartMusic());
