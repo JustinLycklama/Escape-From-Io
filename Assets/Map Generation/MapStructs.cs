@@ -337,7 +337,7 @@ public struct WorldPosition {
 
         Transform mapObjectSpace = mapContainer.transform;
 
-        Vector3 currentPointObjectSpace = new Vector3(mapCoordinate.x, map.getHeightAt(mapCoordinate), mapCoordinate.y);
+        Vector3 currentPointObjectSpace = new Vector3(mapCoordinate.x, map?.getHeightAt(mapCoordinate) ?? 0, mapCoordinate.y);
 
         currentPointObjectSpace.x -= (constants.mapWidth / 2f);
         currentPointObjectSpace.z *= -1;

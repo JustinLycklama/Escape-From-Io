@@ -542,20 +542,31 @@ public class PlayerBehaviour : MonoBehaviour {
         }
     }
 
-    public void InitCameraPosition(Vector3 position) {
-        Camera.main.transform.position = new Vector3(0, (minCameraZoomPosition + maxCameraZoomPosition) / 2.0f, 0);
+    //public void InitCameraPosition(Vector3 position) {
+    //    PanCameraToPosition(Vector3.zero, false, 0.5f);
+    //}
 
-        PanCameraToPosition(position, false);
+
+    private Vector3 GetCameraScenePositionForPan(Vector3 panToPosition, float? heightPercent = null) {
+        float cameraHeight = Camera.main.transform.position.y;
+
+        if(heightPercent.HasValue) {
+            cameraHeight = Mathf.Lerp(minCameraZoomPosition, maxCameraZoomPosition, heightPercent.Value);
+        }
+
+        // Adjust camera ange here
+        float pullbackPercent = Mathf.InverseLerp(minCameraZoomPosition, maxCameraZoomPosition, cameraHeight);
+        float CameraPullBack = -Mathf.Lerp(minCameraZoomPosition, maxCameraZoomPosition, pullbackPercent);
+
+        Vector3 newCameraPosition = panToPosition + new Vector3(0, 0, CameraPullBack);
+        newCameraPosition.y = cameraHeight;
+
+        return newCameraPosition;
     }
 
-    public void PanCameraToPosition(Vector3 position, bool animated = true) {
+    public void PanCameraToPosition(Vector3 position, float? heightPercent = null, bool animated = true) {
 
-        float percentageOfMaxHeight = Mathf.InverseLerp(minCameraZoomPosition, maxCameraZoomPosition, Camera.main.transform.position.y);
-        // Adjust camera ange here
-        float CameraPullBack = -Mathf.Lerp(minCameraZoomPosition, maxCameraZoomPosition, percentageOfMaxHeight);
-
-        Vector3 newCameraPosition = position + new Vector3(0, 0, CameraPullBack);
-        newCameraPosition.y = Camera.main.transform.position.y;
+        Vector3 newCameraPosition = GetCameraScenePositionForPan(position, heightPercent);
 
         if (animated) {
             if (panCameraRoutine != null) {
@@ -566,7 +577,6 @@ public class PlayerBehaviour : MonoBehaviour {
         } else {
             PanToLocation(newCameraPosition);
         }
-
     }
 
     private Coroutine panCameraRoutine;

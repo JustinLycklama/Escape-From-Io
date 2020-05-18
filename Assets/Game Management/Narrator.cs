@@ -12,22 +12,70 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
     PlayerBehaviour playerBehaviour;
     NotificationPanel notificationManager;
     MessageManager messageManager;
+    BuildingManager buildingManager;
+    UnitManager unitManager;
 
-    public List<Unit> startingUnits;
     Queue<Action> initActionChunks;
+    Queue<(float, Func<float>)> animationActionChunks;
 
     int generationStepTwoCount = 0;
     int lastGenerationIteration = 0;
 
-    //LayoutCoordinate spawnCoordinate;
+    [SerializeField]
+    private Unit minerPrefab;
+    [SerializeField]
+    private Unit moverPrefab;
+    [SerializeField]
+    private Unit builderPrefab;
+    [SerializeField]
+    private Unit defenderPrefab;
+
+    private List<Unit> startingUnits;
 
     private bool canSceneChange = false;
 
-    public bool gameInitialized { get; private set; } = false; 
+    public bool gameInitialized { get; private set; } = false;
+
+    Building startingBuilding;
+    GameTask buildBuilding;
 
     void Start() {
+
+        SetupInitChunks();
+        SetupAnimationChunks();
+
+        StartCoroutine(InitializeScene());
+
+        SceneManagement.sharedInstance.RegisterForSceneUpdates(this);
+    }
+
+    private void OnDestroy() {
+        SceneManagement.sharedInstance.EndSceneUpdates(this);
+    }
+
+    /*
+     * CanSceneChangeDelegate Interface
+     * */
+
+    public bool CanWeSwitchScene() {
+        return canSceneChange;
+    }
+
+    /*
+     * SceneChangeListener Interface
+     * */
+
+    public void WillSwitchScene() {
+        //audioSource.Stop();
+    }
+
+    /*
+     * Scene Init Chunks
+     * */
+
+    private void SetupInitChunks() {
         initActionChunks = new Queue<Action>();
-      
+
         initActionChunks.Enqueue(() => {
             grid = Tag.AStar.GetGameObject().GetComponent<PathfindingGrid>();
             mapGenerator = Tag.MapGenerator.GetGameObject().GetComponent<MapGenerator>();
@@ -36,24 +84,18 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
             playerBehaviour = Script.Get<PlayerBehaviour>();
             notificationManager = Script.Get<NotificationPanel>();
             messageManager = Script.Get<MessageManager>();
+            buildingManager = Script.Get<BuildingManager>();
+            unitManager = Script.Get<UnitManager>();
 
             notificationManager.SetSupressNotifications(true);
-
-            if(TutorialManager.isTutorial) {
-                Tag.MapGenerator.GetGameObject().GetComponent<PremadeNoiseGenerator>()?.SetupCustomMap();
-
-                // Tutorial only start with 3 units
-                for(int i = 3; i < startingUnits.Count; i++) {
-                    Destroy(startingUnits[i]);
-                }
-
-                startingUnits.RemoveRange(3, startingUnits.Count - 3);
-            }
-
             playerBehaviour.SetInternalPause(true);
         });
 
         initActionChunks.Enqueue(() => {
+            if(TutorialManager.isTutorial) {
+                Tag.MapGenerator.GetGameObject().GetComponent<PremadeNoiseGenerator>()?.SetupCustomMap();
+            }
+
             mapGenerator.GenerateWorldStepOne(constants.mapCountX, constants.mapCountY);
 
             generationStepTwoCount = mapGenerator.GenerateStepTwoCount();
@@ -68,7 +110,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
                 int stoppingPoint = lastGenerationIteration + actionsPerChunk;
 
                 // on the last chunk, complete all actions regardless of estimation
-                if (localChunk == chunkCount - 1) {
+                if(localChunk == chunkCount - 1) {
                     stoppingPoint = generationStepTwoCount;
                 }
 
@@ -79,11 +121,11 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
                 lastGenerationIteration = stoppingPoint;
             });
         }
-       
+
         initActionChunks.Enqueue(() => {
             mapGenerator.GenerateWorldStepThree();
         });
-        
+
         initActionChunks.Enqueue(() => {
             grid.gameObject.transform.position = mapsManager.transform.position;
             grid.createGrid();
@@ -91,11 +133,26 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
         });
 
         initActionChunks.Enqueue(() => {
-            Script.Get<BuildingManager>().Initialize();
+            buildingManager.Initialize();
+
+            WorldPosition spawnWorldPosition = new WorldPosition(new MapCoordinate(mapGenerator.spawnCoordinate));
+            spawnWorldPosition.y = 15f; // Hacky offset for Unknown tile
+
+            buildBuilding = new GameTask("", new WorldPosition(), GameTask.ActionType.Build, null);
+
+            startingBuilding = Instantiate(Building.Blueprint.Tower.resource) as Building;
+
+            startingBuilding.transform.SetParent(buildingManager.transform);
+            startingBuilding.transform.position = spawnWorldPosition.vector3;
         });
 
-        initActionChunks.Enqueue(() => {           
-            Script.Get<BuildingManager>().Initialize();
+        initActionChunks.Enqueue(() => {
+            if(TutorialManager.isTutorial) {
+                startingUnits = new List<Unit> { Instantiate(minerPrefab), Instantiate(moverPrefab), Instantiate(builderPrefab) };
+            } else {
+                startingUnits = new List<Unit> { Instantiate(minerPrefab), Instantiate(minerPrefab), Instantiate(moverPrefab), Instantiate(builderPrefab) };
+            }
+
             PathGridCoordinate[][] coordinatesForSpawnCoordinate = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(mapGenerator.spawnCoordinate);
 
             List<PathGridCoordinate> unitSpawnPositions = new List<PathGridCoordinate>() {
@@ -111,49 +168,168 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
 
             int i = 0;
             foreach(Unit unit in startingUnits) {
+                unit.transform.SetParent(unitManager.transform);
+
                 WorldPosition worldPos = new WorldPosition(MapCoordinate.FromGridCoordinate(unitSpawnPositions[i]));
+                worldPos.y = 15f; // Hacky offset for Unknown tile
+
                 unit.transform.position = worldPos.vector3;
+                unit.gameObject.SetActive(false);
+
                 i++;
 
-                if (i == startingUnits.Count - 1) {
-                    unit.remainingDuration -= 75;
-                }
+                //if(i == startingUnits.Count - 1) {
+                //    unit.remainingDuration -= 75;
+                //}
             }
-        });
-
-        initActionChunks.Enqueue(() => {
-            WorldPosition spawnWorldPosition = new WorldPosition(new MapCoordinate(mapGenerator.spawnCoordinate));
-
-            Building building = Instantiate(Building.Blueprint.Tower.resource) as Building;
-            building.transform.position = spawnWorldPosition.vector3;
-            
-            building.ProceedToCompleteBuilding();
-            Script.Get<BuildingManager>().AddBuildingAtLocation(building, mapGenerator.spawnCoordinate);
-
-            Script.Get<PlayerBehaviour>().InitCameraPosition(spawnWorldPosition.vector3);
         });
 
         initActionChunks.Enqueue(() => {
             Script.Get<MiniMap>().Initialize();
         });
-
-        StartCoroutine(InitializeScene());
-
-        SceneManagement.sharedInstance.RegisterForSceneUpdates(this);
-
-        
-        //TimeManager timeManager = Script.Get<TimeManager>();
-
-        //System.Action<int, float> createNotificationBlock = (seconds, percent) => {
-        //    NotificationItem notificationItem = new NotificationItem(seconds.ToString(), null);
-        //    notificationManager.AddNotification(notificationItem);
-        //};
-
-        //timeManager.AddNewTimer(20, createNotificationBlock, null);
     }
 
-    private void OnDestroy() {
-        SceneManagement.sharedInstance.EndSceneUpdates(this);
+    private void SetupAnimationChunks() {
+        animationActionChunks = new Queue<(float, Func<float>)>();
+
+        animationActionChunks.Enqueue((0.1f, () => {
+            return startingBuilding.performAction(buildBuilding, 2.5f * Time.deltaTime, null);
+        }
+        ));
+
+        animationActionChunks.Enqueue((0.0f, () => {
+            foreach(Unit unit in startingUnits) {
+                unit.gameObject.SetActive(true);
+            }
+
+            return 1;
+        }
+        ));
+
+        animationActionChunks.Enqueue((0.35f, () => {
+            float lowest = float.MaxValue;
+
+            foreach(Unit unit in startingUnits) {
+
+                float percent = unit.buildableComponent.performAction(buildBuilding, 1.5f * Time.deltaTime, null);
+
+                if (percent < lowest) {
+                    lowest = percent;
+                }
+            }
+
+            return lowest;
+        }
+        ));
+    }
+
+    IEnumerator InitializeScene() {
+
+        FadePanel fadePanel = Script.Get<FadePanel>();
+        fadePanel.DisplayPercentBar(true);
+
+        /*
+         * Init Action Chunks
+         * */
+
+        float percent = 0;
+        fadePanel.SetPercent(percent);
+
+        float incrementalPercent = 1f / ((float) initActionChunks.Count + 1);
+        while(initActionChunks.Count > 0) {
+
+            yield return null;
+
+            Action initAction = initActionChunks.Dequeue();
+            initAction();
+
+            fadePanel.SetPercent(percent += incrementalPercent);
+        }
+
+        yield return null;
+
+        fadePanel.SetPercent(percent += incrementalPercent);
+        fadePanel.FadeOut(false, null);
+
+        yield return new WaitForSeconds(1.75f);
+
+        /*
+         * Init Animation Chunks
+         * */
+
+        WorldPosition spawnWorldPosition = new WorldPosition(new MapCoordinate(mapGenerator.spawnCoordinate));
+
+        float animatePercent = 0;
+        float animationBaseline = 0;
+        float animationTopline = 0;
+
+        while(animationActionChunks.Count > 0) {
+
+            (float, Func<float>) animationChunk = animationActionChunks.Dequeue();
+
+            animationTopline = animationBaseline + animationChunk.Item1;
+
+            animatePercent = 0;
+            while(animatePercent < 1) {
+                animatePercent = animationChunk.Item2();
+
+                playerBehaviour.PanCameraToPosition(spawnWorldPosition.vector3, Mathf.Lerp(animationBaseline, animationTopline, animatePercent), false);
+                yield return null;
+            }
+
+            animationBaseline = animationTopline;
+
+            yield return null;
+        }
+
+        // Wait for colliders to be built
+        yield return new WaitUntil(delegate {
+            return mapsManager.AnyBoxColliderBeingBuilt() == false;
+        });
+
+
+
+        // Init Units with delay
+        //foreach(Unit unit in startingUnits) {
+
+        //    UnitBuilding unitBuilding = unit.GetComponent<UnitBuilding>();
+
+        //    if(unitBuilding != null) {
+        //        unitBuilding.ProceedToCompleteBuilding();
+        //    } else {
+        //        unit.Initialize();
+        //    }
+
+        //    //yield return new WaitForSeconds(0.75f);
+        //}
+
+        playerBehaviour.SetInternalPause(false);
+        StartCoroutine(StartMusic());
+        StartCoroutine(CheckForNoRobots());
+
+        // Animate camera pan with fog fade
+        animatePercent = 0;
+        animationTopline = 1.0f;
+
+        while(animatePercent < 1) {
+            animatePercent += Time.deltaTime / (MapContainer.fogOfWarFadeOutDuration + 1);
+
+            playerBehaviour.PanCameraToPosition(spawnWorldPosition.vector3, Mathf.Lerp(animationBaseline, animationTopline, animatePercent), false);
+            yield return null;
+        }
+
+        if(TutorialManager.isTutorial) {
+            //yield return new WaitForSeconds(MapContainer.fogOfWarFadeOutDuration + 0.5f);
+            TutorialManager.sharedInstance.KickOffTutorial();
+        } else {
+            notificationManager.SetSupressNotifications(false);
+        }
+    }
+
+    IEnumerator StartMusic() {
+        yield return new WaitForSeconds(2.5f);
+
+        Script.Get<AudioManager>().PlayAudio(AudioManager.Type.Background1);       
     }
 
     public void DoEndGameTransition() {
@@ -172,72 +348,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
             DoEndGameTransition();
         };
 
-        Script.Get<MessageManager>().EnqueueMessage("GAME OVER", "No robots remain to fulfill your goals.\nYou remain trapped on Io...", okay);
-    }
-
-    IEnumerator InitializeScene() {
-
-        FadePanel fadePanel = Script.Get<FadePanel>();
-        fadePanel.DisplayPercentBar(true);
-
-        float percent = 0;
-        fadePanel.SetPercent(percent);
-
-        float incrementalPercent = 1f / ((float) initActionChunks.Count + 1);
-
-        yield return null;
-        while(initActionChunks.Count > 0) {
-            Action initAction = initActionChunks.Dequeue();
-            initAction();
-
-            fadePanel.SetPercent(percent += incrementalPercent);
-            yield return null;
-        }
-
-        // Wait for colliders to be built
-        yield return new WaitUntil(delegate {
-            return mapsManager.AnyBoxColliderBeingBuilt() == false;
-        });
-
-        fadePanel.SetPercent(percent += incrementalPercent);     
-        fadePanel.FadeOut(false, null);
-
-
-        //Script.Get<MessageManager>().EnqueueMessage("Test", "This is an opening message!", null);
-        //Script.Get<MessageManager>().EnqueueMessage("", "Second status message incoming", null);
-
-        //messageManager.SetMajorMessage("Hello!", MessageManager.ipsum, null);
-
-        // Init Units with delay
-        foreach(Unit unit in startingUnits) {
-
-            UnitBuilding unitBuilding = unit.GetComponent<UnitBuilding>();
-
-            if(unitBuilding != null) {
-                unitBuilding.ProceedToCompleteBuilding();
-            } else {
-                unit.Initialize();
-            }
-
-            //yield return new WaitForSeconds(0.75f);
-        }
-
-        playerBehaviour.SetInternalPause(false);
-        StartCoroutine(StartMusic());
-        StartCoroutine(CheckForNoRobots());
-
-        if(!TutorialManager.isTutorial) {
-            notificationManager.SetSupressNotifications(false);
-        } else {
-            yield return new WaitForSeconds(MapContainer.fogOfWarFadeOutDuration + 0.5f);
-            TutorialManager.sharedInstance.KickOffTutorial();
-        }
-    }
-
-    IEnumerator StartMusic() {
-        yield return new WaitForSeconds(2.5f);
-
-        Script.Get<AudioManager>().PlayAudio(AudioManager.Type.Background1);       
+        messageManager.EnqueueMessage("GAME OVER", "No robots remain to fulfill your goals.\nYou remain trapped on Io...", okay);
     }
 
     IEnumerator CheckForNoRobots() {
@@ -258,21 +369,5 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
 
             yield return new WaitForSeconds(1);
         }
-    }
-
-    /*
-     * CanSceneChangeDelegate Interface
-     * */
-
-    public bool CanWeSwitchScene() {
-        return canSceneChange;
-    }
-
-    /*
-     * SceneChangeListener Interface
-     * */
-
-    public void WillSwitchScene() {
-        //audioSource.Stop();
     }
 }

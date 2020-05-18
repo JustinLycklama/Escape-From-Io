@@ -28,6 +28,14 @@ public class BuildingManager : MonoBehaviour {
     Dictionary<LayoutCoordinate, Building> locationBuildingMap = new Dictionary<LayoutCoordinate, Building>();
     private List<LayoutCoordinate> listOfCoordinatesToBlockTerrain = new List<LayoutCoordinate>();
 
+    // Building Shaders
+    [HideInInspector] public Shader transparencyShader;
+    [HideInInspector] public Shader tintableShader;
+    [HideInInspector] public Shader uniformTransparencyShader;
+    [HideInInspector] public Shader disolveShader;
+
+    public Texture blackTexture;
+
     public void Initialize() {
         MapsManager mapsManager = Script.Get<MapsManager>();
         Constants constants = Script.Get<Constants>();
@@ -39,6 +47,12 @@ public class BuildingManager : MonoBehaviour {
         buildingsEffectingStatusMapMap = new Building[width, height];
 
         StartCoroutine(AttemptToSetUnwalkable());
+
+        // Get shaders for buildings to use
+        transparencyShader = Shader.Find("Custom/Buildable");
+        tintableShader = Shader.Find("Custom/Tintable");
+        uniformTransparencyShader = Shader.Find("Custom/BuildableUniform");
+        disolveShader = Shader.Find("Custom/Dissolve");
     }
 
     public Building buildlingAtLocation(LayoutCoordinate layoutCoordinate) {
@@ -130,15 +144,19 @@ public class BuildingManager : MonoBehaviour {
 
         while(true) {
 
+            yield return new WaitForSeconds(1);
+
+            if (listOfCoordinatesToBlockTerrain.Count == 0) {
+                continue;
+            }
+
             foreach(LayoutCoordinate layoutCoordinate in listOfCoordinatesToBlockTerrain.ToArray()) {
                 bool success = AttemptToSetUnwalkable(layoutCoordinate);
 
                 if (success) {
                     listOfCoordinatesToBlockTerrain.Remove(layoutCoordinate);
                 }
-            }
-
-            yield return new WaitForSeconds(1);
+            }        
         }
     }
 

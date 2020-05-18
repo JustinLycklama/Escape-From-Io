@@ -53,7 +53,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
     // Fog of War
     GameObject fogOfWarPrefab;
     FogOfWar[,] fogOfWarMap;
-    public static float fogOfWarFadeInSeconds = 0.25f;
+    public static float fogOfWarFadeInSeconds = 0.75f;
     public static float fogOfWarFadeOutDuration = 1.5f;
 
     const float extraFeaturePointOffset = 5f;

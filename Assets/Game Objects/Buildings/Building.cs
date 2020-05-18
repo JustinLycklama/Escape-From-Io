@@ -29,19 +29,18 @@ public abstract class Building : ActionableItem, Selectable {
 
     public LayoutCoordinate buildingLayoutCoordinate;
 
+    public bool useDisolveShader = false; // Failed experiment, don't use
+
     // Building status
     private float percentComplete = 0;
     private Dictionary<GameTask, float> percentPerTask;
 
     private BlueprintCost cost;
-    private CostPanelTooltip costPanel;   
-
-    // Building Shaders
-    private Shader transparencyShader;
-    private Shader tintableShader;
-    private Shader uniformTransparencyShader;
+    private CostPanelTooltip costPanel;      
 
     public List<UserActionUpdateDelegate> userActionDelegateList = new List<UserActionUpdateDelegate>();
+
+    BuildingManager buildingManager;
 
     protected virtual void Awake() {
         //title = "Building #" + buildingCount;
@@ -49,14 +48,9 @@ public abstract class Building : ActionableItem, Selectable {
 
         percentPerTask = new Dictionary<GameTask, float>();
 
-        // Set transparent shader for all objects in the MeshRenderTier
-        transparencyShader = Shader.Find("Custom/Buildable");
-        tintableShader = Shader.Find("Custom/Tintable");
-        uniformTransparencyShader = Shader.Find("Custom/BuildableUniform");
-
-        SetTransparentShaders();
-
         gameObject.isStatic = true;
+
+        buildingManager = Script.Get<BuildingManager>();
     }
 
     protected virtual void Start() {
@@ -65,9 +59,10 @@ public abstract class Building : ActionableItem, Selectable {
             MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(worldPosition);
 
             buildingLayoutCoordinate = new LayoutCoordinate(mapCoordinate);
-
             layoutTerrainModifier = Mathf.Clamp01(buildingLayoutCoordinate.mapContainer.map.GetTerrainAt(buildingLayoutCoordinate).modificationSpeedModifier * 2);
-        } 
+        }
+
+        SetTransparentShaders();
     }
 
     public void SetCost(BlueprintCost cost) {
@@ -150,25 +145,20 @@ public abstract class Building : ActionableItem, Selectable {
      * */
 
     public void SetTransparentShaders() {
-
         if (meshTiers != null && meshTiers.Length == 0) {
             return;
         }
 
-        SetShaders(uniformTransparencyShader);
-
-        //var uniform = (meshTiers[0].meshRenderes[0] is SkinnedMeshRenderer);
-
-        //if (uniform) {
-        //    SetShaders(uniformTransparencyShader);
-        //} else {
-        //    SetShaders(transparencyShader);
-        //}        
+        if (useDisolveShader) {
+            SetShaders(buildingManager.disolveShader);
+        } else {
+            SetShaders(buildingManager.uniformTransparencyShader);
+        }
     }
 
     public void SetTintableShaders() {
         SetAlphaPercentage(1);
-        SetShaders(tintableShader);
+        SetShaders(buildingManager.tintableShader);
     }
 
     private void SetShaders(Shader shader) {
@@ -189,7 +179,7 @@ public abstract class Building : ActionableItem, Selectable {
                 float localPercent = Mathf.InverseLerp(tierBase, tier.aproximateTopPercentage, percent);
 
                 foreach(Renderer meshRenderer in tier.meshRenderes) {                                        
-                    meshRenderer.material.SetFloat("percentComplete", localPercent);
+                    meshRenderer.material.SetFloat(useDisolveShader ? "_Cutoff" : "percentComplete", localPercent);
                 }
 
                 //print("base " + tierBase);
