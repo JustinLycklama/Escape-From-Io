@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListener {
+public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListener, GameButtonDelegate {
 
     PathfindingGrid grid;
     MapGenerator mapGenerator;
@@ -41,6 +41,9 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
 
     [SerializeField]
     private CanvasGroup uiCanvas;
+
+    [SerializeField]
+    private GameOverPanel gameOverPanel;
 
     void Start() {
 
@@ -157,7 +160,8 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
             if(TutorialManager.isTutorial) {
                 startingUnits = new List<Unit> { Instantiate(minerPrefab), Instantiate(moverPrefab), Instantiate(builderPrefab) };
             } else {
-                startingUnits = new List<Unit> { Instantiate(minerPrefab), Instantiate(minerPrefab), Instantiate(moverPrefab), Instantiate(builderPrefab) };
+                //startingUnits = new List<Unit> { Instantiate(minerPrefab), Instantiate(minerPrefab), Instantiate(moverPrefab), Instantiate(builderPrefab) };
+                startingUnits = new List<Unit> {  };
             }
 
             PathGridCoordinate[][] coordinatesForSpawnCoordinate = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(mapGenerator.spawnCoordinate);
@@ -202,7 +206,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
         animationActionChunks = new Queue<(float, Func<float>)>();
 
         animationActionChunks.Enqueue((0.1f, () => {
-            return startingBuilding.performAction(buildBuilding, 2f * Time.deltaTime, null);
+            return startingBuilding.performAction(buildBuilding, 3f * Time.deltaTime, null);
         }
         ));
 
@@ -220,7 +224,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
 
             foreach(Unit unit in startingUnits) {
 
-                float percent = unit.buildableComponent.performAction(buildBuilding, 1.5f * Time.deltaTime, null);
+                float percent = unit.buildableComponent.performAction(buildBuilding, 2.5f * Time.deltaTime, null);
 
                 if (percent < lowest) {
                     lowest = percent;
@@ -241,7 +245,6 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
     IEnumerator InitializeScene() {
 
         FadePanel fadePanel = Script.Get<FadePanel>();
-        fadePanel.DisplayPercentBar(true);
 
         /*
          * Init Action Chunks
@@ -264,7 +267,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
         yield return null;
 
         fadePanel.SetPercent(percent += incrementalPercent);
-        fadePanel.FadeOut(false, null);
+        fadePanel.FadeOut(false, true, null);
 
         WorldPosition spawnWorldPosition = new WorldPosition(new MapCoordinate(mapGenerator.spawnCoordinate));
         playerBehaviour.PanCameraToPosition(spawnWorldPosition.vector3, 0, false);
@@ -303,21 +306,6 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
             return mapsManager.AnyBoxColliderBeingBuilt() == false;
         });
 
-
-
-        // Init Units with delay
-        //foreach(Unit unit in startingUnits) {
-
-        //    UnitBuilding unitBuilding = unit.GetComponent<UnitBuilding>();
-
-        //    if(unitBuilding != null) {
-        //        unitBuilding.ProceedToCompleteBuilding();
-        //    } else {
-        //        unit.Initialize();
-        //    }
-
-        //    //yield return new WaitForSeconds(0.75f);
-        //}
         mapsManager.mapBoundaryObject.gameObject.SetActive(false);
 
         playerBehaviour.SetInternalPause(false);
@@ -349,42 +337,62 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
         Script.Get<AudioManager>().PlayAudio(AudioManager.Type.Background1);       
     }
 
-    public void DoEndGameTransition() {
-        FadePanel panel = Tag.FadePanel.GetGameObject().GetComponent<FadePanel>();
-
-        Action completed = () => {
-            canSceneChange = true;
-        };
-
-        panel.FadeOut(true, completed);
-        SceneManagement.sharedInstance.ChangeScene(SceneManagement.State.GameFinish, null, null, this, null);
-    }
-
-    private void EndGameFailure() {
-        Action okay = () => {
-            DoEndGameTransition();
-        };
-
-        messageManager.EnqueueMessage("GAME OVER", "No robots remain to fulfill your goals.\nYou remain trapped on Io...", okay);
-    }
-
     IEnumerator CheckForNoRobots() {
+        yield return new WaitForSeconds(5);
+
         UnitManager unitManager = Script.Get<UnitManager>();
 
         while(true) {
 
-            if (unitManager.GetPlayerUnitsOfType(MasterGameTask.ActionType.Build).Length == 0 &&
+            if(unitManager.GetPlayerUnitsOfType(MasterGameTask.ActionType.Build).Length == 0 &&
                 unitManager.GetPlayerUnitsOfType(MasterGameTask.ActionType.Mine).Length == 0 &&
                 unitManager.GetPlayerUnitsOfType(MasterGameTask.ActionType.Move).Length == 0) {
 
                 Script.Get<PlayerBehaviour>().SetInternalPause(true);
                 yield return new WaitForSeconds(2);
 
+                 while(uiCanvas.alpha > 0) {
+                    uiCanvas.alpha -= Time.deltaTime * 1.5f;
+                    yield return null;
+                }
+
                 EndGameFailure();
                 yield break;
             }
 
             yield return new WaitForSeconds(1);
+        }
+    }
+
+    private void EndGameFailure() {
+        //Action okay = () => {
+        //    DoEndGameTransition();
+        //};
+
+        gameOverPanel.FadeOut(true, false, null);
+        gameOverPanel.continueButton.buttonDelegate = this;
+
+        //messageManager.EnqueueMessage("GAME OVER", "No robots remain to fulfill your goals.\nYou remain trapped on Io...", okay);
+    }
+
+    public void DoEndGameTransition() {
+        FadePanel panel = Script.Get<FadePanel>();
+
+        Action completed = () => {
+            canSceneChange = true;
+        };
+
+        panel.FadeOut(true, false, completed);
+        SceneManagement.sharedInstance.ChangeScene(SceneManagement.State.GameFinish, null, null, this, null);
+    }
+
+    /*
+     * GameButtonDelegate Interface
+     * */
+
+    public void ButtonDidClick(GameButton button) {
+        if (button == gameOverPanel.continueButton) {
+            DoEndGameTransition();
         }
     }
 }

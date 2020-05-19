@@ -10,6 +10,9 @@ public class LeaderboardWindow : MonoBehaviour, GameButtonDelegate, CanSceneChan
     public TitleWindow titleController;
     public FadePanel fadePanel;
 
+    public FirebaseManager firebaseManager;
+    public HighscoreController highscoreController;
+
     private bool ableToSwitchScene = false;
 
     private void Awake() {
@@ -21,6 +24,9 @@ public class LeaderboardWindow : MonoBehaviour, GameButtonDelegate, CanSceneChan
         if (SceneManagement.sharedInstance.state != SceneManagement.State.GameFinish) {
             replayButton.gameObject.SetActive(false);
         }
+
+        firebaseManager.firebaseDelegate = highscoreController;
+        firebaseManager.ReadScore();
     }
 
     /*
@@ -36,7 +42,7 @@ public class LeaderboardWindow : MonoBehaviour, GameButtonDelegate, CanSceneChan
             titleController.gameObject.SetActive(true);
             gameObject.SetActive(false);
         } else if (button == replayButton) {
-            fadePanel.FadeOut(true, completeTransition);
+            fadePanel.FadeOut(true, false, completeTransition);
             SceneManagement.sharedInstance.ChangeScene(SceneManagement.State.NewGame, null, null, this);
         }
     }

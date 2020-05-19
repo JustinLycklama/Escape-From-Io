@@ -48,7 +48,7 @@ public class HighscoreCell : MonoBehaviour, GameButtonDelegate {
     }
 
     private void ValueChangeCheck() {
-        submitButton.SetEnabled(canSubmit && firstName.text.Length > 0 && lastName.text.Length > 0);
+        submitButton.SetEnabled(canSubmit && firstName.text.Length > 0/* && lastName.text.Length > 0*/);
     }
 
     public void SetRank(int rank) {

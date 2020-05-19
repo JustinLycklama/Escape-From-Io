@@ -24,7 +24,7 @@ public class TitleWindow : MonoBehaviour, GameButtonDelegate, CanSceneChangeDele
     private void Start() {
         leaderboardPanel.gameObject.SetActive(false);
         helpWindow.gameObject.SetActive(false);
-        fadePanel.FadeOut(false, null);
+        fadePanel.FadeOut(false, false, null);
 
         helpWindow.presenter = this;        
 
@@ -46,13 +46,13 @@ public class TitleWindow : MonoBehaviour, GameButtonDelegate, CanSceneChangeDele
             //helpWindow.gameObject.SetActive(true);
             //gameObject.SetActive(false);
 
-            fadePanel.FadeOut(true, completeTransition);
+            fadePanel.FadeOut(true, true, completeTransition);
             SceneManagement.sharedInstance.ChangeScene(SceneManagement.State.Tutorial, null, null, this);
-        
         } else if(button == newGame) {
-            fadePanel.FadeOut(true, completeTransition);
+            fadePanel.FadeOut(true, true, completeTransition);
             SceneManagement.sharedInstance.ChangeScene(SceneManagement.State.NewGame, null, null, this);
         } else if(button == leaderboard) {
+            leaderboardPanel.firebaseManager.ReadScore();
             leaderboardPanel.gameObject.SetActive(true);
             gameObject.SetActive(false);
         } else if(button == exit) {

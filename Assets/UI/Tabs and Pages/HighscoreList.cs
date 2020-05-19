@@ -5,9 +5,7 @@ using UnityEngine;
 public class HighscoreList : TabElement, TableViewDelegate, HighscoreCellDelegate {
 
     public TableView table;
-    public HighscoreController highscoreController;
-    
-    
+    public HighscoreController highscoreController;       
 
     private List<LeaderboardItem> scoreList;
 
@@ -16,8 +14,6 @@ public class HighscoreList : TabElement, TableViewDelegate, HighscoreCellDelegat
 
         table.dataDelegate = this;
         UpdateScore();
-
-        highscoreController.ListLoaded();
     }
 
     private void OnDestroy() {

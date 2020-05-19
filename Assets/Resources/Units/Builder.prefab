@@ -118,6 +118,7 @@ MonoBehaviour:
   statusLocation: {fileID: 4146627357876593413}
   relativeDistanceToTask: 0
   unitHealth: 100
+  skipDurationUpdates: 0
   remainingDuration: 180
   remainingHealth: 0
   buildableComponent: {fileID: 8754757265917881465}
@@ -142,6 +143,7 @@ MonoBehaviour:
     aproximateTopPercentage: 0.35
   - meshRenderes:
     - {fileID: 8690563376170798411}
+    - {fileID: 848130173614985844}
     aproximateTopPercentage: 0.55
   - meshRenderes:
     - {fileID: 7933738300666105962}
@@ -152,6 +154,8 @@ MonoBehaviour:
   statusLocation: {fileID: 4146627357876593413}
   layoutTerrainModifier: 0
   buildingComplete: 0
+  useDisolveShader: 0
+  allowFullTransparent: 0
   associatedUnit: {fileID: 8025371554446927659}
 --- !u!1001 &8392928835660036544
 PrefabInstance:
@@ -258,6 +262,12 @@ MonoBehaviour:
 --- !u!137 &848130173611966900 stripped
 SkinnedMeshRenderer:
   m_CorrespondingSourceObject: {fileID: 9204378698458380404, guid: ee26f6127aa849346bb6ac0695cb7862,
+    type: 3}
+  m_PrefabInstance: {fileID: 8392928835660036544}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &848130173614985844 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 9204378698449071028, guid: ee26f6127aa849346bb6ac0695cb7862,
     type: 3}
   m_PrefabInstance: {fileID: 8392928835660036544}
   m_PrefabAsset: {fileID: 0}

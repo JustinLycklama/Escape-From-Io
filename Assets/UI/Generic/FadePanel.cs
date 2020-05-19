@@ -7,34 +7,35 @@ using UnityEngine.UI;
 public class FadePanel : MonoBehaviour
 {
     public Image background;
+    public CanvasGroup canvasGroup;
     public PercentageBar percentBar;
 
     private float fadeSpeed = 1.5f;
 
     private void Awake() {
-        DisplayPercentBar(false);
+        percentBar?.SetPercent(0);
     }
 
-    public void DisplayPercentBar(bool visible) {
-        if(percentBar.gameObject.activeSelf != visible) {
-            percentBar.gameObject.SetActive(visible);
+    private void DisplayPercentBar(bool visible) {
+        if(percentBar?.gameObject.activeSelf != visible) {
+            percentBar?.gameObject.SetActive(visible);
         }
     }
 
     public void SetPercent(float percent) {
-        percentBar.SetPercent(percent);
+        percentBar?.SetPercent(percent);
     }
 
-    public void FadeOut(bool fadeOut, Action completed) {
-        DisplayPercentBar(false);
+    public void FadeOut(bool fadeOut, bool displayPercent, Action completed) {
+        DisplayPercentBar(displayPercent);
+
         background.raycastTarget = true;
         StartCoroutine(Fade(fadeOut, completed));
     }
 
     IEnumerator Fade(bool fadeOut, Action completed) {
 
-        Color baseFadeColor = background.color;
-        float alpha = baseFadeColor.a;
+        float alpha = canvasGroup.alpha;
 
         int success = fadeOut ? 1 : 0;
         while(alpha != success) {
@@ -49,8 +50,7 @@ public class FadePanel : MonoBehaviour
                 alpha = 0;
             }
 
-            baseFadeColor.a = alpha;
-            background.color = baseFadeColor;
+            canvasGroup.alpha = alpha;
 
             yield return null;
         }
@@ -58,5 +58,4 @@ public class FadePanel : MonoBehaviour
         completed?.Invoke();
         background.raycastTarget = false;
     }
-
 }

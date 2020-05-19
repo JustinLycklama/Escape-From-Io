@@ -14,11 +14,11 @@ public abstract class AnimationController : MonoBehaviour, PlayerBehaviourUpdate
         AnimateState(Unit.AnimationState.Idle);
         playerBehaviour = Script.Get<PlayerBehaviour>();
 
-        playerBehaviour.RegisterForPlayerBehaviourNotifications(this);
+        playerBehaviour?.RegisterForPlayerBehaviourNotifications(this);
     }
 
     private void OnDestroy() {
-        playerBehaviour.EndPlayerBehaviourNotifications(this);
+        playerBehaviour?.EndPlayerBehaviourNotifications(this);
     }
 
     public virtual void AnimateState(Unit.AnimationState state, float rate = 1.0f, bool isCarry = false) {

@@ -39,14 +39,14 @@ public class MenuWindow : MonoBehaviour, GameButtonDelegate, CanSceneChangeDeleg
             settingsPanel.CloseWindows();
         } else if(button == restartButton) {
             settingsPanel.CloseWindows();
-            fadePanel.FadeOut(true, completeTransition);
+            fadePanel.FadeOut(true, true, completeTransition);
             SceneManagement.sharedInstance.ChangeScene(SceneManagement.State.NewGame, null, null, this);
         } else if(button == helpButton) {
             gameObject.SetActive(false);
             helpWindow.gameObject.SetActive(true);
         } else if(button == quitButton) {
             settingsPanel.CloseWindows();
-            fadePanel.FadeOut(true, completeTransition);
+            fadePanel.FadeOut(true, false, completeTransition);
             SceneManagement.sharedInstance.ChangeScene(SceneManagement.State.Title, null, null, this);
         }
     }

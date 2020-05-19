@@ -161,6 +161,8 @@ MonoBehaviour:
   statusLocation: {fileID: 1486896367169583495}
   layoutTerrainModifier: 0
   buildingComplete: 0
+  useDisolveShader: 0
+  allowFullTransparent: 0
   associatedUnit: {fileID: 914912388675594749}
 --- !u!1 &7157651349696165821
 GameObject:
@@ -203,6 +205,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: DefenderModel
+      objectReference: {fileID: 0}
+    - target: {fileID: 532841760498535664, guid: b4b56823cef2d8844a7835e0d5d6fe52,
+        type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 812292134677197884, guid: b4b56823cef2d8844a7835e0d5d6fe52,
+        type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 812292134686284764, guid: b4b56823cef2d8844a7835e0d5d6fe52,
         type: 3}
@@ -273,16 +285,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalScale.z
       value: 0.25
-      objectReference: {fileID: 0}
-    - target: {fileID: 532841760498535664, guid: b4b56823cef2d8844a7835e0d5d6fe52,
-        type: 3}
-      propertyPath: m_ApplyRootMotion
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 812292134677197884, guid: b4b56823cef2d8844a7835e0d5d6fe52,
-        type: 3}
-      propertyPath: m_ApplyRootMotion
-      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: b4b56823cef2d8844a7835e0d5d6fe52, type: 3}

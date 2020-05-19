@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 7750585380817560776}
   - component: {fileID: 7750585380817560783}
   - component: {fileID: 7750585380817560777}
+  - component: {fileID: 2331290640484414939}
   m_Layer: 5
   m_Name: FadePanel
   m_TagString: Untagged
@@ -88,7 +89,20 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   background: {fileID: 7750585380817560783}
+  canvasGroup: {fileID: 2331290640484414939}
   percentBar: {fileID: 171281403969502215}
+--- !u!225 &2331290640484414939
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7750585380817560781}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1001 &5409091294350222334
 PrefabInstance:
   m_ObjectHideFlags: 0

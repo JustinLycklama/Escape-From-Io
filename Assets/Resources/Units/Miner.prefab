@@ -119,6 +119,7 @@ MonoBehaviour:
   statusLocation: {fileID: 8853654982880946024}
   relativeDistanceToTask: 0
   unitHealth: 100
+  skipDurationUpdates: 0
   remainingDuration: 180
   remainingHealth: 0
   buildableComponent: {fileID: 2630742768244688191}
@@ -143,6 +144,7 @@ MonoBehaviour:
     aproximateTopPercentage: 0.4
   - meshRenderes:
     - {fileID: 7366759543750411434}
+    - {fileID: 1595584149126182222}
     aproximateTopPercentage: 0.55
   - meshRenderes:
     - {fileID: 7835216318215110162}
@@ -153,6 +155,8 @@ MonoBehaviour:
   statusLocation: {fileID: 8853654982880946024}
   layoutTerrainModifier: 0
   buildingComplete: 0
+  useDisolveShader: 0
+  allowFullTransparent: 0
   associatedUnit: {fileID: 6684235117908065209}
 --- !u!1 &8372461396974170240
 GameObject:
@@ -195,6 +199,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: MinerModel
+      objectReference: {fileID: 0}
+    - target: {fileID: 7467537033628625099, guid: 6fa996eac36a6874da212e3389413bea,
+        type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7467537033621456683, guid: 6fa996eac36a6874da212e3389413bea,
         type: 3}
@@ -266,11 +275,6 @@ PrefabInstance:
       propertyPath: m_LocalScale.z
       value: 0.35
       objectReference: {fileID: 0}
-    - target: {fileID: 7467537033628625099, guid: 6fa996eac36a6874da212e3389413bea,
-        type: 3}
-      propertyPath: m_ApplyRootMotion
-      value: 0
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 6fa996eac36a6874da212e3389413bea, type: 3}
 --- !u!4 &1595584149124413358 stripped
@@ -294,6 +298,12 @@ MonoBehaviour:
 --- !u!137 &1595584149112678030 stripped
 SkinnedMeshRenderer:
   m_CorrespondingSourceObject: {fileID: 7467537033632929291, guid: 6fa996eac36a6874da212e3389413bea,
+    type: 3}
+  m_PrefabInstance: {fileID: 8180403939109843077}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &1595584149126182222 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 7467537033623356875, guid: 6fa996eac36a6874da212e3389413bea,
     type: 3}
   m_PrefabInstance: {fileID: 8180403939109843077}
   m_PrefabAsset: {fileID: 0}

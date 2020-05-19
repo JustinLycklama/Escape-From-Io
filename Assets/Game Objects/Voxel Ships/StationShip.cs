@@ -49,7 +49,7 @@ public class StationShip : Building, CanSceneChangeDelegate /*, BuildingsUpdateD
                 canSceneChange = true;
             };
 
-            panel.FadeOut(true, completed);
+            panel.FadeOut(true, false, completed);
             SceneManagement.sharedInstance.ChangeScene(SceneManagement.State.GameFinish, null, null, this, completionTime);
         };
 

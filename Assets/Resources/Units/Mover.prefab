@@ -161,6 +161,8 @@ MonoBehaviour:
   statusLocation: {fileID: 4539342120279948449}
   layoutTerrainModifier: 0
   buildingComplete: 0
+  useDisolveShader: 0
+  allowFullTransparent: 0
   associatedUnit: {fileID: 4350705832465765112}
 --- !u!1001 &773014327755863600
 PrefabInstance:
@@ -173,6 +175,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: MoverModel
+      objectReference: {fileID: 0}
+    - target: {fileID: 7778355725215800504, guid: 8ae724ef5522f184d98e6bf8aa64be3d,
+        type: 3}
+      propertyPath: m_ApplyRootMotion
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7778355725223064398, guid: 8ae724ef5522f184d98e6bf8aa64be3d,
         type: 3}
@@ -243,11 +250,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalScale.z
       value: 0.35
-      objectReference: {fileID: 0}
-    - target: {fileID: 7778355725215800504, guid: 8ae724ef5522f184d98e6bf8aa64be3d,
-        type: 3}
-      propertyPath: m_ApplyRootMotion
-      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8ae724ef5522f184d98e6bf8aa64be3d, type: 3}
