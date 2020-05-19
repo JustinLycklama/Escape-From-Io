@@ -52,7 +52,6 @@ public class TitleWindow : MonoBehaviour, GameButtonDelegate, CanSceneChangeDele
             fadePanel.FadeOut(true, true, completeTransition);
             SceneManagement.sharedInstance.ChangeScene(SceneManagement.State.NewGame, null, null, this);
         } else if(button == leaderboard) {
-            leaderboardPanel.firebaseManager.ReadScore();
             leaderboardPanel.gameObject.SetActive(true);
             gameObject.SetActive(false);
         } else if(button == exit) {

@@ -45,7 +45,14 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
     [SerializeField]
     private GameOverPanel gameOverPanel;
 
+    float? completionTime = null;
+
+    Coroutine gameOverRoutine;
+
     void Start() {
+
+        gameOverPanel.fadeSpeed = 0.75f;
+        gameOverPanel.continueButton.buttonDelegate = this;
 
         SetupInitChunks();
         SetupAnimationChunks();
@@ -160,8 +167,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
             if(TutorialManager.isTutorial) {
                 startingUnits = new List<Unit> { Instantiate(minerPrefab), Instantiate(moverPrefab), Instantiate(builderPrefab) };
             } else {
-                //startingUnits = new List<Unit> { Instantiate(minerPrefab), Instantiate(minerPrefab), Instantiate(moverPrefab), Instantiate(builderPrefab) };
-                startingUnits = new List<Unit> {  };
+                startingUnits = new List<Unit> { Instantiate(minerPrefab), Instantiate(minerPrefab), Instantiate(moverPrefab), Instantiate(builderPrefab) };                
             }
 
             PathGridCoordinate[][] coordinatesForSpawnCoordinate = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(mapGenerator.spawnCoordinate);
@@ -310,7 +316,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
 
         playerBehaviour.SetInternalPause(false);
         StartCoroutine(StartMusic());
-        StartCoroutine(CheckForNoRobots());
+        gameOverRoutine = StartCoroutine(CheckForNoRobots());
 
         // Animate camera pan with fog fade
         animatePercent = 0;
@@ -364,18 +370,23 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
         }
     }
 
-    private void EndGameFailure() {
-        //Action okay = () => {
-        //    DoEndGameTransition();
-        //};
+    public void EndGameSuccess() {
+        StopCoroutine(gameOverRoutine);
+        completionTime = (float) Script.Get<TimeManager>().currentDiscreteTime.TotalSeconds;
 
+        playerBehaviour.SetInternalPause(true);
+
+        gameOverPanel.SetSuccess();
         gameOverPanel.FadeOut(true, false, null);
-        gameOverPanel.continueButton.buttonDelegate = this;
-
-        //messageManager.EnqueueMessage("GAME OVER", "No robots remain to fulfill your goals.\nYou remain trapped on Io...", okay);
     }
 
-    public void DoEndGameTransition() {
+    private void EndGameFailure() {
+        playerBehaviour.SetInternalPause(true);
+
+        gameOverPanel.FadeOut(true, false, null);
+    }
+
+    public void DoEndGameTransition() {       
         FadePanel panel = Script.Get<FadePanel>();
 
         Action completed = () => {
@@ -383,7 +394,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
         };
 
         panel.FadeOut(true, false, completed);
-        SceneManagement.sharedInstance.ChangeScene(SceneManagement.State.GameFinish, null, null, this, null);
+        SceneManagement.sharedInstance.ChangeScene(SceneManagement.State.GameFinish, null, null, this, completionTime);
     }
 
     /*
@@ -393,6 +404,8 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
     public void ButtonDidClick(GameButton button) {
         if (button == gameOverPanel.continueButton) {
             DoEndGameTransition();
+
+            button.SetEnabled(false);
         }
     }
 }

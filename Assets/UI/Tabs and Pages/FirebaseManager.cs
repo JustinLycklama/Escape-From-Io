@@ -13,8 +13,10 @@ public interface FirebaseDelegate {
     void ScoredUpdated(List<HighScoreEntry> entries);
 }
 
-public class FirebaseManager : MonoBehaviour
+public class FirebaseManager
 {
+    public static FirebaseManager sharedInstance = new FirebaseManager();
+
     private const string HIGHSCORE_NODE_NAME = "highscore";
 
     private const string HIGHSCORE_NAME_FIELD = "name";
@@ -30,24 +32,14 @@ public class FirebaseManager : MonoBehaviour
 
     List<HighScoreEntry> newEntries = null;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        CheckFirebase();
-        InitializeFirebase();
+    private bool isInit = false;
 
-        InitDatabase();
-
-        TestSignIn(() =>
-        {                  
-            //WriteScore("justin", 32, () =>
-            //{
-            //    ReadScore();
-            //});
-        });        
+    ~FirebaseManager() {
+        auth.StateChanged -= AuthStateChanged;
+        auth = null;
     }
 
-    private void Update() {
+    public void Update() {
         if (newEntries != null && firebaseDelegate != null) {
             firebaseDelegate.ScoredUpdated(newEntries);
             newEntries = null;
@@ -133,68 +125,88 @@ public class FirebaseManager : MonoBehaviour
         highscoreRef = dbReference.Child(HIGHSCORE_NODE_NAME);
     }
 
-    public void WriteScore(string name, int value, Action onComplete)
-    {
-        HighScoreEntry entry = new HighScoreEntry(name, value);
-        string json = JsonUtility.ToJson(entry);
+    private void InitFlow(Action onComplete) {
+        CheckFirebase();
+        InitializeFirebase();
 
-        string insertKey = highscoreRef.Push().Key;
+        InitDatabase();
 
-        highscoreRef.Child(insertKey).SetRawJsonValueAsync(json).ContinueWith(t => {
-            if (t.IsFaulted)
-            {
-                Debug.Log("Faulted..");
-            }
-
-            if (t.IsCanceled)
-            {
-                Debug.Log("Cancelled..");
-            }
-
-            if (t.IsCompleted)
-            {
-                Debug.Log("Complete");
-            }
-
+        TestSignIn(() => {
+            isInit = true;
             onComplete?.Invoke();
         });
     }
 
-    public void ReadScore()
+    /*
+     * Public Interface
+     * */    
+
+    public void WriteScore(string name, int value, Action onComplete)
     {
-        highscoreRef.GetValueAsync().ContinueWith(task => {
-            if (task.IsFaulted)
-            {
-                // Handle the error...
-            }
-            else if (task.IsCompleted)
-            {
-                DataSnapshot snapshot = task.Result;
-                List<HighScoreEntry> highscores = new List<HighScoreEntry>();
+        Action action = () => {
+            HighScoreEntry entry = new HighScoreEntry(name, value);
+            string json = JsonUtility.ToJson(entry);
 
-                foreach(DataSnapshot child in snapshot.Children) {
-                    string name = "";
-                    long value = 0;
+            string insertKey = highscoreRef.Push().Key;
 
-                    try {
-                        name = child.Child(HIGHSCORE_NAME_FIELD).Value as string;
-                        value = (long)child.Child(HIGHSCORE_SCORE_FIELD).Value; // Firebase nonsense, values returned as long
-                    } catch (Exception ex) {
-                        print(ex);
-                        continue;
-                    }
-
-                    highscores.Add(new HighScoreEntry(name, (int)value));
+            highscoreRef.Child(insertKey).SetRawJsonValueAsync(json).ContinueWith(t => {
+                if(t.IsFaulted) {
+                    Debug.Log("Faulted..");
                 }
 
-                newEntries = highscores;
-            }
-        });
+                if(t.IsCanceled) {
+                    Debug.Log("Cancelled..");
+                }
+
+                if(t.IsCompleted) {
+                    Debug.Log("Complete");
+                }
+
+                onComplete?.Invoke();
+            });
+        };
+
+        if(!isInit) {
+            InitFlow(action);
+        } else {
+            action.Invoke();
+        }
     }
 
-    void OnDestroy()
+    public void ReadScore()
     {
-        auth.StateChanged -= AuthStateChanged;
-        auth = null;
+        Action action = () => {
+            highscoreRef.GetValueAsync().ContinueWith(task => {
+                if(task.IsFaulted) {
+                    // Handle the error...
+                } else if(task.IsCompleted) {
+                    DataSnapshot snapshot = task.Result;
+                    List<HighScoreEntry> highscores = new List<HighScoreEntry>();
+
+                    foreach(DataSnapshot child in snapshot.Children) {
+                        string name = "";
+                        long value = 0;
+
+                        try {
+                            name = child.Child(HIGHSCORE_NAME_FIELD).Value as string;
+                            value = (long)child.Child(HIGHSCORE_SCORE_FIELD).Value; // Firebase nonsense, values returned as long
+                        } catch(Exception ex) {
+                            Debug.Log(ex);
+                            continue;
+                        }
+
+                        highscores.Add(new HighScoreEntry(name, (int)value));
+                    }
+
+                    newEntries = highscores;
+                }
+            });
+        };
+
+        if(!isInit) {
+            InitFlow(action);
+        } else {
+            action.Invoke();
+        }
     }
 }

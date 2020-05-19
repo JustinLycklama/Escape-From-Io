@@ -15,7 +15,7 @@ public class StationShip : Building, CanSceneChangeDelegate /*, BuildingsUpdateD
     }
 
     protected override void CompleteBuilding() {
-        CompleteGame();
+        Script.Get<Narrator>().EndGameSuccess();
 
 
         //Script.Get<BuildingManager>().RegisterFoBuildingNotifications(this);
@@ -37,24 +37,6 @@ public class StationShip : Building, CanSceneChangeDelegate /*, BuildingsUpdateD
     //        CompleteGame();
     //    }
     //}
-
-    private void CompleteGame() {
-        TimeManager timeManager = Script.Get<TimeManager>();
-        float completionTime = timeManager.globalTimer;
-
-        Action okay = () => {
-            FadePanel panel = Tag.FadePanel.GetGameObject().GetComponent<FadePanel>();
-
-            Action completed = () => {
-                canSceneChange = true;
-            };
-
-            panel.FadeOut(true, false, completed);
-            SceneManagement.sharedInstance.ChangeScene(SceneManagement.State.GameFinish, null, null, this, completionTime);
-        };
-
-        Script.Get<MessageManager>().EnqueueMessage("SUCCESS", "You've created a ship to return to earth!", okay);
-    }
 
     /*
      * CanSceneChangeDelegate Interface

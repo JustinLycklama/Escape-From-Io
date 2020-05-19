@@ -10,7 +10,6 @@ public class LeaderboardWindow : MonoBehaviour, GameButtonDelegate, CanSceneChan
     public TitleWindow titleController;
     public FadePanel fadePanel;
 
-    public FirebaseManager firebaseManager;
     public HighscoreController highscoreController;
 
     private bool ableToSwitchScene = false;
@@ -24,9 +23,6 @@ public class LeaderboardWindow : MonoBehaviour, GameButtonDelegate, CanSceneChan
         if (SceneManagement.sharedInstance.state != SceneManagement.State.GameFinish) {
             replayButton.gameObject.SetActive(false);
         }
-
-        firebaseManager.firebaseDelegate = highscoreController;
-        firebaseManager.ReadScore();
     }
 
     /*

@@ -692,7 +692,6 @@ GameObject:
   - component: {fileID: 7765370252117322506}
   - component: {fileID: 4963987252929637659}
   - component: {fileID: 13720651956888487}
-  - component: {fileID: 294273082032847971}
   m_Layer: 5
   m_Name: LeaderboardWindow
   m_TagString: Untagged
@@ -744,7 +743,6 @@ MonoBehaviour:
   replayButton: {fileID: 3014523813760231500}
   titleController: {fileID: 0}
   fadePanel: {fileID: 0}
-  firebaseManager: {fileID: 294273082032847971}
   highscoreController: {fileID: 13720651956888487}
 --- !u!114 &13720651956888487
 MonoBehaviour:
@@ -756,19 +754,6 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 917dfe7b1aa57604c9ca44be91e40479, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  firebaseManager: {fileID: 294273082032847971}
---- !u!114 &294273082032847971
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7765370252117322503}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8192dae098f71814eb34dac0a9a5040d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &7765370252544038491

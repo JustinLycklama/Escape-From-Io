@@ -10,7 +10,7 @@ public class FadePanel : MonoBehaviour
     public CanvasGroup canvasGroup;
     public PercentageBar percentBar;
 
-    private float fadeSpeed = 1.5f;
+    public float fadeSpeed = 1.5f;
 
     private void Awake() {
         percentBar?.SetPercent(0);

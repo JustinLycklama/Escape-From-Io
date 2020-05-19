@@ -44,25 +44,23 @@ public class HighscoreController : MonoBehaviour, FirebaseDelegate {
     public static bool preSubmit = false;
     public static int preSubmitValue = int.MaxValue;
 
-    [SerializeField]
-    FirebaseManager firebaseManager;
-
     void Start() {
-        //if(SceneManagement.sharedInstance.state == SceneManagement.State.GameFinish && SceneManagement.sharedInstance.score != null) {
-        //    preSubmit = true;
-        //    preSubmitValue = Mathf.FloorToInt(SceneManagement.sharedInstance.score.Value);
-        //    SceneManagement.sharedInstance.score = null;
+        FirebaseManager.sharedInstance.firebaseDelegate = this;
+        FirebaseManager.sharedInstance.ReadScore();
 
-        //    AddPlaceholderScoreCell();
-        //}
+        if(SceneManagement.sharedInstance.state == SceneManagement.State.GameFinish && SceneManagement.sharedInstance.score != null) {
+            preSubmit = true;
+            preSubmitValue = Mathf.FloorToInt(SceneManagement.sharedInstance.score.Value);
+            SceneManagement.sharedInstance.score = null;
 
-        
-        preSubmit = true;
-        preSubmitValue = Mathf.FloorToInt(11);
-        //SceneManagement.sharedInstance.score = null;
+            AddPlaceholderScoreCell();
+        } 
+    }
 
-        AddPlaceholderScoreCell();       
-    }    
+    private void Update() {
+        // Hacky way around firebase manager not being a monobehaviour. 
+        FirebaseManager.sharedInstance.Update();
+    }
 
     private void UpdateLeaderItems() {
         leaderboardItems = leaderboardItems.OrderBy(scoreObj => scoreObj.score).ToList();
@@ -91,8 +89,8 @@ public class HighscoreController : MonoBehaviour, FirebaseDelegate {
 
     public void SubmitScore(float score, string firstName, string lastName) {
 
-        firebaseManager.WriteScore(firstName, Mathf.FloorToInt(score), () => {
-            firebaseManager.ReadScore();
+        FirebaseManager.sharedInstance.WriteScore(firstName, Mathf.FloorToInt(score), () => {
+            FirebaseManager.sharedInstance.ReadScore();
         });
 
         preSubmit = false;
