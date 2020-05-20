@@ -137,11 +137,9 @@ public class SceneLoadHandler : MonoBehaviour {
         while(!async.isDone) {
 
             // Hold until our UI is ready for a switch
-            if(async.progress >= LOAD_READY_PERCENTAGE) {            
-                if(canChangeDelegate.CanWeSwitchScene()) {
-                    yield return null;
-                    async.allowSceneActivation = true;
-                }
+            if(async.progress >= LOAD_READY_PERCENTAGE && canChangeDelegate.CanWeSwitchScene() && async.allowSceneActivation == false) {            
+                yield return null;
+                async.allowSceneActivation = true;
             }
 
             yield return null;

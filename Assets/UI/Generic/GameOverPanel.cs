@@ -8,19 +8,29 @@ public class GameOverPanel : FadePanel
     public GameButton continueButton;
 
     [SerializeField]
-    private GameObject failureText;
+    private GameObject failureText = null;
     [SerializeField]
-    private GameObject successText;
+    private GameObject successText = null;
 
     [SerializeField]
-    private GameObject failureTitle;
+    private GameObject failureTitle = null;
     [SerializeField]
-    private GameObject successTitle;
+    private GameObject successTitle = null;
 
     [SerializeField]
-    private Image backgroundImage;
+    private Image backgroundImage = null;
     [SerializeField]
-    private Sprite successImage;
+    private Sprite successImage = null;
+
+    private void Start() {
+        background.raycastTarget = false;
+    }
+
+    protected override void RaycastTarget(bool state) {
+        base.RaycastTarget(state);
+
+        continueButton.image.raycastTarget = state;
+    }
 
     public void SetSuccess() {
         failureText.SetActive(false);

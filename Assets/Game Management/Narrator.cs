@@ -22,11 +22,11 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
     int lastGenerationIteration = 0;
 
     [SerializeField]
-    private Unit minerPrefab;
+    private Unit minerPrefab = null;
     [SerializeField]
-    private Unit moverPrefab;
+    private Unit moverPrefab = null;
     [SerializeField]
-    private Unit builderPrefab;
+    private Unit builderPrefab = null;
     [SerializeField]
     private Unit defenderPrefab;
 
@@ -40,10 +40,10 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
     GameTask buildBuilding;
 
     [SerializeField]
-    private CanvasGroup uiCanvas;
+    private CanvasGroup uiCanvas = null;
 
     [SerializeField]
-    private GameOverPanel gameOverPanel;
+    private GameOverPanel gameOverPanel = null;
 
     float? completionTime = null;
 
@@ -274,6 +274,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
 
         fadePanel.SetPercent(percent += incrementalPercent);
         fadePanel.FadeOut(false, true, null);
+        gameOverPanel.FadeOut(false, true, null);
 
         WorldPosition spawnWorldPosition = new WorldPosition(new MapCoordinate(mapGenerator.spawnCoordinate));
         playerBehaviour.PanCameraToPosition(spawnWorldPosition.vector3, 0, false);
@@ -312,7 +313,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
             return mapsManager.AnyBoxColliderBeingBuilt() == false;
         });
 
-        mapsManager.mapBoundaryObject.gameObject.SetActive(false);
+        mapsManager.mapBoundaryObject.gameObject.SetActive(true);
 
         playerBehaviour.SetInternalPause(false);
         StartCoroutine(StartMusic());

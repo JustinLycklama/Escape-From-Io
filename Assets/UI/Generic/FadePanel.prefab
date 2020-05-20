@@ -91,6 +91,7 @@ MonoBehaviour:
   background: {fileID: 7750585380817560783}
   canvasGroup: {fileID: 2331290640484414939}
   percentBar: {fileID: 171281403969502215}
+  fadeSpeed: 1.5
 --- !u!225 &2331290640484414939
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -255,10 +256,30 @@ PrefabInstance:
       propertyPath: m_Value
       value: 0.822
       objectReference: {fileID: 0}
+    - target: {fileID: 1576347568825146793, guid: a3a3ec123c91d07469176ed79c2cf768,
+        type: 3}
+      propertyPath: m_RaycastTarget
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1576740066218776351, guid: a3a3ec123c91d07469176ed79c2cf768,
         type: 3}
       propertyPath: m_FillAmount
       value: 0.822
+      objectReference: {fileID: 0}
+    - target: {fileID: 1576740066218776351, guid: a3a3ec123c91d07469176ed79c2cf768,
+        type: 3}
+      propertyPath: m_RaycastTarget
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1576563626208827143, guid: a3a3ec123c91d07469176ed79c2cf768,
+        type: 3}
+      propertyPath: m_RaycastTarget
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1576545083803447727, guid: a3a3ec123c91d07469176ed79c2cf768,
+        type: 3}
+      propertyPath: m_RaycastTarget
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: a3a3ec123c91d07469176ed79c2cf768, type: 3}

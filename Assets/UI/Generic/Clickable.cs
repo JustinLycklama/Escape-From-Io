@@ -8,7 +8,7 @@ public abstract class Clickable : MonoBehaviour, IPointerEnterHandler, IPointerE
     public Sprite mouseOver;
     public Sprite click;
 
-    protected Image image;
+    public Image image { get; protected set; }
     protected Sprite original;
 
     public bool buttonEnabled { get; private set; }

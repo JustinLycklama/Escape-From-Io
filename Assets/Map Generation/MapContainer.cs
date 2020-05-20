@@ -168,6 +168,11 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         SetupMaterialShader();
 
         map.transform.SetParent(this.transform, true);
+        SetMapActive(false);
+    }
+
+    public void SetMapActive(bool state) {
+        map.gameObject.SetActive(state);
     }
 
     public void DrawMesh() {
@@ -763,7 +768,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
             if((statusMap[sampleX, sampleY] & BuildingEffectStatus.Light) == BuildingEffectStatus.Light) {
 
                 // TODO: Test if we need this?
-                if(gameObject.activeInHierarchy == false) { gameObject.SetActive(true); }
+                //if(gameObject.activeInHierarchy == false) { gameObject.SetActive(true); }
 
                 // Terraform to known terrain type
                 LayoutCoordinate coordinate = new LayoutCoordinate(x, y, this);
@@ -847,6 +852,12 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                 continue;
             }
 
+            // If we are not even displaying this map.. don't bother with the animations
+            if(!map.gameObject.activeSelf) {
+                competion?.Invoke();
+                yield break;
+            }
+
             foreach(KeyValuePair<LayoutCoordinate, TerrainType> coordinate in infoList) {
                 FogOfWar fog = fogOfWarMap[coordinate.Key.x, coordinate.Key.y];
 
@@ -880,6 +891,11 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
 
             if(playerBehaviour.gamePaused) {
                 continue;
+            }
+
+            // If we are not even displaying this map.. don't bother with the animations
+            if(!map.gameObject.activeSelf) {               
+                break;
             }
 
             foreach(KeyValuePair<LayoutCoordinate, TerrainType> coordinate in coordinateList) {

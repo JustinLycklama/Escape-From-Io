@@ -54,10 +54,11 @@ public class MapsManager : MonoBehaviour {
                 }
 
                 if(enabled && !activeContainers.Contains(container)) {
-                    container.gameObject.SetActive(true);
+
+                    container.SetMapActive(true);
                     activeContainers.Add(container);
                 } else if(!enabled && activeContainers.Contains(container)) {
-                    container.gameObject.SetActive(false);
+                    container.SetMapActive(false);
                     activeContainers.Remove(container);
                 }
             }
@@ -112,7 +113,6 @@ public class MapsManager : MonoBehaviour {
                 mapContainerObject.transform.SetParent(this.transform, true);
 
                 mapContainer2d[x, y] = mapContainer;
-                mapContainer.gameObject.SetActive(false);
                 mapContainers.Add(mapContainer);
             }
         }

@@ -198,7 +198,13 @@
 			//float3 localNormal = IN.normal;
 
 			float3 blendAxes = abs(worldNormal);
-			blendAxes /= blendAxes.x + blendAxes.y + blendAxes.z;
+
+			float denom = blendAxes.x + blendAxes.y + blendAxes.z;
+			if (denom == 0) {
+				denom = 0.0001;
+			}
+
+			blendAxes /= denom;
 
 			//float3 blendAxesLocal = abs(localNormal);
 			//blendAxesLocal /= blendAxesLocal.x + blendAxesLocal.y + blendAxesLocal.z;
