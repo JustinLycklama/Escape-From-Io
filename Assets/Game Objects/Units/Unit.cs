@@ -170,6 +170,8 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
     public string title { get; private set; }
     public override string description => title;
 
+    public static string Unit_Noun = "Robot";
+
     /*
      * Followable Interface
      * */
@@ -250,9 +252,9 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
         NotificationPanel notificationManager = Script.Get<NotificationPanel>();
         if (factionType == FactionType.Player) {
-            notificationManager.AddNotification(new NotificationItem("Bot initialized", NotificationType.NewUnit, transform, primaryActionType));
+            notificationManager.AddNotification(new NotificationItem($"{Unit_Noun} initialized", NotificationType.NewUnit, transform, primaryActionType));
         } else {
-            notificationManager.AddNotification(new NotificationItem("Golem Appeared!", NotificationType.NewEnemy, transform, primaryActionType));
+            notificationManager.AddNotification(new NotificationItem("Rock Golem Appeared!", NotificationType.NewEnemy, transform, primaryActionType));
         }
         
         // Duration
@@ -275,7 +277,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
                 return;
             }
 
-            Script.Get<NotificationPanel>().AddNotification(new NotificationItem("Bot has run out of power", NotificationType.UnitBattery, transform, primaryActionType));
+            Script.Get<NotificationPanel>().AddNotification(new NotificationItem($"{Unit_Noun} has run out of power", NotificationType.UnitBattery, transform, primaryActionType));
 
             Shutdown();
         };
@@ -823,7 +825,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
             remainingHealth = 0;
 
             if (factionType == FactionType.Player) {
-                Script.Get<NotificationPanel>().AddNotification(new NotificationItem("Bot has been destroyed", NotificationType.UnitKilled, transform, primaryActionType));
+                Script.Get<NotificationPanel>().AddNotification(new NotificationItem($"{Unit_Noun} has been destroyed", NotificationType.UnitKilled, transform, primaryActionType));
             } else {
                 Script.Get<NotificationPanel>().AddNotification(new NotificationItem("Enemy has been destroyed", NotificationType.EnemyKilled, transform, primaryActionType));
             }
@@ -842,7 +844,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         unitStatusTooltip?.SetRemainingDuration(remainingTime, percentOfMaxUnitTime);
 
         if(remainingTime == NotificationPanel.unitDurationWarning) {
-            Script.Get<NotificationPanel>().AddNotification(new NotificationItem("Bot only has " + NotificationPanel.unitDurationWarning.ToString() + "s remaining", NotificationType.Warning, transform, primaryActionType));
+            Script.Get<NotificationPanel>().AddNotification(new NotificationItem($"{Unit_Noun} only has " + NotificationPanel.unitDurationWarning.ToString() + "s remaining", NotificationType.Warning, transform, primaryActionType));
         }
     }
 
@@ -941,31 +943,31 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
     public class Blueprint : ConstructionBlueprint {
         private static string folder = "Units/";
 
-        public static Blueprint Miner = new Blueprint("Miner", typeof(Miner), "MinerIcon", "Miner", "A basic Mining Automaton.",
+        public static Blueprint Miner = new Blueprint("Miner", typeof(Miner), null, MasterGameTask.ActionType.Mine, "Miner", $"Basic Mining {Unit_Noun}",
             new BlueprintCost(new Dictionary<MineralType, int>(){
                 { MineralType.Copper, 3 },
                 { MineralType.Silver, 2 }                
             }));
 
-        public static Blueprint Mover = new Blueprint("Mover", typeof(Mover), "MoverIcon", "Mover", "A basic Moving Automaton.",
+        public static Blueprint Mover = new Blueprint("Mover", typeof(Mover), null, MasterGameTask.ActionType.Move, "Mover", $"Basic Moving {Unit_Noun}",
             new BlueprintCost(new Dictionary<MineralType, int>(){
                 { MineralType.Copper, 3 }                                
             }));
 
-        public static Blueprint Builder = new Blueprint("Builder", typeof(Builder), "BuilderIcon", "Builder", "A basic Building Automaton.",
+        public static Blueprint Builder = new Blueprint("Builder", typeof(Builder), null, MasterGameTask.ActionType.Build, "Builder", $"Basic Building {Unit_Noun}",
             new BlueprintCost(new Dictionary<MineralType, int>(){
                 { MineralType.Copper, 3 },
                 { MineralType.Silver, 2 }                
             }));
 
 
-        public static Blueprint Defender = new Blueprint("Defender", typeof(Defender), "BuilderIcon", "Defender", "A basic Defending Automaton.",
+        public static Blueprint Defender = new Blueprint("Defender", typeof(Defender), null, MasterGameTask.ActionType.Attack, "Defender", "Hunts Rock Golems",
             new BlueprintCost(new Dictionary<MineralType, int>(){
                 { MineralType.Copper, 1 },
                 { MineralType.Silver, 3 }
             }));
 
-        public static Blueprint AdvancedMiner = new Blueprint("AdvancedMiner", typeof(AdvancedMiner), "MinerIcon", "Adv. Miner", "Faster at Mining than the basic.", 
+        public static Blueprint AdvancedMiner = new Blueprint("AdvancedMiner", typeof(AdvancedMiner), null, MasterGameTask.ActionType.Mine, "Adv. Miner", "High Mining speed", 
             new BlueprintCost(new Dictionary<MineralType, int>(){
                 { MineralType.Silver, 3 },
                 { MineralType.Gold, 2 }
@@ -976,7 +978,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
             "Build Adjacent to " + Building.Blueprint.AdvUnitBuilding.label            
             );
 
-        public static Blueprint AdvancedMover = new Blueprint("AdvancedMover", typeof(AdvancedMover), "MoverIcon", "Adv. Mover", "Hovering Mover.\nTerrain has no effect on this Unit.",
+        public static Blueprint AdvancedMover = new Blueprint("AdvancedMover", typeof(AdvancedMover), null, MasterGameTask.ActionType.Move, "Adv. Mover", "Hovering Mover.\nTerrain has no effect on this Unit",
             new BlueprintCost(new Dictionary<MineralType, int>(){
                 { MineralType.Silver, 4}                
             }),
@@ -986,7 +988,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
             "Build Adjacent to " + Building.Blueprint.AdvUnitBuilding.label
             );
 
-        public static Blueprint AdvancedBuilder = new Blueprint("AdvancedBuilder", typeof(AdvancedBuilder), "BuilderIcon", "Adv. Builder", "Faster at Building than the basic.",
+        public static Blueprint AdvancedBuilder = new Blueprint("AdvancedBuilder", typeof(AdvancedBuilder), null, MasterGameTask.ActionType.Build, "Adv. Builder", "High Building speed",
             new BlueprintCost(new Dictionary<MineralType, int>(){                
                 { MineralType.Silver, 3 },
                 { MineralType.Gold, 2 }
@@ -997,10 +999,10 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
             "Build Adjacent to " + Building.Blueprint.AdvUnitBuilding.label
             );
 
-        public Blueprint(string fileName, Type type, string iconName, string label, string description, BlueprintCost cost) : base(folder + fileName, type, iconName, label, description, cost) { }
+        public Blueprint(string fileName, Type type, string iconName, MasterGameTask.ActionType? actionType, string label, string description, BlueprintCost cost) : base(folder + fileName, type, iconName, actionType, label, description, cost) { }
 
-        public Blueprint(string fileName, Type type, string iconName, string label, string description, BlueprintCost cost, Func<LayoutCoordinate, bool> requirementsMet, string notMetString) : 
-            base(folder + fileName, type, iconName, label, description, cost, requirementsMet, notMetString) { }
+        public Blueprint(string fileName, Type type, string iconName, MasterGameTask.ActionType? actionType, string label, string description, BlueprintCost cost, Func<LayoutCoordinate, bool> requirementsMet, string notMetString) : 
+            base(folder + fileName, type, iconName, actionType, label, description, cost, requirementsMet, notMetString) { }
 
 
         public override GameObject ConstructAt(LayoutCoordinate layoutCoordinate) {

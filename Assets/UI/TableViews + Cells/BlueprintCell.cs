@@ -7,13 +7,18 @@ using UnityEngine.UI;
 public class BlueprintCell : MonoBehaviour, IPointerClickHandler, BuildingsUpdateDelegate, TerrainUpdateDelegate {
 
     public Image icon;
+    public UnitTypeIcon typeIcon;
+
     public Text labelText;
     public Text detailText;
 
     public CostPanel costPanel;
 
     public CanvasGroup canvasGroup;
+
+    public GameObject disabledElement;
     public Text disabledText;
+
     private bool disabled = false;
 
     private ConstructionBlueprint blueprint;
@@ -32,6 +37,20 @@ public class BlueprintCell : MonoBehaviour, IPointerClickHandler, BuildingsUpdat
     public void SetBlueprint(ConstructionBlueprint blueprint, LayoutCoordinate blueprintLayoutCoordinate) {
         labelText.text = blueprint.label;
         detailText.text = blueprint.description;
+
+        if(blueprint.actionType.HasValue) {
+            typeIcon.gameObject.SetActive(true);
+            typeIcon.SetActionType(blueprint.actionType.Value);
+        } else {
+            typeIcon.gameObject.SetActive(false);
+        }
+
+        if (blueprint.iconImage != null) {
+            icon.gameObject.SetActive(true);
+            icon.sprite = blueprint.iconImage;
+        }else {
+            icon.gameObject.SetActive(false);
+        }
 
         costPanel.SetCost(blueprint.cost);
 
@@ -62,8 +81,8 @@ public class BlueprintCell : MonoBehaviour, IPointerClickHandler, BuildingsUpdat
             canvasGroup.alpha = 1f;
         }
 
-        if(disabledText.gameObject.activeSelf != disabled) {
-            disabledText.gameObject.SetActive(disabled);
+        if(disabledElement.gameObject.activeSelf != disabled) {
+            disabledElement.gameObject.SetActive(disabled);
         }
     }
 

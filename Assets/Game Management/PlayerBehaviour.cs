@@ -27,6 +27,8 @@ public class PlayerBehaviour : MonoBehaviour {
     private const float maxCameraAutoPanDistance = 200;
     private const float minCameraAutoPanDistance = 5;
 
+    private const float cameraPanUIAlpha = 0.4f;
+
     [SerializeField]
     private AnimationCurve cameraAutoPanCurve;
 
@@ -39,6 +41,7 @@ public class PlayerBehaviour : MonoBehaviour {
 
     SettingsPanel settingsPanel;
     GraphicRaycaster graphicRaycaster;
+    [SerializeField] private CanvasGroup ui_canvas;
 
     public bool gamePaused { get; private set; }
     private bool playerPausedState = false;
@@ -249,7 +252,6 @@ public class PlayerBehaviour : MonoBehaviour {
         panVectors.Clear();
 
         if (joystickEnabled) {
-            print("Joystick enabled");
 
             float vertical = panContolPanel.joystick.Vertical;
             if(Mathf.Abs(vertical) > minJoystickThreshold) {
@@ -292,6 +294,12 @@ public class PlayerBehaviour : MonoBehaviour {
         // If we are manually panning while auto pan is on, stop auto pan
         if(panVectors.Count > 0 && panCameraRoutine != null) {
             StopCoroutine(panCameraRoutine);
+        }
+
+        if (panVectors.Count > 0 && ui_canvas.alpha == 1) {
+            ui_canvas.alpha = cameraPanUIAlpha;
+        } else if (panVectors.Count == 0 && ui_canvas.alpha == cameraPanUIAlpha) {
+            ui_canvas.alpha = 1;
         }
 
         foreach(Vector3 vector in panVectors) {

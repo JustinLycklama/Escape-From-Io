@@ -190,12 +190,13 @@ public abstract class ConstructionBlueprint : PrefabBlueprint {
 
     public static string iconFolder = "UI/Icons/";
 
-    public Sprite iconImage;
+    public Sprite iconImage = null;
+    public MasterGameTask.ActionType? actionType;
 
     public Func<LayoutCoordinate, bool> requirementsMet;
     public string requirementsNotMetString;
 
-    public ConstructionBlueprint(string fileName, Type type, string iconName, string label, string description, 
+    public ConstructionBlueprint(string fileName, Type type, string iconName, MasterGameTask.ActionType? actionType, string label, string description, 
         BlueprintCost cost, Func<LayoutCoordinate, bool> requirementsMet = null, string requirementsNotMetString = null) : base(fileName, type) {
         this.label = label;
         this.description = description;
@@ -203,7 +204,11 @@ public abstract class ConstructionBlueprint : PrefabBlueprint {
         this.requirementsMet = requirementsMet;
         this.requirementsNotMetString = requirementsNotMetString;
 
-        iconImage = Resources.Load<Sprite>(iconFolder + iconName);
+        if (iconName != null) {
+            iconImage = Resources.Load<Sprite>(iconFolder + iconName);
+        }
+        
+        this.actionType = actionType;
     }
 
     public BlueprintCost cost;

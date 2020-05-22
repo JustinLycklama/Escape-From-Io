@@ -10,7 +10,7 @@ public class AudioManager : MonoBehaviour {
     }
 
     [SerializeField]
-    private AudioSource backgroundSource = null;
+    public AudioSource backgroundSource = null;
 
     [SerializeField]
     private AudioSource sfx1 = null;
@@ -32,6 +32,12 @@ public class AudioManager : MonoBehaviour {
     }
 
     public void PlayAudio(Type type, Vector3? location = null) {
+
+        // Lets not have any extra sound effects for now
+        if (type != Type.Background1) {
+            return;
+        }
+
         ClipType clip = clipTypes.Where(ac => ac.type == type).SingleOrDefault();
 
         if (clip.audioClip == null) {

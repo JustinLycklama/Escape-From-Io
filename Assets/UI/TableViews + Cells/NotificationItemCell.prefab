@@ -137,8 +137,6 @@ MonoBehaviour:
   text: {fileID: 2138949327219224745}
   gameButton: {fileID: 5212083731304033260}
   unitTypeIcon: {fileID: 2238225462817420206}
-  vfxPrefab: {fileID: 8908916794864061128, guid: e9c19def9289bd54da161cc1d70c2383,
-    type: 3}
   vfxParent: {fileID: 3726572281775787277}
   vfxPosition: {fileID: 4800869633022737371}
 --- !u!225 &5791152613091736351
@@ -152,7 +150,7 @@ CanvasGroup:
   m_Alpha: 1
   m_Interactable: 1
   m_BlocksRaycasts: 1
-  m_IgnoreParentGroups: 0
+  m_IgnoreParentGroups: 1
 --- !u!114 &8605821579749050973
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -608,7 +606,7 @@ MonoBehaviour:
     m_AlignByGeometry: 0
     m_RichText: 1
     m_HorizontalOverflow: 0
-    m_VerticalOverflow: 0
+    m_VerticalOverflow: 1
     m_LineSpacing: 1
   m_Text: Some Text Here
 --- !u!114 &3254152229639021894

@@ -34,6 +34,5 @@ public class BlueprintPanel : NavigationPanel, TableViewDelegate {
         ConstructionBlueprint blueprint = blueprints[row];
 
         blueprintCell.SetBlueprint(blueprint, blueprintLayoutCoordinate);
-        blueprintCell.icon.sprite = blueprint.iconImage;
     }
 }

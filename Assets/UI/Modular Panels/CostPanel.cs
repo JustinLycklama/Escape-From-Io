@@ -8,6 +8,9 @@ public class CostPanel : MonoBehaviour {
     public ImageValueCell secondCell;
     public ImageValueCell thirdCellll;
 
+    public Color completeColor = Color.white;
+    public Color notCompleteColor = Color.red;
+
     private List<ImageValueCell> orderedCells;
 
     private bool tallyMode = false;
@@ -66,6 +69,13 @@ public class CostPanel : MonoBehaviour {
             if(tallyMode) {
                 string tally = tallyCountDictionary[mineralType].ToString();
                 cell.value.text = tally + "/" + total;
+
+                if (tally != total) {
+                    cell.backgroundImage.color = notCompleteColor;
+                } else {
+                    cell.backgroundImage.color = completeColor;
+                }
+
             } else {
                 cell.value.text = total;
             }

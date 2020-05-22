@@ -7,6 +7,8 @@ public class ImageValueCell : MonoBehaviour {
     public Image image;
     public Text value;
 
+    public Image backgroundImage;
+
     int integerValue = 0;
 
     private void Awake() {

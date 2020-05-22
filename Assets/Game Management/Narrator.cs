@@ -332,6 +332,8 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
 
         if(TutorialManager.isTutorial) {
             //yield return new WaitForSeconds(MapContainer.fogOfWarFadeOutDuration + 0.5f);
+
+            TutorialManager.sharedInstance.tutorialObject = new TutorialBasic();
             TutorialManager.sharedInstance.KickOffTutorial();
         } else {
             notificationManager.SetSupressNotifications(false);
@@ -341,7 +343,17 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
     IEnumerator StartMusic() {
         yield return new WaitForSeconds(2.5f);
 
-        Script.Get<AudioManager>().PlayAudio(AudioManager.Type.Background1);       
+        AudioManager audioManager = Script.Get<AudioManager>();
+
+        audioManager.PlayAudio(AudioManager.Type.Background1);
+
+        float audioPercent = 0;
+        while(audioPercent < 1) {
+            audioManager.backgroundSource.volume = audioPercent;
+            audioPercent += Time.deltaTime * 0.2f;
+
+            yield return null;
+        }
     }
 
     IEnumerator CheckForNoRobots() {
@@ -387,7 +399,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
         gameOverPanel.FadeOut(true, false, null);
     }
 
-    public void DoEndGameTransition() {       
+    public void DoEndGameTransition(bool displayHighscores = true) {       
         FadePanel panel = Script.Get<FadePanel>();
 
         Action completed = () => {
@@ -395,7 +407,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
         };
 
         panel.FadeOut(true, false, completed);
-        SceneManagement.sharedInstance.ChangeScene(SceneManagement.State.GameFinish, null, null, this, completionTime);
+        SceneManagement.sharedInstance.ChangeScene(displayHighscores ? SceneManagement.State.GameFinish : SceneManagement.State.Title, null, null, this, completionTime);
     }
 
     /*

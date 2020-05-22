@@ -854,8 +854,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
 
             // If we are not even displaying this map.. don't bother with the animations
             if(!map.gameObject.activeSelf) {
-                competion?.Invoke();
-                yield break;
+                fadePercent = 1.0f;
             }
 
             foreach(KeyValuePair<LayoutCoordinate, TerrainType> coordinate in infoList) {
@@ -894,8 +893,8 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
             }
 
             // If we are not even displaying this map.. don't bother with the animations
-            if(!map.gameObject.activeSelf) {               
-                break;
+            if(!map.gameObject.activeSelf) {
+                fadePercent = 1.0f;
             }
 
             foreach(KeyValuePair<LayoutCoordinate, TerrainType> coordinate in coordinateList) {

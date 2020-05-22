@@ -24,7 +24,6 @@ public class FadePanel : MonoBehaviour
 
     public void SetPercent(float percent) {
         percentBar?.SetPercent(percent);
-        print("set percent " + percentBar.name + " " + percent);
     }
 
     public void FadeOut(bool fadeOut, bool displayPercent, Action completed) {

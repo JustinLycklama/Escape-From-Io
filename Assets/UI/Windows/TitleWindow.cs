@@ -10,6 +10,7 @@ public class TitleWindow : MonoBehaviour, GameButtonDelegate, CanSceneChangeDele
     public GameButton exit;
 
     public LeaderboardWindow leaderboardPanel;
+    public TutorialPanel tutorialPanel;
     public HelpWindow helpWindow;
     public FadePanel fadePanel;
 
@@ -23,6 +24,7 @@ public class TitleWindow : MonoBehaviour, GameButtonDelegate, CanSceneChangeDele
 
     private void Start() {
         leaderboardPanel.gameObject.SetActive(false);
+        tutorialPanel.gameObject.SetActive(false);
         helpWindow.gameObject.SetActive(false);
         fadePanel.FadeOut(false, false, null);
 
@@ -43,11 +45,11 @@ public class TitleWindow : MonoBehaviour, GameButtonDelegate, CanSceneChangeDele
         };
 
         if(button == tutorial) {
-            //helpWindow.gameObject.SetActive(true);
-            //gameObject.SetActive(false);
+            //fadePanel.FadeOut(true, true, completeTransition);
+            //SceneManagement.sharedInstance.ChangeScene(SceneManagement.State.Tutorial, null, null, this);
 
-            fadePanel.FadeOut(true, true, completeTransition);
-            SceneManagement.sharedInstance.ChangeScene(SceneManagement.State.Tutorial, null, null, this);
+            tutorialPanel.gameObject.SetActive(true);
+            gameObject.SetActive(false);
         } else if(button == newGame) {
             fadePanel.FadeOut(true, true, completeTransition);
             SceneManagement.sharedInstance.ChangeScene(SceneManagement.State.NewGame, null, null, this);

@@ -99,8 +99,10 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
         taskListLockButton.buttonDelegate = this;
         taskListLockToggle.buttonDelegate = this;
 
+        UnitManager unitManager = Script.Get<UnitManager>();
+
         Script.Get<TaskQueueManager>().RegisterForNotifications(this, actionType);
-        Script.Get<UnitManager>().RegisterForNotifications(this, actionType);
+        unitManager.RegisterForNotifications(this, actionType);
         Script.Get<TimeManager>().RegisterForTimeUpdateNotifications(this);
 
         for(int i = 0; i < percentBars.Count; i++) {
@@ -115,6 +117,8 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
         };
 
         pieChart.SetColors(colors);
+
+        NotifyUpdateUnitList(unitManager.GetPlayerUnitsOfType(actionType), actionType);
 
         SecondUpdated();
     }
@@ -279,7 +283,6 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
         //unitStatusText.text = unitListState.decription();
 
         UpdatePieChart(unitList);
-
         soonToExpireUnits = unitList.OrderBy(unit => unit.remainingDuration).Take(percentBars.Count).ToList();        
     }
 

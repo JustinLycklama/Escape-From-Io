@@ -30,8 +30,12 @@ public class AttackersCell : MonoBehaviour, UnitManagerDelegate, GameButtonDeleg
     // Start is called before the first frame update
     void Start()
     {
-        Script.Get<UnitManager>().RegisterForNotifications(this, actionType);
+        UnitManager unitManager = Script.Get<UnitManager>();
+
+        unitManager.RegisterForNotifications(this, actionType);
         Script.Get<TimeManager>().RegisterForTimeUpdateNotifications(this);
+
+        NotifyUpdateUnitList(unitManager.GetPlayerUnitsOfType(actionType), actionType);
     }
 
     private void OnDestroy() {

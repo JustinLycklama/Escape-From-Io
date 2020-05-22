@@ -12,10 +12,10 @@ public class EnemyManager : MonoBehaviour, TimeUpdateDelegate
     private TimeManager timeManager;
     private UnitManager unitManager;
 
-    private const int minTimeBeforeEnemy = 2 * 60;
+    private const int minTimeBeforeEnemy = 3 * 60;
     private const int decisionFrequency = 10;
 
-    private const float maxUnitToFrequencyRatio = 40.0f; // at 40 units, frequency will be 1
+    private const float maxUnitToFrequencyRatio = 20.0f; // at 20 units, frequency will be 1
 
     private const float minEnemyPerMinute = 0.2f;
     private const float maxEnemyPerMinute = 4;
@@ -155,7 +155,11 @@ public class EnemyManager : MonoBehaviour, TimeUpdateDelegate
       * */
 
     public void SecondUpdated() {
-        frequency = Mathf.Clamp(unitManager.GetAllPlayerUnits().Length / maxUnitToFrequencyRatio, 0.1f, 1);
+
+        float frequencyUnitRatio = Mathf.Clamp01(unitManager.GetAllPlayerUnits().Length / maxUnitToFrequencyRatio);
+        float currentGameTimePercentage = Mathf.InverseLerp(minTimeBeforeEnemy, maxEvoTime, (float) timeManager.currentDiscreteTime.TotalSeconds);
+
+        frequency = Mathf.Lerp(0, frequencyUnitRatio, currentGameTimePercentage);
         evolution = Mathf.Clamp01(evolution + evoPerSecond);
 
         if (timeManager.currentDiscreteTime.TotalSeconds > minTimeBeforeEnemy &&
@@ -171,10 +175,10 @@ public class EnemyManager : MonoBehaviour, TimeUpdateDelegate
     public class Blueprint : ConstructionBlueprint {
         private static string folder = "Units/";
 
-        public static Blueprint Golem = new Blueprint("Golem", typeof(Golem), "MinerIcon", "Golem", "Native Enemy");
+        public static Blueprint Golem = new Blueprint("Golem", typeof(Golem));
 
-        public Blueprint(string fileName, Type type, string iconName, string label, string description) :
-            base(folder + fileName, type, iconName, label, description, new BlueprintCost(new Dictionary<MineralType, int>() { })) { } 
+        public Blueprint(string fileName, Type type) :
+            base(folder + fileName, type, null, null, null, null, new BlueprintCost(new Dictionary<MineralType, int>() { })) { } 
 
         public GameObject ConstructAt(WorldPosition worldPosition) {
             UnitManager unitManager = Script.Get<UnitManager>();
