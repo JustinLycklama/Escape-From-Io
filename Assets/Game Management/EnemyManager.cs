@@ -95,7 +95,7 @@ public class EnemyManager : MonoBehaviour, TimeUpdateDelegate
         }
     }
 
-    private void SpawnEnemy() {
+    public void SpawnEnemy() {
         Unit[] units = unitManager.GetAllPlayerUnits();
 
         if (units.Length == 0) {
@@ -150,11 +150,20 @@ public class EnemyManager : MonoBehaviour, TimeUpdateDelegate
         golem.Initialize();
     }
 
+    public void SetFrequencyAndEvo(float freq, float evo) {
+        frequency = freq;
+        evolution = evo;
+    }
+
     /*
       * TimeUpdateDelegate Interface
       * */
 
     public void SecondUpdated() {
+
+        if(TutorialManager.isTutorial) {
+            return;
+        }
 
         float frequencyUnitRatio = Mathf.Clamp01(unitManager.GetAllPlayerUnits().Length / maxUnitToFrequencyRatio);
         float currentGameTimePercentage = Mathf.InverseLerp(minTimeBeforeEnemy, maxEvoTime, (float) timeManager.currentDiscreteTime.TotalSeconds);

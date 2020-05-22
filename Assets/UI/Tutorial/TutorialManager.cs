@@ -80,13 +80,23 @@ public class IsolatedUserAction {
     }
 }
 
+public enum TutorialType {
+    Basic, Defense, Escape
+}
+
 
 public class TutorialManager: GameButtonDelegate {
 
     public static TutorialManager sharedInstance = new TutorialManager();
 
-    public static bool isTutorial = false;
+    public static bool isTutorial {
+        get {
+            return sharedInstance.tutorialType != null;
+        }
+    }
     public static IsolatedUserAction isolateUserAction = null;
+
+    public TutorialType? tutorialType = null;
 
     //private Dictionary<TutorialTrigger, TutorialTriggerListener> eventListenerMap = new Dictionary<TutorialTrigger, TutorialTriggerListener>();
 
@@ -99,7 +109,7 @@ public class TutorialManager: GameButtonDelegate {
 
     private GameButton repeatButton;
 
-    public TutorialObject tutorialObject;
+    private TutorialObject tutorialObject;
 
     //TutorialScene? previousScene;
     TutorialScene? currentScene;
@@ -121,10 +131,31 @@ public class TutorialManager: GameButtonDelegate {
         uIManager = Script.Get<UIManager>();
         unitManager = Script.Get<UnitManager>();
 
+        Script.Get<EnemyManager>().SetFrequencyAndEvo(0, 0.1f);
+        Script.Get<TimeManager>().SimulateSecondsUpdated();
+
+        Script.Get<NotificationPanel>().gameObject.SetActive(false);
+
         repeatButton = uIManager.tutorialRepeatButton;
         repeatButton.buttonDelegate = this;
 
-        playerBehaviour.SetInternalPause(true);
+        //playerBehaviour.SetInternalPause(true);
+
+        if (tutorialType == null) {
+            return;
+        }
+
+        switch(tutorialType.Value) {
+            case TutorialType.Basic:
+                tutorialObject = new TutorialBasic();
+                break;
+            case TutorialType.Defense:
+                tutorialObject = new TutorialDefense();
+                break;
+            case TutorialType.Escape:
+                tutorialObject = new TutorialEscape();
+                break;
+        }
 
         sceneQueue = tutorialObject?.GetTutorialSceneQueue();
         isolateUserAction = new IsolatedUserAction();   
@@ -176,8 +207,10 @@ public class TutorialManager: GameButtonDelegate {
             return;
         }
 
-        currentScene = sceneQueue.Dequeue();
-        ResetCurrentEventQueue();
+        uIManager.StartCoroutine(AddDelay(0.5f, () => {
+            currentScene = sceneQueue.Dequeue();
+            ResetCurrentEventQueue();
+        }));
     }
 
     private void ResetCurrentEventQueue() {
@@ -188,6 +221,11 @@ public class TutorialManager: GameButtonDelegate {
         currentEventQueue = new Queue<TutorialEvent>(currentScene.Value.eventQueue);
 
         uIManager.StartCoroutine(IterateScene());
+    }
+
+    private IEnumerator AddDelay(float delay, Action complete) {
+        yield return new WaitForSeconds(delay);
+        complete?.Invoke();
     }
 
     private IEnumerator IterateScene() {

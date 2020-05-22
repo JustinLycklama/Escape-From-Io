@@ -88,6 +88,12 @@ public class TimeManager : MonoBehaviour, PlayerBehaviourUpdateDelegate {
         }
     }
 
+    public void SimulateSecondsUpdated() {
+        foreach(TimeUpdateDelegate updateDelegate in delegateList) {
+            updateDelegate.SecondUpdated();
+        }
+    }
+
     public void AddNewTimer(int duration, Action<int, float> updateBlock, Action completionBlock, int comparisonPower = 0) {
         TimeUpdateObject newObject = new TimeUpdateObject();
 

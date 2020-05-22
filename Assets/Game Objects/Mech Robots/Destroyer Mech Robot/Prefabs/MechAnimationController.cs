@@ -61,7 +61,7 @@ public class MechAnimationController : AnimationController {
     public override float AnimationModifierForState(Unit.AnimationState state) {
         switch(state) {
             case Unit.AnimationState.Idle:
-                break;
+                return 1.0f;
             case Unit.AnimationState.TurnLeft:
             case Unit.AnimationState.TurnRight:
                 return 5.0f;

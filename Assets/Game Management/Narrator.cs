@@ -28,7 +28,9 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
     [SerializeField]
     private Unit builderPrefab = null;
     [SerializeField]
-    private Unit defenderPrefab;
+    private Unit defenderPrefab = null;
+    [SerializeField]
+    private Unit golemPrefab = null;
 
     private List<Unit> startingUnits;
 
@@ -167,7 +169,8 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
             if(TutorialManager.isTutorial) {
                 startingUnits = new List<Unit> { Instantiate(minerPrefab), Instantiate(moverPrefab), Instantiate(builderPrefab) };
             } else {
-                startingUnits = new List<Unit> { Instantiate(minerPrefab), Instantiate(minerPrefab), Instantiate(moverPrefab), Instantiate(builderPrefab) };                
+                //startingUnits = new List<Unit> { Instantiate(minerPrefab), Instantiate(minerPrefab), Instantiate(moverPrefab), Instantiate(builderPrefab) };                
+                startingUnits = new List<Unit> { Instantiate(defenderPrefab), Instantiate(golemPrefab) };
             }
 
             PathGridCoordinate[][] coordinatesForSpawnCoordinate = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(mapGenerator.spawnCoordinate);
@@ -212,7 +215,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
         animationActionChunks = new Queue<(float, Func<float>)>();
 
         animationActionChunks.Enqueue((0.1f, () => {
-            return startingBuilding.performAction(buildBuilding, 3f * Time.deltaTime, null);
+            return startingBuilding.performAction(buildBuilding, 2.5f * Time.deltaTime, null);
         }
         ));
 
@@ -305,7 +308,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
 
             animationBaseline = animationTopline;
 
-            yield return null;
+            //yield return null;
         }
 
         // Wait for colliders to be built
@@ -317,7 +320,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
 
         playerBehaviour.SetInternalPause(false);
         StartCoroutine(StartMusic());
-        gameOverRoutine = StartCoroutine(CheckForNoRobots());
+        //gameOverRoutine = StartCoroutine(CheckForNoRobots());
 
         // Animate camera pan with fog fade
         animatePercent = 0;
@@ -331,9 +334,6 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
         }
 
         if(TutorialManager.isTutorial) {
-            //yield return new WaitForSeconds(MapContainer.fogOfWarFadeOutDuration + 0.5f);
-
-            TutorialManager.sharedInstance.tutorialObject = new TutorialBasic();
             TutorialManager.sharedInstance.KickOffTutorial();
         } else {
             notificationManager.SetSupressNotifications(false);

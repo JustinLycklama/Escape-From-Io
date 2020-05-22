@@ -333,9 +333,9 @@ public abstract class Building : ActionableItem, Selectable {
                 { MineralType.Gold, 1 }
             }));
 
-        public static Blueprint DefenseTower = new Blueprint("DefenderTower", typeof(DefenderTower), "DefenderTower", null, "Defender Turret", "Attacks nearby Enemies",
+        public static Blueprint DefenseTower = new Blueprint("DefenderTower", typeof(DefenderTower), "DefenderTower", null, "Turret", "Attacks nearby Enemies",
             new BlueprintCost(new Dictionary<MineralType, int>(){                        
-                        { MineralType.Silver, 4 },
+                        { MineralType.Silver, 3 },
                         { MineralType.Gold, 1 }
             }));
 

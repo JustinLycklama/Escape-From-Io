@@ -46,7 +46,7 @@ public class FirebaseManager
         }
     }
 
-    void CheckFirebase()
+    void CheckFirebase(Action callback)
     {
         Firebase.FirebaseApp.CheckAndFixDependenciesAsync().ContinueWith(task => {
             var dependencyStatus = task.Result;
@@ -64,6 +64,8 @@ public class FirebaseManager
                   "Could not resolve all Firebase dependencies: {0}", dependencyStatus));
                 // Firebase Unity SDK is not safe to use here.
             }
+
+            callback?.Invoke();
         });
     }
 
@@ -73,6 +75,15 @@ public class FirebaseManager
         auth = Firebase.Auth.FirebaseAuth.DefaultInstance;
         auth.StateChanged += AuthStateChanged;
         AuthStateChanged(this, null);
+    }
+
+    private void InitDatabase() {
+        // Set up the Editor before calling into the realtime database.
+        FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("https://test1-e5512.firebaseio.com/");
+
+        // Get the root reference location of the database.
+        dbReference = FirebaseDatabase.DefaultInstance.RootReference;
+        highscoreRef = dbReference.Child(HIGHSCORE_NODE_NAME);
     }
 
     // Track state changes of the auth object.
@@ -115,25 +126,15 @@ public class FirebaseManager
         });
     }
 
-    private void InitDatabase()
-    {
-        // Set up the Editor before calling into the realtime database.
-        FirebaseApp.DefaultInstance.SetEditorDatabaseUrl("https://test1-e5512.firebaseio.com/");
-
-        // Get the root reference location of the database.
-        dbReference = FirebaseDatabase.DefaultInstance.RootReference;
-        highscoreRef = dbReference.Child(HIGHSCORE_NODE_NAME);
-    }
-
     private void InitFlow(Action onComplete) {
-        CheckFirebase();
-        InitializeFirebase();
+        CheckFirebase(() => {
+            InitializeFirebase();
+            InitDatabase();
 
-        InitDatabase();
-
-        TestSignIn(() => {
-            isInit = true;
-            onComplete?.Invoke();
+            TestSignIn(() => {
+                isInit = true;
+                onComplete?.Invoke();
+            });
         });
     }
 

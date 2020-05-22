@@ -26,14 +26,14 @@ public class FadePanel : MonoBehaviour
         percentBar?.SetPercent(percent);
     }
 
-    public void FadeOut(bool fadeOut, bool displayPercent, Action completed) {
+    public virtual void FadeOut(bool fadeOut, bool displayPercent, Action completed) {
         DisplayPercentBar(displayPercent);
 
         RaycastTarget(true);
         StartCoroutine(Fade(fadeOut, completed));
     }
 
-    protected virtual void RaycastTarget(bool state) {
+    protected void RaycastTarget(bool state) {
         background.raycastTarget = state;
     }
 

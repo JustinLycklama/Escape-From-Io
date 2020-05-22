@@ -13,7 +13,7 @@ public abstract class AttackingUnit : Unit
     private Coroutine resetSearchCoroutine;
     private Coroutine resetTaskStateDelayed;
 
-    private const float updateFollowTargetDelay = 0.30f;
+    private const float updateFollowTargetDelay = 0.65f;
 
     protected override void UnitCustomInit() {
 
@@ -21,7 +21,7 @@ public abstract class AttackingUnit : Unit
         followTargetCoroutine = StartCoroutine(FollowAttackTarget());
 
         // Occasionally update our search target
-        resetSearchCoroutine = StartCoroutine(ResetSearch());
+        //resetSearchCoroutine = StartCoroutine(ResetSearch());
 
         unitManager = Script.Get<UnitManager>();
 
@@ -60,7 +60,8 @@ public abstract class AttackingUnit : Unit
 
                 LayoutCoordinate layoutCoordinate = new LayoutCoordinate(mapCoordinate);
 
-                FollowPathCoroutine = StartCoroutine(FollowPath(path, completedPath));
+                StopActionCoroutines();
+                followPathCoroutine = StartCoroutine(FollowPath(path, completedPath));
             } else {
                 // There is no path to task, we cannot do this.
                 ResetTaskState();
@@ -99,9 +100,14 @@ public abstract class AttackingUnit : Unit
     }
 
     IEnumerator ResetTaskStateDelayed() {
+        coroutinesRunning++;
+        coroutinesCount["reset"]++;
+
         yield return new WaitForSeconds(0.75f);
 
         ResetTaskStateWithNewFollow();
+        coroutinesRunning--;
+        coroutinesCount["reset"]--;
     }
 
     private void ResetTaskStateWithNewFollow() {
@@ -148,6 +154,7 @@ public abstract class AttackingUnit : Unit
     // If we begin chasing a unit when we are far away, then as we get closer to the group, the closest unit to us may have changed.
     // Infrequently, update the search to find the next closest unit
     IEnumerator ResetSearch() {
+        coroutinesRunning++;
         while(true) {
             yield return new WaitForSeconds(resetSearchDelay);
             
@@ -157,13 +164,20 @@ public abstract class AttackingUnit : Unit
                 followingUnit = null;
                 ResetTaskStateWithNewFollow();
             }            
-        }        
+        }
+        coroutinesRunning--;
     }
 
     IEnumerator FollowAttackTarget() {
-
+        coroutinesRunning++;
         while(true) {
-            yield return new WaitForSeconds(updateFollowTargetDelay);
+            yield return new WaitForSeconds(updateFollowTargetDelay);            
+
+            //if (factionType == FactionType.Player) {
+            //    foreach(string key in coroutinesCount.Keys) {
+            //        print(key + ": " + coroutinesCount[key]);
+            //    }
+            //}            
 
             // If we still have a task we are navigating to, keep updating position
             if(currentGameTask != null && currentGameTask == targetTask && followingUnit != null && unitManager.IsUnitEnabled(followingUnit) && navigatingToTask) {
@@ -184,7 +198,7 @@ public abstract class AttackingUnit : Unit
                         LayoutCoordinate layoutCoordinate = new LayoutCoordinate(mapCoordinate);
 
                         StopActionCoroutines();
-                        FollowPathCoroutine = StartCoroutine(FollowPath(path, completedPath));
+                        followPathCoroutine = StartCoroutine(FollowPath(path, completedPath));
                     } else {
                         //currentPathRequest.Cancel();
                         //ResetTaskState();
@@ -192,6 +206,6 @@ public abstract class AttackingUnit : Unit
                 });
             }
         }
-        
+        coroutinesRunning--;
     }
 }

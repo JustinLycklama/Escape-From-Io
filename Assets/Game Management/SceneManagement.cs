@@ -59,11 +59,10 @@ public class SceneManagement {
                 break;
             case State.NewGame:
                 scene = GameScene;
-                TutorialManager.isTutorial = false;
+                TutorialManager.sharedInstance.tutorialType = null;
                 break;
             case State.Tutorial:
                 scene = GameScene;
-                TutorialManager.isTutorial = true;
                 break;
         }
 

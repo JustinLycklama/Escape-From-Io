@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -26,12 +27,6 @@ public class GameOverPanel : FadePanel
         background.raycastTarget = false;
     }
 
-    protected override void RaycastTarget(bool state) {
-        base.RaycastTarget(state);
-
-        continueButton.image.raycastTarget = state;
-    }
-
     public void SetSuccess() {
         failureText.SetActive(false);
         failureTitle.SetActive(false);
@@ -40,5 +35,11 @@ public class GameOverPanel : FadePanel
         successTitle.SetActive(true);
 
         backgroundImage.sprite = successImage;
+    }
+
+    public override void FadeOut(bool fadeOut, bool displayPercent, Action completed) {
+        base.FadeOut(fadeOut, displayPercent, completed);
+
+        continueButton.image.raycastTarget = fadeOut;
     }
 }

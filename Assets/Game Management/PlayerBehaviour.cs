@@ -41,7 +41,7 @@ public class PlayerBehaviour : MonoBehaviour {
 
     SettingsPanel settingsPanel;
     GraphicRaycaster graphicRaycaster;
-    [SerializeField] private CanvasGroup ui_canvas;
+    [SerializeField] private CanvasGroup ui_canvas = null;
 
     public bool gamePaused { get; private set; }
     private bool playerPausedState = false;

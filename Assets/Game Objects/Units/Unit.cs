@@ -161,6 +161,9 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
     public List<TaskStatusUpdateDelegate> taskStatusDelegateList = new List<TaskStatusUpdateDelegate>();
     public List<UserActionUpdateDelegate> userActionDelegateList = new List<UserActionUpdateDelegate>();
 
+    protected int coroutinesRunning = 0;
+    protected Dictionary<string, int> coroutinesCount;
+
     [HideInInspector]
 
     /*
@@ -206,6 +209,13 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
         gameTasksQueue = new Queue<GameTask>();
         refuseTaskSet = new HashSet<int>();
+
+        coroutinesCount = new Dictionary<string, int>();
+        
+        foreach(string name in new string[] { "task", "path", "turn", "reset" }) {
+            coroutinesCount[name] = 0;
+        }
+
     }
 
     private void OnDestroy() {
@@ -289,6 +299,8 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         taskQueueManager.RegisterForLockStatusUpdates(this);
 
         completedTaskAction = (success) => {
+            AnimateState(AnimationState.Idle);
+
             unitStatusTooltip.DisplayPercentageBar(false);
             ContinueGameTaskQueue();
         };
@@ -336,7 +348,8 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
                 LayoutCoordinate layoutCoordinate = new LayoutCoordinate(mapCoordinate);
 
-                FollowPathCoroutine = StartCoroutine(FollowPath(path, completedPath));
+                StopActionCoroutines();
+                followPathCoroutine = StartCoroutine(FollowPath(path, completedPath));
             } else {
                 // There is no path to task, we cannot do this.
                 refuseTaskSet.Add(currentMasterTask.taskNumber);
@@ -520,8 +533,12 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
             StopCoroutine(performTaskCoroutine);
         }
 
-        if(FollowPathCoroutine != null) {
-            StopCoroutine(FollowPathCoroutine);
+        if(followPathCoroutine != null) {
+            StopCoroutine(followPathCoroutine);
+        }
+
+        if (turnCoroutine != null) {
+            StopCoroutine(turnCoroutine);
         }
     }
 
@@ -547,6 +564,8 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
     protected Coroutine performTaskCoroutine;
     protected IEnumerator PerformTaskAction(Action<bool> callBack) {
+        coroutinesRunning++;
+        coroutinesCount["task"]++;
 
         float speed = SpeedForTask(currentMasterTask.actionType) * ResearchSingleton.sharedInstance.unitActionMultiplier;
 
@@ -568,6 +587,8 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
                 callBack(false);
                 AnimateState(AnimationState.Idle);
                 //CompleteTaskActionDelegate();
+                coroutinesRunning--;
+                coroutinesCount["task"]--;
                 yield break;
             }
 
@@ -580,6 +601,9 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
                 callBack(true);
                 AnimateState(AnimationState.Idle);
                 //CompleteTaskActionDelegate();
+                coroutinesRunning--;
+                coroutinesCount["task"]--;
+
                 yield break;
             }
 
@@ -590,15 +614,18 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
     //protected virtual void BeginWalkDelegate() { }
     //protected virtual void CompleteWalkDelegate() { }
 
-    protected Coroutine FollowPathCoroutine;    
+    protected Coroutine followPathCoroutine;    
     protected IEnumerator FollowPath(Path path, System.Action<bool> callBack) {
+        coroutinesRunning++;
+        coroutinesCount["path"]++;
 
         Vector3 startPoint = path.lookPoints[0].worldPosition.vector3;
         startPoint.y = transform.position.y;
   
         // If we are not moving at all (with some grey area) then don't bother turning to it.
         if(Vector3.Distance(startPoint, transform.position) > 5) {
-            yield return StartCoroutine(TurnInPlace(startPoint - transform.position));
+            turnCoroutine = StartCoroutine(TurnInPlace(startPoint - transform.position));
+            yield return turnCoroutine;
         }
 
         // Keep track of our waypoints
@@ -690,12 +717,19 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         Vector3 finalLookAtBalancedHeight = path.finalLookAt.vector3;
         finalLookAtBalancedHeight.y = transform.position.y;
 
-        yield return StartCoroutine(TurnInPlace(finalLookAtBalancedHeight - transform.position));
+        turnCoroutine = StartCoroutine(TurnInPlace(finalLookAtBalancedHeight - transform.position)); ;
+        yield return turnCoroutine;
 
         callBack(true);
+        coroutinesRunning--;
+        coroutinesCount["path"]--;
     }
 
+    protected Coroutine turnCoroutine;
     private IEnumerator TurnInPlace(Vector3 lookAt) {
+        coroutinesRunning++;
+        coroutinesCount["turn"]++;
+
         //Quaternion originalRotation = transform.rotation;
         Quaternion targetRotation = Quaternion.LookRotation(lookAt);
         
@@ -733,6 +767,8 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
                 transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, turnSpeed * Time.deltaTime * 90);
 
             } else {
+                coroutinesRunning--;
+                coroutinesCount["turn"]--;
                 yield break;
             }
 
@@ -795,7 +831,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
                     // The associatedTask is over
                     AssociateTask(null);
-                    TakeDamage(5);
+                    TakeDamage(10);
 
                     //GameResourceManager resourceManager = Script.Get<GameResourceManager>();
                     //resourceManager.GiveToUnit(this, unit);
