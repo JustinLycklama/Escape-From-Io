@@ -233,6 +233,11 @@ public class PlayerBehaviour : MonoBehaviour {
             settingsPanel = Script.Get<SettingsPanel>();
         }
 
+        // Only enable escape for tutorial, no other hotkeys
+        if (TutorialManager.isTutorial) {
+            return;
+        }
+
         if(Input.GetKeyUp(KeyCode.Space)) {
             SetPlayerPauseState(!gamePaused);
         }
@@ -296,11 +301,12 @@ public class PlayerBehaviour : MonoBehaviour {
             StopCoroutine(panCameraRoutine);
         }
 
-        if (panVectors.Count > 0 && ui_canvas.alpha == 1) {
-            ui_canvas.alpha = cameraPanUIAlpha;
-        } else if (panVectors.Count == 0 && ui_canvas.alpha == cameraPanUIAlpha) {
-            ui_canvas.alpha = 1;
-        }
+        // Hide UI during manual Pan
+        //if (panVectors.Count > 0 && ui_canvas.alpha == 1) {
+        //    ui_canvas.alpha = cameraPanUIAlpha;
+        //} else if (panVectors.Count == 0 && ui_canvas.alpha == cameraPanUIAlpha) {
+        //    ui_canvas.alpha = 1;
+        //}
 
         foreach(Vector3 vector in panVectors) {
             PanByVector(vector);

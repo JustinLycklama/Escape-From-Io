@@ -15,6 +15,7 @@ public class PremadeNoiseGenerator : MonoBehaviour {
     public void SetupCustomMap() {
         Constants constants = Script.Get<Constants>();
         TerrainManager terrainManager = Script.Get<TerrainManager>();
+        MapGenerator mapGenerator = Script.Get<MapGenerator>();
 
         constants.layoutMapWidth = 5;
         constants.layoutMapHeight = 5;
@@ -52,6 +53,9 @@ public class PremadeNoiseGenerator : MonoBehaviour {
                 RegionType regionObject = terrainManager.regionTypeMap[regionType];
                 TerrainType terrainObject = terrainManager.terrainTypeMap[terrainType];
 
+                if (terrainType == T.AlunarRock) {
+                    mapGenerator.listOfLunarLocations.Add(new KeyValuePair<int, int>(x, y));
+                }
 
                 LayoutNoiseData[x, y] = (regionObject.noiseBase + regionObject.noiseMax) / 2.0f;
                 GroundMutatorNoiseData[x, y] = (terrainObject.mutatorNoiseBase + terrainObject.mutatorNoiseMax) / 2.0f;
@@ -117,12 +121,12 @@ public class PremadeNoiseGenerator : MonoBehaviour {
         { WT,  WT,  WT,  WT, WT, WT, WT, WT, WT, WT },
         { WT,  WT,  WT,  WT, WT, WT, WT, WT, WT, WT },
         { WT,  WT,  WT,  WT, WT, WT, WT, WT, WT, WT },
-        { WT,  WT,  WT,  WT, WT, WT, WT, WT, WT, WT },
-        { WT,  WT,  WT,  WT, WT, WT, WT, WT, WT, WT },
-        { WT,  WT,  WT,  WT, WT, WT, WT, WT, WT, WT },
-        { WT,  WT,  WT,  WT, WT, WT, WT, WT, WT, WT },
-        { WT,  WT,  WT,  WT, WT, WT, WT, WT, WT, WT },
-        { WT,  WT,  WT,  WT, WT, WT, WT, WT, WT, WT },
+        { WT,  WT,  WT,  SR, SR, SR, LR, SR, WT, WT },
+        { WT,  WT,  WT,  SR, EL, HR, EL, LR, WT, WT },
+        { WT,  WT,  WT,  SR, SR, SR, LR, SR, WT, WT },
+        { WT,  WT,  WT,  WT, WT, SR, EL, SR, WT, WT },
+        { WT,  WT,  WT,  WT, WT, AL, EL, AL, WT, WT },
+        { WT,  WT,  WT,  WT, WT, SR, LR, SR, WT, WT },
         { WT,  WT,  WT,  WT, WT, WT, WT, WT, WT, WT } };
     }
 }

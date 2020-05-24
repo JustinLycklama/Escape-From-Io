@@ -12,7 +12,7 @@ public enum TutorialTrigger {
 //    void EventFired(TutorialTrigger e);
 //}
 
-public struct TutorialEvent {
+public class TutorialEvent {
     public TutorialTrigger? completionTrigger;
 
     public string title;
@@ -85,7 +85,7 @@ public enum TutorialType {
 }
 
 
-public class TutorialManager: GameButtonDelegate {
+public class TutorialManager: GameButtonDelegate, SceneChangeListener {
 
     public static TutorialManager sharedInstance = new TutorialManager();
 
@@ -131,6 +131,8 @@ public class TutorialManager: GameButtonDelegate {
         uIManager = Script.Get<UIManager>();
         unitManager = Script.Get<UnitManager>();
 
+        SceneManagement.sharedInstance.RegisterForSceneUpdates(this);
+
         Script.Get<EnemyManager>().SetFrequencyAndEvo(0, 0.1f);
         Script.Get<TimeManager>().SimulateSecondsUpdated();
 
@@ -138,8 +140,6 @@ public class TutorialManager: GameButtonDelegate {
 
         repeatButton = uIManager.tutorialRepeatButton;
         repeatButton.buttonDelegate = this;
-
-        //playerBehaviour.SetInternalPause(true);
 
         if (tutorialType == null) {
             return;
@@ -170,33 +170,13 @@ public class TutorialManager: GameButtonDelegate {
     }
 
     /*
-     * TutorialEventListener Implementation
-     * */
-
-    //public void ListenForEvent(TutorialTriggerListener updateDelegate, TutorialTrigger tutorialEvent) {
-    //    eventListenerMap[tutorialEvent] = updateDelegate;
-    //}
-
-    //public void RemoveListener(TutorialTriggerListener updateDelegate) {
-    //    foreach(TutorialTrigger e in eventListenerMap.Keys) {
-    //        if (eventListenerMap[e] == updateDelegate) {
-    //            eventListenerMap.Remove(e);
-    //            return;
-    //        }
-    //    }
-    //}
-
-    //private void NotifyEvent(TutorialTrigger e) {
-    //    if (eventListenerMap.ContainsKey(e)) {
-    //        eventListenerMap[e].EventFired(e);
-    //   }
-    //}
-
-    /*
      * Tutorial Events
      * */
 
     private void CompleteTutorial() {
+        isolateUserAction = null;
+        tutorialType = null;
+
         Script.Get<Narrator>().DoEndGameTransition(false);
     }
 
@@ -264,7 +244,19 @@ public class TutorialManager: GameButtonDelegate {
      * */
 
     public void ButtonDidClick(GameButton button) {
+        foreach(TutorialEvent e in currentScene.Value.eventQueue) {
+            e.addDelay = 0;
+        }
+
         ResetCurrentEventQueue();
+    }
+
+    /*
+     * SceneChangeListener Interface
+     * */
+
+    public void WillSwitchScene() {
+        sceneWaitForTrigger = null;
     }
 
     //private void PerformActionsForEvent(TutorialScene e) {

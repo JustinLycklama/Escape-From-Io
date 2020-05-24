@@ -240,6 +240,7 @@ public class TerrainManager : MonoBehaviour {
                     shipAction.description = "Build Ship Parts";
                     shipAction.layoutCoordinate = coordinate;
 
+                    shipAction.tutorialIdentifier = UserAction.UserActionTutorialIdentifier.BuildShip;
                     shipAction.associatedActionTypes = new List<MasterGameTask.ActionType> { MasterGameTask.ActionType.Move, MasterGameTask.ActionType.Build };
 
                     shipAction.blueprintList = new ConstructionBlueprint[] { Building.Blueprint.StationShipFrame, Building.Blueprint.Thrusters, Building.Blueprint.Reactor, Building.Blueprint.Machining, Building.Blueprint.Telemerty, Building.Blueprint.StationShip }; //Building.Blueprint.Refinery,

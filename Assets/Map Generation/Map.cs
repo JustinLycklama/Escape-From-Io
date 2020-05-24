@@ -311,12 +311,7 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
             terraformTargetCoordinateMap[coordinate.x, coordinate.y] = null;
 
             // Create Ore at location
-            GameResourceManager resourceManager = Script.Get<GameResourceManager>();
-            Dictionary<MineralType, int> mineralLists = resourceManager.MineralListForCoordinate(coordinate);
-
-            PlaceMineralsAroundLocation(new WorldPosition(new MapCoordinate(terraformTarget.coordinate)), mineralLists);
-
-            resourceManager.ClearMineralsAtCoordinate(coordinate);
+            PlaceMineralsAtLocation(coordinate);
 
         } else {
             if(Mathf.RoundToInt(previousPercentage * 25) != Mathf.RoundToInt(terraformTarget.percentage * 25)) {
@@ -329,6 +324,14 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
         return terraformTarget.percentage;
     }
 
+    public void PlaceMineralsAtLocation(LayoutCoordinate layoutCoordinate) {
+        GameResourceManager resourceManager = Script.Get<GameResourceManager>();
+        Dictionary<MineralType, int> mineralLists = resourceManager.MineralListForCoordinate(layoutCoordinate);
+
+        PlaceMineralsAroundLocation(new WorldPosition(new MapCoordinate(layoutCoordinate)), mineralLists);
+
+        resourceManager.ClearMineralsAtCoordinate(layoutCoordinate);
+    }
 
     public void TerraformHeightMap(TerraformTarget terraformTarget, bool delayMeshUpdate = false) {
         MapGenerator mapGenerator = Script.Get<MapGenerator>();

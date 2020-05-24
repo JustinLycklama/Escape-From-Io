@@ -161,7 +161,6 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
     public List<TaskStatusUpdateDelegate> taskStatusDelegateList = new List<TaskStatusUpdateDelegate>();
     public List<UserActionUpdateDelegate> userActionDelegateList = new List<UserActionUpdateDelegate>();
 
-    protected int coroutinesRunning = 0;
     protected Dictionary<string, int> coroutinesCount;
 
     [HideInInspector]
@@ -564,7 +563,6 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
     protected Coroutine performTaskCoroutine;
     protected IEnumerator PerformTaskAction(Action<bool> callBack) {
-        coroutinesRunning++;
         coroutinesCount["task"]++;
 
         float speed = SpeedForTask(currentMasterTask.actionType) * ResearchSingleton.sharedInstance.unitActionMultiplier;
@@ -587,7 +585,6 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
                 callBack(false);
                 AnimateState(AnimationState.Idle);
                 //CompleteTaskActionDelegate();
-                coroutinesRunning--;
                 coroutinesCount["task"]--;
                 yield break;
             }
@@ -601,7 +598,6 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
                 callBack(true);
                 AnimateState(AnimationState.Idle);
                 //CompleteTaskActionDelegate();
-                coroutinesRunning--;
                 coroutinesCount["task"]--;
 
                 yield break;
@@ -616,7 +612,6 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
     protected Coroutine followPathCoroutine;    
     protected IEnumerator FollowPath(Path path, System.Action<bool> callBack) {
-        coroutinesRunning++;
         coroutinesCount["path"]++;
 
         Vector3 startPoint = path.lookPoints[0].worldPosition.vector3;
@@ -721,13 +716,11 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         yield return turnCoroutine;
 
         callBack(true);
-        coroutinesRunning--;
         coroutinesCount["path"]--;
     }
 
     protected Coroutine turnCoroutine;
     private IEnumerator TurnInPlace(Vector3 lookAt) {
-        coroutinesRunning++;
         coroutinesCount["turn"]++;
 
         //Quaternion originalRotation = transform.rotation;
@@ -767,7 +760,6 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
                 transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, turnSpeed * Time.deltaTime * 90);
 
             } else {
-                coroutinesRunning--;
                 coroutinesCount["turn"]--;
                 yield break;
             }
@@ -982,7 +974,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         public static Blueprint Miner = new Blueprint("Miner", typeof(Miner), null, MasterGameTask.ActionType.Mine, "Miner", $"Basic Mining {Unit_Noun}",
             new BlueprintCost(new Dictionary<MineralType, int>(){
                 { MineralType.Copper, 3 },
-                { MineralType.Silver, 2 }                
+                { MineralType.Silver, 1 }                
             }));
 
         public static Blueprint Mover = new Blueprint("Mover", typeof(Mover), null, MasterGameTask.ActionType.Move, "Mover", $"Basic Moving {Unit_Noun}",
@@ -1014,7 +1006,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
             "Build Adjacent to " + Building.Blueprint.AdvUnitBuilding.label            
             );
 
-        public static Blueprint AdvancedMover = new Blueprint("AdvancedMover", typeof(AdvancedMover), null, MasterGameTask.ActionType.Move, "Adv. Mover", "Hovering Mover.\nTerrain has no effect on this Unit",
+        public static Blueprint AdvancedMover = new Blueprint("AdvancedMover", typeof(AdvancedMover), null, MasterGameTask.ActionType.Move, "Adv. Mover", "Terrain has no effect on this Unit",
             new BlueprintCost(new Dictionary<MineralType, int>(){
                 { MineralType.Silver, 4}                
             }),

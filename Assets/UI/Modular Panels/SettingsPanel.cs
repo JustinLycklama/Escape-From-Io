@@ -23,6 +23,11 @@ public class SettingsPanel : MonoBehaviour, PlayerBehaviourUpdateDelegate, GameB
         playerBehaviour.AddHotKeyDelegate(KeyCode.Escape, this);
 
         menuWindow.gameObject.SetActive(false);
+
+        if (TutorialManager.isTutorial) {
+            playButton.SetEnabled(false);
+            pauseButton.SetEnabled(false);
+        }
     }
 
     private void OnDestroy() {

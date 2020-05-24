@@ -40,7 +40,7 @@ public class MenuWindow : MonoBehaviour, GameButtonDelegate, CanSceneChangeDeleg
         } else if(button == restartButton) {
             settingsPanel.CloseWindows();
             fadePanel.FadeOut(true, true, completeTransition);
-            SceneManagement.sharedInstance.ChangeScene(SceneManagement.State.NewGame, null, null, this);
+            SceneManagement.sharedInstance.ChangeScene(SceneManagement.sharedInstance.state, null, null, this);
         } else if(button == helpButton) {
             gameObject.SetActive(false);
             helpWindow.gameObject.SetActive(true);

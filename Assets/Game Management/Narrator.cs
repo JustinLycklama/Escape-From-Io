@@ -163,14 +163,15 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
 
             startingBuilding.transform.SetParent(buildingManager.transform);
             startingBuilding.transform.position = spawnWorldPosition.vector3;
+
+            buildingManager.AddBuildingAtLocation(startingBuilding, mapGenerator.spawnCoordinate);
         });
 
         initActionChunks.Enqueue(() => {
             if(TutorialManager.isTutorial) {
                 startingUnits = new List<Unit> { Instantiate(minerPrefab), Instantiate(moverPrefab), Instantiate(builderPrefab) };
             } else {
-                //startingUnits = new List<Unit> { Instantiate(minerPrefab), Instantiate(minerPrefab), Instantiate(moverPrefab), Instantiate(builderPrefab) };                
-                startingUnits = new List<Unit> { Instantiate(defenderPrefab), Instantiate(golemPrefab) };
+                startingUnits = new List<Unit> { Instantiate(minerPrefab), Instantiate(minerPrefab), Instantiate(moverPrefab), Instantiate(builderPrefab) };
             }
 
             PathGridCoordinate[][] coordinatesForSpawnCoordinate = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(mapGenerator.spawnCoordinate);

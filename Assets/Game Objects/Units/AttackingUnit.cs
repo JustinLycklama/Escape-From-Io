@@ -100,13 +100,11 @@ public abstract class AttackingUnit : Unit
     }
 
     IEnumerator ResetTaskStateDelayed() {
-        coroutinesRunning++;
         coroutinesCount["reset"]++;
 
         yield return new WaitForSeconds(0.75f);
 
         ResetTaskStateWithNewFollow();
-        coroutinesRunning--;
         coroutinesCount["reset"]--;
     }
 
@@ -154,7 +152,6 @@ public abstract class AttackingUnit : Unit
     // If we begin chasing a unit when we are far away, then as we get closer to the group, the closest unit to us may have changed.
     // Infrequently, update the search to find the next closest unit
     IEnumerator ResetSearch() {
-        coroutinesRunning++;
         while(true) {
             yield return new WaitForSeconds(resetSearchDelay);
             
@@ -165,11 +162,9 @@ public abstract class AttackingUnit : Unit
                 ResetTaskStateWithNewFollow();
             }            
         }
-        coroutinesRunning--;
     }
 
     IEnumerator FollowAttackTarget() {
-        coroutinesRunning++;
         while(true) {
             yield return new WaitForSeconds(updateFollowTargetDelay);            
 
@@ -206,6 +201,5 @@ public abstract class AttackingUnit : Unit
                 });
             }
         }
-        coroutinesRunning--;
     }
 }

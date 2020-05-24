@@ -48,7 +48,7 @@ public class TutorialDefense : TutorialObject {
             enemyManager.SpawnEnemy();
         };
 
-        TutorialEvent defender4 = new TutorialEvent("The Defender", "We had better hurry and finish this unit before the Golem does too much damage!", TutorialTrigger.TaskLockToggle, true);
+        TutorialEvent defender4 = new TutorialEvent("The Defender", "We had better hurry and finish this unit before the Golem does too much damage!", null, true);
         TutorialEvent defender5 = new TutorialEvent("The Defender", "Unlock the Mover Task Lock to the right of Move Bots panel to speed this task up", TutorialTrigger.TaskLockToggle, true);
         defender5.eventAction = (isolationObject) => {
             isolationObject.SetTaskAndCellAction(MasterGameTask.ActionType.Move, TaskAndUnitCell.TaskAndUnitCellTutorialIdentifier.LockToggle);

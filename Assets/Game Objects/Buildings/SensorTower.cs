@@ -88,15 +88,21 @@ public class SensorTower : RotatingBuilding, TerrainUpdateDelegate {
 
         int yRotation = 0;
 
-        if (absX > absY) {
-            if (azurePos.Key > buildingPos.x) {
+        print("Azure: " + azurePos);
+        print("building: " + buildingPos);
+
+        print("absX: " + absX);
+        print("absY: " + absY);
+
+        if(absX > absY) {
+            if (azurePos.Key < buildingPos.x) {
                 yRotation = 180;
             }
         } else {
             if(azurePos.Value < buildingPos.y) {
-                yRotation = 90;
-            } else {
                 yRotation = -90;
+            } else {
+                yRotation = 90;
             }
         }
 

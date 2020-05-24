@@ -316,40 +316,41 @@ public abstract class Building : ActionableItem, Selectable {
                 { MineralType.Copper, 1 }
             }));
 
-        public static Blueprint TerraformLandBuilding = new Blueprint("PathBuilding", typeof(TerraformLandBuilding), "TowerIcon", null, "Terraform Land", "Create a path over water.",
-            new BlueprintCost(new Dictionary<MineralType, int>(){
-                { MineralType.Copper, 1 }
-            }));
+        //public static Blueprint TerraformLandBuilding = new Blueprint("PathBuilding", typeof(TerraformLandBuilding), "TowerIcon", null, "Terraform Land", "Create a path over water.",
+        //    new BlueprintCost(new Dictionary<MineralType, int>(){
+        //        { MineralType.Copper, 1 }
+        //    }));
 
-        public static Blueprint Tower = new Blueprint("Tower", typeof(Tower), "LightTower", null, "Light Tower", "Provides vision in all directions until obstructed",
+        public static Blueprint Tower = new Blueprint("Tower", typeof(Tower), "LightTower", null, "Light Tower", "Provides vision",
             new BlueprintCost(new Dictionary<MineralType, int>(){
                 { MineralType.Copper, 3 }                
             }));
 
         public static Blueprint SensorTower = new Blueprint("SensorTower", typeof(SensorTower), "SensorTower", null, "Azure Sensor", "Points to the closest Azure vein",
             new BlueprintCost(new Dictionary<MineralType, int>(){
-                { MineralType.Copper, 4 },
+                { MineralType.Copper, 3 },
                 { MineralType.Silver, 2 },
                 { MineralType.Gold, 1 }
             }));
 
         public static Blueprint DefenseTower = new Blueprint("DefenderTower", typeof(DefenderTower), "DefenderTower", null, "Turret", "Attacks nearby Enemies",
-            new BlueprintCost(new Dictionary<MineralType, int>(){                        
-                        { MineralType.Silver, 3 },
+            new BlueprintCost(new Dictionary<MineralType, int>(){
+                        { MineralType.Copper, 4 },
+                        { MineralType.Silver, 2 },
                         { MineralType.Gold, 1 }
             }));
 
-        public static Blueprint AdvUnitBuilding = new Blueprint("AdvUnitBuilding", typeof(AdvUnitBuilding), "AdvUnits", null, "Adv. Units Building", "Advanced units can be built adjacent to this", 
+        public static Blueprint AdvUnitBuilding = new Blueprint("AdvUnitBuilding", typeof(AdvUnitBuilding), "AdvUnits", null, "Adv. Units Building", "Build advanced units adjacent", 
             new BlueprintCost(new Dictionary<MineralType, int>(){
                 { MineralType.Silver, 4 },
                 { MineralType.Azure, 2 }
             }));
 
-        public static Blueprint Refinery = new Blueprint("Refinery", typeof(Refinery), "MinerIcon", null, "Refinery", "",
-            new BlueprintCost(new Dictionary<MineralType, int>(){
-                { MineralType.Copper, 3 },
-                { MineralType.Silver, 1 }
-            }));
+        //public static Blueprint Refinery = new Blueprint("Refinery", typeof(Refinery), "MinerIcon", null, "Refinery", "",
+        //    new BlueprintCost(new Dictionary<MineralType, int>(){
+        //        { MineralType.Copper, 3 },
+        //        { MineralType.Silver, 1 }
+        //    }));
 
         /*
          * Ship Parts
@@ -385,7 +386,7 @@ public abstract class Building : ActionableItem, Selectable {
 
         public static Blueprint StationShip = new Blueprint("StationShip", typeof(StationShip), "shuttle", null, "Escape Shuttle", "Escape...",
             new BlueprintCost(new Dictionary<MineralType, int>(){
-                { MineralType.Silver, 4 },                
+                { MineralType.Silver, 3 },                
                 { MineralType.Gold, 3 },                
                 { MineralType.Azure, 2 }
             }),
@@ -410,7 +411,7 @@ public abstract class Building : ActionableItem, Selectable {
 
         public static Blueprint Thrusters = new Blueprint("ShipThrusters", typeof(ShipThrusters), "thrusters", null, "Ship Thrusters", "Once built, ALL units Move 50% faster",
            new BlueprintCost(new Dictionary<MineralType, int>(){
-                { MineralType.Silver, 4 },
+                { MineralType.Silver, 3 },
                 { MineralType.Gold, 3 },
                 { MineralType.Azure, 2 }
            }),           
@@ -426,7 +427,7 @@ public abstract class Building : ActionableItem, Selectable {
 
         public static Blueprint Reactor = new Blueprint("ShipReactor", typeof(ShipReactor), "reactor", null, "Ship Reactor", "Once built, ALL units get duration +60s",
            new BlueprintCost(new Dictionary<MineralType, int>(){
-                { MineralType.Silver, 4 },
+                { MineralType.Silver, 3 },
                 { MineralType.Gold, 3 },
                 { MineralType.Azure, 2 }
            }),
@@ -442,7 +443,7 @@ public abstract class Building : ActionableItem, Selectable {
 
         public static Blueprint Machining = new Blueprint("ShipMachining", typeof(ShipMachining), "machining", null, "Ship Machining", "Once built, ALL units act 50% faster",
            new BlueprintCost(new Dictionary<MineralType, int>(){
-                { MineralType.Silver, 4 },
+                { MineralType.Silver, 3 },
                 { MineralType.Gold, 3 },
                 { MineralType.Azure, 2 }
            }),
@@ -458,7 +459,7 @@ public abstract class Building : ActionableItem, Selectable {
 
         public static Blueprint Telemerty = new Blueprint("ShipTelemetry", typeof(ShipTelemetry), "telemetry", null, "Ship Telemetry", "Once built, Tower vision increased 3->5",
            new BlueprintCost(new Dictionary<MineralType, int>(){
-                { MineralType.Silver, 4 },
+                { MineralType.Silver, 3 },
                 { MineralType.Gold, 3 },
                 { MineralType.Azure, 2 }
            }),
@@ -505,7 +506,7 @@ public abstract class Building : ActionableItem, Selectable {
         }
     }
 
-    public static Blueprint[] Blueprints() {
-        return new Blueprint[] { Blueprint.Tower, Blueprint.Refinery, Blueprint.StationShip };
-    }
+    //public static Blueprint[] Blueprints() {
+    //    return new Blueprint[] { Blueprint.Tower, Blueprint.Refinery, Blueprint.StationShip };
+    //}
 }

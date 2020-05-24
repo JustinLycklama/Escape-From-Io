@@ -11,6 +11,7 @@ public class UserAction {
         DrillDown,
         BuildUnit,
         BuildBuilding,
+        BuildShip,
         Mine,
         Clean,
         Path

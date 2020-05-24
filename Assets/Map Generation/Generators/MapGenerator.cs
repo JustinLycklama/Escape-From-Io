@@ -393,6 +393,13 @@ public class MapGenerator : MonoBehaviour {
         return noiseSubset;
     }
 
+    public TerrainType[,] GetTerrainForMap(MapContainer mapContainer) {
+        int startXLayout = mapContainer.mapX * mapLayoutWidth;
+        int startYLayout = mapContainer.mapY * mapLayoutHeight;
+
+        return RangeSubset(terrainMap, startXLayout, startYLayout, mapLayoutWidth, mapLayoutHeight);
+    }
+
     public float[,] GetFinalNoiseMap() {
         return finalNoiseMap;
     }
