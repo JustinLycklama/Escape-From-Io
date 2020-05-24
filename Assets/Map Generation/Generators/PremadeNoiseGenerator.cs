@@ -81,7 +81,7 @@ public class PremadeNoiseGenerator : MonoBehaviour {
         { WT,  AL,  SR,  EL, EL, SR, EL, SR, WT, WT },
         { WT,  WT,  SR,  SR, LR, SR, LR, WT, WT, WT },
         { WT,  WT,  LR,  EL, EL, LR, LR, WT, WT, WT },
-        { WT,  WT,  WT,  WT, WT, AL, AL, WT, WT, WT },
+        { WT,  WT,  WT,  WT, WT, WT, WT, WT, WT, WT },
         { WT,  WT,  WT,  WT, WT, WT, WT, WT, WT, WT },
         { WT,  WT,  WT,  WT, WT, WT, WT, WT, WT, WT } };
     }
@@ -126,7 +126,7 @@ public class PremadeNoiseGenerator : MonoBehaviour {
         { WT,  WT,  WT,  SR, SR, SR, LR, SR, WT, WT },
         { WT,  WT,  WT,  WT, WT, SR, EL, SR, WT, WT },
         { WT,  WT,  WT,  WT, WT, AL, EL, AL, WT, WT },
-        { WT,  WT,  WT,  WT, WT, SR, LR, SR, WT, WT },
+        { WT,  WT,  WT,  WT, WT, SR, HR, SR, WT, WT },
         { WT,  WT,  WT,  WT, WT, WT, WT, WT, WT, WT } };
     }
 }

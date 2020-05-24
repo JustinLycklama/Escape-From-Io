@@ -50,7 +50,9 @@ public class UnitDisplayCell : MonoBehaviour, TaskStatusUpdateDelegate, GameButt
      * */
 
     public void NowPerformingTask(Unit unit, MasterGameTask masterGameTask, GameTask gameTask) {
-        masterAndGameTaskCell.SetTask(masterGameTask, gameTask);
+        if (gameObject.activeSelf) {
+            masterAndGameTaskCell.SetTask(masterGameTask, gameTask);
+        }        
     }
 
     /*

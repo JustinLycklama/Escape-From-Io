@@ -150,6 +150,7 @@ MonoBehaviour:
   statusLocation: {fileID: 8490146879033831438}
   relativeDistanceToTask: 0
   unitHealth: 100
+  skipDurationUpdates: 0
   remainingDuration: 480
   remainingHealth: 0
   buildableComponent: {fileID: 3138948788478579289}
@@ -175,6 +176,8 @@ MonoBehaviour:
   statusLocation: {fileID: 7143543371081329384}
   layoutTerrainModifier: 0
   buildingComplete: 0
+  useDisolveShader: 0
+  allowFullTransparent: 0
   associatedUnit: {fileID: 4397335953106636041}
 --- !u!114 &5029782900890592726
 MonoBehaviour:
@@ -289,17 +292,17 @@ PrefabInstance:
     - target: {fileID: 7768332364634398007, guid: c214708a724e6044c94c5d639a006705,
         type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.45
+      value: 0.55
       objectReference: {fileID: 0}
     - target: {fileID: 7768332364634398007, guid: c214708a724e6044c94c5d639a006705,
         type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.45
+      value: 0.55
       objectReference: {fileID: 0}
     - target: {fileID: 7768332364634398007, guid: c214708a724e6044c94c5d639a006705,
         type: 3}
       propertyPath: m_LocalScale.z
-      value: 0.45
+      value: 0.55
       objectReference: {fileID: 0}
     - target: {fileID: 7768332364641661655, guid: c214708a724e6044c94c5d639a006705,
         type: 3}

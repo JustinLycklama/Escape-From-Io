@@ -6,9 +6,17 @@ public class AdvancedBuilder : Unit {
     public override int duration => 570;
     public override MasterGameTask.ActionType primaryActionType => MasterGameTask.ActionType.Build;
 
+    [SerializeField]
+    private MechAnimationController mechAnimationController = null;
+
+
     protected override void UnitCustomInit() {
 
     }
+
+    protected override void AnimateState(AnimationState state, float rate, bool isCarry = false) {
+        mechAnimationController.AnimateState(state, rate);
+    }    
 
     public override float SpeedForTask(MasterGameTask.ActionType actionType) {
         switch(actionType) {
@@ -21,10 +29,6 @@ public class AdvancedBuilder : Unit {
         }
 
         return 0.1f;
-    }
-
-    protected override void AnimateState(AnimationState state, float rate = 1.0f, bool isCarry = false) {
-        //throw new System.NotImplementedException();
     }
 }
 

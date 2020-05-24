@@ -28,6 +28,6 @@ public class ShipReactor : Building {
             unit.remainingDuration += ResearchSingleton.sharedInstance.unitDurationAddition;
         }
 
-        Script.Get<NotificationPanel>().AddNotification(new NotificationItem("Ship Reactor Complete! Units last " + ResearchSingleton.sharedInstance.unitDurationAddition + "s longer!", NotificationType.TaskComplete, transform));
+        Script.Get<NotificationPanel>().AddNotification(new NotificationItem("Units last " + ResearchSingleton.sharedInstance.unitDurationAddition + "s longer!", NotificationType.TaskComplete, transform));
     }
 }

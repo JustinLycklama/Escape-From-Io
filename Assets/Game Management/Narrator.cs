@@ -321,7 +321,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
 
         playerBehaviour.SetInternalPause(false);
         StartCoroutine(StartMusic());
-        //gameOverRoutine = StartCoroutine(CheckForNoRobots());
+        gameOverRoutine = StartCoroutine(CheckForNoRobots());
 
         // Animate camera pan with fog fade
         animatePercent = 0;
@@ -352,6 +352,18 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
         while(audioPercent < 1) {
             audioManager.backgroundSource.volume = audioPercent;
             audioPercent += Time.deltaTime * 0.2f;
+
+            yield return null;
+        }
+    }
+
+    IEnumerator StopMusic() {
+        AudioManager audioManager = Script.Get<AudioManager>();
+
+        float audioPercent = 1;
+        while(audioPercent > 0) {
+            audioManager.backgroundSource.volume = audioPercent;
+            audioPercent -= Time.deltaTime * 0.2f;
 
             yield return null;
         }
@@ -406,6 +418,8 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
         Action completed = () => {
             canSceneChange = true;
         };
+
+        StartCoroutine(StopMusic());
 
         panel.FadeOut(true, false, completed);
         SceneManagement.sharedInstance.ChangeScene(displayHighscores ? SceneManagement.State.GameFinish : SceneManagement.State.Title, null, null, this, completionTime);

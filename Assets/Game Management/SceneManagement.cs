@@ -66,6 +66,7 @@ public class SceneManagement {
                 break;
         }
 
+        TutorialManager.isolateUserAction = null;
         SceneLoadHandler.sharedInstance.ChangeScene(scene, percentUpdated, complete, canChangeDelegate);
     }
 

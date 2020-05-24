@@ -23,6 +23,6 @@ public class ShipThrusters : Building {
     protected override void CompleteBuilding() {
         ResearchSingleton.sharedInstance.unitSpeedMultiplier = 1.5f;
 
-        Script.Get<NotificationPanel>().AddNotification(new NotificationItem("Ship Thrusters Complete! Units move 50% faster!", NotificationType.TaskComplete, transform));
+        Script.Get<NotificationPanel>().AddNotification(new NotificationItem("Units move 50% faster!", NotificationType.TaskComplete, transform));
     }
 }

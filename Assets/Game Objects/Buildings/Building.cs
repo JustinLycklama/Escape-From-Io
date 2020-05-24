@@ -342,8 +342,8 @@ public abstract class Building : ActionableItem, Selectable {
 
         public static Blueprint AdvUnitBuilding = new Blueprint("AdvUnitBuilding", typeof(AdvUnitBuilding), "AdvUnits", null, "Adv. Units Building", "Build advanced units adjacent", 
             new BlueprintCost(new Dictionary<MineralType, int>(){
-                { MineralType.Silver, 4 },
-                { MineralType.Azure, 2 }
+                { MineralType.Silver, 1 }, // 4
+                //{ MineralType.Azure, 2 }
             }));
 
         //public static Blueprint Refinery = new Blueprint("Refinery", typeof(Refinery), "MinerIcon", null, "Refinery", "",
@@ -409,7 +409,7 @@ public abstract class Building : ActionableItem, Selectable {
             "Must be build on a Frame with all four Components built.",
             true); // As last priority
 
-        public static Blueprint Thrusters = new Blueprint("ShipThrusters", typeof(ShipThrusters), "thrusters", null, "Ship Thrusters", "Once built, ALL units Move 50% faster",
+        public static Blueprint Thrusters = new Blueprint("ShipThrusters", typeof(ShipThrusters), "thrusters", null, "Ship Thrusters", "ALL units Move 50% faster",
            new BlueprintCost(new Dictionary<MineralType, int>(){
                 { MineralType.Silver, 3 },
                 { MineralType.Gold, 3 },
@@ -425,7 +425,7 @@ public abstract class Building : ActionableItem, Selectable {
             "Only one per game.\nBuild Adjacent to " + Building.Blueprint.StationShipFrame.label,
             true); // As last priority
 
-        public static Blueprint Reactor = new Blueprint("ShipReactor", typeof(ShipReactor), "reactor", null, "Ship Reactor", "Once built, ALL units get duration +60s",
+        public static Blueprint Reactor = new Blueprint("ShipReactor", typeof(ShipReactor), "reactor", null, "Ship Reactor", "ALL units get duration +60s",
            new BlueprintCost(new Dictionary<MineralType, int>(){
                 { MineralType.Silver, 3 },
                 { MineralType.Gold, 3 },
@@ -441,7 +441,7 @@ public abstract class Building : ActionableItem, Selectable {
             "Only one per game.\nBuild Adjacent to " + Building.Blueprint.StationShipFrame.label,
             true); // As last priority
 
-        public static Blueprint Machining = new Blueprint("ShipMachining", typeof(ShipMachining), "machining", null, "Ship Machining", "Once built, ALL units act 50% faster",
+        public static Blueprint Machining = new Blueprint("ShipMachining", typeof(ShipMachining), "machining", null, "Ship Machining", "ALL units act 50% faster",
            new BlueprintCost(new Dictionary<MineralType, int>(){
                 { MineralType.Silver, 3 },
                 { MineralType.Gold, 3 },
@@ -457,7 +457,7 @@ public abstract class Building : ActionableItem, Selectable {
             "Only one per game.\nBuild Adjacent to " + Building.Blueprint.StationShipFrame.label,
             true); // As last priority
 
-        public static Blueprint Telemerty = new Blueprint("ShipTelemetry", typeof(ShipTelemetry), "telemetry", null, "Ship Telemetry", "Once built, Tower vision increased 3->5",
+        public static Blueprint Telemerty = new Blueprint("ShipTelemetry", typeof(ShipTelemetry), "telemetry", null, "Ship Telemetry", "Tower vision increased 3->5",
            new BlueprintCost(new Dictionary<MineralType, int>(){
                 { MineralType.Silver, 3 },
                 { MineralType.Gold, 3 },

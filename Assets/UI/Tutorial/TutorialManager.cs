@@ -187,10 +187,16 @@ public class TutorialManager: GameButtonDelegate, SceneChangeListener {
             return;
         }
 
-        uIManager.StartCoroutine(AddDelay(0.5f, () => {
+        Action cont = () => {
             currentScene = sceneQueue.Dequeue();
             ResetCurrentEventQueue();
-        }));
+        };
+
+        if (tutorialType != TutorialType.Basic) {
+            uIManager.StartCoroutine(AddDelay(0.5f, cont));
+        } else {
+            cont();
+        }        
     }
 
     private void ResetCurrentEventQueue() {

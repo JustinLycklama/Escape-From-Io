@@ -924,7 +924,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
     protected override void NotifyAllTaskStatus() {
         foreach(TaskStatusUpdateDelegate updateDelegate in taskStatusDelegateList.ToArray()) {
-            updateDelegate.NowPerformingTask(this, currentMasterTask, currentGameTask);
+            updateDelegate?.NowPerformingTask(this, currentMasterTask, currentGameTask);
         }
     }
 

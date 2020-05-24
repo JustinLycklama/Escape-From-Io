@@ -6,15 +6,12 @@ public class AdvancedMiner : Unit {
     public override int duration => 600;
     public override MasterGameTask.ActionType primaryActionType => MasterGameTask.ActionType.Mine;
 
-    protected override void UnitCustomInit() {
+    [SerializeField]
+    private MechAnimationController mechAnimationController = null;
 
+    protected override void AnimateState(AnimationState state, float rate, bool isCarry = false) {
+        mechAnimationController.AnimateState(state, rate);
     }
-
-    //protected override void Animate() {
-    //    foreach(MoenenGames.VoxelRobot.Weapon weapon in weaponSet) {
-    //        weapon.Animate();
-    //    }
-    //}
 
     public override float SpeedForTask(MasterGameTask.ActionType actionType) {
         switch(actionType) {
@@ -29,7 +26,7 @@ public class AdvancedMiner : Unit {
         return 0.1f;
     }
 
-    protected override void AnimateState(AnimationState state, float rate = 1.0f, bool isCarry = false) {
-        //throw new System.NotImplementedException();
+    protected override void UnitCustomInit() {
+
     }
 }

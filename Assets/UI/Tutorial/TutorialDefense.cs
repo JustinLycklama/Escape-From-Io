@@ -65,7 +65,7 @@ public class TutorialDefense : TutorialObject {
         sceneQueue.Enqueue(new TutorialScene(new TutorialEvent[] { watch1, watch2 }));
 
         TutorialEvent gold1 = new TutorialEvent("New Area", "Look at all of this gold! This looks like an area we are going to spend some time in", null, true);
-        gold1.addDelay = 4;
+        gold1.addDelay = 5;
         TutorialEvent gold2 = new TutorialEvent("New Area", "To secure it for the future, lets build a Turret here. Turrets require gold, so lets first mine some Hard Rock", TutorialTrigger.TerraformComplete, false);
         gold2.eventAction = (isolationObject) => {
             isolationObject.SetUserActionIdentifier(UserAction.UserActionTutorialIdentifier.Mine);
