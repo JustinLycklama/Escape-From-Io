@@ -342,8 +342,8 @@ public abstract class Building : ActionableItem, Selectable {
 
         public static Blueprint AdvUnitBuilding = new Blueprint("AdvUnitBuilding", typeof(AdvUnitBuilding), "AdvUnits", null, "Adv. Units Building", "Build advanced units adjacent", 
             new BlueprintCost(new Dictionary<MineralType, int>(){
-                { MineralType.Silver, 1 }, // 4
-                //{ MineralType.Azure, 2 }
+                { MineralType.Silver, 4 },
+                { MineralType.Azure, 2 }
             }));
 
         //public static Blueprint Refinery = new Blueprint("Refinery", typeof(Refinery), "MinerIcon", null, "Refinery", "",

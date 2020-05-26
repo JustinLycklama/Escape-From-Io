@@ -23,6 +23,8 @@ public class MenuWindow : MonoBehaviour, GameButtonDelegate, CanSceneChangeDeleg
 
         helpWindow.gameObject.SetActive(false);
         helpWindow.presenter = this;
+
+        helpButton.SetEnabled(false);
     }
         
    /*

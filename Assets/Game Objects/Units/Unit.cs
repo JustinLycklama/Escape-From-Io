@@ -455,6 +455,13 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
     }
 
     public virtual void Shutdown() {
+        UnitManager unitManager = Script.Get<UnitManager>();
+
+        // We are already shuting down, skip
+        if (!unitManager.IsUnitEnabled(this)) {
+            return;
+        }
+
         taskQueueManager.RestractTaskRequest(this);
         InterruptInProgressActions();
 
@@ -482,7 +489,6 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
             DestroySelf();
         };
 
-
         TimeManager timeManager = Script.Get<TimeManager>();
         
         // Allow time for showdown animation
@@ -490,8 +496,6 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
             // Then fade and destroy object
             timeManager.AddNewTimer(3, fadeOutBlock, destroyBlock, 2);
         });
-
-
     }
 
     // Pipeline Helpers

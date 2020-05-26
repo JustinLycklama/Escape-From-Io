@@ -22,6 +22,7 @@ public class TutorialEvent {
 
     public int addDelay;
     public Action<IsolatedUserAction> eventAction;
+    public bool postTeraformWait = false;
 
     public TutorialEvent(string title, string message, TutorialTrigger? completionTrigger = null, bool remainPaused = false) {
         this.title = title;
@@ -115,9 +116,18 @@ public class TutorialManager: GameButtonDelegate, SceneChangeListener {
     TutorialScene? currentScene;
     Queue<TutorialEvent> currentEventQueue;
     TutorialTrigger? sceneWaitForTrigger = null;
+    bool waitForPostTeraform = false;
 
     public void Fire(TutorialTrigger e) {
         if (sceneWaitForTrigger == e) {
+            if (waitForPostTeraform == true) {
+
+                waitForPostTeraform = false;
+                sceneWaitForTrigger = TutorialTrigger.TerraformComplete;
+
+                return;
+            }
+
             sceneWaitForTrigger = null;
 
             messageManager.CloseCurrentMinorMessage();
@@ -231,6 +241,7 @@ public class TutorialManager: GameButtonDelegate, SceneChangeListener {
 
         e.eventAction?.Invoke(isolateUserAction);
         sceneWaitForTrigger = e.completionTrigger;
+        waitForPostTeraform = e.postTeraformWait;
 
         messageManager.EnqueueMessage(e.title, e.message, () => {
             repeatButton.SetEnabled(true);

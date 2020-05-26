@@ -140,10 +140,12 @@ public class TutorialEscape : TutorialObject {
         sceneQueue.Enqueue(new TutorialScene(new TutorialEvent[] { component1, component2, component3, component4 }));
 
 
-        TutorialEvent complete1 = new TutorialEvent("Congrats!", "Building all four Components on the frame, and finally creating a Shuttle, is the goal of the game", TutorialTrigger.BuildingComplete, true);
-        TutorialEvent complete2 = new TutorialEvent("Congrats!", "Great job, you've finished the tutorials. Thanks for playing!", TutorialTrigger.BuildingComplete, true);
+        TutorialEvent complete1 = new TutorialEvent("Congrats!", "You've built your first Component!", null, true);
+        TutorialEvent complete2 = new TutorialEvent("Congrats!", "Once all four Components are complete, you can build the Shuttle and escape!", null, true);
 
-        sceneQueue.Enqueue(new TutorialScene(new TutorialEvent[] { complete1, complete2 }));
+        TutorialEvent complete3 = new TutorialEvent("Congrats!", "Great job, you've finished the tutorials. Thanks for playing!", null, true);
+
+        sceneQueue.Enqueue(new TutorialScene(new TutorialEvent[] { complete1, complete2, complete3 }));
 
         return sceneQueue;
     }

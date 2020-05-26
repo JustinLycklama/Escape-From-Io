@@ -21,6 +21,7 @@ public class TutorialDefense : TutorialObject {
 
         TutorialEvent info4 = new TutorialEvent("Defense Info", "The frequency has increased and enemies will spawn soon! lets mine out some rock and build some defense", TutorialTrigger.TerraformComplete, false);
         info4.addDelay = 1;
+        info4.postTeraformWait = true;
         info4.eventAction = (isolationObject) => {
             enemyManager.SetFrequencyAndEvo(0.25f, 0.1f);
             timeManager.SimulateSecondsUpdated();
@@ -29,7 +30,7 @@ public class TutorialDefense : TutorialObject {
         };
 
         TutorialEvent info5 = new TutorialEvent("Defense Info", "A Defender costs 3 silver ore, and we have only found 2. Lets keep digging until we have enough silver", TutorialTrigger.TerraformComplete, false);
-        info5.addDelay = 4;
+        info5.addDelay = 1;
         info5.eventAction = (isolationObject) => {
             isolationObject.SetUserActionIdentifier(UserAction.UserActionTutorialIdentifier.Mine);
         };
@@ -56,8 +57,10 @@ public class TutorialDefense : TutorialObject {
 
         sceneQueue.Enqueue(new TutorialScene(new TutorialEvent[] { defender1, defender2, defender3, defender4, defender5 }));
 
-        TutorialEvent watch1 = new TutorialEvent("Watch", "Lets watch and see how the Defender takes care of the Golem, once it is built", TutorialTrigger.UnitFinishedDestroySelf, false);
+        TutorialEvent watch1 = new TutorialEvent("Watch", "Once it's complete, watch and see how the Defender takes care of the Golem", TutorialTrigger.UnitFinishedDestroySelf, false);
+        watch1.addDelay = 1;
         TutorialEvent watch2 = new TutorialEvent("Watch", "Great! Now that the golem is taken care of, lets continue exploring to our right using a Light Tower", TutorialTrigger.BuildingComplete, false);
+        watch2.postTeraformWait = true;
         watch2.eventAction = (isolationObject) => {
             isolationObject.SetUserActionIdentifier(UserAction.UserActionTutorialIdentifier.BuildBuilding, Building.Blueprint.Tower);
         };
@@ -65,14 +68,14 @@ public class TutorialDefense : TutorialObject {
         sceneQueue.Enqueue(new TutorialScene(new TutorialEvent[] { watch1, watch2 }));
 
         TutorialEvent gold1 = new TutorialEvent("New Area", "Look at all of this gold! This looks like an area we are going to spend some time in", null, true);
-        gold1.addDelay = 5;
+        gold1.addDelay = 1;
         TutorialEvent gold2 = new TutorialEvent("New Area", "To secure it for the future, lets build a Turret here. Turrets require gold, so lets first mine some Hard Rock", TutorialTrigger.TerraformComplete, false);
         gold2.eventAction = (isolationObject) => {
             isolationObject.SetUserActionIdentifier(UserAction.UserActionTutorialIdentifier.Mine);
         };
 
-        TutorialEvent gold3 = new TutorialEvent("New Area", "Great! Now lets build a Turret in the center, to keep this area safe for good", TutorialTrigger.BuildingComplete, false);
-        gold2.eventAction = (isolationObject) => {
+        TutorialEvent gold3 = new TutorialEvent("New Area", "Great! Now lets build a Turret in the center, to keep this area safe", TutorialTrigger.BuildingComplete, false);
+        gold3.eventAction = (isolationObject) => {
             isolationObject.SetUserActionIdentifier(UserAction.UserActionTutorialIdentifier.BuildBuilding, Building.Blueprint.DefenseTower);
         };
 
@@ -93,7 +96,7 @@ public class TutorialDefense : TutorialObject {
 
         TutorialEvent complete1 = new TutorialEvent("Complete!", "As you can see, the Turrets are much more powerful than the Defender Units", null, false);
         TutorialEvent complete2 = new TutorialEvent("Complete!", "The downside is, they can only protect a small area. As you explore, you may need a combination to stay safe!", null, false);
-        TutorialEvent complete3 = new TutorialEvent("Complete!", "Thats all for now! Checkout the Help Menu in game for more info, and thanks for playing!", null, false);
+        TutorialEvent complete3 = new TutorialEvent("Complete!", "Thats all for now! Thanks for playing!", null, false);
 
         sceneQueue.Enqueue(new TutorialScene(new TutorialEvent[] { complete1, complete2, complete3 }));
 

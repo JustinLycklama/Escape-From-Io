@@ -22,7 +22,7 @@ public class DefenderTower : RotatingBuilding {
     private const float shotCooldown = 2f;
 
     private const float range = 275;
-    private const int damage = 25;
+    private const int damage = 15;
 
     [SerializeField]
     private ParticleSystem[] particles = new ParticleSystem[0];

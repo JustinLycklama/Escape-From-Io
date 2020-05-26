@@ -95,6 +95,9 @@ public class FirebaseManager
             if (!signedIn && user != null)
             {
                 Debug.Log("Signed out " + user.UserId);
+
+                // Try to sign in again
+                TestSignIn(null);
             }
             user = auth.CurrentUser;
             if (signedIn)

@@ -50,15 +50,10 @@ public class PlayerBehaviour : MonoBehaviour {
     List<PlayerBehaviourUpdateDelegate> delegateList = new List<PlayerBehaviourUpdateDelegate>();
 
     // Pan and Input Control
-    private Vector2? initialTouchPosition;
-
     private Vector2? previousTouch = null;
     private Vector2? residualDirection = null;
 
     private float minJoystickThreshold = 0.35f;
-
-    private float mouseDownTime = 0;
-    private float secondsBeforeTouchPan = 0.075f;
 
     [SerializeField]
     private PanControlsPanel panContolPanel = null;
@@ -140,6 +135,10 @@ public class PlayerBehaviour : MonoBehaviour {
         }
     }
 
+    public void SetPanJoystickEnabled(bool enabled) {
+        panContolPanel.SetJoystickEnabled(joystickEnabled && enabled);
+    }
+
     private IEnumerator AutoClickWhileJoystick() {
 
         Color fullColor = crosshairImage.color;
@@ -168,8 +167,6 @@ public class PlayerBehaviour : MonoBehaviour {
         HotkeyInput();
         StaticPanInput();
 
-        CameraApplyTouchPan();
-
         bool mouseDown = Input.GetMouseButtonDown(0);
         bool mouseUp = Input.GetMouseButtonUp(0);
 
@@ -192,7 +189,7 @@ public class PlayerBehaviour : MonoBehaviour {
 
         bool cameraAction = false;
 
-        //cameraAction |= CameraTouchPanInput();
+        cameraAction |= CameraTouchPanInput();
         cameraAction |= CameraZoom();
 
         // If we are manually moving the camera while the auto pan is happening, stop auto pan
@@ -200,10 +197,7 @@ public class PlayerBehaviour : MonoBehaviour {
             StopCoroutine(panCameraRoutine);
         }
 
-        if(!cameraAction && mouseUp) {
-
-            //print("Mouse Button Up");
-            //initialTouchPosition = null;
+        if(mouseDown) {
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             SelectGameObject(ray);
         }
@@ -324,69 +318,29 @@ public class PlayerBehaviour : MonoBehaviour {
 
     private bool CameraTouchPanInput() {
 
-        bool hasPanned = (mouseDownTime != 0 && Time.time > mouseDownTime + secondsBeforeTouchPan);
-
-        //if(initialTouchPosition.HasValue && previousTouch.HasValue) {
-        //    hasPanned = Vector2.Distance(initialTouchPosition.Value, previousTouch.Value) > 1;
-        //}
-
-
-        //if (residualDirection == null) {
-        //    return false;
-        //}
-
-        if(Input.GetMouseButtonDown(0)) {
-            mouseDownTime = Time.time;
-            //return false;
-        }
-
-        else if(Input.GetMouseButtonUp(0)) {
-            mouseDownTime = 0;
-
-            initialTouchPosition = null;
+        if(Input.GetMouseButtonUp(0)) {
             previousTouch = null;
-
-            print("Mouse Button Up");
         }
 
-
-        if(mouseDownTime != 0 && Input.touchCount < 2) {
+        if(Input.GetMouseButton(0) || Input.touchCount == 1) {
 
             Vector2 touch = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
 
-            if(initialTouchPosition == null) {
-                initialTouchPosition = touch;
-            }
-
             if (previousTouch.HasValue) {
+                Vector2 direction = (touch - previousTouch.Value) * 0.25f;
 
-                //if(Vector2.Distance(initialTouchPosition.Value, previousTouch.Value) < 10) {
+                if (residualDirection.HasValue) {
+                    direction = (direction + residualDirection.Value) / 2.0f;
+                }
 
-                //    return false;
-                //}
-
-
-                residualDirection = (touch - previousTouch.Value) * 0.5f;
-                //print("Dir: " + residualDirection);
-
+                residualDirection = direction;
             }
 
             previousTouch = touch;
         }
 
-        //if (residualDirection == null) {
-        //    print("direction Null");
-        //    return false;
-        //}
-
-
-
-        return hasPanned;
-    }
-
-    private void CameraApplyTouchPan() {
-        if(residualDirection == null) {            
-            return;
+        if(residualDirection == null) {
+            return false;
         }
 
         var right = cameraRight;
@@ -396,16 +350,26 @@ public class PlayerBehaviour : MonoBehaviour {
         forward.z *= residualDirection.Value.y;
 
         var finalDirection = forward + right;
-        //Camera.main.transform.Translate(-finalDirection * maxCameraMovementSpeed * Time.deltaTime, Space.World);
 
-        print("Pan: " + residualDirection);
         PanByVector(-finalDirection * maxCameraMovementSpeed);
 
         // Apply pan friction
-        residualDirection -= residualDirection * 0.05f;
-        if(Mathf.Abs(residualDirection.Value.x) < 0.01 && Mathf.Abs(residualDirection.Value.y) < 0.01) {
+        Vector2 friction = residualDirection.Value * 0.05f;
+
+        if (Mathf.Abs(friction.x) > Mathf.Abs(residualDirection.Value.x)) {
+            friction.x = residualDirection.Value.x;
+        }
+        if(Mathf.Abs(friction.y) > Mathf.Abs(residualDirection.Value.y)) {
+            friction.y = residualDirection.Value.y;
+        }
+
+        residualDirection -= friction;
+
+        if(Mathf.Abs(residualDirection.Value.x) < 0.001 && Mathf.Abs(residualDirection.Value.y) < 0.001) {
             residualDirection = null;
         }
+
+        return true;
     }
 
     private bool CameraZoom() {
@@ -446,6 +410,8 @@ public class PlayerBehaviour : MonoBehaviour {
 
         if (IsPositionWithinBoundary(cameraAnticipatedLocation)) {
             Camera.main.transform.Translate(translation, Space.World);
+        } else {
+            print("Out Boundary");
         }
     }
 

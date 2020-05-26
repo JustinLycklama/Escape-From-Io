@@ -104,7 +104,7 @@ public class TutorialBasic : TutorialObject {
 
         //Task Lock Intro
         TutorialEvent lockIntro1 = new TutorialEvent("Task Delegation", "Wait, are we stuck? Lucky for us, Move tasks can be delegated to Mine and Build Bots!", null, true);
-        lockIntro1.addDelay = 5;
+        lockIntro1.addDelay = 4;
 
         TutorialEvent lockIntro2 = new TutorialEvent("Task Delegation", "Take a look at the 'Move Bots' panel; On the right side we can see the number of tasks in our backlog.", null, true);
         TutorialEvent lockIntro3 = new TutorialEvent("Task Delegation", "Try clicking on this panel now.", TutorialTrigger.TaskLockToggle, true);
@@ -121,7 +121,7 @@ public class TutorialBasic : TutorialObject {
 
         // Task Lock Actions
         TutorialEvent sensor1 = new TutorialEvent("Complete!", "Nicely done. Our new Move is built to replace our lost one.", null, true);
-        TutorialEvent sensor2 = new TutorialEvent("Complete!", "That's enough info for now. Check the Help menu in game for more details, and thanks for playing!", null, true);
+        TutorialEvent sensor2 = new TutorialEvent("Complete!", "That's enough info for now. Thanks for playing!", null, true);
         //TutorialEvent sensor2 = new TutorialEvent("Where Next?", "Now we are faced with a choice, which direction should we mine in?", TutorialTrigger.UnitCompleted);
         //TutorialEvent sensor3 = new TutorialEvent("Where Next?", "Our end goal is to build ", TutorialTrigger.UnitCompleted);
 
