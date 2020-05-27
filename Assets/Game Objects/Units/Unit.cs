@@ -862,7 +862,6 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
                 Script.Get<NotificationPanel>().AddNotification(new NotificationItem("Enemy has been destroyed", NotificationType.EnemyKilled, transform, primaryActionType));
             }
 
-            Script.Get<UnitManager>().DisableUnit(this);
             Shutdown();
         }
 

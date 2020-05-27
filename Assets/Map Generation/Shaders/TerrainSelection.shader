@@ -24,6 +24,8 @@
 
 		float layoutTextures[22*22];	
 
+		float isActionAtLayout[22 * 22];
+
 		float mapLayoutWidth;
 		float mapLayoutHeight;
 
@@ -231,6 +233,11 @@
 			if (hasSelection && floorX - 1 == selectionX && floorY - 1 == selectionY) {
 				baseColor *= float3(0, 1, 1);
 			}
+
+			// If we have an action at this index
+			//if (isActionAtLayout[baseIndex] > 0) {
+				baseColor *= float3(0, 1, 1);
+			//}			
 
 			float3 otherColor = float3(0, 0, 0);
 			int highestSamplePriority = -1;

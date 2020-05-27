@@ -6,7 +6,7 @@ using UnityEngine;
 public class TutorialBasic : TutorialObject {
     public string welcomeTitle => "The Basics";
 
-    public string welcomeMessage => "Escape from Io is a task management game. We can assign tasks to the terrain, and delegate which unit types can perform them. Manage units quickly and efficiently to find the resources you need to escape, before you are overrun by the planets inhabitants! \n\nIn this tutorial you'll learn the basics of commanding your units and exploring the map. In later tutorials we will finding important resources, defending your units from enemies, and escaping the planet.\n\n Have fun!";
+    public string welcomeMessage => "Escape from Io is a task management game. We can assign tasks to the terrain, and delegate which unit types can perform them. Manage units quickly and efficiently to find the resources you need to escape, before you are overrun by the planets inhabitants! \n\nIn this tutorial you'll learn the basics of commanding your units and exploring the map. In later tutorials we will cover finding important resources, defending your units from enemies, and escaping the planet.\n\n Have fun!";
 
     public Queue<TutorialScene> GetTutorialSceneQueue() {
 

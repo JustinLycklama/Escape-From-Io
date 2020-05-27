@@ -30,6 +30,8 @@ public class Golem : AttackingUnit
 
     public void Start() {
         animationController.IdleActivate();
+
+        buildableComponent.allowFullTransparent = true;
     }
 
     public void ActiveAnimate() {

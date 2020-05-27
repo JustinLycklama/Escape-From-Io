@@ -170,7 +170,7 @@ public abstract class Building : ActionableItem, Selectable {
                 if(allowFullTransparent) {
                     meshRenderer.material.SetFloat("minTransparency", 0f);
                 } else {
-                    meshRenderer.material.SetFloat("minTransparency", 0.2f);
+                    meshRenderer.material.SetFloat("minTransparency", 0.35f);
                 }
             }
         }

@@ -125,7 +125,7 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
     UserAction[,][] userActionCoordinateMap;
     List<UserActionUpdateDelegate>[,] userActionDelegateMap;
 
-    private MasterGameTask[,] associatedTasksCoordinateMap;
+    public MasterGameTask[,] associatedTasksCoordinateMap { get; private set; }
     private List<TaskStatusUpdateDelegate>[,] taskUpdateDelegateMap;
 
     public void CreateAllActionableItemOverrides() {
@@ -179,6 +179,8 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
 
             action.performAction = (LayoutCoordinate layoutCoordinate) => {
                 associatedTasksCoordinateMap[layoutCoordinate.x, layoutCoordinate.y].CancelTask();
+
+                mapContainer.NotifyUpdateActionAt(layoutCoordinate);
 
                 GameResourceManager resourceManager = Script.Get<GameResourceManager>();
                 PlaceMineralsAroundLocation(new WorldPosition(new MapCoordinate(layoutCoordinate)), resourceManager.FloatingCostPanelResources());
@@ -424,6 +426,7 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
 
         UpdateUserActionsAt(coordinate);
         NotifyAllTaskStatus(coordinate);
+        mapContainer.NotifyUpdateActionAt(coordinate);
     }
 
     /*

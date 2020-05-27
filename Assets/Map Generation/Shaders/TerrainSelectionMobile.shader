@@ -31,6 +31,9 @@ Shader "Custom/TerrainSelectionMobile" {
 		float indexPriority[20];
 		float indexScale[20];
 
+		// Max width / height per map is 10x10
+		float actionAtIndex[10*10];
+
 		float2 selection;
 
 		// Used as a bool. 0 is skip selection calculations
@@ -190,6 +193,10 @@ Shader "Custom/TerrainSelectionMobile" {
 			// Is this tile selected
 			if (hasSelection && floorX - 1 == selection.x && floorY - 1 == selection.y) {
 				baseColor *= float3(0, 1, 1);
+			}
+
+			if (actionAtIndex[baseIndex] > 0) {
+				baseColor *= float3(0.75, 0.75, 1);
 			}
 
 			float3 otherColor = float3(0, 0, 0);

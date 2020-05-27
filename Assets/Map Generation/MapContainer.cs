@@ -630,6 +630,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         mapMaterial.SetFloatArray("layoutTextures", textureIndexList);    
     }
 
+    private float[] isActionAtIndex = new float[10 * 10];
     public void SetupMaterialShader() {
         Constants constants = Script.Get<Constants>();
         Material mapMaterial = GetComponent<MeshRenderer>().sharedMaterial;
@@ -665,6 +666,14 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
 
         mapMaterial.SetFloatArray("indexPriority", texGen.TexturePriorityList());
         mapMaterial.SetFloatArray("indexScale", texGen.TextureScaleList());
+        
+        for(int x = 0; x < mapWidthWithOverhang; x++) {
+            for(int y = 0; y < mapHeightWithOverhang; y++) {
+                isActionAtIndex[y * mapWidthWithOverhang + x] = 0;
+            }
+        }
+
+        mapMaterial.SetFloatArray("actionAtIndex", isActionAtIndex);
 
         Texture2DArray texturesArray = texGen.TextureArray();
         mapMaterial.SetTexture("baseTextures", texturesArray);
@@ -741,6 +750,29 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
             mapMaterial.SetFloat("hasSelection", 0);
             mapMaterial.SetVector("selection", new Vector2(-1, -1));
         }
+    }
+
+    public void NotifyUpdateActionAt(LayoutCoordinate layoutCoordinate) {
+        Constants constants = Script.Get<Constants>();
+        Material mapMaterial = GetComponent<MeshRenderer>().sharedMaterial;
+
+        int mapWidthWithOverhang = constants.layoutMapWidth + 2;
+        int mapHeightWithOverhang = constants.layoutMapHeight + 2;
+
+        //for(int y = 0; y < mapHeightWithOverhang; y++) {
+        //    for(int x = 0; x < mapWidthWithOverhang; x++) {
+
+        //        if(x == 0 || x == mapWidthWithOverhang - 1 || y == 0 || y == mapHeightWithOverhang - 1) {
+        //            continue;
+        //        }
+
+
+        //        isActionAtIndex[y * mapWidthWithOverhang + x] = map.associatedTasksCoordinateMap[x - 1, y - 1] == null ? 0f : 1f;
+        //    }
+        //}
+
+        isActionAtIndex[((layoutCoordinate.y + 1) * mapWidthWithOverhang) + layoutCoordinate.x + 1] = map.associatedTasksCoordinateMap[layoutCoordinate.x, layoutCoordinate.y] == null ? 0f : 1f;
+        mapMaterial.SetFloatArray("actionAtIndex", isActionAtIndex);
     }
 
     /*
