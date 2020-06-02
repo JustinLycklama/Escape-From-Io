@@ -209,7 +209,7 @@ public class TerrainManager : MonoBehaviour {
                     }
                 }
 
-                Building buildingAtLocation = Script.Get<BuildingManager>().buildlingAtLocation(coordinate);
+                Building buildingAtLocation = Script.Get<BuildingManager>().buildingAtLocation(coordinate);
                 if (terrainType.buildable && (buildingAtLocation == null || buildingAtLocation.GetType() == typeof(Path) || buildingAtLocation.GetType() == typeof(ShipProps))) {
                     UserAction unitAction = new UserAction();
                     unitAction.description = "Build Unit";

@@ -260,12 +260,12 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
 
         NotificationPanel notificationManager = Script.Get<NotificationPanel>();
-        if (factionType == FactionType.Player) {
-            notificationManager.AddNotification(new NotificationItem($"{Unit_Noun} initialized", NotificationType.NewUnit, transform, primaryActionType));
+        if(factionType == FactionType.Player) {
+            //notificationManager.AddNotification(new NotificationItem($"{Unit_Noun} initialized", NotificationType.NewUnit, transform, primaryActionType));
         } else {
             notificationManager.AddNotification(new NotificationItem("Rock Golem Appeared!", NotificationType.NewEnemy, transform, primaryActionType));
         }
-        
+
         // Duration
         this.remainingDuration = unitDuration;
         Action<int, float> durationUpdateBlock = (remainingTime, percentComplete) => {
@@ -569,7 +569,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
     protected IEnumerator PerformTaskAction(Action<bool> callBack) {
         coroutinesCount["task"]++;
 
-        float speed = SpeedForTask(currentMasterTask.actionType) * ResearchSingleton.sharedInstance.unitActionMultiplier;
+        float speed = SpeedForTask(currentMasterTask.actionType) * ResearchSingleton.sharedInstance.unitActionMultiplier * TutorialManager.tutorialActionModifierSpeed;
 
         //BeginTaskActionDelegate();
 

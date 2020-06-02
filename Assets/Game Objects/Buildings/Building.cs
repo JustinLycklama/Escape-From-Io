@@ -373,8 +373,12 @@ public abstract class Building : ActionableItem, Selectable {
                 }
 
                 MapGenerator mapGenerator = Script.Get<MapGenerator>();
+                BuildingManager buildingManager = Script.Get<BuildingManager>();
                 foreach(LayoutCoordinate coordinate in adjCoordinates) {
                     if(!mapGenerator.GetTerrainAt(coordinate).buildable) {
+                        return false;
+                    }
+                    if (buildingManager.buildingAtLocation(coordinate) != null) {
                         return false;
                     }
                 }
@@ -393,7 +397,7 @@ public abstract class Building : ActionableItem, Selectable {
             (LayoutCoordinate layoutCoordinate) => {
                 BuildingManager buildingManager = Script.Get<BuildingManager>();
 
-                Building thisCoordinate = buildingManager.buildlingAtLocation(layoutCoordinate);
+                Building thisCoordinate = buildingManager.buildingAtLocation(layoutCoordinate);
                 if(
                     thisCoordinate != null && thisCoordinate.GetType() == typeof(ShipProps) &&
                     buildingManager.IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(ShipThrusters)) &&
@@ -483,7 +487,7 @@ public abstract class Building : ActionableItem, Selectable {
             // We cannot build any buildings next to the ship frame
             requirementsMet = (LayoutCoordinate layoutCoordinate) => {
                 BuildingManager buildingManager = Script.Get<BuildingManager>();
-                Building thisCoordinate = buildingManager.buildlingAtLocation(layoutCoordinate);
+                Building thisCoordinate = buildingManager.buildingAtLocation(layoutCoordinate);
                 
                 return !buildingManager.IsLayoutCoordinateAdjacentToBuilding(layoutCoordinate, typeof(ShipProps), false) || (thisCoordinate != null);
             };

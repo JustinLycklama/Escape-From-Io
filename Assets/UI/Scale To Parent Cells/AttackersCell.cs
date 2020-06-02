@@ -22,6 +22,12 @@ public class AttackersCell : MonoBehaviour, UnitManagerDelegate, GameButtonDeleg
     [SerializeField]
     private HalfPieChart evolutionChart = null;
 
+    [SerializeField]
+    private Image insetBackground = null;
+
+    [SerializeField]
+    private Color insetWarningColor = Color.clear;
+
     private List<Unit> soonToExpireUnits = new List<Unit>();
 
     private const MasterGameTask.ActionType actionType = MasterGameTask.ActionType.Attack;
@@ -72,6 +78,8 @@ public class AttackersCell : MonoBehaviour, UnitManagerDelegate, GameButtonDeleg
 
         Unit[] enemyUnits = unitList.Where(u => { return u.factionType == Unit.FactionType.Enemy; }).ToArray();
         enemyCountText.text = enemyUnits.Length.ToString();
+
+        insetBackground.color = enemyUnits.Length > 0 ? insetWarningColor : Color.clear; 
     }
 
     /*

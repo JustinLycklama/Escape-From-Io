@@ -97,6 +97,8 @@ public class TutorialManager: GameButtonDelegate, SceneChangeListener {
     }
     public static IsolatedUserAction isolateUserAction = null;
 
+    public static float tutorialActionModifierSpeed = 1.0f;
+
     public TutorialType? tutorialType = null;
 
     //private Dictionary<TutorialTrigger, TutorialTriggerListener> eventListenerMap = new Dictionary<TutorialTrigger, TutorialTriggerListener>();

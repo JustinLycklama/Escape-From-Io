@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class EnemyManager : MonoBehaviour, TimeUpdateDelegate
@@ -12,7 +13,7 @@ public class EnemyManager : MonoBehaviour, TimeUpdateDelegate
     private TimeManager timeManager;
     private UnitManager unitManager;
 
-    private const int minTimeBeforeEnemy = 3 * 60;
+    private const int minTimeBeforeEnemy = 0; //3 * 60;
     private const int decisionFrequency = 10;
 
     private const float maxUnitToFrequencyRatio = 20.0f; // at 20 units, frequency will be 1
@@ -96,7 +97,10 @@ public class EnemyManager : MonoBehaviour, TimeUpdateDelegate
     }
 
     public void SpawnEnemy() {
-        Unit[] units = unitManager.GetAllPlayerUnits();
+        Unit[] units = unitManager.GetPlayerUnitsOfType(MasterGameTask.ActionType.Mine, Unit.FactionType.Player)
+            .Concat(unitManager.GetPlayerUnitsOfType(MasterGameTask.ActionType.Move, Unit.FactionType.Player))
+            .Concat(unitManager.GetPlayerUnitsOfType(MasterGameTask.ActionType.Attack, Unit.FactionType.Player))
+            .ToArray();
 
         if (units.Length == 0) {
             return;

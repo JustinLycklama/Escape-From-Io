@@ -93,7 +93,7 @@ public class PathfindingGrid : MonoBehaviour, TerrainUpdateDelegate, StatusEffec
 
                 // If we are in the center square, a building blocks our location if one exists at this layout coordinate
                 if (x == width / 2 && y == height / 2) {
-                    buildingBlocksSpace = buildingManager.buildlingAtLocation(layoutCoordinate) != null;
+                    buildingBlocksSpace = buildingManager.buildingAtLocation(layoutCoordinate) != null;
                 }
 
                 grid[updatedCoordinate.xLowSample, updatedCoordinate.yLowSample].walkable = terrainWalkable && !buildingBlocksSpace;

@@ -6,7 +6,7 @@ using System.Linq;
 
 public class AudioManager : MonoBehaviour {
     public enum Type {
-        Background1, DefenderShot, TurretShot
+        Background1, DefenderShot, TurretShot, GolemAttack1, GolemAttack2
     }
 
     [SerializeField]
@@ -31,10 +31,10 @@ public class AudioManager : MonoBehaviour {
 
     }
 
-    public void PlayAudio(Type type, Vector3? location = null) {
+    public void PlayAudio(Type type, Vector3? location = null, float delay = 0.1f) {
 
         // Lets not have any extra sound effects for now
-        if (type != Type.Background1) {
+        if(type != Type.Background1) {
             return;
         }
 
@@ -48,7 +48,7 @@ public class AudioManager : MonoBehaviour {
             backgroundSource.clip = clip.audioClip;
             backgroundSource.Play();
         } else if (location != null) {
-            StartCoroutine(PlayClipAtPoint(sfx1, clip.audioClip, location.Value, 2, 0.1f));
+            StartCoroutine(PlayClipAtPoint(sfx1, clip.audioClip, location.Value, 2, delay));
         }        
     }
 

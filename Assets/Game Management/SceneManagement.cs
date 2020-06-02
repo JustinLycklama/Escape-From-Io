@@ -60,9 +60,11 @@ public class SceneManagement {
             case State.NewGame:
                 scene = GameScene;
                 TutorialManager.sharedInstance.tutorialType = null;
+                TutorialManager.tutorialActionModifierSpeed = 1.0f;
                 break;
             case State.Tutorial:
                 scene = GameScene;
+                TutorialManager.tutorialActionModifierSpeed = 3.0f;
                 break;
         }
 

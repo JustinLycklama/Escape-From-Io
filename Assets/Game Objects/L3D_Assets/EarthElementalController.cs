@@ -7,6 +7,10 @@ public class EarthElementalController : AnimationController
     [SerializeField]
     private GameObject mainInstanceMesh;
 
+    private System.Random rnd;
+    private AudioManager audioManager;
+
+
     //[SerializeField]
     //private GameObject instanceDieMesh;
 
@@ -16,6 +20,13 @@ public class EarthElementalController : AnimationController
 
     public void IdleActivate() {
         animator.Play("idleActivate");
+    }
+
+    protected override void Start() {
+        base.Start();
+
+        rnd = NoiseGenerator.random;
+        audioManager = Script.Get<AudioManager>();
     }
 
     public void DieEvent() {
@@ -42,6 +53,20 @@ public class EarthElementalController : AnimationController
         //    G.SetActive(true);
         //}
         //EartElemental.SetActive(false);
+    }
+
+    public override void AnimateState(Unit.AnimationState state, float rate = 1.0f, bool isCarry = false) {
+        base.AnimateState(state, rate);
+
+        if (state == Unit.AnimationState.PerformCoreAction) {
+            int flip = rnd.Next(0, 1);
+
+            if (flip == 0) {
+                audioManager.PlayAudio(AudioManager.Type.GolemAttack1, transform.position, 1.0f);
+            } else {
+                audioManager.PlayAudio(AudioManager.Type.GolemAttack2, transform.position, 1.0f);
+            }
+        }
     }
 
     public override string StringConstantForState(Unit.AnimationState state, bool isCarry = false) {

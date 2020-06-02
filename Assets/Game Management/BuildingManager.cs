@@ -55,7 +55,7 @@ public class BuildingManager : MonoBehaviour {
         disolveShader = Shader.Find("Custom/Dissolve");
     }
 
-    public Building buildlingAtLocation(LayoutCoordinate layoutCoordinate) {
+    public Building buildingAtLocation(LayoutCoordinate layoutCoordinate) {
         if(locationBuildingMap.ContainsKey(layoutCoordinate)) {
             return locationBuildingMap[layoutCoordinate];
         }

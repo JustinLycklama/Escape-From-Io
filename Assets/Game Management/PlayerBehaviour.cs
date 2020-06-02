@@ -572,7 +572,7 @@ public class PlayerBehaviour : MonoBehaviour {
             float percentOfDistance = Mathf.InverseLerp(minCameraAutoPanDistance, maxCameraAutoPanDistance, distance);
             float cameraSpeed = Mathf.Lerp(minCameraAutoPanSpeed, maxCameraAutoPanSpeed, percentOfDistance);
 
-            print("Speed " + cameraSpeed);
+            //print("Speed " + cameraSpeed);
 
             totalDistance += cameraSpeed * Time.deltaTime;
 

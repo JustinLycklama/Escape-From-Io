@@ -7,12 +7,17 @@ public class SensorTower : RotatingBuilding, TerrainUpdateDelegate {
     public override string title => "Azure Sensor";
     public override float constructionModifierSpeed => 0.20f;
 
+    [SerializeField]
+    private GameObject arrow;
+
     private KeyValuePair<int, int>? closestLunarRock = null;
 
     Vector2 buildingPos;
 
     protected override void Start() {
         base.Start();
+
+        arrow.SetActive(false);
 
         Constants constants = Script.Get<Constants>();
 
@@ -23,6 +28,10 @@ public class SensorTower : RotatingBuilding, TerrainUpdateDelegate {
         int yPos = startY + buildingLayoutCoordinate.y;
 
         buildingPos = new Vector2(xPos, yPos);
+    }
+
+    private void Update() {
+        arrow.transform.Rotate(new Vector3(0, 1, 0), Space.Self);
     }
 
     private void OnDestroy() {
@@ -71,6 +80,8 @@ public class SensorTower : RotatingBuilding, TerrainUpdateDelegate {
 
 
     private void ResetTower() {
+        arrow.SetActive(false);
+
         //Quaternion endRotation = Quaternion.Euler(angles);
 
         //StartCoroutine(AttemptToRotate(new Vector3(0, 0, 0), 2));
@@ -107,7 +118,9 @@ public class SensorTower : RotatingBuilding, TerrainUpdateDelegate {
         }
 
         Quaternion targetRotation = Quaternion.Euler(new Vector3(0, yRotation, 0));
-        AttemptToRotate(targetRotation);
+        AttemptToRotate(targetRotation, () => {
+            arrow.SetActive(true);
+        });
     }
 
     /*
