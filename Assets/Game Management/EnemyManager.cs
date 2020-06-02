@@ -13,7 +13,7 @@ public class EnemyManager : MonoBehaviour, TimeUpdateDelegate
     private TimeManager timeManager;
     private UnitManager unitManager;
 
-    private const int minTimeBeforeEnemy = 0; //3 * 60;
+    private const int minTimeBeforeEnemy = 3 * 60;
     private const int decisionFrequency = 10;
 
     private const float maxUnitToFrequencyRatio = 20.0f; // at 20 units, frequency will be 1

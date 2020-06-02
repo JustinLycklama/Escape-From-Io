@@ -79,7 +79,7 @@ public class AttackersCell : MonoBehaviour, UnitManagerDelegate, GameButtonDeleg
         Unit[] enemyUnits = unitList.Where(u => { return u.factionType == Unit.FactionType.Enemy; }).ToArray();
         enemyCountText.text = enemyUnits.Length.ToString();
 
-        insetBackground.color = enemyUnits.Length > 0 ? insetWarningColor : Color.clear; 
+        insetBackground.color = enemyUnits.Length > 0 ? insetWarningColor : Color.white; 
     }
 
     /*
