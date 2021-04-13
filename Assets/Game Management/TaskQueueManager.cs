@@ -38,6 +38,9 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
 
     PlayerBehaviour playerBehaviour;
 
+    // Hack for restarting queue manager on crash
+    public DateTime lastDished = DateTime.Now;
+
     //List<MasterGameTask> taskList;
     //UIManager uiManager;
 
@@ -80,15 +83,22 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
         }
     }
 
+    Coroutine assignTasksRoutine;
+
     private void Start() {
         playerBehaviour = Script.Get<PlayerBehaviour>();
 
-        StartCoroutine(DishOutTasks());        
+        assignTasksRoutine = StartCoroutine(DishOutTasks());        
 
         Script.Get<UnitManager>().RegisterForNotifications(this, MasterGameTask.ActionType.Build);
         Script.Get<UnitManager>().RegisterForNotifications(this, MasterGameTask.ActionType.Mine);
         Script.Get<UnitManager>().RegisterForNotifications(this, MasterGameTask.ActionType.Move);
         Script.Get<UnitManager>().RegisterForNotifications(this, MasterGameTask.ActionType.Attack);
+    }
+
+    public void RestartDishOut() {
+        StopCoroutine(assignTasksRoutine);
+        assignTasksRoutine = StartCoroutine(DishOutTasks());
     }
 
     private void OnDestroy() {
@@ -311,13 +321,15 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
 
         while(true) {
 
+            lastDished = DateTime.Now;
+
             // Don't perform on pause
             if(playerBehaviour.gamePaused) {
                 yield return null;
                 continue;
             }
 
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(0.5f);            
 
             //float shortestDistance = float.MaxValue;
             //UnitAndRefused shortestUnitAndRefused = null;

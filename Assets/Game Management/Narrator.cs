@@ -50,6 +50,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
     float? completionTime = null;
 
     Coroutine gameOverRoutine;
+    Coroutine taskQueueManagerCheckRoutine;
 
     void Start() {
 
@@ -322,6 +323,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
         playerBehaviour.SetInternalPause(false);
         StartCoroutine(StartMusic());
         gameOverRoutine = StartCoroutine(CheckForNoRobots());
+        taskQueueManagerCheckRoutine = StartCoroutine(CheckForTaskQueueManager());
 
         // Animate camera pan with fog fade
         animatePercent = 0;
@@ -349,8 +351,10 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
         audioManager.PlayAudio(AudioManager.Type.Background1);
 
         float audioPercent = 0;
+        float originalVolume = audioManager.backgroundSource.volume;
+
         while(audioPercent < 1) {
-            audioManager.backgroundSource.volume = audioPercent;
+            audioManager.backgroundSource.volume = audioPercent * originalVolume;
             audioPercent += Time.deltaTime * 0.2f;
 
             yield return null;
@@ -364,6 +368,20 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
         while(audioPercent > 0) {
             audioManager.backgroundSource.volume = audioPercent;
             audioPercent -= Time.deltaTime * 0.2f;
+
+            yield return null;
+        }
+    }
+
+    IEnumerator CheckForTaskQueueManager() {
+        while(true) {
+            yield return new WaitForSeconds(5);
+
+            TaskQueueManager manager = Script.Get<TaskQueueManager>();
+            if ((DateTime.Now - manager.lastDished).Seconds > 4) {
+                print("------- Restarting Task Assigmment Routine -------");
+                manager.RestartDishOut();
+            }
 
             yield return null;
         }

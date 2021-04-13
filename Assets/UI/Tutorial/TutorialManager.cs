@@ -153,7 +153,7 @@ public class TutorialManager: GameButtonDelegate, SceneChangeListener {
         repeatButton = uIManager.tutorialRepeatButton;
         repeatButton.buttonDelegate = this;
 
-        if (tutorialType == null) {
+        if(tutorialType == null) {
             return;
         }
 
@@ -174,8 +174,8 @@ public class TutorialManager: GameButtonDelegate, SceneChangeListener {
 
         messageManager.SetMajorMessage(tutorialObject.welcomeTitle, tutorialObject.welcomeMessage, () => {
 
-            repeatButton.transform.parent.gameObject.SetActive(true);
-            repeatButton.SetEnabled(false);
+            //repeatButton.transform.parent.gameObject.SetActive(true);
+            //repeatButton.SetEnabled(false);
 
             ContinueSceneQueue();
         });
@@ -233,7 +233,7 @@ public class TutorialManager: GameButtonDelegate, SceneChangeListener {
             yield break;
         }
 
-        repeatButton.SetEnabled(false);
+        //repeatButton.SetEnabled(false);
 
         TutorialEvent e = currentEventQueue.Dequeue();
 
@@ -246,7 +246,7 @@ public class TutorialManager: GameButtonDelegate, SceneChangeListener {
         waitForPostTeraform = e.postTeraformWait;
 
         messageManager.EnqueueMessage(e.title, e.message, () => {
-            repeatButton.SetEnabled(true);
+            //repeatButton.SetEnabled(true);
 
             if(e.remainPaused) {
                 playerBehaviour.SetInternalPause(true);

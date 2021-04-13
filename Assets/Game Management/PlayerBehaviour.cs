@@ -189,7 +189,7 @@ public class PlayerBehaviour : MonoBehaviour {
 
         bool cameraAction = false;
 
-        cameraAction |= CameraTouchPanInput();
+        //cameraAction |= CameraTouchPanInput();
         cameraAction |= CameraZoom();
 
         // If we are manually moving the camera while the auto pan is happening, stop auto pan
@@ -411,7 +411,7 @@ public class PlayerBehaviour : MonoBehaviour {
         if (IsPositionWithinBoundary(cameraAnticipatedLocation)) {
             Camera.main.transform.Translate(translation, Space.World);
         } else {
-            print("Out Boundary");
+            //print("Out Boundary");
         }
     }
 
