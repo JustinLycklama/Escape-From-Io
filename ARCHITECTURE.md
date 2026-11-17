@@ -1,0 +1,226 @@
+# Escape From Io — Architecture
+
+Catalog of the game as it stood at v0.2 (last gameplay commit 2020-05, repo dormant since 2021-04).
+Written from a read of the source in Nov 2026; items marked **(unverified)** are inferred from code and not yet confirmed by running the game.
+
+## The game
+
+Indirect-control RTS / colony builder. **Current target: PC only (Windows, mouse + keyboard).** It was originally built mobile-first
+(Android/iOS builds, a Joystick Pack, touch input). That code still exists but is out of scope for now. Don't extend it, and don't design around touch. You are stranded on Io with a handful of
+robots. You never steer robots directly: you place **tasks** (mine this rock, build that, clean this terrain) and robots pull work
+from per-type queues. Robots have a battery **duration** and shut down when it runs out, so you must keep building new ones.
+Rock Golems spawn over time and attack. **Win:** build the Escape Shuttle. **Lose:** no Miners, Movers or Builders left.
+Score = completion time, posted to a Firebase leaderboard.
+
+Core loop: mine terrain → ore drops → Movers haul ore to construction sites → Builders build → more robots/buildings → ship parts → shuttle.
+
+## Layout of the code
+
+Only these folders are first-party (~18k lines). Everything else under `Assets/` is asset-store/vendor content.
+
+| Folder | Contents |
+|---|---|
+| `Assets/Game Management/` | Scene-level managers (task queue, units, buildings, time, enemies, input, narrator/game flow, scene switching) |
+| `Assets/Game Objects/` | `Unit` + subclasses, `Building` + subclasses, `ActionableItem`, `Ore`, `GameResourceManager` |
+| `Assets/Map Generation/` | Procedural world: noise, terrain types, mesh/texture gen, `Map`/`MapContainer`, fog of war, minimap |
+| `Assets/PathFinding/` | A* grid, path requests, path following |
+| `Assets/Math/` | `Heap` (A* open set), `Line`, vision/shadow-casting algorithms (several experimental implementations) |
+| `Assets/UI/` | Panels, windows, table views, tooltips, tutorial, leaderboard (`FirebaseManager`). Subfolders `PieChart`, `SciFi UI Pings VFX`, `Assets/Icons` are vendor |
+| `Assets/Resources/` | Prefabs loaded by name at runtime (units, buildings, UI). Blueprint `fileName`s must match paths here |
+| `GridIdentifiers/` (repo root) | Stray `GridAxis.cs`, outside `Assets/`, not compiled |
+
+Vendor (don't edit, don't document): Voxel Robots, Voxel Ships/Turrets, Mech Robots/Spiders, L3D_Assets, SF_Fighter, Joystick Pack,
+LowPolyWater, PeterLu_HologramShader, Standard Assets, Stylized texture packs, Firebase, Parse.
+Exception: `Game Objects/Voxel Ships/RandomShipGenerator.cs`, `StationShip.cs` and `L3D_Assets/EarthElementalController.cs` are yours.
+
+## Scenes
+
+Build settings contain only two scenes:
+
+- `Assets/Scenes/TitleScene.unity` (index 0): title, menu, tutorial picker, leaderboard
+- `Assets/Scenes/GameScene.unity` (index 1): the game
+
+`PathfindingScene`, `WorldGeneration`, `PrefabLayoutScene` are dev sandboxes. All other `.unity` files are vendor demos.
+
+`SceneManagement` (plain singleton, not a MonoBehaviour) switches scenes by `State { Title, GameFinish, NewGame, Tutorial }`.
+Tutorial mode reuses GameScene with `TutorialManager.isTutorial`, a premade map (`PremadeNoiseGenerator`) and 3x action speed.
+
+## Service locator: `Tag` / `Script` (Constants.cs)
+
+Managers are found via `Script.Get<T>()`: each type maps to a Unity **tag** + component type, results cached, cache cleared on scene unload.
+Most managers live on the `Narrator` GameObject. **Adding a manager = add a `Script` entry, add it to `allScripts`, ensure the tag exists.**
+Calling `Script.Get` for an unregistered type silently returns `null`.
+
+Other singletons use `sharedInstance` statics: `ResearchSingleton`, `TutorialManager`, `ColorSingleton`, `NameSingleton`, `FirebaseManager`, `SceneManagement`.
+
+## Observer pattern ("Delegate List")
+
+Since 2019-06 the convention is: objects don't track who needs updates; subscribers call `RegisterFor…(this)` / `End…(this)` and
+implement a `…Delegate` interface. Registration usually pushes the current state immediately. Always pair Register with End in `OnDestroy`.
+Examples: `TaskQueueDelegate`, `TaskLockUpdateDelegate`, `UnitManagerDelegate`, `MasterTaskUpdateDelegate`, `TerrainUpdateDelegate`,
+`TimeUpdateDelegate`, `BuildingsUpdateDelegate`, `SelectionManagerDelegate`.
+
+## Game flow: `Narrator`
+
+`Narrator.Start` runs a queue of init "chunks" spread over frames (with a loading percentage):
+1. Grab managers, pause, hide UI.
+2. `MapGenerator.GenerateWorldStepOne` (+ premade map for tutorial).
+3. `GenerateWorldStepTwo` in 4 chunks, then step three.
+4. Place the starting Light Tower and starting units (Miner, Mover, Builder; one extra Miner outside the tutorial).
+5. Camera fly-in, fog-of-war fade, music fade-in, start tutorial or enable notifications.
+
+Then two watchdog coroutines run:
+- `CheckForNoRobots`: game over when no Build/Mine/Move units remain.
+- `CheckForTaskQueueManager`: restarts the task-assignment coroutine if it hasn't ticked for >4s (see Known issues).
+
+`EndGameSuccess` is called when the Escape Shuttle completes; time becomes the score.
+
+## World and coordinates
+
+The world is a grid of `mapCountX × mapCountY` **maps** (`MapContainer` + `Map`), each with its own mesh. Sizes come from the
+`Constants` component on Narrator. There are four coordinate spaces (`Map Generation/MapStructs.cs`); mixing them up is the
+most likely source of bugs:
+
+| Type | Granularity | Used for |
+|---|---|---|
+| `LayoutCoordinate` | One gameplay tile (per map, + `mapContainer`) | Terrain type, buildings, user actions, tasks |
+| `MapCoordinate` | Height-map sample (`featuresPerLayoutPerAxis` per layout tile) | Height, mesh |
+| `PathGridCoordinate` | A* node (`nodesPerLayoutPerAxis` per layout tile) | Pathfinding |
+| `WorldPosition` | Unity world space | Transforms, task targets |
+
+Conversions live on the structs and on `MapsManager`. Grid↔map conversion needs padding (fixed in 2019-06-24).
+
+**Generation** (`MapGenerator`): noise is generated twice, once for the layout (terrain region per tile) and once for features (height detail),
+plus mutator maps for ground and mountains. The lowest N mountain values become Azure ("Alunar") rock, so the Azure count is controlled, not random.
+The spawn area is plateaued. One seeded `NoiseGenerator.random` drives everything, so a seed reproduces a map.
+
+**Terrain** (`TerrainManager`, `TerrainType`): Water, Empty, Grass, Mud, Path, ScorchedEarth, LooseRock, Rock, HardRock, SolidRock, AlunarRock, Sand.
+Each has walkable, buildable, walk-speed and modification-speed multipliers, textures and mineral drop chances. Region types: Water, Land, Mountain.
+`MapGenerator` remembers the original terrain so terraforming can restore it.
+
+**Terraforming**: player actions on a tile come from `TerrainManager.ActionsAvailableForTerrain`: mine rock, "Clean" to Empty, build Path.
+Each queues a `MasterGameTask` whose target is the `Map` (an `ActionableItem`). Mining drops `Ore`. Height maps are re-meshed in place.
+
+Other systems: `FogOfWar` + `Math/Vision Casting` (tower vision radius), `MiniMap`, `IntervalActionPipeline` (spreads per-map work across frames).
+
+## Task system (the heart of the game)
+
+`Game Management/GameTask.cs`, `TaskQueueManager.cs`, `Game Objects/Units/Unit.cs`
+
+- **`GameTask`**: one step: `Build, Mine, PickUp, DropOff, FlattenPath, AttackMele, AttackRanged`. It has a target (`WorldPosition`)
+  and a `PathRequestTargetType` (World/Layout/PathGrid, or Unknown meaning "find the nearest ore of type X / enemy of faction Y").
+  It also has an `actionItem` and an optional `SatisfiesStartRequirements` predicate.
+- **`MasterGameTask`**: an ordered list of GameTasks with an `ActionType` (`Mine, Build, Move, Attack`) that picks its queue.
+  It supports:
+  - `blockerTasks` (must finish first) and `taskBlockedByThis`
+  - `repeatCount`: the queue hands out clones until exhausted, and the parent finishes when all children finish
+  - `alwaysPerformLast`: only taken when nothing else is available (used for ship parts)
+  - `itemContingentOnTask`: destroyed if the task is cancelled, e.g. an unbuilt building
+  - Cancelling cascades to clones and blockers.
+
+**Example: placing a building** (`GameResourceManager.CueueGatherTasksForCost`). For each mineral in the cost, it queues a **Move** master task
+"Collect X" (PickUp nearest ore, then DropOff at the site) with `repeatCount = amount`. Then it queues a **Build** master task blocked by all of them.
+
+**`TaskQueueManager`** keeps one list per ActionType. Each list has a **lock** (locked = only that unit type may take it; unlocked = any idle robot may).
+Each list also has a state (Empty/Blocked/Smooth/Inefficient) for the UI. `DishOutTasks` is a coroutine that ticks every 0.5s:
+1. For each unit waiting for work, it checks whether it could **steal** another unit's in-progress task. A steal happens when the
+   requester's path cost is < 75% of the remaining cost, it is still on the first GameTask, and it isn't a Move task.
+   This requires async path requests.
+2. Otherwise, it builds a distance-sorted candidate list per unit. The search order is: own queue, then other *unlocked* queues,
+   then `alwaysPerformLast` tasks.
+3. Steals are granted first. Then a greedy loop gives the globally-closest unit/task pair, removes exhausted tasks from the
+   other units' lists, and repeats.
+
+**`Unit` pipeline**:
+1. `ResetTaskState` → `RequestNextDoableTask`, and the callback calls `DoTask`.
+2. `DoTask` enqueues the child GameTasks, then `ContinueGameTaskQueue` → `RequestPath` → `foundWaypoints` → `FollowPath` → `PerformTaskAction`.
+3. `performAction` runs on the `ActionableItem` until it reports 100%, then the next GameTask runs. When the queue is empty, `MarkTaskFinished`.
+4. If no path exists, the unit adds the task to `refuseTaskSet` and puts it back.
+
+Unit state for the UI: Idle / Efficient (doing its primary type) / Inefficient (doing another type).
+
+## Pathfinding
+
+`PathfindingGrid` holds the A* nodes, with movement penalties from terrain, buildings and paths. It also blurs the penalty map and updates on terrain changes.
+`PathFinding` runs A* as coroutines using `Math/Heap`, then simplifies the result into `LookPoint`s.
+`PathRequestManager` is a **single serialized queue**: one request is processed at a time, and the next starts only when the current callback returns.
+It also handles "closest ore of type" and "closest unit of faction" searches. `Path` and `Unit.FollowPath` do smoothed turning along look points.
+`movementPenaltyMultiplier` is set per prefab: 0 (ignores terrain) for Advanced Mover, Defender and Golem, and 1 for the rest.
+
+## Units (`Game Objects/Units/`)
+
+Blueprints (cost, prefab and placement rule) are static fields on `Unit.Blueprint`. A unit is "built" like a building:
+the prefab carries a `UnitBuilding` component, and `Unit.Initialize()` runs on completion.
+
+| Unit | Primary | Notes |
+|---|---|---|
+| Miner | Mine | Base unit; speed per task type via `SpeedForTask` |
+| Mover | Move | Hauls ore |
+| Builder | Build | 3 Copper + 2 Silver |
+| Defender | Attack | `AttackingUnit`, hunts Golems. 1 Copper + 3 Silver |
+| Adv. Miner / Builder | Mine / Build | Faster; must be built adjacent to the Adv. Units Building |
+| Adv. Mover | Move | Ignores terrain penalties |
+| Golem | Attack (Enemy faction) | Spawned by `EnemyManager` |
+
+Each unit has `duration` (battery seconds; Research adds to it), `unitHealth`, a status tooltip and a `TimeManager` timer that calls `Shutdown()`.
+`Shutdown` puts the task back, plays the death animation, then fades out and destroys the unit.
+
+## Buildings (`Game Objects/Buildings/`)
+
+`Building : ActionableItem`. Construction progress goes through `performAction` with `constructionModifierSpeed` and terrain modifiers
+(grass/mud allowed but slow), and meshes appear in tiers. Blueprints are on `Building.Blueprint`:
+
+- Path (faster movement), Light Tower (vision), Azure Sensor (points to the nearest Azure), Turret (`DefenderTower`), Adv. Units Building
+- **Ship**: Shuttle Frame (`ShipProps`, needs 4 free buildable neighbours, only one allowed) → Thrusters (+50% move), Reactor (+60s duration),
+  Machining (+50% action speed) and Telemetry (vision 3→5) adjacent to it → **Escape Shuttle** on the frame once all four are built = **win**.
+  Ship parts double as global upgrades through `ResearchSingleton`.
+- Refinery / Terraform Land are commented out (cut features). Minerals include unused `Refined*` types.
+
+`BuildingManager` tracks placement and adjacency, and holds status effects (`BuildingEffectStatus`) that affect the grid.
+
+## Enemies (`EnemyManager`)
+
+Ticks via `TimeManager`. There are no spawns for the first 3 minutes. Spawn frequency scales with player unit count (maxed at 20 units),
+between 0.2 and 4 per minute. `evolution` ramps 0→1 over 25 minutes and scales Golem attack (1–10). No spawns in the tutorial.
+
+## Time, input, UI
+
+- `TimeManager`: game clock, pausable (`PlayerBehaviour.gamePaused` / internal pause), and timers via `AddNewTimer(seconds, update, complete)`.
+- `PlayerBehaviour`: camera pan/zoom and hotkeys. Mouse/touch pan was removed in v0.2. `master` has an extra WIP commit "WIP Mobile Touch Camera".
+  It's mobile-only work and probably not worth merging under the PC-only target.
+- Mobile leftovers: `TouchManager`, `Joystick Pack`, `DpCanvasScaler`, `PanControlsPanel`, and the Android/iOS build settings. Leave them alone for now. Remove them only as a deliberate cleanup.
+- `SelectionManager`: selects terrain or a `Selectable` (unit or building) and drives the detail panels and available `UserAction`s.
+- `UIManager` + `UI/Modular Panels`, `Navigation Panels` (Blueprint picker, task and unit overview), `TableViews + Cells`, `Tooltips`, `Windows` (title, menu, help, leaderboard).
+- `TutorialManager` + `TutorialBasic/Defense/Escape`: trigger-driven (`TutorialManager.Fire(TutorialTrigger.X)` is sprinkled through gameplay code), and can isolate a single allowed user action.
+- `NotificationPanel`, `MessageManager`, `AudioManager`, `VersionNumber`.
+- `FirebaseManager`: anonymous auth + Realtime Database high scores.
+
+## Known issues and hazards
+
+1. **Task assignment stalls** (the v0.2 workaround restarts `DishOutTasks` when it stops ticking). Likely causes **(unverified)**:
+   - `TaskQueueManager` builds `unitsWithAccessableTasks` by evaluating `u.currentMasterTask.actionType` *before* the null check.
+     It is guarded by `canTakeTaskFromUnit`, but any exception kills the coroutine.
+   - The steal step `yield`s on `WaitUntil(waitForRequests == 0)`. If any path callback never fires, the coroutine hangs forever.
+     For example, `PathRequestManager` is serial and stops processing if a callback throws, or a request returns `null` for an `Unknown` target with neither gather nor attack type.
+   - Unit callbacks can fire after the unit is destroyed.
+2. The watchdog uses `TimeSpan.Seconds` instead of `TotalSeconds`, so stalls of 60–64s, 120–124s and so on aren't detected.
+3. Static state survives scene reloads unless reset explicitly: `MasterGameTask.gameTaskCounter`, `UnitManager.unitCount`, `EnemyManager` statics, singletons.
+   `ResearchSingleton` resets on scene change.
+4. Many `Resources.Load` by string path and Unity tags. Renames break things at runtime, not compile time.
+5. Lots of commented-out code from earlier designs. It's safe to delete once the game runs.
+
+## Repo state (Nov 2026)
+
+- Checkout is a **detached HEAD at `6030893`** (v0.2 + download-link fix). `master` is 1 commit ahead ("WIP Mobile Touch Camera", 174 files incl. textures).
+  The other branches have no unmerged work except `MeshGenerationTests` (1 experimental commit, 2019).
+- Working tree shows **163 deleted `.meta` files and 1 modified ProBuilder settings file**, all uncommitted.
+  The binaries they belong to are **missing from disk and were never committed**:
+  - Firebase DLLs (`Assets/Firebase/Plugins/*.dll`)
+  - Parse plugins
+  - many vendor `.obj` models (Voxel Robots/Turrets/Ships)
+  - `Buildings/arrow.obj`
+
+  Unity deleted the orphaned metas. Restoring the metas (`git checkout -- .`) and re-importing the asset packs (Firebase Unity SDK **6.14.1**) is needed;
+  otherwise `FirebaseManager.cs` won't compile and models will be missing.
+- `docs/` is the GitHub Pages site (Jekyll output). `Static-Site-Jekyll/` is its source. Neither is developer documentation.
+- `Build/` holds old Android/OSX/Windows builds (gitignored). They're useful for seeing how the game played.
