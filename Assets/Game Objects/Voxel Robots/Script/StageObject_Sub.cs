@@ -166,7 +166,7 @@
 				// Add Rigidbody
 				Rigidbody rig = tf.gameObject.AddComponent<Rigidbody>();
 				rig.mass = 0.1f;
-				rig.angularDrag = 6f;
+				rig.angularDamping = 6f;
 
 				// Add Explosion
 				Vector3 dir = Random.insideUnitSphere;

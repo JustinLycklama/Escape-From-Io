@@ -1,17 +1,10 @@
-﻿using UnityEngine;
-using System.Reflection;
+using UnityEngine;
 
 
 /// <summary>
-/// Automatically provides a version number to a project and displays
-/// it for 20 seconds at the start of the game.
+/// Displays the version (Player Settings > Version, i.e. Application.version)
+/// for 20 seconds at the start of the game.
 /// </summary>
-/// <remarks>
-/// Change the first two number to update the major and minor version number.
-/// The following number are the build number (which is increased automatically
-///  once a day, and the revision number which is increased every second). 
-/// </remarks>
-[assembly: AssemblyVersion("1.0.*")]
 public class VersionNumber : MonoBehaviour {
     /// <summary>
     /// Can be set to true, in that case the version number will be shown in bottom right of the screen
