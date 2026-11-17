@@ -210,7 +210,11 @@ between 0.2 and 4 per minute. `evolution` ramps 0→1 over 25 minutes and scales
 4. Many `Resources.Load` by string path and Unity tags. Renames break things at runtime, not compile time.
 5. Lots of commented-out code from earlier designs. It's safe to delete once the game runs.
 
-## Unity 6 upgrade (in progress, branch `unity6-upgrade`)
+## Unity 6 upgrade (branch `unity6-upgrade`)
+
+Status (2026-11-17): compiles clean on 6000.3.28f1. TitleScene plays with 0 console warnings or errors, and you confirmed the game runs.
+The only code fix needed was removing a wildcard `AssemblyVersion` in `VersionNumber.cs`. The API updater changed one vendor call
+(`angularDrag` → `angularDamping`). `com.unity.pipeline` (Unity CLI bridge) was added.
 
 Target: **Unity 6000.3.28f1 LTS**. Before the upgrade, these were removed:
 - Firebase, Parse, the Google External Dependency Manager, `google-services*.json` and the Firebase plugin folders
