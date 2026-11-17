@@ -193,7 +193,8 @@ between 0.2 and 4 per minute. `evolution` ramps 0→1 over 25 minutes and scales
 - `UIManager` + `UI/Modular Panels`, `Navigation Panels` (Blueprint picker, task and unit overview), `TableViews + Cells`, `Tooltips`, `Windows` (title, menu, help, leaderboard).
 - `TutorialManager` + `TutorialBasic/Defense/Escape`: trigger-driven (`TutorialManager.Fire(TutorialTrigger.X)` is sprinkled through gameplay code), and can isolate a single allowed user action.
 - `NotificationPanel`, `MessageManager`, `AudioManager`, `VersionNumber`.
-- `FirebaseManager`: anonymous auth + Realtime Database high scores.
+- `FirebaseManager`: high scores. Originally Firebase anonymous auth + Realtime Database. Now a local store in PlayerPrefs
+  (on the `unity6-upgrade` branch). The name is kept so `HighscoreController` didn't need to change.
 
 ## Known issues and hazards
 
@@ -209,7 +210,15 @@ between 0.2 and 4 per minute. `evolution` ramps 0→1 over 25 minutes and scales
 4. Many `Resources.Load` by string path and Unity tags. Renames break things at runtime, not compile time.
 5. Lots of commented-out code from earlier designs. It's safe to delete once the game runs.
 
-## Repo state (Nov 2026)
+## Unity 6 upgrade (in progress, branch `unity6-upgrade`)
+
+Target: **Unity 6000.3.28f1 LTS**. Before the upgrade, these were removed:
+- Firebase, Parse, the Google External Dependency Manager, `google-services*.json` and the Firebase plugin folders
+- Packages: Ads, Analytics, Purchasing, Collab, Multiplayer HLAPI, ProGrids, XR legacy input helpers, Package Manager UI, and the VS Code IDE package (replaced by `com.unity.ide.visualstudio`)
+
+None of them were referenced by first-party code, scenes or prefabs. ProBuilder stays because the Ship Props prefabs use `ProBuilderMesh`.
+
+## Repo state (Nov 2026, before the upgrade branch)
 
 - Checkout is a **detached HEAD at `6030893`** (v0.2 + download-link fix). `master` is 1 commit ahead ("WIP Mobile Touch Camera", 174 files incl. textures).
   The other branches have no unmerged work except `MeshGenerationTests` (1 experimental commit, 2019).
@@ -220,7 +229,7 @@ between 0.2 and 4 per minute. `evolution` ramps 0→1 over 25 minutes and scales
   - many vendor `.obj` models (Voxel Robots/Turrets/Ships)
   - `Buildings/arrow.obj`
 
-  Unity deleted the orphaned metas. Restoring the metas (`git checkout -- .`) and re-importing the asset packs (Firebase Unity SDK **6.14.1**) is needed;
-  otherwise `FirebaseManager.cs` won't compile and models will be missing.
+  Unity deleted the orphaned metas. The Firebase/Parse DLLs survive in the sibling folder `../PathfindingAndroid`, but they're moot now that Firebase is removed.
+  The `.obj` models exist nowhere on disk. Re-download the Voxel Robots/Turrets/StarForce packs from the Asset Store to get them back.
 - `docs/` is the GitHub Pages site (Jekyll output). `Static-Site-Jekyll/` is its source. Neither is developer documentation.
 - `Build/` holds old Android/OSX/Windows builds (gitignored). They're useful for seeing how the game played.
