@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -36,13 +36,9 @@ public abstract class AttackingUnit : Unit
                 // In this case, when we find a unit, create a task to follow that unit
                 if(actionableItem != null) {
                     followingUnit = actionableItem as Unit;
-                    //CreateFollowTask(actionableItem);
                     ResetTaskState();
                     return;
                 }
-
-                //movementCostToTask = distance;
-                //print("Path Distance " + distance);            
 
                 // If the task item is a known, like a location or builing, the actionItem was set at initialization
                 // If the task item was an unknown resource, it has just been set above
@@ -168,12 +164,6 @@ public abstract class AttackingUnit : Unit
         while(true) {
             yield return new WaitForSeconds(updateFollowTargetDelay);            
 
-            //if (factionType == FactionType.Player) {
-            //    foreach(string key in coroutinesCount.Keys) {
-            //        print(key + ": " + coroutinesCount[key]);
-            //    }
-            //}            
-
             // If we still have a task we are navigating to, keep updating position
             if(currentGameTask != null && currentGameTask == targetTask && followingUnit != null && unitManager.IsUnitEnabled(followingUnit) && navigatingToTask) {
 
@@ -195,8 +185,6 @@ public abstract class AttackingUnit : Unit
                         StopActionCoroutines();
                         followPathCoroutine = StartCoroutine(FollowPath(path, completedPath));
                     } else {
-                        //currentPathRequest.Cancel();
-                        //ResetTaskState();
                     }
                 });
             }

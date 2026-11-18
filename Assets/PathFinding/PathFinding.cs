@@ -7,7 +7,6 @@ using UnityEngine;
 using System.Diagnostics;
 
 public class PathFinding : MonoBehaviour {
-    //public Transform seeker, target;
 
     PathfindingGrid grid;
 
@@ -258,8 +257,6 @@ public class PathFinding : MonoBehaviour {
 
         openSet.Add(startNode);
 
-        //Dictionary<(int, int), Node> nodeDictionary = new Dictionary<(int, int), Node>();
-
         while(openSet.Count > 0) {
 
             // Get node with lowest fcost, or if fCosts equal, lowest hCost
@@ -268,7 +265,6 @@ public class PathFinding : MonoBehaviour {
             
             if (currentNode == targetNode) {
                 sw.Stop();
-                //print("Path Took " + sw.ElapsedMilliseconds + " Miliseconds");
 
                 finalPath = RetracePath(targetNode).ToArray();
                 success = true;
@@ -288,13 +284,6 @@ public class PathFinding : MonoBehaviour {
 
                     if(!openSet.Contains(neighbour)) {
                         openSet.Add(neighbour);
-
-                        //(int, int) key = (neighbour.gridX, neighbour.gridY);
-                        //if (nodeDictionary.ContainsKey(key)) {
-                        //    print("What the fuck");
-                        //} else {
-                        //    nodeDictionary.Add(key, neighbour);
-                        //}
 
                     } else {
                         openSet.UpdateItem(neighbour);

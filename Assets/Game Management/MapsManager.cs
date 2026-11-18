@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
@@ -79,8 +79,6 @@ public class MapsManager : MonoBehaviour {
 
         mapContainers.Clear();
         mapContainer2d = new MapContainer[horizontalMaps, verticalMaps];
-
-        //Object mapResource = Resources.Load("Map", typeof(MapContainer));
 
         float mapBoundaryHeight = 5;
 
@@ -185,10 +183,6 @@ public class MapsManager : MonoBehaviour {
         return layoutCoordinate.mapContainer.map.GetTerrainAt(layoutCoordinate);
     }
 
-    //public UserAction[] ActionsAvailableAt(LayoutCoordinate layoutCoordinate) {
-    //    return layoutCoordinate.mapContainer.map.ActionsAvailableAt(layoutCoordinate);
-    //}
-
     public Material GetMaterialForMap(LayoutCoordinate layoutCoordinate) {
         return layoutCoordinate.mapContainer.GetComponent<MeshRenderer>().material;
     }
@@ -197,8 +191,6 @@ public class MapsManager : MonoBehaviour {
 
     // MAP STRUCTS
     //public PathGridCoordinate PathGridCoordinateFromWorld(WorldPosition worldPosition) {
-
-    //}
 
     public PathGridCoordinate PathGridCoordinateFromMapCoordinate(MapCoordinate mapCoordinate) {
         Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();
@@ -240,63 +232,24 @@ public class MapsManager : MonoBehaviour {
 
         return new MapCoordinate(mapCoordinateX, mapCoordinateY, mapContainer);
 
-        //Vector3 currentPointObjectSpace = new Vector3(mapCoordinateX, 0, mapCoordinateY);
-        //Vector3 positionWorldSpace = mapContainer.transform.TransformPoint(currentPointObjectSpace);
-
-        //WorldPosition worldPosition = new WorldPosition(positionWorldSpace);
-        //worldPosition.recalculateHeight();
-
-        //return worldPosition;
-
         // ----
 
-        //MapContainer mapContainer = MapContainerForPoint(new Vector2(mapsManagerXCoord, mapsManagerYCoord));
-
         //// We do not know the coordinates for the map we are looking at right now, so we can't create a map coordinate
-        //Vector3 currentPointObjectSpace = new Vector3(mapsManagerXCoord, 0, mapsManagerYCoord);
         ////Vector3 positionWorldSpace = transform.TransformPoint(currentPointObjectSpace);
 
         //// Now we create a mapCoordinate to figure out the height
-        //MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(new WorldPosition(positionWorldSpace));
 
         //// And we can finally send back the correct world position with height
-        //return new WorldPosition(mapCoordinate);
 
 
         // --------------------
 
-        //MapCoordinate mapCoordinate = new MapCoordinate(mapsManagerXCoord, mapsManagerYCoord, mapContainer);
-
         // At this point we do not know the height yet, we do not know what map we are dealing with
         //Vector3 currentPointObjectSpace = new Vector3(x, mapContainer.map.getHeightAt(mapCoordinate), y);
 
-        //return new WorldPosition(mapCoordinate);
-
-        //currentPointObjectSpace.x -= (constants.mapWidth / 2f);
-        //currentPointObjectSpace.z *= -1;
-        //currentPointObjectSpace.z += (constants.mapHeight / 2f);
-
-        //Vector3 positionWorldSpace = mapContainer.transform.TransformPoint(currentPointObjectSpace);
-        //WorldPosition worldPosition = new WorldPosition(positionWorldSpace);
-
-        //MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(worldPosition);
-
         //// Do the calculation again with the correct height
-        //currentPointObjectSpace = new Vector3(x, mapContainer.map.getHeightAt(mapCoordinate), y);
 
-        //currentPointObjectSpace.x -= (constants.mapWidth / 2f);
-        //currentPointObjectSpace.z *= -1;
-        //currentPointObjectSpace.z += (constants.mapHeight / 2f);
-
-        //positionWorldSpace = mapContainer.transform.TransformPoint(currentPointObjectSpace);
-        //worldPosition = new WorldPosition(positionWorldSpace);
-
-        //return worldPosition;
     }
-
-    //public WorldPosition WorldPositionFromMapCoordinate(MapCoordinate) {
-
-    //}
 
     public MapCoordinate MapCoordinateFromWorld(WorldPosition worldPosition) {
         Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();

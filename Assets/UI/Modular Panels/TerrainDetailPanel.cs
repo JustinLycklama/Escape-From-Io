@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -42,12 +42,6 @@ public class TerrainDetailPanel : MonoBehaviour {
             TypeValueCell cell = mineralTypeValues[i];
 
             // Actual Mineral Info
-
-            //if(mineralTypeCount.ContainsKey(mineralType)) {
-            //    cell.value.text = mineralTypeCount[mineralType].ToString();
-            //} else {
-            //    cell.value.text = "None";
-            //}
 
             // Mineral Chance Info
 

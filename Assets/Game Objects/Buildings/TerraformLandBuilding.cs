@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -19,7 +19,6 @@ public class TerraformLandBuilding : Building {
     }
 
     protected override void CompleteBuilding() {
-        //layoutCoordinate.mapContainer.map.UpdateTerrainAtLocation(layoutCoordinate, Script.Get<TerrainManager>().terrainTypeMap[TerrainType.Type.Mud]);
         Destroy();
     }
 

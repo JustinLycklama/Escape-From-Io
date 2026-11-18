@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
@@ -7,10 +7,6 @@ using System;
 public enum TutorialTrigger {
     SelectMine, TerraformComplete, TaskAndUnitDetails, TaskLockToggle, BuildingComplete, BuildingAdded, UnitCompleted, UnitAdded, UnitFinishedDestroySelf
 }
-
-//public interface TutorialTriggerListener {
-//    void EventFired(TutorialTrigger e);
-//}
 
 public class TutorialEvent {
     public TutorialTrigger? completionTrigger;
@@ -101,8 +97,6 @@ public class TutorialManager: GameButtonDelegate, SceneChangeListener {
 
     public TutorialType? tutorialType = null;
 
-    //private Dictionary<TutorialTrigger, TutorialTriggerListener> eventListenerMap = new Dictionary<TutorialTrigger, TutorialTriggerListener>();
-
     private Queue<TutorialScene> sceneQueue;
 
     private PlayerBehaviour playerBehaviour;
@@ -114,7 +108,6 @@ public class TutorialManager: GameButtonDelegate, SceneChangeListener {
 
     private TutorialObject tutorialObject;
 
-    //TutorialScene? previousScene;
     TutorialScene? currentScene;
     Queue<TutorialEvent> currentEventQueue;
     TutorialTrigger? sceneWaitForTrigger = null;
@@ -174,9 +167,6 @@ public class TutorialManager: GameButtonDelegate, SceneChangeListener {
 
         messageManager.SetMajorMessage(tutorialObject.welcomeTitle, tutorialObject.welcomeMessage, () => {
 
-            //repeatButton.transform.parent.gameObject.SetActive(true);
-            //repeatButton.SetEnabled(false);
-
             ContinueSceneQueue();
         });
     }
@@ -233,8 +223,6 @@ public class TutorialManager: GameButtonDelegate, SceneChangeListener {
             yield break;
         }
 
-        //repeatButton.SetEnabled(false);
-
         TutorialEvent e = currentEventQueue.Dequeue();
 
         if (e.addDelay != 0) {
@@ -246,7 +234,6 @@ public class TutorialManager: GameButtonDelegate, SceneChangeListener {
         waitForPostTeraform = e.postTeraformWait;
 
         messageManager.EnqueueMessage(e.title, e.message, () => {
-            //repeatButton.SetEnabled(true);
 
             if(e.remainPaused) {
                 playerBehaviour.SetInternalPause(true);
@@ -278,25 +265,8 @@ public class TutorialManager: GameButtonDelegate, SceneChangeListener {
         sceneWaitForTrigger = null;
     }
 
-    //private void PerformActionsForEvent(TutorialScene e) {
 
 
 
-    //    switch(e) {
-    //        case TutorialTrigger.Welcome:
-    //            messageManager.SetMajorMessage("Welcome!", "", () => {
 
-    //                ContinueSceneQueue();
-    //            });
-    //            break;
-    //        case TutorialTrigger.FirstMine:
-    //            messageManager.EnqueueMessage("Mine that", "Click Mine", () => {
-
-
-
-    //            });
-    //            break;
-    //    }
-
-    //}
 }

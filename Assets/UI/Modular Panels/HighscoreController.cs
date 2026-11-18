@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -34,7 +34,6 @@ public class LeaderboardItem {
 
 public class HighscoreController : MonoBehaviour, FirebaseDelegate {
 
-    //private PubNub pubnub;
     private const string channel = "leaderboard";
 
     public List<LeaderboardItem> leaderboardItems = new List<LeaderboardItem>();

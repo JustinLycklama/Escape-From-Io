@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -164,7 +164,6 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
             //StartCoroutine(AddBoxColliders());
         }
 
-        //SetupFogOfWar();
         SetupMaterialShader();
 
         map.transform.SetParent(this.transform, true);
@@ -229,16 +228,12 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         IntervalActionPipeline pipeline = Script.Get<IntervalActionPipeline>();
         pipeline.Add(this);
 
-        //PathGridCoordinate[][] gridCoordinates = PathGridCoordinate.pathCoordiatesFromLayoutCoordinate(layoutCoordinate);
         MapCoordinate[,] mapCoordinates = MapCoordinate.MapCoordinatesFromLayoutCoordinate(layoutCoordinate);
 
         Dictionary<MapCoordinate, float> cachedHeights = CacheHightsAround(layoutCoordinate);
 
         for(int w = 0; w < numCollidersPerTilePerAxis; w++) {
             for(int h = 0; h < numCollidersPerTilePerAxis; h++) {
-                //if (w != 0 && h != 0 && w != numColliders -1 && h != numColliders - 1) {
-                //    continue;
-                //}
 
                 yield return new WaitUntil(delegate {
                     return canCreateBox;
@@ -259,9 +254,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
 
                 int realWorldH = constants.featuresPerLayoutPerAxis - 1 - sampleH;
 
-                //MapCoordinate mapCoordinate = MapCoordinate.FromGridCoordinate(gridCoordinates[w][sampleH]);
                 MapCoordinate mapCoordinate = mapCoordinates[sampleW, realWorldH];
-                //MapCoordinate mapCoordinate = new MapCoordinate(layoutCoordinate);
 
                 BoxCollider boxCollider = gameObject.AddComponent(typeof(BoxCollider)) as BoxCollider;
 
@@ -389,11 +382,6 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         MapGenerator mapGenerator = Script.Get<MapGenerator>();
 
         GameObject prefab = mapsManager.fogOfWarPrefab;
-        //float[,] originalFinalNoiseMap = mapGenerator.GetOriginalFinalNosieMapForMap(this);
-
-        //float[,] fullOriginalFinalNoiseMap = mapGenerator.GetFullOriginalNoiseMap();
-
-        //int tileSize = constants.featuresPerLayoutPerAxis;
 
         const float featurePointOffset = 5f;
 
@@ -420,28 +408,6 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
 
                 int startY = (mapY * featuresHeightPerMap) + (y * constants.featuresPerLayoutPerAxis);
                 int tileHeight = constants.featuresPerLayoutPerAxis;
-
-                //if(startX != 0) {
-                //    startX -= 1;
-                //    tileWidth += 1;
-                //    xOffset -= featurePointOffset;
-                //}
-
-                //if(startY != 0) {
-                //    startY -= 1;
-                //    tileHeight += 1;
-                //    yOffset += featurePointOffset;
-                //}
-
-                //if(x != width -1 || mapX != constants.mapCountX - 1) {
-                //    tileWidth += 1;
-                //    xOffset += featurePointOffset;
-                //}
-
-                //if(y != height - 1 || mapY != constants.mapCountY - 1) {
-                //    tileHeight += 1;
-                //    yOffset -= featurePointOffset;
-                //}
 
                 float[,] tileNoiseMap = MapGenerator.RangeSubset(fullOriginalFinalNoiseMap, startX, startY, tileWidth, tileHeight);
                 MeshData fogMesh = MeshGenerator.GenerateTerrainMesh(tileNoiseMap);
@@ -646,12 +612,6 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
 
         mapMaterial.SetVector("mapLayout", new Vector2(mapWidthWithOverhang, mapHeightWithOverhang));
 
-        //mapMaterial.SetFloat("mapXOffsetLow", 0 - (constants.layoutMapWidth * constants.featuresPerLayoutPerAxis / 2f));
-        //mapMaterial.SetFloat("mapXOffsetHigh", constants.layoutMapWidth - (constants.layoutMapWidth * constants.featuresPerLayoutPerAxis / 2f));
-
-        //mapMaterial.SetFloat("mapYOffsetLow", 0 - (constants.layoutMapHeight * constants.featuresPerLayoutPerAxis / 2f));
-        //mapMaterial.SetFloat("mapYOffsetHigh", constants.layoutMapHeight - (constants.layoutMapHeight * constants.featuresPerLayoutPerAxis / 2f));
-
         float mapXOffsetLow = 0 - (constants.layoutMapWidth * constants.featuresPerLayoutPerAxis / 2f);
         float mapXOffsetHigh = constants.layoutMapWidth - (constants.layoutMapWidth * constants.featuresPerLayoutPerAxis / 2f);
 
@@ -695,7 +655,6 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
             for(int x = 0; x < mapWidthWithOverhang; x++) {
 
                 if(x == 0 || x == mapWidthWithOverhang - 1 || y == 0 || y == mapHeightWithOverhang - 1) {
-                    //textureIndexList[y * mapWidthWithOverhang + x] = -1;
                     continue;
                 }
 
@@ -759,17 +718,6 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         int mapWidthWithOverhang = constants.layoutMapWidth + 2;
         int mapHeightWithOverhang = constants.layoutMapHeight + 2;
 
-        //for(int y = 0; y < mapHeightWithOverhang; y++) {
-        //    for(int x = 0; x < mapWidthWithOverhang; x++) {
-
-        //        if(x == 0 || x == mapWidthWithOverhang - 1 || y == 0 || y == mapHeightWithOverhang - 1) {
-        //            continue;
-        //        }
-
-
-        //        isActionAtIndex[y * mapWidthWithOverhang + x] = map.associatedTasksCoordinateMap[x - 1, y - 1] == null ? 0f : 1f;
-        //    }
-        //}
 
         isActionAtIndex[((layoutCoordinate.y + 1) * mapWidthWithOverhang) + layoutCoordinate.x + 1] = map.associatedTasksCoordinateMap[layoutCoordinate.x, layoutCoordinate.y] == null ? 0f : 1f;
         mapMaterial.SetFloatArray("actionAtIndex", isActionAtIndex);

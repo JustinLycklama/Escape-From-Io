@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -32,26 +32,4 @@ public class Defender : AttackingUnit
     // * Action Delegates
     // * */
 
-    //protected override void BeginWalkDelegate() {
-    //    base.BeginWalkDelegate();
-
-    //    //animationController.Walk();
-    //}
-
-    //protected override void CompleteWalkDelegate() {
-    //    base.CompleteWalkDelegate();
-
-    //    //animationController.Idle();
-    //}
-
-    //protected override void BeginTaskActionDelegate() {
-    //    base.BeginTaskActionDelegate();
-
-    //    //if(NoiseGenerator.random.Next(0, 2) == 0) {
-    //    //    animationController.Atk01();
-    //    //} else {
-    //    //    animationController.Atk01();
-    //        //animationController.Atk02();
-    //    //}
-    //}
 }

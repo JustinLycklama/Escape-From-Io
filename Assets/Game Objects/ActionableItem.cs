@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,12 +11,6 @@ public abstract class ActionableItem : MonoBehaviour, TaskStatusNotifiable {
     [HideInInspector]
     public bool taskAlreadyDictated = false; 
     public MasterGameTask associatedTask { get; private set; }
-
-    //private MasterGameTask[,] associatedTasksCoordinateMap;
-
-    //protected void SetuoCoordinateArrays(int ) {
-    //    associatedTasksCoordinateMap = new MasterGameTask[];
-    //}
 
     private List<TaskStatusUpdateDelegate> taskStatusDelegateList = new List<TaskStatusUpdateDelegate>();
 
@@ -65,16 +59,5 @@ public abstract class ActionableItem : MonoBehaviour, TaskStatusNotifiable {
     /*
      * MasterTaskUpdateDelegate Interface
      * */
-
-    //public void RepeatCountUpdated(MasterGameTask masterGameTask, int count) {
-    //}
-
-    //public void TaskCancelled(MasterGameTask masterGameTask) {
-    //}
-
-    //public void TaskFinished(MasterGameTask masterGameTask) {
-    //}
-
-    //public void TaskBlockerRemoved(MasterGameTask masterGameTask) { }
 
 }

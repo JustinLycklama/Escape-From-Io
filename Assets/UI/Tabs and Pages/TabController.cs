@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,7 +8,6 @@ using System.Linq;
 public class TabController : MonoBehaviour, GameButtonDelegate {
 
     public GameButton prototypeButton;
-    //public Text prototypeText;
 
     public GameObject detailPane;
     public HorizontalLayoutGroup tabButtonLayout;
@@ -22,7 +21,6 @@ public class TabController : MonoBehaviour, GameButtonDelegate {
 
         GameButton first = null;
         foreach(TabElement tab in tabs) {
-            //obj.transform.SetParent(null);
             tab.transform.SetParent(detailPane.transform, false);
             tab.gameObject.SetActive(false);
 

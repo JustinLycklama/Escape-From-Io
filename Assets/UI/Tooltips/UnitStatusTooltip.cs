@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEngine.UI;
 
 public class UnitStatusTooltip : MonoBehaviour, TrackingUIInterface { //TaskStatusUpdateDelegate
@@ -19,7 +19,6 @@ public class UnitStatusTooltip : MonoBehaviour, TrackingUIInterface { //TaskStat
     private Unit.FactionType faction;
 
     private RectTransform targetCanvas;
-    //private RectTransform rectTransform;
 
     // TrackingUIInterface
     public Transform followPosition { get; set; }
@@ -28,8 +27,6 @@ public class UnitStatusTooltip : MonoBehaviour, TrackingUIInterface { //TaskStat
     [SerializeField]
     private CanvasGroup canvas = null;
     public CanvasGroup canvasGroup { get => canvas; }
-
-    //private Unit unit;
 
     private void Start() {
         durationBar.setDetailTextHidden(true);
@@ -49,29 +46,15 @@ public class UnitStatusTooltip : MonoBehaviour, TrackingUIInterface { //TaskStat
     }
 
     public void SetTask(Unit unit, MasterGameTask masterGameTask, GameTask gameTask) {
-        //if (task == null) {
-        //    taskDescription.text = "Idle";
-        //} else {
-        //    taskDescription.text = task.description;
-        //}
 
         masterAndGameTaskCell.SetTask(masterGameTask, gameTask);
 
-        //Unit.UnitState unitState = unit.GetUnitState();
-
-        // Override color to display RED on inefficient units
-        //Color efficiencyColor = Color.red;
-        //if (unitState != Unit.UnitState.Inefficient) {
         Color efficiencyColor = unit.GetUnitState().ColorForState();
-        //}
 
         if (faction == Unit.FactionType.Enemy) {
             efficiencyColor = ColorSingleton.sharedInstance.enemyTaskColor;
         }
 
-        //Color efficiencyColor = new Color(statusColorColor.r * 2, statusColorColor.g * 2, statusColorColor.b * 2);
-
-        //unitInfoCanvas.alpha = unitState == Unit.UnitState.Idle ? 0.7f : 1;        
         masterAndGameTaskCell.Colorize(efficiencyColor);
     }
 

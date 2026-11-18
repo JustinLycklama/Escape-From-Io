@@ -332,8 +332,6 @@ public class MapGenerator : MonoBehaviour {
         minMaxOfFinalMap.max += minMaxOfGround.max * groundFeaturesImpactOnLayout * 2;
         minMaxOfFinalMap.max += minMaxOfMountain.max * mountainFeaturesImpactOnLayout;
 
-        //print("Min: " + minMaxOfFinalMap.min + "  Max: " + minMaxOfFinalMap.max);
-
         NoiseGenerator.NormalizeMapUsingMinMax(finalNoiseMap, minMaxOfFinalMap);
 
         spawnCoordinate = new LayoutCoordinate(0, 0, mapsManager.mapContainers[0]);
@@ -504,12 +502,6 @@ public class MapGenerator : MonoBehaviour {
 
                     float finalValue = MapAtXYWithFeatures(x, y, terrainMap, terraformTarget.terrainTypeTarget, heightAtNewRegion);
 
-                    //if (finalValue < minMaxOfFinalMap.min || finalValue > minMaxOfFinalMap.max) {
-                    //    //todo:
-                    //    minMaxOfFinalMap = NoiseGenerator.NormalizeMap(finalNoiseMap);
-
-                    //}
-
                     terraformTarget.heightTarget[width, height] = Mathf.InverseLerp(minMaxOfFinalMap.min, minMaxOfFinalMap.max, finalValue);
                 }
             }
@@ -534,7 +526,6 @@ public class MapGenerator : MonoBehaviour {
         // Upon completion of terraform, update out layout map to represent what we have 
         if(terraformTarget.percentage == 1) {
             layoutNoiseMap[startXLayout + layoutCoordinate.x, startYLayout + layoutCoordinate.y] = heightAtNewRegion;
-            //originalLayoutNoiseMap[startXLayout + layoutCoordinate.x, startYLayout + layoutCoordinate.y] = heightAtNewRegion;
         }
 
         float[,] finalSubsetNoiseMap = GetNoiseSubsetForMap(mapContainer).finalNoiseMap;
@@ -622,8 +613,6 @@ public class MapGenerator : MonoBehaviour {
 
     // Given arrays for our layouts, features and terrain types, create a final height map
     private float[,] CreateMapWithFeatures(TerrainType[,] usingTerrainMap) {
-        //int featuresWidth = groundFeaturesNoiseMap.GetLength(0);
-        //int featuresHeight = groundFeaturesNoiseMap.GetLength(1);
 
         float[,] fullMap = new float[totalFullWidth, totalFullHeight];
         for(int y = 0; y < totalFullWidth; y++) {
@@ -709,17 +698,6 @@ public class MapGenerator : MonoBehaviour {
 
         return mapAtXY;
 
-        //if (distanceToEdgeX == 0 || (distanceToEdgeX == featuresPerLayoutPerAxis) || distanceToEdgeY == 0 || (distanceToEdgeY == featuresPerLayoutPerAxis)) {
-        //    fullMap[x, y] *= 0.30f;
-        //}
-
-        //if(distanceToEdgeX == 1 || (distanceToEdgeX == featuresPerLayoutPerAxis - 1) || distanceToEdgeY == 1 || (distanceToEdgeY == featuresPerLayoutPerAxis - 1)) {
-        //    fullMap[x, y] *= 0.60f;
-        //}
-
-        //if(distanceToEdgeX == 2 || (distanceToEdgeX == featuresPerLayoutPerAxis - 2) || distanceToEdgeY == 2 || (distanceToEdgeY == featuresPerLayoutPerAxis - 2)) {
-        //    fullMap[x, y] *= 0.90f;
-        //}
     }
 
     // Sampling at an index for CreateMapWithFeatures
@@ -757,26 +735,6 @@ public class MapGenerator : MonoBehaviour {
     /*
      * Creating color maps from finished noise maps 
      * */
-
-    //private Color[] CreateColorMap(float[,] noiseMap) {
-
-    //    int noiseMapWidth = noiseMap.GetLength(0);
-    //    int noiseMapHeight = noiseMap.GetLength(1);
-
-    //    TerrainType[] regions = Script.Get<TerrainManager>().terrainTypes;
-
-    //    Color[] colorMap = new Color[noiseMapWidth * noiseMapHeight];
-    //    for(int y = 0; y < noiseMapHeight; y++) {
-    //        for(int x = 0; x < noiseMapWidth; x++) {
-
-    //            float currentHeight = noiseMap[x, y];
-    //            RegionType region = Script.Get<TerrainManager>().RegionTypeForValue(currentHeight);
-    //            colorMap[y * noiseMapWidth + x] = region.color;
-    //        }
-    //    }
-
-    //    return colorMap;
-    //}
 
     private Color[] CreateColorMapWithTerrain(float[,] noiseMap, TerrainType[,] terrainTypeMap, MapContainer mapContainer) {
         Constants constants = Script.Get<Constants>();

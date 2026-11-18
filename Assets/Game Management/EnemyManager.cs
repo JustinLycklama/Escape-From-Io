@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,15 +21,11 @@ public class EnemyManager : MonoBehaviour, TimeUpdateDelegate
     private const float minEnemyPerMinute = 0.2f;
     private const float maxEnemyPerMinute = 4;
 
-    // At 25 mins, evo will top out at 1.0f;
     private const float maxEvoTime = 60.0f * 25.0f;
     private const float evoPerSecond = 1.0f / maxEvoTime;
 
     public static float minEnemyAttack = 1;
     public static float maxEnemyAttack = 10;
-
-    //private const float minEnemyHealth = 1;
-    //private const float maxEnemyHealth = 10;
 
     private float falloverRemainder = 0;
 
@@ -81,10 +77,6 @@ public class EnemyManager : MonoBehaviour, TimeUpdateDelegate
                 concreteEnemysThisDecicion += 1;
             }
         }
-
-        //print("concreteEnemysThisDecicion: " + concreteEnemysThisDecicion);
-        //print("remainder: " + remainder);
-        //print("falloverRemainder: " + falloverRemainder);
 
         for(int i = 0; i < concreteEnemysThisDecicion; i++) {
             float t = rnd.Next(0, 100) / 100.0f;

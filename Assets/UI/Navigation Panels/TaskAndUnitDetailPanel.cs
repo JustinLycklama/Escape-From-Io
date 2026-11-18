@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -40,7 +40,6 @@ public class TaskAndUnitDetailPanel : NavigationPanel, TaskQueueDelegate, UnitMa
 
         lockTaskListButton.SetState(taskQueueManager.GetTaskListLockStatus(actionType));
 
-        //taskListTitle.text = actionType.TitleAsNoun() + " Backlog";
         unitListTitle.text = actionType.TitleAsNoun() + " Units";
 
         unitIconImage.SetActionType(actionType);

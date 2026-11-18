@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -82,7 +82,6 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
      * */
 
     public void WillSwitchScene() {
-        //audioSource.Stop();
     }
 
     /*
@@ -148,7 +147,6 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
         initActionChunks.Enqueue(() => {
             grid.gameObject.transform.position = mapsManager.transform.position;
             grid.createGrid();
-            //grid.BlurPenaltyMap(4); // No blurr today!        
         });
 
         initActionChunks.Enqueue(() => {
@@ -202,9 +200,6 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
 
                 i++;
 
-                //if(i == startingUnits.Count - 1) {
-                //    unit.remainingDuration -= 75;
-                //}
             }
         });
 
@@ -310,7 +305,6 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
 
             animationBaseline = animationTopline;
 
-            //yield return null;
         }
 
         // Wait for colliders to be built

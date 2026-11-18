@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,17 +8,6 @@ public interface IntervalActionDelegate {
 
 // Allows delegates to sign up to perfom actions at equal spacings
 public class IntervalActionPipeline : MonoBehaviour {
-    //private static IntervalActionPipeline backingInstance;
-    //public static IntervalActionPipeline sharedInstace {
-    //    get {
-    //        if (backingInstance == null) {
-    //            backingInstance = new IntervalActionPipeline();
-    //            backingInstance.StartDish();
-    //        }
-
-    //        return backingInstance;
-    //    }
-    //}
 
     private List<IntervalActionDelegate> delegates = new List<IntervalActionDelegate>();   
 

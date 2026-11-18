@@ -39,16 +39,6 @@ public class PathRequest {
         pathEndGoalFaction = null;
     }
 
-    //public PathRequest(Vector3 _start, PathGridCoordinate _end, Action<WorldPosition[], bool> _callback) {
-    //    pathStart = _start;
-    //    pathEndGrid = _end;
-    //    callback = _callback;
-
-    //    targetType = PathRequestTargetType.World;
-    //    pathEndWorld = null;
-    //    pathEndLayout = null;
-    //}
-
     public PathRequest(Vector3 _start, LayoutCoordinate _end, int _movementPenaltyMultiplier, Action<LookPoint[], ActionableItem, bool, int> _callback, PathRequestTargetType targetType) {
         pathStart = _start;
         pathEndLayout = _end;
@@ -146,13 +136,6 @@ public class PathRequestManager : MonoBehaviour {
         instance = this;
         pathFinding = GetComponent<PathFinding>();
     }
-
-    //public static void RequestPath(Vector3 pathStart, Vector3 pathEnd, Action<WorldPosition[], bool> callback, GameTask.TargetType targetType = GameTask.TargetType.World) {
-    //    PathRequest newRequest = new PathRequest(pathStart, pathEnd, callback, targetType);
-    //    instance.pathRequestQueue.Enqueue(newRequest);
-
-    //    instance.TryProcessNext();
-    //}
 
     public static PathRequest RequestPathForTask(Vector3 position, int movementPenaltyMultiplier, GameTask task, Action<LookPoint[], ActionableItem, bool, int> callback) {
 

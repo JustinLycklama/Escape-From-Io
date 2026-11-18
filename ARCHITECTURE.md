@@ -177,7 +177,7 @@ Each unit has `duration` (battery seconds; Research adds to it), `unitHealth`, a
 - **Ship**: Shuttle Frame (`ShipProps`, needs 4 free buildable neighbours, only one allowed) → Thrusters (+50% move), Reactor (+60s duration),
   Machining (+50% action speed) and Telemetry (vision 3→5) adjacent to it → **Escape Shuttle** on the frame once all four are built = **win**.
   Ship parts double as global upgrades through `ResearchSingleton`.
-- Refinery / Terraform Land are commented out (cut features). Minerals include unused `Refined*` types.
+- Cut features: Refinery and Terraform Land (classes `Refinery`, `TerraformLandBuilding` still exist; their blueprints were commented out and removed in #10, see git history). Minerals include unused `Refined*` types.
 
 `BuildingManager` tracks placement and adjacency, and holds status effects (`BuildingEffectStatus`) that affect the grid.
 
@@ -213,7 +213,6 @@ The full backlog is in [GitHub Issues](https://github.com/JustinLycklama/Escape-
    `EnemyManager` in `Start`, and `ResearchSingleton`/`TutorialManager` on scene change. `MasterGameTask` ids are deliberately session-unique.
    Check with `Tools/Stress/game-state.cs` across a scene reload.
 4. Many `Resources.Load` calls by string path, and Unity tags. Renames break things at runtime, not compile time.
-5. Lots of commented-out code from earlier designs ([#10](https://github.com/JustinLycklama/Escape-From-Io/issues/10)).
 
 ## Unity 6 upgrade (Nov 2026, now `master`)
 

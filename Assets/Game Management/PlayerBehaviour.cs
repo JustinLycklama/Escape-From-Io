@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -14,7 +14,6 @@ public interface HotkeyDelegate {
 }
 
 public class PlayerBehaviour : MonoBehaviour {
-    //private const string UI_ELEMENT_TAG = "BlockingUIElement";
 
     private int UI_Layer;
 
@@ -175,21 +174,17 @@ public class PlayerBehaviour : MonoBehaviour {
                 mouseIsDownOverUI = false;
             }
 
-            //print("MouseStill Over UI");
-
             return;
         }
 
         // We want as little as possible to be done here, first check to see if mouse down or up, and we are not over UI
         if(mouseDown && IsOverUI(Input.mousePosition)) {
             mouseIsDownOverUI = true;
-            //print("MouseDown Over UI");
             return;
         }
 
         bool cameraAction = false;
 
-        //cameraAction |= CameraTouchPanInput();
         cameraAction |= CameraZoom();
 
         // If we are manually moving the camera while the auto pan is happening, stop auto pan
@@ -258,7 +253,6 @@ public class PlayerBehaviour : MonoBehaviour {
 
                 int sign = vertical > 0 ? 1 : -1;
                 float verticalMovement = Mathf.Lerp(minCameraMovementSpeed, maxCameraMovementSpeed, Mathf.Abs(vertical));
-                //Camera.main.transform.Translate(sign * cameraForward * verticalMovement * Time.deltaTime, Space.World);
                 panVectors.Add(sign * cameraForward * verticalMovement);
             }
 
@@ -269,7 +263,6 @@ public class PlayerBehaviour : MonoBehaviour {
 
                 int sign = horizontal > 0 ? 1 : -1;
                 float horizontalMovement = Mathf.Lerp(minCameraMovementSpeed, maxCameraMovementSpeed, Mathf.Abs(horizontal));
-                //Camera.main.transform.Translate(sign * cameraRight * horizontalMovement * Time.deltaTime, Space.World);
                 panVectors.Add(sign * cameraRight * horizontalMovement);
             }
 
@@ -295,25 +288,12 @@ public class PlayerBehaviour : MonoBehaviour {
             StopCoroutine(panCameraRoutine);
         }
 
-        // Hide UI during manual Pan
-        //if (panVectors.Count > 0 && ui_canvas.alpha == 1) {
-        //    ui_canvas.alpha = cameraPanUIAlpha;
-        //} else if (panVectors.Count == 0 && ui_canvas.alpha == cameraPanUIAlpha) {
-        //    ui_canvas.alpha = 1;
-        //}
-
         foreach(Vector3 vector in panVectors) {
             PanByVector(vector);
         }
 
         //// Camera Rotate
-        //if(Input.GetKey(KeyCode.RightArrow)) {
-        //    Camera.main.transform.Rotate(new Vector3(0, cameraRotateSpeed * Time.deltaTime, 0), Space.World);
-        //}
 
-        //if(Input.GetKey(KeyCode.LeftArrow)) {
-        //    Camera.main.transform.Rotate(new Vector3(0, -cameraRotateSpeed * Time.deltaTime, 0), Space.World);
-        //}
     }
 
     private bool CameraTouchPanInput() {
@@ -411,7 +391,6 @@ public class PlayerBehaviour : MonoBehaviour {
         if (IsPositionWithinBoundary(cameraAnticipatedLocation)) {
             Camera.main.transform.Translate(translation, Space.World);
         } else {
-            //print("Out Boundary");
         }
     }
 
@@ -448,11 +427,6 @@ public class PlayerBehaviour : MonoBehaviour {
     }
 
     private void SelectGameObject(Ray ray) {
-        //Debug.DrawRay(lastRay.origin, lastRay.direction * 1000, Color.yellow);
-
-        //if (lastHit != null) {
-        //    Debug.DrawRay(lastHit.Value.point, Vector3.up * 1000, Color.red);
-        //}       
 
         RaycastHit hit;
 
@@ -463,9 +437,6 @@ public class PlayerBehaviour : MonoBehaviour {
 
             GameObject objectHit = hit.transform.gameObject;
             SelectionManager selectionManager = Script.Get<SelectionManager>();
-
-            //Unit unit = objectHit.GetComponent<Unit>();
-            //Building building = objectHit.GetComponent<Building>();
 
             // Select a Terrain Selection
             if(objectHit.GetComponent<MapContainer>() != null) {
@@ -480,15 +451,6 @@ public class PlayerBehaviour : MonoBehaviour {
             }
 
             //// Select a unit
-            //else if(unit != null) {
-            //    if(!unit.initialized && building != null) {
-            //        selectionManager.SelectSelectable(building);
-            //    } else {
-            //        selectionManager.SelectSelectable(unit);
-            //    }
-            //} else if(building != null) {
-            //    selectionManager.SelectSelectable(building);
-            //}
 
             // Deselect everything
             else {
@@ -521,10 +483,6 @@ public class PlayerBehaviour : MonoBehaviour {
             PanCameraToPosition(unit.transform.position);
         }
     }
-
-    //public void InitCameraPosition(Vector3 position) {
-    //    PanCameraToPosition(Vector3.zero, false, 0.5f);
-    //}
 
 
     private Vector3 GetCameraScenePositionForPan(Vector3 panToPosition, float? heightPercent = null) {
@@ -571,8 +529,6 @@ public class PlayerBehaviour : MonoBehaviour {
         while(distance > minCameraAutoPanDistance) {
             float percentOfDistance = Mathf.InverseLerp(minCameraAutoPanDistance, maxCameraAutoPanDistance, distance);
             float cameraSpeed = Mathf.Lerp(minCameraAutoPanSpeed, maxCameraAutoPanSpeed, percentOfDistance);
-
-            //print("Speed " + cameraSpeed);
 
             totalDistance += cameraSpeed * Time.deltaTime;
 

@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -24,19 +24,11 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
     // Map Width + Height in Map Coordinates (Not Layout Coordinates)
     public int mapWidth;
     public int mapHeight;
-    //public Vector2 textureMapSize;
 
     public MeshData meshData;
     public Texture2D meshTexture;
 
-    //private TerrainType[,] terrainData; // TODO: Remove
     public int featuresPerLayoutPerAxis;
-
-    //float[,] layoutNoiseMap;
-    //float[,] groundFeaturesNoiseMap;
-    //float[,] mountainFeaturesNoiseMap;
-
-    //float[,] finalHeightMap;
 
     public MapContainer mapContainer;
 
@@ -53,21 +45,8 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
         mapWidth = terrainData.GetLength(0) * constants.featuresPerLayoutPerAxis;
         mapHeight = terrainData.GetLength(1) * constants.featuresPerLayoutPerAxis;
 
-        //mapWidth = finalHeightMap.GetLength(0);
-        //mapHeight = finalHeightMap.GetLength(1);
-
-        //this.textureMapSize = new Vector2(mapWidth, mapHeight);
-
-
-        //this.finalHeightMap = finalHeightMap;
-
-        //this.layoutNoiseMap = layoutNoiseMap;
-        //this.groundFeaturesNoiseMap = groundFeaturesNoiseMap;
-        //this.mountainFeaturesNoiseMap = mountainFeaturesNoiseMap;
 
         this.meshData = meshData;
-        //this.meshTexture = meshTexture;
-        //this.terrainData = terrainData;
 
         int terrainWidth = terrainData.GetLength(0);
         int terrainHeight = terrainData.GetLength(1);
@@ -81,17 +60,10 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
 
     // Returns the height in MAP COORDINATE position
     public float getHeightAt(MapCoordinate coordinate) {
-        //int mapWidth = finalHeightMap.GetLength(0);
-        //int mapHeight = finalHeightMap.GetLength(1);
 
         //// If I have a map coordinate, should it be guarenteed to be on the map?
-        //if(coordinate.x < 0 || coordinate.y < 0 || coordinate.x >= mapWidth || coordinate.y >= mapHeight) {
-        //    return 10;
-        //}
 
         //// TODO: Triangle Calculations        
-
-        //return finalHeightMap[coordinate.xLowSample, coordinate.yLowSample];
 
         return Script.Get<MapGenerator>().GetHeightAt(coordinate);        
     }
@@ -114,9 +86,6 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
 
         TutorialManager.sharedInstance.Fire(TutorialTrigger.TerraformComplete);
     }
-
-    //Dictionary<LayoutCoordinate, UserAction[]> userActionDictionary = new Dictionary<LayoutCoordinate, UserAction[]>();
-    //Dictionary<LayoutCoordinate, List<UserActionUpdateDelegate>> userActionDelegateMap = new Dictionary<LayoutCoordinate, List<UserActionUpdateDelegate>>();
 
     /*
      * Actionable Item Override Properties
@@ -194,64 +163,8 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
             // Build?
         }
 
-        //if (GetTerrainAt(coordinate).buildable) {
-
-        //    UserAction action = new UserAction();
-        //    action.description = "Building";
-        //    action.layoutCoordinate = coordinate;
-
-        //    action.blueprintList = new ConstructionBlueprint[] { Building.Blueprint.Tower, Building.Blueprint.Refinery };
-
-        //    actionList.Add(action);
-
-            //foreach (Building.Blueprint blueprint in Building.Blueprints()) {
-            //    actionList.Add(blueprint.ConstructionAction(worldPosition));
-
-            //UserAction action = new UserAction();
-
-            //TerrainType landTerrain = Script.Get<MapGenerator>().TerrainForRegion(RegionType.Land);
-
-            //action.description = "Add Path";
-            //action.performAction = () => {
-            //    TaskQueueManager queue = Script.Get<TaskQueueManager>();
-
-            //    GameTask miningTask = new GameTask("Building", worldPosition, GameTask.ActionType.FlattenPath, this, PathRequestTargetType.Layout);
-            //    MasterGameTask masterMiningTask = new MasterGameTask(MasterGameTask.ActionType.Build, "Build Path At " + coordinate.description, new GameTask[] { miningTask });
-
-            //    queue.QueueTask(masterMiningTask);
-
-
-            //};
-
-            //actionList.Add(action);
-            //}
-        //} 
-        // We cannot build but we are a land, lets terraform to buildable
-        //else if (false) {
-
-        //}
 
         //// Mine?
-        //else if(GetTerrainAt(coordinate).regionType == RegionType.Type.Mountain) {
-        //    UserAction action = new UserAction();
-
-        //    //TerrainType landTerrain = Script.Get<MapGenerator>().TerrainForRegion(RegionType.Type.Land);
-
-        //    action.description = "Mine Wall";
-        //    action.layoutCoordinate = coordinate;
-
-        //    action.performAction = (LayoutCoordinate layoutCoordinate) => {
-        //        TaskQueueManager queue = Script.Get<TaskQueueManager>();
-
-        //        GameTask miningTask = new GameTask("Mining", worldPosition, GameTask.ActionType.Mine, this, PathRequestTargetType.Layout);
-        //        MasterGameTask masterMiningTask = new MasterGameTask(MasterGameTask.ActionType.Mine, "Mine at location " + layoutCoordinate.description, new GameTask[] { miningTask });
-
-        //        queue.QueueTask(masterMiningTask);
-        //        this.AssociateTask(masterMiningTask, layoutCoordinate);
-        //    };
-
-        //    actionList.Add(action);
-        //}
 
         return actionList.ToArray();
     }
@@ -277,10 +190,6 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
             TerrainType originalTerrain = GetTerrainAt(coordinate);
 
             TerrainType? targetTerrain = terrainManager.CanTerriformTo(originalTerrain);
-
-            //if (task.action == GameTask.ActionType.FlattenPath) {
-            //    targetTerrain = Script.Get<MapGenerator>().TerrainForRegion(RegionType.Path);
-            //}
 
             if(targetTerrain == null) {
                 // Do not attempt to terraform a target point into the same terrain type

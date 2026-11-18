@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -60,12 +60,6 @@ public class TutorialEscape : TutorialObject {
         sceneQueue.Enqueue(new TutorialScene(new TutorialEvent[] { cont1 }));
 
 
-        //TutorialEvent azure0 = new TutorialEvent("Keep Searching", "Keep mining until we find Azure", TutorialTrigger.TerraformComplete, false);
-        //azure0.addDelay = 3;
-        //azure0.eventAction = (IsolatedUserAction) => {
-        //    IsolatedUserAction.SetUserActionIdentifier(UserAction.UserActionTutorialIdentifier.Mine);
-        //};
-
         TutorialEvent azure1 = new TutorialEvent("Azure!", "It looks like we have found some Azure, let's get mining!", TutorialTrigger.TerraformComplete, false);
         azure1.addDelay = 4;
         azure1.eventAction = (IsolatedUserAction) => {
@@ -93,7 +87,6 @@ public class TutorialEscape : TutorialObject {
 
                             LayoutCoordinate layoutCoordinate = new LayoutCoordinate(x, y, mapContainer);
                             RegionType regionType = terrainManager.regionTypeMap[targetTerrain.Value.regionType];
-                            //float targetTerrainHeight = regionType.plateauAtBase ? regionType.noiseBase : regionType.noiseMax;
 
                             TerraformTarget terraformTarget = new TerraformTarget(layoutCoordinate, targetTerrain.Value);
                             terraformTarget.percentage = 1.0f;
@@ -108,17 +101,10 @@ public class TutorialEscape : TutorialObject {
             }
         };
 
-        //TutorialEvent azure2 = new TutorialEvent("Azure!", "One more to go!", TutorialTrigger.TerraformComplete, false);
-        //azure2.eventAction = (IsolatedUserAction) => {
-        //    IsolatedUserAction.SetUserActionIdentifier(UserAction.UserActionTutorialIdentifier.Mine);
-        //};
-
         sceneQueue.Enqueue(new TutorialScene(new TutorialEvent[] { azure1, autoComplete }));
 
         TutorialEvent frame1 = new TutorialEvent("Shuttle Frame", "Each Shuttle Component costs 2 Azure. Since we have enough for a component, lets start a Frame", null, true);
         frame1.addDelay = 1;
-
-        //TutorialEvent shuttle2 = new TutorialEvent("Azure!", "Each Shuttle Component costs 2 Azure. Since we have enough for a component, lets start a Frame", TutorialTrigger.TerraformComplete, false);
 
         TutorialEvent frame2 = new TutorialEvent("Shuttle Frame", "A Shuttle Frame houses 4 Shuttle Components, and the Shuttle itself", null, true);
         TutorialEvent frame3 = new TutorialEvent("Shuttle Frame", "It must be built on a space where all 4 adjacent tiles are also buildable", null, true);

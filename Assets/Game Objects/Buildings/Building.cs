@@ -88,7 +88,6 @@ public abstract class Building : ActionableItem, Selectable {
             }
 
             costPanel.transform.SetParent(null);
-            //costPanel.gameObject.SetActive(false);
             Destroy(costPanel.gameObject);
         }
 
@@ -186,9 +185,6 @@ public abstract class Building : ActionableItem, Selectable {
                     meshRenderer.material.SetFloat(useDisolveShader ? "_Cutoff" : "percentComplete", localPercent);
                 }
 
-                //print("base " + tierBase);
-                //print("top " + tier.aproximateTopPercentage);
-                //print("local% " + localPercent);
             }
 
             tierBase = tier.aproximateTopPercentage;
@@ -313,11 +309,6 @@ public abstract class Building : ActionableItem, Selectable {
                 { MineralType.Copper, 1 }
             }));
 
-        //public static Blueprint TerraformLandBuilding = new Blueprint("PathBuilding", typeof(TerraformLandBuilding), "TowerIcon", null, "Terraform Land", "Create a path over water.",
-        //    new BlueprintCost(new Dictionary<MineralType, int>(){
-        //        { MineralType.Copper, 1 }
-        //    }));
-
         public static Blueprint Tower = new Blueprint("Tower", typeof(Tower), "LightTower", null, "Light Tower", "Provides vision",
             new BlueprintCost(new Dictionary<MineralType, int>(){
                 { MineralType.Copper, 3 }                
@@ -342,12 +333,6 @@ public abstract class Building : ActionableItem, Selectable {
                 { MineralType.Silver, 4 },
                 { MineralType.Azure, 2 }
             }));
-
-        //public static Blueprint Refinery = new Blueprint("Refinery", typeof(Refinery), "MinerIcon", null, "Refinery", "",
-        //    new BlueprintCost(new Dictionary<MineralType, int>(){
-        //        { MineralType.Copper, 3 },
-        //        { MineralType.Silver, 1 }
-        //    }));
 
         /*
          * Ship Parts
@@ -507,7 +492,4 @@ public abstract class Building : ActionableItem, Selectable {
         }
     }
 
-    //public static Blueprint[] Blueprints() {
-    //    return new Blueprint[] { Blueprint.Tower, Blueprint.Refinery, Blueprint.StationShip };
-    //}
 }

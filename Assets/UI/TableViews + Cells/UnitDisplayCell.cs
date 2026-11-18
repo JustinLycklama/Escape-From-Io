@@ -1,11 +1,10 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class UnitDisplayCell : MonoBehaviour, TaskStatusUpdateDelegate, GameButtonDelegate {
 
-    //public Text unitTitleText;
     public Text unitTypeText;
 
     public GameButton cellButton;
@@ -35,7 +34,6 @@ public class UnitDisplayCell : MonoBehaviour, TaskStatusUpdateDelegate, GameButt
         this.unit = unit;
         unit.RegisterForTaskStatusNotifications(this);
 
-        //unitTitleText.text = unit.description;
         unitTypeText.text = unit.primaryActionType.TitleAsNoun();
     }
 
@@ -61,6 +59,5 @@ public class UnitDisplayCell : MonoBehaviour, TaskStatusUpdateDelegate, GameButt
 
     public void ButtonDidClick(GameButton button) {
         Script.Get<PlayerBehaviour>().PanCameraToUnit(unit);
-        //Script.Get<SelectionManager>().SelectSelectable(unit);
     }
 }

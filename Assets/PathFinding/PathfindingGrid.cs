@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,7 +12,6 @@ public class PathfindingGrid : MonoBehaviour, TerrainUpdateDelegate, StatusEffec
 
     public LayerMask unwalkableMask;
 
-    //public TerrainType[] walkableRegions;
     LayerMask walkableMask;
     Dictionary<int, int> walkableRegionsDictionary = new Dictionary<int, int>();
 
@@ -37,10 +36,6 @@ public class PathfindingGrid : MonoBehaviour, TerrainUpdateDelegate, StatusEffec
 
         constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();
 
-        //foreach(TerrainType region in walkableRegions) {
-        //    walkableMask.value += region.terrainMask.value;            
-        //    walkableRegionsDictionary.Add(Mathf.FloorToInt(Mathf.Log(region.terrainMask.value, 2)), region.terrainPenalty);
-        //}       
     }
 
     private void Start() {
@@ -168,8 +163,6 @@ public class PathfindingGrid : MonoBehaviour, TerrainUpdateDelegate, StatusEffec
         // Vertical Pass
         for(int x = 0; x < gridSizeX; x++) {
 
-            //print("Penalties: \n");
-
             // First node we have sum everything
             for(int y = -kernelExtents; y <= kernelExtents; y++) {
                 // clamp the x value for when the extents take the sample outside of our grid
@@ -179,8 +172,6 @@ public class PathfindingGrid : MonoBehaviour, TerrainUpdateDelegate, StatusEffec
 
             int blurredPenalty = Mathf.RoundToInt(verticalPass[x, 0] / ((blurSize * 2 + 1) * (blurSize * 2 + 1)));
             grid[x, 0].movementPenalty = blurredPenalty;
-
-            //string weights = "";
 
             // continue with the rest of the columns by remoing the far left item and adding the far right item to our previous value
             // There by imitating summing all of the values together
@@ -201,10 +192,7 @@ public class PathfindingGrid : MonoBehaviour, TerrainUpdateDelegate, StatusEffec
                     penaltyMin = blurredPenalty;
                 }
 
-                //weights += blurredPenalty + " ";
             }
-
-            //print(weights);
 
         }
     }
@@ -262,11 +250,8 @@ public class PathfindingGrid : MonoBehaviour, TerrainUpdateDelegate, StatusEffec
             Gizmos.DrawWireCube(mapsManagerPosition.position, new Vector3(gridSizeX * mapScale.x, 1 * mapScale.y, gridSizeY * mapScale.z));
 
             foreach(Node n in grid) {
-                //Gizmos.color = Color.Lerp(Color.white, Color.black, Mathf.InverseLerp(penaltyMin, penaltyMax, n.movementPenalty));
 
                 Gizmos.color = Color.Lerp(Color.green, Color.blue, Mathf.InverseLerp(0, 10, n.movementPenalty));
-
-                //print(n.movementPenalty);
 
 
                 Gizmos.color = n.walkable ? Gizmos.color : Color.red;
@@ -276,23 +261,7 @@ public class PathfindingGrid : MonoBehaviour, TerrainUpdateDelegate, StatusEffec
 
                 Gizmos.color = col;
 
-                //if (PathFinding.staticGridCoordinatesSurroundingLayoutCoordinate != null) {
-                //    PathGridCoordinate pathGridCoordinate = new PathGridCoordinate(n.gridX, n.gridY);
-                //    if(PathFinding.staticGridCoordinatesSurroundingLayoutCoordinate.Contains(pathGridCoordinate)) {
-                //        Gizmos.color = Color.cyan;
-
-                //        WorldPosition worldPosition = new WorldPosition(MapCoordinate.FromGridCoordinate(pathGridCoordinate));
-
-                //        WorldPosition to = worldPosition;
-                //        to.y = 100;
-
-                //        Gizmos.DrawLine(worldPosition.vector3, to.vector3);
-                //    }
-                //}                 
-
                 Gizmos.DrawCube(n.worldPosition.vector3, Vector3.one *cubeDiameter);
-                //Handles.Label(n.worldPosition.vector3, n.gridX + ", " + n.gridY);
-                //Handles.Label(n.worldPosition.vector3, "G: " + n.gCost + " H: " + n.hCost + "\n   F: " + n.fCost);
             }
         }
     }
@@ -345,9 +314,4 @@ public class PathfindingGrid : MonoBehaviour, TerrainUpdateDelegate, StatusEffec
         }
     }
 
-    //[System.Serializable]
-    //public class TerrainType {
-    //    public LayerMask terrainMask;
-    //    public int terrainPenalty;
-    //}
 }
