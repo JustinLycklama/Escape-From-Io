@@ -258,6 +258,10 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
         return $"[TaskQueue lists: {lists}; units waiting: {unitsRequestingTasks.Count}]";
     }
 
+    public int QueuedTaskCount(MasterGameTask.ActionType actionType) {
+        return taskListMap.TryGetValue(actionType, out List<MasterGameTask> list) ? list.Count : 0;
+    }
+
     public void RequestNextDoableTask(Unit unit, Action<MasterGameTask> callback, HashSet<int> refuseTaskList = null) {
         unitsRequestingTasks.Add(new UnitAndRefused(unit, refuseTaskList, callback));
     }

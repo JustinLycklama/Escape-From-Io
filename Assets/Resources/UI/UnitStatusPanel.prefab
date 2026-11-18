@@ -93,7 +93,7 @@ CanvasGroup:
   m_Alpha: 0.8
   m_Interactable: 1
   m_BlocksRaycasts: 1
-  m_IgnoreParentGroups: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &2557182895766334913
 GameObject:
   m_ObjectHideFlags: 0
@@ -163,7 +163,7 @@ CanvasGroup:
   m_Alpha: 1
   m_Interactable: 1
   m_BlocksRaycasts: 1
-  m_IgnoreParentGroups: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &3362376464182372823
 GameObject:
   m_ObjectHideFlags: 0
@@ -360,7 +360,7 @@ CanvasGroup:
   m_Alpha: 1
   m_Interactable: 1
   m_BlocksRaycasts: 1
-  m_IgnoreParentGroups: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &8550029559875971553
 GameObject:
   m_ObjectHideFlags: 0
@@ -439,6 +439,7 @@ GameObject:
   - component: {fileID: 6216370526556650266}
   - component: {fileID: 8894072953733433923}
   - component: {fileID: 6526471772905938261}
+  - component: {fileID: 1340934152856728228}
   m_Layer: 2
   m_Name: UnitStatusPanel
   m_TagString: Untagged
@@ -484,7 +485,8 @@ MonoBehaviour:
   healthBar: {fileID: 6565584202898834338}
   percentageBar: {fileID: 2744568311568440141}
   unitIcon: {fileID: 5776502471284081943}
-  canvas: {fileID: 8993955056266565924}
+  owner: {fileID: 0}
+  canvas: {fileID: 1340934152856728228}
 --- !u!222 &8894072953733433923
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -519,6 +521,18 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!225 &1340934152856728228
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8894072953733433926}
+  m_Enabled: 1
+  m_Alpha: 0
+  m_Interactable: 0
+  m_BlocksRaycasts: 0
+  m_IgnoreParentGroups: 0
 --- !u!1 &8920925271933599593
 GameObject:
   m_ObjectHideFlags: 0
