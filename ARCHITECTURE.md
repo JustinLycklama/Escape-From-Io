@@ -104,6 +104,13 @@ Each has walkable, buildable, walk-speed and modification-speed multipliers, tex
 **Terraforming**: player actions on a tile come from `TerrainManager.ActionsAvailableForTerrain`: mine rock, "Clean" to Empty, build Path.
 Each queues a `MasterGameTask` whose target is the `Map` (an `ActionableItem`). Mining drops `Ore`. Height maps are re-meshed in place.
 
+**Terrain mesh**: one grid mesh per `MapContainer` (one vertex per height sample, plus a 1-vertex overhang ring), scaled (10, 100, 10).
+Tile edges are shaped in `MapGenerator.MapAtXYWithFeatures`: a higher-region tile ramps its outer 3 samples down toward its region base
+(mountain beside land, land beside water). Only the left/top overhang copies the neighbour's heights; right/bottom is a hidden skirt at 0.
+Normals come from `MeshGenerator.CalculateNormals` (#25), not `RecalculateNormals`. They're computed from the global final height map, so they agree
+across containers, and in world proportions. At a cliff base the flatter side wins, so flat ground isn't shaded like a groove. A terraform at a
+container edge redraws the neighbours whose edge normals depend on it. `Tools/Stress/terrain-seams.cs` / `terrain-dips.cs` inspect seam heights.
+
 Other systems: `FogOfWar` + `Math/Vision Casting` (tower vision radius), `MiniMap`, `IntervalActionPipeline` (spreads per-map work across frames).
 
 **Scene backdrop**: GameScene uses the MilkyWay skybox (`Tools/set-game-skybox.cs`) with ambient pinned to Flat, at the colour the old procedural sky gave,

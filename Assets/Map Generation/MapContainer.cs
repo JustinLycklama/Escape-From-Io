@@ -175,7 +175,13 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
     }
 
     public void DrawMesh() {
-        meshFilter.sharedMesh = map.meshData.FinalizeMesh();
+        Constants constants = Script.Get<Constants>();
+        int f = constants.featuresPerLayoutPerAxis;
+
+        Vector3[] normals = MeshGenerator.CalculateNormals(map.meshData, Script.Get<MapGenerator>().GetFinalNoiseMap(),
+            mapX * constants.layoutMapWidth * f, mapY * constants.layoutMapHeight * f, transform.lossyScale);
+
+        meshFilter.sharedMesh = map.meshData.FinalizeMesh(normals);
         meshRenderer.sharedMaterial.mainTexture = map.meshTexture;
     }
 
@@ -692,6 +698,15 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
 
         if(coordinate.y == layoutHeight - 1 && neighbours.bottomMap != null) {
             neighbours.bottomMap.UpdateMapOverhang();
+        }
+
+        // Left/top neighbours have no overhang from us, but their edge normals are computed from our heights (#25)
+        if(coordinate.x == 0 && neighbours.leftMap != null) {
+            neighbours.leftMap.DrawMesh();
+        }
+
+        if(coordinate.y == 0 && neighbours.topMap != null) {
+            neighbours.topMap.DrawMesh();
         }
     }
 
