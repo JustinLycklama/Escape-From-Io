@@ -507,6 +507,14 @@ public class MapGenerator : MonoBehaviour {
                     terraformTarget.heightTarget[width, height] = Mathf.InverseLerp(minMaxOfFinalMap.min, minMaxOfFinalMap.max, finalValue);
                 }
             }
+
+            CalculateNeighbourEdgeTargets(terraformTarget, startXLayout + layoutCoordinate.x, startYLayout + layoutCoordinate.y);
+        }
+
+        // Neighbouring tiles' edges follow the same animation (#29)
+        for(int i = 0; i < terraformTarget.neighbourSamples.Count; i++) {
+            Vector2Int sample = terraformTarget.neighbourSamples[i];
+            finalNoiseMap[sample.x, sample.y] = Mathf.Lerp(terraformTarget.neighbourInitialHeight[i], terraformTarget.neighbourHeightTarget[i], terraformTarget.percentage);
         }
 
         for(int width = 0; width < coordinates.GetLength(0); width++) {
@@ -536,6 +544,70 @@ public class MapGenerator : MonoBehaviour {
         ResetCachedMap();
 
         return finalSubsetNoiseMap;
+    }
+
+    // Tile edges are shaped by their neighbours (see MapAtXYWithFeatures: a higher-region tile ramps down toward a lower
+    // neighbour). When a tile changes terrain, its 4 neighbours' facing edges must be re-shaped too, or e.g. mining out a
+    // mountain leaves the mountains beside it as sheer walls. Records the edge-band samples whose height changes once
+    // the target tile has its new terrain type (#29). Global layout coordinates.
+    const int edgeBand = 3;   // matches dipRadius in MapAtXYWithFeatures
+
+    private void CalculateNeighbourEdgeTargets(TerraformTarget terraformTarget, int tileX, int tileY) {
+        int f = Script.Get<Constants>().featuresPerLayoutPerAxis;
+
+        terraformTarget.neighbourSamples = new List<Vector2Int>();
+        terraformTarget.neighbourInitialHeight = new List<float>();
+        terraformTarget.neighbourHeightTarget = new List<float>();
+        terraformTarget.neighbourTiles = new List<Vector2Int>();
+
+        // Evaluate the neighbours as if the terraform were complete
+        TerrainType savedTerrain = terrainMap[tileX, tileY];
+        terrainMap[tileX, tileY] = terraformTarget.terrainTypeTarget;
+
+        foreach(Vector2Int direction in new Vector2Int[] { Vector2Int.left, Vector2Int.right, Vector2Int.down, Vector2Int.up }) {
+            int neighbourX = tileX + direction.x;
+            int neighbourY = tileY + direction.y;
+
+            if(neighbourX < 0 || neighbourY < 0 || neighbourX >= terrainMap.GetLength(0) || neighbourY >= terrainMap.GetLength(1)) {
+                continue;
+            }
+
+            bool changedTile = false;
+
+            for(int i = 0; i < f; i++) {
+                for(int band = 0; band < edgeBand; band++) {
+                    // Distance `band` in from the edge that faces the terraformed tile
+                    int localX = direction.x == 0 ? i : (direction.x > 0 ? band : f - 1 - band);
+                    int localY = direction.y == 0 ? i : (direction.y > 0 ? band : f - 1 - band);
+
+                    int x = neighbourX * f + localX;
+                    int y = neighbourY * f + localY;
+
+                    float current = finalNoiseMap[x, y];
+                    float target = Mathf.InverseLerp(minMaxOfFinalMap.min, minMaxOfFinalMap.max, MapAtXYWithFeatures(x, y, terrainMap));
+
+                    if(Mathf.Abs(target - current) > 0.0001f) {
+                        terraformTarget.neighbourSamples.Add(new Vector2Int(x, y));
+                        terraformTarget.neighbourInitialHeight.Add(current);
+                        terraformTarget.neighbourHeightTarget.Add(target);
+                        changedTile = true;
+                    }
+                }
+            }
+
+            if(changedTile) {
+                terraformTarget.neighbourTiles.Add(new Vector2Int(neighbourX, neighbourY));
+            }
+        }
+
+        terrainMap[tileX, tileY] = savedTerrain;
+    }
+
+    // This container's slice of the final height map. Pooled: use it before calling again.
+    public float[,] FinalHeightSubsetFor(MapContainer mapContainer) {
+        float[,] subset = GetNoiseSubsetForMap(mapContainer).finalNoiseMap;
+        ResetResourcePool();
+        return subset;
     }
 
     /*
@@ -649,7 +721,8 @@ public class MapGenerator : MonoBehaviour {
         int sampleX = x / featuresPerLayoutPerAxis;
         int sampleY = y / featuresPerLayoutPerAxis;
 
-        TerrainType thisTerrainType = usingTerrainMap[sampleX, sampleY];
+        // Unknown (unexplored) tiles are shaped as the terrain they will be (#28/#29)
+        TerrainType thisTerrainType = TerrainAtLocation(sampleX, sampleY);
 
         if (withAlternateTerrain != null) {
             thisTerrainType = withAlternateTerrain.Value;

@@ -5,6 +5,7 @@ Don't add touch or joystick support, and don't spend effort on Android/iOS. The 
 The goal is to build an escape shuttle before you run out of robots. The repo folder is named "Pathfinding" for historical reasons.
 
 **Read `ARCHITECTURE.md` before non-trivial changes.** It covers systems, coordinate spaces, the task pipeline and known issues.
+For anything touching terrain generation, terraforming, the terrain mesh or its shader, read `TERRAIN.md`. It lists the expected behaviour.
 
 ## Environment
 
