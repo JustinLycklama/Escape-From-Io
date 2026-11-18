@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -98,7 +98,6 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
     public Transform oreLocation;
 
-    //Path path;
     protected Path pathToDraw;
     protected bool navigatingToTask;
 
@@ -254,14 +253,9 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         unitStatusTooltip.SetRemainingDuration(unitDuration, (float)unitDuration / (float)maxUnitUduration);
         unitStatusTooltip.SetRemainingHealth(unitHealth, 1.0f);
 
-        // Name
-        //Name name = NameSingleton.sharedInstance.GenerateName();
-        //title = name.fullName;
-
 
         NotificationPanel notificationManager = Script.Get<NotificationPanel>();
         if(factionType == FactionType.Player) {
-            //notificationManager.AddNotification(new NotificationItem($"{Unit_Noun} initialized", NotificationType.NewUnit, transform, primaryActionType));
         } else {
             notificationManager.AddNotification(new NotificationItem("Rock Golem Appeared!", NotificationType.NewEnemy, transform, primaryActionType));
         }
@@ -329,7 +323,6 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
                 }
 
                 movementCostToTask = distance;
-                //print("Path Distance " + distance);            
 
                 // If the task item is a known, like a location or builing, the actionItem was set at initialization
                 // If the task item was an unknown resource, it has just been set above
@@ -562,16 +555,11 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
     // TODO: Combine Animate() with begin and completion delegates
 
-    //protected virtual void BeginTaskActionDelegate() { }
-    //protected virtual void CompleteTaskActionDelegate() { }
-
     protected Coroutine performTaskCoroutine;
     protected IEnumerator PerformTaskAction(Action<bool> callBack) {
         coroutinesCount["task"]++;
 
         float speed = SpeedForTask(currentMasterTask.actionType) * ResearchSingleton.sharedInstance.unitActionMultiplier * TutorialManager.tutorialActionModifierSpeed;
-
-        //BeginTaskActionDelegate();
 
         bool isCarrying = resourceManager.isHoldingResources(this);
         AnimateState(AnimationState.PerformCoreAction, 1.0f, isCarrying);
@@ -588,7 +576,6 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
             if (currentGameTask.actionItem == null) {
                 callBack(false);
                 AnimateState(AnimationState.Idle);
-                //CompleteTaskActionDelegate();
                 coroutinesCount["task"]--;
                 yield break;
             }
@@ -596,12 +583,9 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
             float completion = currentGameTask.actionItem.performAction(currentGameTask, Time.deltaTime * speed, this);
             unitStatusTooltip?.percentageBar.SetPercent(completion);
 
-            //Animate();
-
             if (completion >= 1) {
                 callBack(true);
                 AnimateState(AnimationState.Idle);
-                //CompleteTaskActionDelegate();
                 coroutinesCount["task"]--;
 
                 yield break;
@@ -610,9 +594,6 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
             yield return null;
         }     
     }
-
-    //protected virtual void BeginWalkDelegate() { }
-    //protected virtual void CompleteWalkDelegate() { }
 
     protected Coroutine followPathCoroutine;    
     protected IEnumerator FollowPath(Path path, System.Action<bool> callBack) {
@@ -658,7 +639,6 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
             Vector2 position2D = transform.position.ToVector2();
             while(path.turnBoundaries[pathIndex].HasCrossedLine(position2D)) {
-                //print("Crossed Path Boundaries");
 
                 if(pathIndex == path.finishLineIndex) {
                     followingPath = false;
@@ -668,11 +648,6 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
                     previousWaypointPosition = path.lookPoints[pathIndex].worldPosition.vector3;
                     pathIndex++;
 
-                    //WorldPosition worldPos = path.lookPoints[pathIndex].worldPosition;
-                    //MapCoordinate mapCoordinate = MapCoordinate.FromWorldPosition(worldPos);
-
-                    //LayoutCoordinate layoutCoordinate = new LayoutCoordinate(mapCoordinate);
-                    //print("New Lookpoint at: " + worldPos.description + ", " + mapCoordinate.description + ", " + layoutCoordinate.description);
                 }
             }
 
@@ -707,7 +682,6 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
                 currentPercentOfJournery = basePercentOfJourney + ((Mathf.InverseLerp(totalDistanceFromGoal, 0, currentDistanceFromGoal) * path.lookPoints[pathIndex].percentOfJourney));
 
-                //print("Percent of Journey Done: " + currentPercentOfJournery);
             }
 
             yield return null;
@@ -727,19 +701,13 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
     private IEnumerator TurnInPlace(Vector3 lookAt) {
         coroutinesCount["turn"]++;
 
-        //Quaternion originalRotation = transform.rotation;
         Quaternion targetRotation = Quaternion.LookRotation(lookAt);
         
-        //float degreesToTurn = (targetRotation.eulerAngles - originalRotation.eulerAngles).magnitude;
-        //float totalTurnDistance = 0;
-
         // Use the cross product to determine if we are moving left or right
         Vector3 cross = Vector3.Cross(transform.forward, lookAt);
 
         // Alter animation if unit is carrying something
         bool isCarrying = resourceManager.isHoldingResources(this);
-
-        //print("degreesToTurn: " + degreesToTurn);
 
         while(true) {
 
@@ -753,13 +721,6 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
             if(degreesToTurn > 1) {
                 AnimateState(cross.y > 0 ? AnimationState.TurnRight : AnimationState.TurnLeft, Mathf.InverseLerp(-5, 5, turnSpeed), isCarrying);
-
-                //float additionalDistance = ((Time.deltaTime * turnSpeed) / degreesToTurn * 180);
-
-                //print("additionalDistance: " + additionalDistance);
-
-                //totalTurnDistance = Mathf.Clamp01(totalTurnDistance + additionalDistance);
-                //transform.rotation = Quaternion.Slerp(originalRotation, targetRotation, totalTurnDistance);
 
                 transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, turnSpeed * Time.deltaTime * 90);
 
@@ -782,10 +743,6 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         // The idea is to find a shorter path if one has become available... but I think this is messing up the associatedTask to 'unknown' objects, specifically the ore.
         // We become associated and then find a new path without unassociating
 
-        //if (currentMasterTask != null && navigatingToTask == true && currentGameTask.target.vector3 != this.transform.position) {
-        //    // Request a new path if the world has updated and we are already on the move
-        //    RequestPath(transform.position, movementPenaltyMultiplier, currentGameTask, foundWaypoints);
-        //}
     }
 
 
@@ -810,9 +767,6 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
                     AssociateTask(null);
                     TakeDamage(Mathf.Lerp(EnemyManager.minEnemyAttack, EnemyManager.maxEnemyAttack, EnemyManager.evolution));
 
-                    //GameResourceManager resourceManager = Script.Get<GameResourceManager>();
-                    //resourceManager.GiveToUnit(this, unit);
-
                     attackActionPercent = 0;
 
                     return 1;
@@ -828,9 +782,6 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
                     // The associatedTask is over
                     AssociateTask(null);
                     TakeDamage(10);
-
-                    //GameResourceManager resourceManager = Script.Get<GameResourceManager>();
-                    //resourceManager.GiveToUnit(this, unit);
 
                     attackActionPercent = 0;
 

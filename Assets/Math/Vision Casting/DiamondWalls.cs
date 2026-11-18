@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -69,7 +69,6 @@ public class DiamondWalls {
                 bool inRange = rangeLimit < 0 || GetDistance(tx, ty) <= rangeLimit;
                 // NOTE: use the following line instead to make the algorithm symmetrical
                 if(inRange && (y != topY || top.GreaterOrEqual(y, x)) && (y != bottomY || bottom.LessOrEqual(y, x))) SetVisible(tx, ty);
-                //if(inRange) SetVisible(tx, ty);
 
                 bool isOpaque = !inRange || _blocksLight(tx, ty);
                 // if y == topY or y == bottomY, make sure the sector actually intersects the wall tile. if not, don't consider

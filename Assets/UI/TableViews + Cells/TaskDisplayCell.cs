@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -48,9 +48,6 @@ public class TaskDisplayCell : MonoBehaviour, GameButtonDelegate, MasterTaskUpda
         } else if (button == cancelTaskButton) {
             task.CancelTask();
 
-            //TaskQueueManager taskQueueManager = Script.Get<TaskQueueManager>();
-
-            //taskQueueManager.DeQueueTask(task);
         }
     }
 

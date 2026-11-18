@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -58,25 +58,6 @@ public class ColorSingleton {
     public Color HealthColorByPercent(float percent) {
         return Color.Lerp(healthFinalColor, healthInitialColor, percent);
     }
-
-    //ColorUtility.TryParseHtmlString(hexString, out color);
-
-    //public static class ColorExtensions {
-    //    public static Color FromHex(string hexString) {
-    //        Color color = Color.white;
-    //        ColorUtility.TryParseHtmlString(hexString, out color);
-
-    //        return color;
-    //    }
-    //}
-
-    //private Color ColorFromHex(this Color c, string hexString) {
-
-    //    Color color = Color.white;
-    //    ColorUtility.TryParseHtmlString(hexString, out color);
-
-    //    return color;
-    //}
 
 }
 

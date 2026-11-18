@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,12 +12,6 @@ public class Miner : Unit {
     protected override void UnitCustomInit() {
 
     }
-
-    //protected override void Animate() {
-    //    foreach(MoenenGames.VoxelRobot.Weapon weapon in weaponSet) {
-    //        weapon.Animate();
-    //    }
-    //}
 
     protected override void AnimateState(AnimationState state, float rate, bool isCarry = false) {
         mechAnimationController.AnimateState(state, rate);

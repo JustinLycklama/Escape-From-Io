@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -18,7 +18,6 @@ public class SceneManagement {
 
     private const int MenuScene = 0;
     private const int GameScene = 1;
-    //private const int TutorialScene = 2;
 
     /*
      * Title state is the defaut state on game load

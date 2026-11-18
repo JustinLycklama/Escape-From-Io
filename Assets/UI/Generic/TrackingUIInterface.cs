@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -32,24 +32,11 @@ public static class TrackingUIInterfaceExtension {
 
         MonoBehaviour behaviour = trackingInterface as MonoBehaviour;
 
-        //if(behaviour.gameObject.activeSelf == true && bb.y < aa.y) {
-        //    //behaviour.gameObject.SetActive(false);
-        //    trackingInterface.canvasGroup.alpha = 0;
-        //} else if(behaviour.gameObject.activeSelf == false && bb.y > aa.y) {
-        //    //behaviour.gameObject.SetActive(true);
-        //    trackingInterface.canvasGroup.alpha = 1;
-        //}
-
         bool forceHideInterface = false;
         if(trackingInterface.canvasGroup.alpha > 0.1f && bb.y < aa.y) {
             forceHideInterface = true;
-            //trackingInterface.canvasGroup.alpha = 0;
         }
         
-        //else if(trackingInterface.canvasGroup.alpha == 0 && bb.y > aa.y) {
-        //    trackingInterface.canvasGroup.alpha = 1;
-        //}
-
         float magnitude = (aa - bb).magnitude;
         if (magnitude == 0) {
             magnitude = 0.001f;

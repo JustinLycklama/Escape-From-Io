@@ -1,9 +1,5 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using UnityEngine;
-
-//public interface StatusDelegate {
-//    void InformCurrentTask(MasterGameTask task, GameTask gameTask);
-//}
 
 public interface DeletionWatch {
     void ObjectDeleted(Selectable selectable);
@@ -167,7 +163,6 @@ public class Selection {
         switch(selectionType) {
             case SelectionType.Terrain:
                 coordinate.mapContainer.map.RegisterForUserActionNotifications(userActionDelegate, coordinate);
-                //return Script.Get<MapsManager>().ActionsAvailableAt(coordinate);
                 break;
             case SelectionType.Selectable:
                 selection.RegisterForUserActionNotifications(userActionDelegate);

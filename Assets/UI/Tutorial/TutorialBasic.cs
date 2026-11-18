@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -122,8 +122,6 @@ public class TutorialBasic : TutorialObject {
         // Task Lock Actions
         TutorialEvent sensor1 = new TutorialEvent("Complete!", "Nicely done. Our new Move is built to replace our lost one.", null, true);
         TutorialEvent sensor2 = new TutorialEvent("Complete!", "That's enough info for now. Thanks for playing!", null, true);
-        //TutorialEvent sensor2 = new TutorialEvent("Where Next?", "Now we are faced with a choice, which direction should we mine in?", TutorialTrigger.UnitCompleted);
-        //TutorialEvent sensor3 = new TutorialEvent("Where Next?", "Our end goal is to build ", TutorialTrigger.UnitCompleted);
 
         sceneQueue.Enqueue(new TutorialScene(new TutorialEvent[] { sensor1, sensor2 }));
 

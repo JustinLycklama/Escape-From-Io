@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
@@ -27,16 +27,6 @@ public class GameResourceManager : MonoBehaviour {
     public Sprite refinedGoldImage;
 
 
-
-    //public struct MineralTypeCount {
-    //    public int count;
-    //    public MineralType type;
-
-    //    public MineralTypeCount(int count, MineralType type) : this() {
-    //        this.count = count;
-    //        this.type = type;
-    //    }
-    //}
 
     Dictionary<LayoutCoordinate, Dictionary<MineralType, int>> mineralsForLayoutCoordinate;
 
@@ -75,8 +65,6 @@ public class GameResourceManager : MonoBehaviour {
         return GetAllAvailableOfType(type).Count() > 0;
     }
 
-    //Dictionary<TerrainType, int> terrainTypeCount = new Dictionary<TerrainType, int>();
-
     public void RegisterMapForMinerals(Map map) {
         Constants constants = Script.Get<Constants>();
         MapGenerator mapGenerator = Script.Get<MapGenerator>();
@@ -95,10 +83,6 @@ public class GameResourceManager : MonoBehaviour {
                 if (terrainType.regionType == RegionType.Type.Unknown) {
                     terrainType = mapGenerator.KnownTerrainTypeAtIndex(x + sampleXOffset, y + sampleYOffset);
                 }
-
-                //terrainTypeCount[terrainType]++;
-
-                //Dictionary<MineralType, int> maxIterationForMineral = new Dictionary<MineralType, int>() { MineralType.Copper :  }
 
                 Dictionary<MineralType, int> mineralTypeCounts = new Dictionary<MineralType, int>();
                 foreach(TerrainType.MineralChance mineralChance in terrainType.mineralChances) {

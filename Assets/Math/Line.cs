@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -55,7 +55,6 @@ public struct Line
         // The new perpendicular line created from point p will have this Y intercept.
 
         // c = y - mx
-
         float yInterceptPerpendicular = p.y - gradientPerpendicular * p.x;
         
         // Our original line has y = mx + c

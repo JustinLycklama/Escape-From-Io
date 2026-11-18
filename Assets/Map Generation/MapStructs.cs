@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -143,13 +143,6 @@ public struct PathGridCoordinate {
         return Script.Get<MapsManager>().PathGridCoordinateFromMapCoordinate(mapCoordinate);
     }
 
-    //public PathGridCoordinate(MapCoordinate mapCoordinate) {
-    //    Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();
-
-    //    x = mapCoordinate.x / constants.featuresPerLayoutPerAxis * constants.nodesPerLayoutPerAxis;
-    //    y = mapCoordinate.y / constants.featuresPerLayoutPerAxis * constants.nodesPerLayoutPerAxis;
-    //}
-
     public static PathGridCoordinate[][] pathCoordiatesFromLayoutCoordinate (LayoutCoordinate layoutCoordinate) {
         Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();
 
@@ -199,14 +192,6 @@ public struct MapCoordinate {
         return Script.Get<MapsManager>().MapCoordinateFromPathGridCoordinate(pathGridCoordinate);
     }
 
-    //public MapCoordinate(PathGridCoordinate pathGridCoordinate) {
-    //    Constants constants = Script.Get<Constants>();
-
-    //    x = pathGridCoordinate.x / constants.nodesPerLayoutPerAxis * constants.featuresPerLayoutPerAxis;
-    //    y = pathGridCoordinate.y / constants.nodesPerLayoutPerAxis * constants.featuresPerLayoutPerAxis;
-
-    //}
-
         
     // Get the center MapCoordinate
     public MapCoordinate(LayoutCoordinate layoutCoordinate) {
@@ -240,14 +225,6 @@ public struct MapCoordinate {
 
         return Script.Get<MapsManager>().MapCoordinateFromWorld(worldPosition);
 
-        //GameObject map = Tag.Map.GetGameObject();
-        //Transform mapObjectSpace = map.transform;
-        //Constants constants = Tag.Narrator.GetGameObject().GetComponent<Constants>();
-
-        //Vector3 mapPosition = mapObjectSpace.InverseTransformPoint(worldPosition.vector3);
-
-        //x = mapPosition.x + constants.mapWidth / 2f;
-        //y = - mapPosition.z + constants.mapHeight / 2f;
     }
     
     public MapCoordinate(float x, float y, MapContainer mapContainer) {
@@ -325,10 +302,6 @@ public struct WorldPosition {
         y = position.y;
         z = position.z;
     }    
-
-    //public static WorldPosition FromGridCoordinate(PathGridCoordinate pathGridCoordinate) {
-    //    return Script.Get<MapsManager>().mapCoordinateFromPathGridCoordinate(pathGridCoordinate);
-    //}
 
     public WorldPosition(MapCoordinate mapCoordinate) {
         MapContainer mapContainer = mapCoordinate.mapContainer;

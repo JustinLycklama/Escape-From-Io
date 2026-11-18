@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UCharts;
@@ -57,13 +57,6 @@ public class AttackersCell : MonoBehaviour, UnitManagerDelegate, GameButtonDeleg
 
     public void ButtonDidClick(GameButton button) {
 
-        //if(button == taskListLockButton) {
-        //    TaskQueueManager taskQueueManager = Script.Get<TaskQueueManager>();
-        //    var newState = !taskQueueManager.GetTaskListLockStatus(actionType);
-
-        //    SetLockState(newState);
-        //    taskQueueManager.SetTaskListLocked(actionType, newState);
-        //}
     }
 
     /*

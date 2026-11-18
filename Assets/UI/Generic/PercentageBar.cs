@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -17,18 +17,9 @@ public class PercentageBar : MonoBehaviour/*, TrackingUIInterface*/ {
     private int has;
     private string unitOfMeasure;
 
-    // TrackingUIInterface
-    //public Transform toFollow { get; set; }
-    //public CanvasGroup canvas;
-    //public CanvasGroup canvasGroup { get => canvas; }
-
     private void Awake() {
         SetDisplayType(DisplayType.Bar);
     }
-
-    //private void Update() {
-    //    this.UpdateTrackingPosition();
-    //}
 
     private void SetDisplayType(DisplayType type) {
         displayType = type;

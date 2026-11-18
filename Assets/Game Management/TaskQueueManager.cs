@@ -41,13 +41,6 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
     // Hack for restarting queue manager on crash
     public DateTime lastDished = DateTime.Now;
 
-    //List<MasterGameTask> taskList;
-    //UIManager uiManager;
-
-    //List<MasterGameTask> mineTaskList;
-    //List<MasterGameTask> moveTaskList;
-    //List<MasterGameTask> buildTaskList;
-
     // Whether if a task list is Locked or not
     Dictionary<MasterGameTask.ActionType, bool> taskListLockMap;
 
@@ -62,9 +55,6 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
 
     void Awake()
     {
-        //mineTaskList = new List<MasterGameTask>();
-        //moveTaskList = new List<MasterGameTask>();
-        //buildTaskList = new List<MasterGameTask>();
 
         taskListMap = new Dictionary<MasterGameTask.ActionType, List<MasterGameTask>>();
         delegateListMap = new Dictionary<MasterGameTask.ActionType, List<TaskQueueDelegate>>();
@@ -223,19 +213,6 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
         taskListMap[task.actionType].Add(task);
         NotifyDelegates(task.actionType);
 
-        //switch(task.actionType) {
-        //    case MasterGameTask.ActionType.Mine:
-        //        mineTaskList.Add(task);
-        //        break;
-        //    case MasterGameTask.ActionType.Build:
-        //        buildTaskList.Add(task);
-        //        break;
-        //    case MasterGameTask.ActionType.Move:
-        //        moveTaskList.Add(task);
-        //        break;
-        //}
-
-        //uiManager.UpdateTaskList(mineTaskList.InsertRange(moveTaskList.Count, moveTaskList).toArray());
     }
 
     public void DeQueueTask(MasterGameTask task) {
@@ -583,8 +560,6 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
     }
 
     private List<DistanceAndTask> geAvailableTaskDistancesFromList(List<MasterGameTask> taskList, Unit unit, bool lastPriorityTasks, HashSet<int> refuseTaskList = null) {
-        //float shortestDistance = float.MaxValue;
-        //MasterGameTask shortestTask = null;
 
         List<DistanceAndTask> distanceAndTasks = new List<DistanceAndTask>();
 
@@ -606,16 +581,8 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
 
                     distanceAndTasks.Add(new DistanceAndTask(masterTask, distance));
 
-                    //if(distance < shortestDistance) {
-                    //    shortestDistance = distance;
-                    //    shortestTask = masterTask;
-                    //}
                 } else {
                     distanceAndTasks.Add(new DistanceAndTask(masterTask, float.MaxValue));
-
-                    //if(shortestTask == null) {
-                    //    shortestTask = masterTask;
-                    //}
 
                     // If we have an unknown task, this is the end of our search. 
                     // Either we have a task above that is more important, and the shortest of those is the victor, or we use this unknown as the shortest task;
@@ -630,23 +597,5 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
 
         return distanceAndTasks;
 
-        //if(shortestTask != null) {
-
-        //    if (shortestTask.repeatCount == 0) {
-        //        taskList.Remove(shortestTask);
-        //    } else {
-        //        MasterGameTask masterTask = shortestTask;
-        //        shortestTask = shortestTask.CloneTask();
-
-        //        if (masterTask.repeatCount == 0) {
-        //            taskList.Remove(masterTask);
-        //        }
-        //    }
-
-        //    NotifyDelegates(shortestTask.actionType);
-        //    //uiManager.UpdateTaskList(taskList.ToArray());
-        //}
-
-        //return shortestTask;
     }
 }

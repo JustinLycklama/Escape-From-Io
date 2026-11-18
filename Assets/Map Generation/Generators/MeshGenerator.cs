@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -16,11 +16,6 @@ public static class MeshGenerator {
         MeshData meshData = new MeshData(width, height, constants.featuresPerLayoutPerAxis);
 
         for (int y = 0; y < height; y++) {
-
-            // If we are on a y-row that needs duplicates, do the set of non-triangle verticies first
-            //if((y + 1) % featuresPerLayoutPerAxis == 0) {
-            //    DoAllXFor(y, topLeftX, topLeftZ, width, height, heightMap, meshData, featuresPerLayoutPerAxis, false);
-            //}
 
             DoAllXFor(y, topLeftX, topLeftZ, width, height, heightMap, meshData, constants.featuresPerLayoutPerAxis, true);
         }

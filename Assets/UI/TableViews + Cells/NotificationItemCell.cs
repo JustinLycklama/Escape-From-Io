@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -69,7 +69,5 @@ public class NotificationItemCell : MonoBehaviour, GameButtonDelegate {
      * */
 
     public void ButtonDidClick(GameButton button) {
-        //if(notificationItem != null && notificationItem.notificationPosition != null)
-        //    Script.Get<PlayerBehaviour>().PanCameraToPosition(notificationItem.notificationPosition.position);
     }
 }

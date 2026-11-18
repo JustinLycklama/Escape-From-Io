@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -20,19 +20,13 @@ public class CurrentSelectionPanelDetailed : NavigationPanel, SelectionManagerDe
     [SerializeField]
     private TerrainDetailPanel terrainDetailPanel = null;
     
-    //public MasterAndGameTaskCell taskItemCell;
-
 
     public ActionsList actionsList;
-
-    //public CameraPanel cameraPanel;
 
     override protected void Start() {
         base.Start();
         title.text = noSelectionText;
         Script.Get<SelectionManager>().RegisterForNotifications(this);
-
-        //NotifyUpdateSelection(null);
 
         unitDetailPanel.durationBar = percentageBar;
     }
@@ -67,12 +61,6 @@ public class CurrentSelectionPanelDetailed : NavigationPanel, SelectionManagerDe
      * */
 
     public void NotifyUpdateSelection(Selection nextSelection) {
-
-        //if(currentSelection != null && currentSelection.selectionType == Selection.SelectionType.Selectable && currentSelection.selection is TaskStatusNotifiable) {
-        //    (currentSelection.selection as TaskStatusNotifiable).EndNotifications(this);
-        //}
-
-        //cameraPanel.SetSelection(nextSelection);
 
         if (currentSelection != null) {
             currentSelection.EndSubscriptionToUserActions(this);

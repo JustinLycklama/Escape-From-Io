@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -71,22 +71,11 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
     [SerializeField]
     private Sprite lockedIcon = null;
 
-    //public Toggle taskListLocked;
-    //public Text taskListLockedText;
-
-    //public Image mainPairConnection;
-    //public Image[] sidePairConnection;
-
-
-    //public Image unitBackgroundSprite;
-    //public Image taskBackgroundSprite;
 
     private List<Unit> soonToExpireUnits = new List<Unit>();
 
     private Unit[] unitList = new Unit[0];
     private MasterGameTask[] taskList = new MasterGameTask[0];
-
-    //private Unit.UnitState unitListState = Unit.UnitState.Idle;
 
     private void Start() {
         iconTitle.text = actionType.ToString();
@@ -133,7 +122,6 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
 
 
     private void UpdatePieChart(Unit[] unitList) {
-        //unitBackgroundSprite.color = unitListState.ColorForState();     
 
         List<Unit.UnitState> unitStates = unitList.Select(unit => unit.GetUnitState()).ToList();
         var idleNode = new PieChartDataNode("", unitStates.Where(state => state == Unit.UnitState.Idle).Count());
@@ -148,27 +136,6 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
     }
 
     private void SetLockState(bool state) {
-        //taskListLocked.SetState(state);
-
-        //Unit.UnitState taskListColorState = state ? Unit.UnitState.Efficient : Unit.UnitState.Inefficient;
-        //taskBackgroundSprite.color = taskListColorState.ColorForState();
-
-        //Color mainPairConnectionColor = mainPairConnection.color;
-        //Color sidePairConnectionColor = mainPairConnectionColor;
-
-        //if (state == true) {
-        //    mainPairConnectionColor.a = 1f;
-        //    sidePairConnectionColor.a = 0.1f;
-        //} else {
-        //    mainPairConnectionColor.a = 0.5f;
-        //    sidePairConnectionColor.a = 0.8f;
-        //}
-
-        //mainPairConnection.color = mainPairConnectionColor;
-
-        //foreach(Image image in sidePairConnection) {
-        //    image.color = sidePairConnectionColor;
-        //}        
 
         foreach(TaskIconFlow flow in taskIconFlowList.Where(flow => flow.actionType != actionType)) {
             flow.flowImage.sprite = !state ? openIcon : lockedIcon;
@@ -183,10 +150,7 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
     }
 
     private void UpdateLockAndCountUI() {
-        //string stateText = taskListLocked.state ? "Paired" : "Open";
-        //string count = taskList.Length.ToString();
 
-        //taskListLockedText.text = $"{count} {stateText}";
         taskCountText.text = taskList.Select(task => {
             if (task.repeatCount > 0) {
                 return task.repeatCount;
@@ -267,7 +231,6 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
 
         SetLockState(Script.Get<TaskQueueManager>().GetTaskListLockStatus(actionType));
 
-        //UpdatePieChart();
     }
 
     /*
@@ -276,11 +239,6 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
 
     public void NotifyUpdateUnitList(Unit[] unitList, MasterGameTask.ActionType actionType) {
         this.unitList = unitList;
-
-        //this.unitListState = unitListState;
-
-        //unitCountText.text = unitList.Length + " Unit" + ((unitList.Length == 1) ? "" : "s");
-        //unitStatusText.text = unitListState.decription();
 
         UpdatePieChart(unitList);
         soonToExpireUnits = unitList.OrderBy(unit => unit.remainingDuration).Take(percentBars.Count).ToList();        
@@ -291,8 +249,6 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
      * */
 
     public void SecondUpdated() {
-
-        //DateTime now = DateTime.Now;
 
         for(int i = 0; i < percentBars.Count; i++) {
             PercentageBar bar = percentBars[i];

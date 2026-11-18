@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
@@ -119,8 +119,6 @@ public class BuildingManager : MonoBehaviour {
             AddBuildingAffectingStatusMap(building, layoutCoordinate);
         }
         
-        //ModifyStatusCircularAroundPoint(x, y, building.BuildingStatusEffects(), building.BuildingStatusRange());
-
         NotifyBuildingUpdate(building, false);
         TutorialManager.sharedInstance.Fire(TutorialTrigger.BuildingComplete);
     }

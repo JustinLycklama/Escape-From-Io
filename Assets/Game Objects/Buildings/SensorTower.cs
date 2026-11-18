@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -82,9 +82,6 @@ public class SensorTower : RotatingBuilding, TerrainUpdateDelegate {
     private void ResetTower() {
         arrow.SetActive(false);
 
-        //Quaternion endRotation = Quaternion.Euler(angles);
-
-        //StartCoroutine(AttemptToRotate(new Vector3(0, 0, 0), 2));
     }
 
     private void RotateToNearestAzure() {

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -27,14 +27,12 @@ public class Tag {
     private static Dictionary<Tag, GameObject> objectCache = new Dictionary<Tag, GameObject>();    
 
     public static Tag Narrator { get { return new Tag("Narrator"); } }
-    //public static Tag Map { get { return new Tag("Map"); } }
     public static Tag MapsManager { get { return new Tag("MapsManager"); } }
     public static Tag UnitManager { get { return new Tag("UnitManager"); } }
     public static Tag MapGenerator { get { return new Tag("MapGenerator"); } }
     public static Tag AStar { get { return new Tag("AStar"); } }
     public static Tag UIManager { get { return new Tag("UIManager"); } }
     public static Tag UIOverlayPanel { get { return new Tag("UIOverlayPanel"); } }
-    //public static Tag UIArea { get { return new Tag("UIArea"); } }
     public static Tag ResourceManager { get { return new Tag("ResourceManager"); } }
     public static Tag MiniMap { get { return new Tag("MiniMap"); } }
     public static Tag BuildingManager { get { return new Tag("BuildingManager"); } }
@@ -82,7 +80,6 @@ public class Script {
 
     public static Script Constants { get { return new Script(Tag.Narrator, typeof(Constants)); } }
     public static Script PlayerBehaviour { get { return new Script(Tag.Narrator, typeof(PlayerBehaviour)); } }
-    //public static Script MapContainer { get { return new Script(Tag.Map, typeof(MapContainer)); } }
     public static Script MapsManager { get { return new Script(Tag.MapsManager, typeof(MapsManager)); } }
     public static Script UIManager { get { return new Script(Tag.UIManager, typeof(UIManager)); } }
     public static Script TaskQueue { get { return new Script(Tag.Narrator, typeof(TaskQueueManager)); } }

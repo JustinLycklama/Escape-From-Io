@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
@@ -16,8 +16,6 @@ public class CostPanel : MonoBehaviour {
     private bool tallyMode = false;
     private BlueprintCost cost;
     protected Dictionary<MineralType, int> tallyCountDictionary = new Dictionary<MineralType, int>();
-
-    //private int
 
     private void Awake() {
         orderedCells = new List<ImageValueCell>() { firstCell, secondCell, thirdCellll };        

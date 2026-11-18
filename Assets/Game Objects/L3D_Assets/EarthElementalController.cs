@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -31,28 +31,6 @@ public class EarthElementalController : AnimationController
 
     public void DieEvent() {
 
-        //instanceDieMesh.SetActive(true);
-
-        //GameObject dieMesh = (GameObject)Instantiate(instanceDieMesh, transform.position, transform.rotation);
-        //dieMesh.transform.localScale = transform.localScale;
-        //dieMesh.transform.parent = transform.parent.parent;
-        //dieMesh.SetActive(true);
-
-        //mainInstanceMesh.SetActive(false);
-
-        //dieMesh.transform.localScale = new Vector3(1, 1, 1);
-
-        //if(Demo.curmat == 0) {
-        //    GameObject G = (GameObject)Instantiate(Demo.DieAnim[0], Istancer.position, Istancer.rotation);
-        //    Demo.instanceDieMesh = G;
-        //    Demo.instanceDieMesh.transform.parent = Demo.T;
-        //    G.SetActive(true);
-        //} else {
-        //    GameObject G = (GameObject)Instantiate(Demo.DieAnim[1], Istancer.position, Istancer.rotation);
-        //    Demo.instanceDieMesh = G;
-        //    G.SetActive(true);
-        //}
-        //EartElemental.SetActive(false);
     }
 
     public override void AnimateState(Unit.AnimationState state, float rate = 1.0f, bool isCarry = false) {

@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -27,9 +27,6 @@ public abstract class AnimationController : MonoBehaviour, PlayerBehaviourUpdate
         if (currentState == state) {
             return;
         }
-
-        //print("AnimateSpeed: " + animator.speed);
-        //print("Animate State: " + StringConstantForState(state, isCarry));
 
         animator.Play(StringConstantForState(state, isCarry));
         currentState = state;

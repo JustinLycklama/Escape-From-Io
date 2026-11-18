@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -13,14 +13,11 @@ public class UIManager : MonoBehaviour, SelectionManagerDelegate, HotkeyDelegate
 
         public Blueprint(string fileName,  Type type) : base(folder+fileName, type) { }
 
-        //public static Blueprint PercentageBar = new Blueprint("PercentageBar", typeof(PercentageBar));
         public static Blueprint CostPanel = new Blueprint("CostPanelTooltip", typeof(CostPanelTooltip));
         public static Blueprint TaskAndUnitDetail = new Blueprint("TaskAndUnitDetailPanel", typeof(TaskAndUnitDetailPanel));
         public static Blueprint BlueprintPanel = new Blueprint("BlueprintPanel", typeof(BlueprintPanel));
         public static Blueprint CurrentSelectionPanel = new Blueprint("CurrentSelectionPanel", typeof(CurrentSelectionPanel));
     }
-
-    //public Text selectionTitle;
 
     [SerializeField]
     public NavigationPanel currentTopPanel;
@@ -97,15 +94,5 @@ public class UIManager : MonoBehaviour, SelectionManagerDelegate, HotkeyDelegate
         Pop();
     }
 
-    //public void SetSelection(Selection selection) {
-    //    this.selection = selection;
 
-    //    selectionTitle.text = selection.Title();
-
-
-    //    //actionsTable.ReloadData(this);
-
-    //    //button.enabled = selection.selectionType == Selection.SelectionType.Terrain;
-
-    //}
 }

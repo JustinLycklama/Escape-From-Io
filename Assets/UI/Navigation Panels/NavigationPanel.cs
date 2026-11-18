@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,8 +9,6 @@ public class NavigationPanel : MonoBehaviour, GameButtonDelegate
     public NavigationPanel backTrace;
     [HideInInspector]
     public Transform positionParent;
-
-    //private GameObject defaultBackButtonObject;
 
     [SerializeField]
     private GameButton backButton = null;

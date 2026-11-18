@@ -27,8 +27,6 @@ public class UnitManager : MonoBehaviour, TaskStatusUpdateDelegate {
     Dictionary<MasterGameTask.ActionType, List<Unit>> unitListMap;
     Dictionary<MasterGameTask.ActionType, List<UnitManagerDelegate>> delegateListMap;
 
-    //Dictionary<MasterGameTask.ActionType, Unit.UnitState> unitListStateMap;
-
     public static Dictionary<MasterGameTask.ActionType, int> backingUnitCount;
     public static Dictionary<MasterGameTask.ActionType, int> unitCount {
         get {
@@ -52,13 +50,10 @@ public class UnitManager : MonoBehaviour, TaskStatusUpdateDelegate {
         unitListMap = new Dictionary<MasterGameTask.ActionType, List<Unit>>();
         delegateListMap = new Dictionary<MasterGameTask.ActionType, List<UnitManagerDelegate>>();
 
-        //unitListStateMap = new Dictionary<MasterGameTask.ActionType, Unit.UnitState>();
-
         foreach(MasterGameTask.ActionType actionType in new MasterGameTask.ActionType[] { MasterGameTask.ActionType.Build, MasterGameTask.ActionType.Mine, MasterGameTask.ActionType.Move, MasterGameTask.ActionType.Attack }) {
             unitListMap[actionType] = new List<Unit>();
             delegateListMap[actionType] = new List<UnitManagerDelegate>();
 
-            //unitListStateMap[actionType] = Unit.UnitState.Idle;
         }
     }
 
@@ -103,23 +98,6 @@ public class UnitManager : MonoBehaviour, TaskStatusUpdateDelegate {
     }
 
     private void RecalculateStatus(MasterGameTask.ActionType actionType) {
-
-        //if (unitListMap[actionType].Count == 0) {
-        //    unitListStateMap[actionType] = Unit.UnitState.Idle;
-        //} else {
-
-        //    Unit.UnitState lowestUnitState = Unit.UnitState.Efficient;
-
-        //    foreach(Unit unit in unitListMap[actionType]) {
-        //        Unit.UnitState unitState = unit.GetUnitState();
-
-        //        if(unitState.ranking() < lowestUnitState.ranking()) {
-        //            lowestUnitState = unitState;
-        //        }
-        //    }
-
-        //    unitListStateMap[actionType] = lowestUnitState;
-        //}
 
         NotifyDelegates(actionType);
     }
