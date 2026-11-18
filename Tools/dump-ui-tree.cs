@@ -1,13 +1,14 @@
-// Editor eval: dump the GameScene screen-space canvas tree (to DEPTH) with active state, anchors, size, position and key components.
+// Editor eval: dump a scene's screen-space canvas tree (to DEPTH) with active state, anchors, size, position and key components.
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 using System.Linq;
 using System.Text;
 
-const int DEPTH = 4;
+const int DEPTH = 6;
+const string SCENE = "Assets/Scenes/TitleScene.unity";   // or GameScene.unity
 var sb = new StringBuilder();
-EditorSceneManager.OpenScene("Assets/Scenes/GameScene.unity", OpenSceneMode.Single);
+EditorSceneManager.OpenScene(SCENE, OpenSceneMode.Single);
 var canvas = Object.FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None)
     .First(c => c.isRootCanvas && c.renderMode == RenderMode.ScreenSpaceOverlay);
 
