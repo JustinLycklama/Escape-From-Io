@@ -378,6 +378,8 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
         while(true) {
             yield return new WaitForSeconds(5);
 
+            PathRequestManager.ResetIfStuck(5f);
+
             TaskQueueManager manager = Script.Get<TaskQueueManager>();
             double secondsSinceDished = (DateTime.Now - manager.lastDished).TotalSeconds;
             if (secondsSinceDished > 4) {
