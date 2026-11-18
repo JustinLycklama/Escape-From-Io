@@ -1,112 +1,274 @@
 fileFormatVersion: 2
 guid: 454dde309cfb6c34891a2ee04215a1f9
-timeCreated: 1479607512
-licenseType: Store
 ModelImporter:
-  serializedVersion: 19
-  fileIDToRecycleName:
-    100000: back_leg_nub
-    100002: back_leg_toe
-    100004: back_lower_leg
-    100006: back_upper_leg
-    100008: front_leg_nub
-    100010: front_leg_toe
-    100012: front_lower_leg
-    100014: front_upper_leg
-    100016: hips
-    100018: left_leg_nub
-    100020: left_leg_toe
-    100022: left_lower_leg
-    100024: left_shoulder
-    100026: left_upper_leg1
-    100028: left_weapon_mount
-    100030: left_weapon_nub
-    100032: //RootNode
-    100034: mech_destroyer1
-    100036: right_leg_nub
-    100038: right_leg_toe
-    100040: right_lower_leg
-    100042: right_shoulder
-    100044: right_upper_leg1
-    100046: right_weapon_mount
-    100048: right_weapon_nub
-    100050: torso
-    400000: back_leg_nub
-    400002: back_leg_toe
-    400004: back_lower_leg
-    400006: back_upper_leg
-    400008: front_leg_nub
-    400010: front_leg_toe
-    400012: front_lower_leg
-    400014: front_upper_leg
-    400016: hips
-    400018: left_leg_nub
-    400020: left_leg_toe
-    400022: left_lower_leg
-    400024: left_shoulder
-    400026: left_upper_leg1
-    400028: left_weapon_mount
-    400030: left_weapon_nub
-    400032: //RootNode
-    400034: mech_destroyer1
-    400036: right_leg_nub
-    400038: right_leg_toe
-    400040: right_lower_leg
-    400042: right_shoulder
-    400044: right_upper_leg1
-    400046: right_weapon_mount
-    400048: right_weapon_nub
-    400050: torso
-    4300000: mech_destroyer1
-    7400000: idle1
-    7400002: idle2
-    7400004: idle3
-    7400006: idle4
-    7400008: walk
-    7400010: run
-    7400012: stand attack left
-    7400014: stand attack right
-    7400016: crouch
-    7400018: crouch hold
-    7400020: crouch attack left
-    7400022: crouch attack right
-    7400024: stand
-    7400026: jump
-    7400028: jump hold
-    7400030: jump fall
-    7400032: hit1
-    7400034: hit2
-    7400036: death fall back
-    7400038: death fall forward
-    7400040: death fall on knees
-    7400042: t-pose
-    7400044: demo
-    9500000: //RootNode
-    13700000: mech_destroyer1
+  serializedVersion: 24300
+  internalIDToNameTable:
+  - first:
+      1: 100000
+    second: back_leg_nub
+  - first:
+      1: 100002
+    second: back_leg_toe
+  - first:
+      1: 100004
+    second: back_lower_leg
+  - first:
+      1: 100006
+    second: back_upper_leg
+  - first:
+      1: 100008
+    second: front_leg_nub
+  - first:
+      1: 100010
+    second: front_leg_toe
+  - first:
+      1: 100012
+    second: front_lower_leg
+  - first:
+      1: 100014
+    second: front_upper_leg
+  - first:
+      1: 100016
+    second: hips
+  - first:
+      1: 100018
+    second: left_leg_nub
+  - first:
+      1: 100020
+    second: left_leg_toe
+  - first:
+      1: 100022
+    second: left_lower_leg
+  - first:
+      1: 100024
+    second: left_shoulder
+  - first:
+      1: 100026
+    second: left_upper_leg1
+  - first:
+      1: 100028
+    second: left_weapon_mount
+  - first:
+      1: 100030
+    second: left_weapon_nub
+  - first:
+      1: 100032
+    second: //RootNode
+  - first:
+      1: 100034
+    second: mech_destroyer1
+  - first:
+      1: 100036
+    second: right_leg_nub
+  - first:
+      1: 100038
+    second: right_leg_toe
+  - first:
+      1: 100040
+    second: right_lower_leg
+  - first:
+      1: 100042
+    second: right_shoulder
+  - first:
+      1: 100044
+    second: right_upper_leg1
+  - first:
+      1: 100046
+    second: right_weapon_mount
+  - first:
+      1: 100048
+    second: right_weapon_nub
+  - first:
+      1: 100050
+    second: torso
+  - first:
+      4: 400000
+    second: back_leg_nub
+  - first:
+      4: 400002
+    second: back_leg_toe
+  - first:
+      4: 400004
+    second: back_lower_leg
+  - first:
+      4: 400006
+    second: back_upper_leg
+  - first:
+      4: 400008
+    second: front_leg_nub
+  - first:
+      4: 400010
+    second: front_leg_toe
+  - first:
+      4: 400012
+    second: front_lower_leg
+  - first:
+      4: 400014
+    second: front_upper_leg
+  - first:
+      4: 400016
+    second: hips
+  - first:
+      4: 400018
+    second: left_leg_nub
+  - first:
+      4: 400020
+    second: left_leg_toe
+  - first:
+      4: 400022
+    second: left_lower_leg
+  - first:
+      4: 400024
+    second: left_shoulder
+  - first:
+      4: 400026
+    second: left_upper_leg1
+  - first:
+      4: 400028
+    second: left_weapon_mount
+  - first:
+      4: 400030
+    second: left_weapon_nub
+  - first:
+      4: 400032
+    second: //RootNode
+  - first:
+      4: 400034
+    second: mech_destroyer1
+  - first:
+      4: 400036
+    second: right_leg_nub
+  - first:
+      4: 400038
+    second: right_leg_toe
+  - first:
+      4: 400040
+    second: right_lower_leg
+  - first:
+      4: 400042
+    second: right_shoulder
+  - first:
+      4: 400044
+    second: right_upper_leg1
+  - first:
+      4: 400046
+    second: right_weapon_mount
+  - first:
+      4: 400048
+    second: right_weapon_nub
+  - first:
+      4: 400050
+    second: torso
+  - first:
+      43: 4300000
+    second: mech_destroyer1
+  - first:
+      74: 7400000
+    second: idle1
+  - first:
+      74: 7400002
+    second: idle2
+  - first:
+      74: 7400004
+    second: idle3
+  - first:
+      74: 7400006
+    second: idle4
+  - first:
+      74: 7400008
+    second: walk
+  - first:
+      74: 7400010
+    second: run
+  - first:
+      74: 7400012
+    second: stand attack left
+  - first:
+      74: 7400014
+    second: stand attack right
+  - first:
+      74: 7400016
+    second: crouch
+  - first:
+      74: 7400018
+    second: crouch hold
+  - first:
+      74: 7400020
+    second: crouch attack left
+  - first:
+      74: 7400022
+    second: crouch attack right
+  - first:
+      74: 7400024
+    second: stand
+  - first:
+      74: 7400026
+    second: jump
+  - first:
+      74: 7400028
+    second: jump hold
+  - first:
+      74: 7400030
+    second: jump fall
+  - first:
+      74: 7400032
+    second: hit1
+  - first:
+      74: 7400034
+    second: hit2
+  - first:
+      74: 7400036
+    second: death fall back
+  - first:
+      74: 7400038
+    second: death fall forward
+  - first:
+      74: 7400040
+    second: death fall on knees
+  - first:
+      74: 7400042
+    second: t-pose
+  - first:
+      74: 7400044
+    second: demo
+  - first:
+      95: 9500000
+    second: //RootNode
+  - first:
+      137: 13700000
+    second: mech_destroyer1
+  externalObjects: {}
   materials:
-    importMaterials: 1
+    materialImportMode: 1
     materialName: 0
     materialSearch: 1
+    materialLocation: 0
+    searchTexturesGlobally: 1
   animations:
     legacyGenerateAnimations: 4
     bakeSimulation: 0
     resampleCurves: 1
     optimizeGameObjects: 0
+    removeConstantScaleCurves: 0
     motionNodeName: 
     animationImportErrors: 
     animationImportWarnings: 
     animationRetargetingWarnings: 
     animationDoRetargetingWarnings: 0
+    importAnimatedCustomProperties: 0
+    importConstraints: 0
     animationCompression: 1
     animationRotationError: 0.5
     animationPositionError: 0.5
     animationScaleError: 0.5
     animationWrapMode: 0
     extraExposedTransformPaths: []
+    extraUserProperties: []
     clipAnimations:
     - serializedVersion: 16
       name: idle1
       takeName: Take 001
+      internalID: 0
       firstFrame: 375
       lastFrame: 430
       wrapMode: 0
@@ -187,6 +349,7 @@ ModelImporter:
     - serializedVersion: 16
       name: idle2
       takeName: Take 001
+      internalID: 0
       firstFrame: 435
       lastFrame: 515
       wrapMode: 0
@@ -267,6 +430,7 @@ ModelImporter:
     - serializedVersion: 16
       name: idle3
       takeName: Take 001
+      internalID: 0
       firstFrame: 520
       lastFrame: 600
       wrapMode: 0
@@ -347,6 +511,7 @@ ModelImporter:
     - serializedVersion: 16
       name: idle4
       takeName: Take 001
+      internalID: 0
       firstFrame: 605
       lastFrame: 670
       wrapMode: 0
@@ -427,6 +592,7 @@ ModelImporter:
     - serializedVersion: 16
       name: walk
       takeName: Take 001
+      internalID: 0
       firstFrame: 10
       lastFrame: 40
       wrapMode: 0
@@ -507,6 +673,7 @@ ModelImporter:
     - serializedVersion: 16
       name: run
       takeName: Take 001
+      internalID: 0
       firstFrame: 45
       lastFrame: 75
       wrapMode: 0
@@ -587,6 +754,7 @@ ModelImporter:
     - serializedVersion: 16
       name: stand attack left
       takeName: Take 001
+      internalID: 0
       firstFrame: 80
       lastFrame: 89
       wrapMode: 0
@@ -667,6 +835,7 @@ ModelImporter:
     - serializedVersion: 16
       name: stand attack right
       takeName: Take 001
+      internalID: 0
       firstFrame: 90
       lastFrame: 99
       wrapMode: 0
@@ -747,6 +916,7 @@ ModelImporter:
     - serializedVersion: 16
       name: crouch
       takeName: Take 001
+      internalID: 0
       firstFrame: 100
       lastFrame: 110
       wrapMode: 0
@@ -827,6 +997,7 @@ ModelImporter:
     - serializedVersion: 16
       name: crouch hold
       takeName: Take 001
+      internalID: 0
       firstFrame: 110
       lastFrame: 114
       wrapMode: 0
@@ -907,6 +1078,7 @@ ModelImporter:
     - serializedVersion: 16
       name: crouch attack left
       takeName: Take 001
+      internalID: 0
       firstFrame: 115
       lastFrame: 124
       wrapMode: 0
@@ -987,6 +1159,7 @@ ModelImporter:
     - serializedVersion: 16
       name: crouch attack right
       takeName: Take 001
+      internalID: 0
       firstFrame: 125
       lastFrame: 134
       wrapMode: 0
@@ -1067,6 +1240,7 @@ ModelImporter:
     - serializedVersion: 16
       name: stand
       takeName: Take 001
+      internalID: 0
       firstFrame: 135
       lastFrame: 145
       wrapMode: 0
@@ -1147,6 +1321,7 @@ ModelImporter:
     - serializedVersion: 16
       name: jump
       takeName: Take 001
+      internalID: 0
       firstFrame: 145
       lastFrame: 158
       wrapMode: 0
@@ -1227,6 +1402,7 @@ ModelImporter:
     - serializedVersion: 16
       name: jump hold
       takeName: Take 001
+      internalID: 0
       firstFrame: 159
       lastFrame: 162
       wrapMode: 0
@@ -1307,6 +1483,7 @@ ModelImporter:
     - serializedVersion: 16
       name: jump fall
       takeName: Take 001
+      internalID: 0
       firstFrame: 163
       lastFrame: 175
       wrapMode: 0
@@ -1387,6 +1564,7 @@ ModelImporter:
     - serializedVersion: 16
       name: hit1
       takeName: Take 001
+      internalID: 0
       firstFrame: 180
       lastFrame: 190
       wrapMode: 0
@@ -1467,6 +1645,7 @@ ModelImporter:
     - serializedVersion: 16
       name: hit2
       takeName: Take 001
+      internalID: 0
       firstFrame: 195
       lastFrame: 205
       wrapMode: 0
@@ -1547,6 +1726,7 @@ ModelImporter:
     - serializedVersion: 16
       name: death fall back
       takeName: Take 001
+      internalID: 0
       firstFrame: 210
       lastFrame: 235
       wrapMode: 0
@@ -1627,6 +1807,7 @@ ModelImporter:
     - serializedVersion: 16
       name: death fall forward
       takeName: Take 001
+      internalID: 0
       firstFrame: 240
       lastFrame: 270
       wrapMode: 0
@@ -1707,6 +1888,7 @@ ModelImporter:
     - serializedVersion: 16
       name: death fall on knees
       takeName: Take 001
+      internalID: 0
       firstFrame: 275
       lastFrame: 365
       wrapMode: 0
@@ -1787,6 +1969,7 @@ ModelImporter:
     - serializedVersion: 16
       name: t-pose
       takeName: Take 001
+      internalID: 0
       firstFrame: 1
       lastFrame: 5
       wrapMode: 0
@@ -1867,6 +2050,7 @@ ModelImporter:
     - serializedVersion: 16
       name: demo
       takeName: Take 001
+      internalID: 0
       firstFrame: 10
       lastFrame: 670
       wrapMode: 0
@@ -1950,25 +2134,52 @@ ModelImporter:
     globalScale: 50
     meshCompression: 0
     addColliders: 0
+    useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
+    importPhysicalCameras: 0
+    importVisibility: 0
     importBlendShapes: 1
+    importCameras: 0
+    importLights: 0
+    nodeNameCollisionStrategy: 0
+    fileIdsGeneration: 1
     swapUVChannels: 0
     generateSecondaryUV: 0
     useFileUnits: 1
-    optimizeMeshForGPU: 1
     keepQuads: 0
     weldVertices: 1
+    bakeAxisConversion: 0
+    preserveHierarchy: 0
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    optimizeBones: 1
+    generateMeshLods: 0
+    meshLodGenerationFlags: 0
+    maximumMeshLod: -1
+    meshOptimizationFlags: -1
+    indexFormat: 1
     secondaryUVAngleDistortion: 8
     secondaryUVAreaDistortion: 15.000001
     secondaryUVHardAngle: 88
+    secondaryUVMarginMethod: 0
+    secondaryUVMinLightmapResolution: 40
+    secondaryUVMinObjectScale: 1
     secondaryUVPackMargin: 4
     useFileScale: 1
+    strictVertexDataChecks: 0
   tangentSpace:
     normalSmoothAngle: 60
     normalImportMode: 0
     tangentImportMode: 3
+    normalCalculationMode: 0
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 1
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  referencedClips: []
   importAnimation: 1
-  copyAvatar: 0
   humanDescription:
+    serializedVersion: 3
     human: []
     skeleton: []
     armTwist: 0.5
@@ -1978,11 +2189,19 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
+    globalScale: 50
     rootMotionBoneName: 
     hasTranslationDoF: 0
+    hasExtraRoot: 0
+    skeletonHasParents: 0
   lastHumanDescriptionAvatarSource: {instanceID: 0}
+  autoGenerateAvatarMappingIfUnspecified: 1
   animationType: 2
   humanoidOversampling: 1
+  avatarSetup: 1
+  addHumanoidExtraRootOnlyWhenUsingAvatar: 0
+  importBlendShapeDeformPercent: 0
+  remapMaterialsIfMaterialImportModeIsNone: 1
   additionalBone: 0
   userData: 
   assetBundleName: 
