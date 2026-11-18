@@ -69,6 +69,7 @@ Everything else in `Assets/` is asset-store/vendor content: **don't modify it, a
 - **Coordinates**: be explicit about which space a value is in (`LayoutCoordinate` / `MapCoordinate` / `PathGridCoordinate` / `WorldPosition`) and use the
   conversion helpers in `MapStructs.cs` / `MapsManager`.
 - **Tutorial hooks**: gameplay code calls `TutorialManager.sharedInstance.Fire(TutorialTrigger.X)`. Keep these when refactoring.
+- **UI**: follow ARCHITECTURE.md → UI style guide (1600×900 canvas reference, Agency FB + DS-DIGI only, size steps, spacing). Review with `Tools/capture-ui-review.ps1`.
 - Style: K&R braces on the same line, `camelCase` fields, `PascalCase` methods, interfaces named `…Delegate` without an `I` prefix. Match the surrounding code.
 
 ## Gotchas
