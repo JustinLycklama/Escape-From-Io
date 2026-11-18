@@ -189,6 +189,9 @@ between 0.2 and 4 per minute. `evolution` ramps 0→1 over 25 minutes and scales
 ## Time, input, UI
 
 - `TimeManager`: game clock, pausable (`PlayerBehaviour.gamePaused` / internal pause), and timers via `AddNewTimer(seconds, update, complete)`.
+- **Minimap** (#18, `GUI Overlay Panel/MinimapDock`): 220×220 at bottom right. `MiniMap` is schematic: icons for the camera, miners, ore and
+  towers, placed as a percentage of `MapsManager.mapsBoundaries` (no terrain image). `MiniMapNavigation` inverts that mapping, so click or drag pans
+  the camera. The old bottom-left slide-out (`OverviewPanel`) is retired, inactive in the scene.
 - **Command card** (#17): selecting a tile pushes `CurrentSelectionPanel` (prefab in `Resources/UI`) as a 640×150 card at bottom centre.
   It shows the tile title, a task line (only when the tile has a task), and one row of action buttons (only real actions; `ActionsList` hides empty slots).
   The back button is the close button in the top-right corner; Q also closes it. Sub-panels pushed from it (`BlueprintPanel`, the build lists) open
