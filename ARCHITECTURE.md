@@ -106,6 +106,10 @@ Each queues a `MasterGameTask` whose target is the `Map` (an `ActionableItem`). 
 
 Other systems: `FogOfWar` + `Math/Vision Casting` (tower vision radius), `MiniMap`, `IntervalActionPipeline` (spreads per-map work across frames).
 
+**Scene backdrop**: GameScene uses the MilkyWay skybox (`Tools/set-game-skybox.cs`) with ambient pinned to Flat, at the colour the old procedural sky gave,
+so terrain lighting doesn't depend on the skybox. Most of the black around the playfield is the fog of war over unexplored maps, not empty space;
+styling it is #24.
+
 ## Task system (the heart of the game)
 
 `Game Management/GameTask.cs`, `TaskQueueManager.cs`, `Game Objects/Units/Unit.cs`
