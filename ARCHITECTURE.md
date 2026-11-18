@@ -198,19 +198,19 @@ between 0.2 and 4 per minute. `evolution` ramps 0→1 over 25 minutes and scales
 
 ## Known issues and hazards
 
-1. **Task assignment stalls** (the v0.2 workaround restarts `DishOutTasks` when it stops ticking). Likely causes **(unverified)**:
-   - `TaskQueueManager` builds `unitsWithAccessableTasks` by evaluating `u.currentMasterTask.actionType` *before* the null check.
-     It is guarded by `canTakeTaskFromUnit`, but any exception kills the coroutine.
-   - The steal step `yield`s on `WaitUntil(waitForRequests == 0)`. If any path callback never fires, the coroutine hangs forever.
-     For example, `PathRequestManager` is serial and stops processing if a callback throws, or a request returns `null` for an `Unknown` target with neither gather nor attack type.
-   - Unit callbacks can fire after the unit is destroyed.
-2. The watchdog uses `TimeSpan.Seconds` instead of `TotalSeconds`, so stalls of 60–64s, 120–124s and so on aren't detected.
-3. Static state survives scene reloads unless reset explicitly: `MasterGameTask.gameTaskCounter`, `UnitManager.unitCount`, `EnemyManager` statics, singletons.
-   `ResearchSingleton` resets on scene change.
-4. Many `Resources.Load` by string path and Unity tags. Renames break things at runtime, not compile time.
-5. Lots of commented-out code from earlier designs. It's safe to delete once the game runs.
+The full backlog is in [GitHub Issues](https://github.com/JustinLycklama/Escape-From-Io/issues). This section lists the ones that affect how you read the code.
 
-## Unity 6 upgrade (branch `unity6-upgrade`)
+1. **Idle robots with full queues** ([#1](https://github.com/JustinLycklama/Escape-From-Io/issues/1)). `Unit.refuseTaskSet` never expires, so a single failed path means a robot ignores that task forever.
+   The stress test reproduces idle robots with **unlocked** queues. (With locked queues, a robot ignoring other types' tasks is expected.)
+   Some task targets also look wrong; that's under investigation in #1.
+2. **One exception freezes pathfinding** ([#2](https://github.com/JustinLycklama/Escape-From-Io/issues/2)). `PathRequestManager` is serial and only clears its busy flag after the callback returns.
+   A throwing callback, or a route that never calls back, stops all pathing. `DishOutTasks` can also hang on its steal wait or die on an exception;
+   the v0.2 watchdog restarts it, and the watchdog itself has a `TimeSpan.Seconds` bug ([#3](https://github.com/JustinLycklama/Escape-From-Io/issues/3)).
+3. Static state survives scene reloads ([#5](https://github.com/JustinLycklama/Escape-From-Io/issues/5)). `Narrator.gameInitialized` is never set ([#4](https://github.com/JustinLycklama/Escape-From-Io/issues/4)).
+4. Many `Resources.Load` calls by string path, and Unity tags. Renames break things at runtime, not compile time.
+5. Lots of commented-out code from earlier designs ([#10](https://github.com/JustinLycklama/Escape-From-Io/issues/10)).
+
+## Unity 6 upgrade (Nov 2026, now `master`)
 
 Status (2026-11-17): compiles clean on 6000.3.28f1. TitleScene plays with 0 console warnings or errors, and you confirmed the game runs.
 The only code fix needed was removing a wildcard `AssemblyVersion` in `VersionNumber.cs`. The API updater changed one vendor call
