@@ -9,6 +9,13 @@ public class TerraformTarget {
     public float[,] heightTarget;
     public float[,] initialHeight;
 
+    // Edge samples of the 4 neighbouring tiles that re-shape because this tile changes (e.g. a mountain beside a mined-out
+    // tile ramps down to it). Global MapCoordinate samples, animated with the same percentage (#29). Filled by MapGenerator.
+    public List<Vector2Int> neighbourSamples;
+    public List<float> neighbourInitialHeight;
+    public List<float> neighbourHeightTarget;
+    public List<Vector2Int> neighbourTiles;   // global layout coordinates of neighbours with changed samples
+
     public float percentage;
 
     public TerraformTarget(LayoutCoordinate coordinate, TerrainType terrainTypeTarget) {
@@ -253,7 +260,35 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
         if (!delayMeshUpdate) {
             mapContainer.DrawMesh();
             mapContainer.UpdateNeibourOverhangsForCoordinate(terraformTarget.coordinate);
-        }        
+            UpdateNeighbourTileMeshes(terraformTarget);
+        }
+    }
+
+    // Re-mesh the neighbouring tiles whose edges re-shaped with this terraform (#29). They can be in other containers.
+    private void UpdateNeighbourTileMeshes(TerraformTarget terraformTarget) {
+        if (terraformTarget.neighbourTiles == null || terraformTarget.neighbourTiles.Count == 0) {
+            return;
+        }
+
+        Constants constants = Script.Get<Constants>();
+        MapGenerator mapGenerator = Script.Get<MapGenerator>();
+        MapsManager mapsManager = Script.Get<MapsManager>();
+
+        foreach (Vector2Int tile in terraformTarget.neighbourTiles) {
+            MapContainer container = mapsManager.mapContainers.Find(m => m.mapX == tile.x / constants.layoutMapWidth && m.mapY == tile.y / constants.layoutMapHeight);
+            if (container == null || container.map == null) {
+                continue;
+            }
+
+            LayoutCoordinate local = new LayoutCoordinate(tile.x % constants.layoutMapWidth, tile.y % constants.layoutMapHeight, container);
+
+            // The subset array is pooled, so consume it before the next call
+            float[,] containerHeights = mapGenerator.FinalHeightSubsetFor(container);
+            MeshGenerator.UpdateTerrainMesh(container.map.meshData, containerHeights, featuresPerLayoutPerAxis, local);
+
+            container.DrawMesh();
+            container.UpdateNeibourOverhangsForCoordinate(local);
+        }
     }
 
     private void PlaceMineralsAroundLocation(WorldPosition worldPosition, Dictionary<MineralType, int> mineralLists) {
