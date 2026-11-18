@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -41,7 +41,7 @@ public class HighscoreCell : MonoBehaviour, GameButtonDelegate {
     void Update() {
         if(!subCell) { return; }
 
-        if(firstName.isFocused && Input.GetKeyDown(KeyCode.Tab)) {
+        if(firstName.isFocused && UnityEngine.InputSystem.Keyboard.current != null && UnityEngine.InputSystem.Keyboard.current.tabKey.wasPressedThisFrame) {
             lastName.Select();
             lastName.ActivateInputField();
         }

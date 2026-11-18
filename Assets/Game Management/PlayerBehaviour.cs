@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Controls;
 using UnityEngine.UI;
 using System.Linq;
 using System.Collections;
@@ -114,12 +116,25 @@ public class PlayerBehaviour : MonoBehaviour {
 
 
     void Update() {
+        Keyboard keyboard = Keyboard.current;
+        Mouse mouse = Mouse.current;
 
-        HotkeyInput();
-        StaticPanInput();
+        if (keyboard != null) {
+            HotkeyInput(keyboard);
+        }
 
-        bool mouseDown = Input.GetMouseButtonDown(0);
-        bool mouseUp = Input.GetMouseButtonUp(0);
+        KeyboardPanInput(keyboard);
+
+        if (mouse == null) {
+            return;
+        }
+
+        Vector2 mousePosition = mouse.position.ReadValue();
+
+        bool cameraAction = MouseDragPanInput(mouse, mousePosition);
+
+        bool mouseDown = mouse.leftButton.wasPressedThisFrame;
+        bool mouseUp = mouse.leftButton.wasReleasedThisFrame;
 
         if (mouseIsDownOverUI) {
             if (mouseUp) {
@@ -130,14 +145,12 @@ public class PlayerBehaviour : MonoBehaviour {
         }
 
         // We want as little as possible to be done here, first check to see if mouse down or up, and we are not over UI
-        if(mouseDown && IsOverUI(Input.mousePosition)) {
+        if(mouseDown && IsOverUI(mousePosition)) {
             mouseIsDownOverUI = true;
             return;
         }
 
-        bool cameraAction = false;
-
-        cameraAction |= CameraZoom();
+        cameraAction |= CameraZoom(mouse, mousePosition);
 
         // If we are manually moving the camera while the auto pan is happening, stop auto pan
         if(cameraAction && panCameraRoutine != null) {
@@ -145,7 +158,7 @@ public class PlayerBehaviour : MonoBehaviour {
         }
 
         if(mouseDown) {
-            Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+            Ray ray = Camera.main.ScreenPointToRay(mousePosition);
             SelectGameObject(ray);
         }
     }
@@ -164,45 +177,58 @@ public class PlayerBehaviour : MonoBehaviour {
         return results.Where(res => res.gameObject.layer == UI_Layer).Count() > 0;
     }
 
-    private void HotkeyInput() {
-        if(Input.GetKeyUp(KeyCode.Escape)) {
-            settingsPanel = Script.Get<SettingsPanel>();
-        }
+    private void HotkeyInput(Keyboard keyboard) {
+        foreach(KeyCode vKey in hotKeyListMap.Keys.ToArray()) {
+            // The tutorial only allows Escape (settings menu); no other hotkeys
+            if (TutorialManager.isTutorial && vKey != KeyCode.Escape) {
+                continue;
+            }
 
-        // Only enable escape for tutorial, no other hotkeys
-        if (TutorialManager.isTutorial) {
-            return;
-        }
-
-        if(Input.GetKeyUp(KeyCode.Space)) {
-            SetPlayerPauseState(!gamePaused);
-        }
-
-        foreach(KeyCode vKey in hotKeyListMap.Keys) {
-            if (Input.GetKeyUp(vKey)) {
-                foreach(HotkeyDelegate keyDelegate in hotKeyListMap[vKey]) {
+            KeyControl key = KeyControlFor(keyboard, vKey);
+            if (key != null && key.wasReleasedThisFrame) {
+                foreach(HotkeyDelegate keyDelegate in hotKeyListMap[vKey].ToArray()) {
                     keyDelegate.HotKeyPressed(vKey);
                 }
             }
         }
+
+        if (!TutorialManager.isTutorial && keyboard.spaceKey.wasReleasedThisFrame) {
+            SetPlayerPauseState(!gamePaused);
+        }
+    }
+
+    // Hotkey registrations use KeyCode; map them to Input System keys (letters, Space, Escape, Tab, arrows, AlphaN -> DigitN)
+    private static KeyControl KeyControlFor(Keyboard keyboard, KeyCode keyCode) {
+        string name = keyCode.ToString();
+        if (name.StartsWith("Alpha")) {
+            name = "Digit" + name.Substring("Alpha".Length);
+        }
+
+        if (System.Enum.TryParse(name, out Key key) && key != Key.None) {
+            return keyboard[key];
+        }
+
+        return null;
     }
 
     List<Vector3> panVectors = new List<Vector3>();
-    private void StaticPanInput() {
+    private void KeyboardPanInput(Keyboard keyboard) {
 
         panVectors.Clear();
 
-        if(Input.GetKey(KeyCode.D)) {
-            panVectors.Add(cameraRight * maxCameraMovementSpeed);
-        }
-        if(Input.GetKey(KeyCode.A)) {
-            panVectors.Add(-cameraRight * maxCameraMovementSpeed);
-        }
-        if(Input.GetKey(KeyCode.S)) {
-            panVectors.Add(-cameraForward * maxCameraMovementSpeed);
-        }
-        if(Input.GetKey(KeyCode.W)) {
-            panVectors.Add(cameraForward * maxCameraMovementSpeed);
+        if (keyboard != null) {
+            if(keyboard.dKey.isPressed || keyboard.rightArrowKey.isPressed) {
+                panVectors.Add(cameraRight * maxCameraMovementSpeed);
+            }
+            if(keyboard.aKey.isPressed || keyboard.leftArrowKey.isPressed) {
+                panVectors.Add(-cameraRight * maxCameraMovementSpeed);
+            }
+            if(keyboard.sKey.isPressed || keyboard.downArrowKey.isPressed) {
+                panVectors.Add(-cameraForward * maxCameraMovementSpeed);
+            }
+            if(keyboard.wKey.isPressed || keyboard.upArrowKey.isPressed) {
+                panVectors.Add(cameraForward * maxCameraMovementSpeed);
+            }
         }
 
         // If we are manually panning while auto pan is on, stop auto pan
@@ -213,25 +239,50 @@ public class PlayerBehaviour : MonoBehaviour {
         foreach(Vector3 vector in panVectors) {
             PanByVector(vector);
         }
-
-        //// Camera Rotate
-
     }
 
-
-    // Returns true if zooming should interrupt an automatic camera pan. The mouse wheel never interferes with clicks.
-    private bool CameraZoom() {
-        if (!IsOverUI(Input.mousePosition)) {
-            Zoom(Input.GetAxis("Mouse ScrollWheel") * 100f);
+    // Middle-mouse drag pans the camera, grabbing the ground: the map follows the cursor. Returns true while dragging.
+    private bool MouseDragPanInput(Mouse mouse, Vector2 mousePosition) {
+        if (!mouse.middleButton.isPressed) {
+            lastDragPosition = null;
+            return false;
         }
 
-        return false;
+        if (lastDragPosition.HasValue) {
+            Vector2 delta = mousePosition - lastDragPosition.Value;
+            Vector3 move = -(cameraRight * delta.x + cameraForward * delta.y) * dragPanWorldUnitsPerPixel;
+            Vector3 anticipated = Camera.main.transform.position + move;
+
+            if (IsPositionWithinBoundary(anticipated)) {
+                Camera.main.transform.Translate(move, Space.World);
+            }
+        }
+
+        lastDragPosition = mousePosition;
+        return true;
     }
 
-    // Enact motion on camera
+    private Vector2? lastDragPosition = null;
+    private const float dragPanWorldUnitsPerPixel = 0.6f;
+
+    // Returns true if zooming should interrupt an automatic camera pan
+    private bool CameraZoom(Mouse mouse, Vector2 mousePosition) {
+        float scroll = mouse.scroll.ReadValue().y;
+        if (scroll == 0 || IsOverUI(mousePosition)) {
+            return false;
+        }
+
+        // One wheel notch is +-120 on Windows (or +-1 when normalized); legacy code zoomed 10 units per notch
+        float notches = Mathf.Abs(scroll) >= 10f ? scroll / 120f : scroll;
+        Zoom(notches * 10f);
+
+        return true;
+    }
+
+    // Enact motion on camera. Uses unscaled time so camera speed is independent of game speed and pause.
     private void PanByVector(Vector3 vector) {
 
-        Vector3 translation = vector * Time.deltaTime;
+        Vector3 translation = vector * Time.unscaledDeltaTime;
         Vector3 cameraAnticipatedLocation = Camera.main.transform.position + vector;
 
         if (IsPositionWithinBoundary(cameraAnticipatedLocation)) {
@@ -254,7 +305,7 @@ public class PlayerBehaviour : MonoBehaviour {
 
         cameraUp *= increment;
 
-        Vector3 translation = cameraUp * maxCameraMovementSpeed * Time.deltaTime;
+        Vector3 translation = cameraUp * maxCameraMovementSpeed * Time.unscaledDeltaTime;
         Vector3 cameraAnticipatedLocation = Camera.main.transform.position + translation;
 
         if (IsPositionWithinBoundary(cameraAnticipatedLocation)) {

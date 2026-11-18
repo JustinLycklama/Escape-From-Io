@@ -189,7 +189,11 @@ between 0.2 and 4 per minute. `evolution` ramps 0→1 over 25 minutes and scales
 ## Time, input, UI
 
 - `TimeManager`: game clock, pausable (`PlayerBehaviour.gamePaused` / internal pause), and timers via `AddNewTimer(seconds, update, complete)`.
-- `PlayerBehaviour`: camera pan/zoom and hotkeys. WASD pans, the mouse wheel zooms, and left-click selects. `PanControlsPanel` only shows the WASD hint during the tutorial.
+- `PlayerBehaviour`: camera and hotkeys on the **Input System** (#8). The project uses input handling "Both", because vendor scripts still call legacy `Input`;
+  first-party code uses only the Input System. Controls: WASD/arrows pan, middle-drag pans (grab the ground), the wheel zooms, left-click selects,
+  Space pauses, Q/E/Escape are hotkeys (Escape also works in the tutorial). Camera motion uses unscaled time.
+  Hotkey registrations keep `KeyCode` and are mapped to Input System keys. `PanControlsPanel` only shows the WASD hint during the tutorial.
+  UI uses `InputSystemUIInputModule`. `Assets/InputSystem.inputsettings.asset` routes all input to the Game view in Play Mode (editor-only), for CLI testing.
 - `SelectionManager`: selects terrain or a `Selectable` (unit or building) and drives the detail panels and available `UserAction`s.
 - `UIManager` + `UI/Modular Panels`, `Navigation Panels` (Blueprint picker, task and unit overview), `TableViews + Cells`, `Tooltips`, `Windows` (title, menu, help, leaderboard).
 - `TutorialManager` + `TutorialBasic/Defense/Escape`: trigger-driven (`TutorialManager.Fire(TutorialTrigger.X)` is sprinkled through gameplay code), and can isolate a single allowed user action.

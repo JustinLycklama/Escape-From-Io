@@ -23,6 +23,8 @@ The editor must be open: run `unity open .` from the repo root, then `unity stat
 - `unity command scene open --path Scenes/GameScene`
 - `unity command editor.playmode start` / `stop` / `pause`
 - `unity command capture game_view --output-path Screenshots/x.png`: screenshot (Screenshots/ is gitignored)
+- **Input testing**: `unity command runtime simulate_key` handles held keys only, and `simulate_pointer` clicks UI through the EventSystem without moving the Mouse device.
+  For gameplay input, queue real device events from eval: `Tools/Stress/input-sequence.cs` checks pause, pan, drag, click-select and zoom.
 - `unity command test run --mode editor`: EditMode tests in the open editor (`unity test` runs batch mode and needs the editor closed).
   Tests live in `Assets/Tests/Editor/`, without an asmdef, so they can see game code. Only pure logic is testable there; scene-dependent checks are eval scripts in `Tools/Stress/` (e.g. `coordinates.cs`).
 - `unity command scene get_hierarchy`, `unity command gameobject …`
@@ -37,7 +39,7 @@ To verify a change: recompile, clear the console, start play mode, wait, read th
 
 ## Workflow
 
-- **Backlog = GitHub Issues** on `JustinLycklama/Escape-From-Io`, through `gh`. Labels: a type (`bug`, `feature`, `tech-debt`, `tooling`, `docs`),
+- **Backlog = GitHub Issues** on `JustinLycklama/Escape-From-Io`, through `gh`. Labels: a type (`bug`, `feature`, `tech-debt`, `tooling`, `docs`), `backlog` for parked work,
   plus an `area:*` label (`tasks`, `pathfinding`, `map`, `units-buildings`, `ui`, `art-assets`) and `needs-repro` for unconfirmed bugs.
   Templates are in `.github/ISSUE_TEMPLATE/`.
 - **Starting a session**: `git status` / `git log -5`, then `gh issue list` to see what's open. For a specific ticket, `gh issue view <n> --comments`.
