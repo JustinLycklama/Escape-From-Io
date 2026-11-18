@@ -77,6 +77,6 @@ Everything else in `Assets/` is asset-store/vendor content: **don't modify it, a
 - `Resources.Load` paths and Unity tags are stringly-typed. Renaming a prefab or tag breaks things at runtime, not at compile time.
 - Task assignment was reported to stall in v0.2. A watchdog in `Narrator.CheckForTaskQueueManager` restarts it. See ARCHITECTURE.md → Known issues and the GitHub issue before touching `TaskQueueManager`.
 - No `.obj` models were ever committed: a past global gitignore excluded them. Unity deletes their orphaned `.meta` files on open. **Don't commit those deletions**,
-  because the metas preserve GUIDs for when the asset packs are reimported. Missing in-game: the Shuttle Frame mesh (Voxel StarForce pack) and `Buildings/arrow.obj` (Sensor Tower pointer).
+  because the metas preserve GUIDs for when the asset packs are reimported. The two models used in-game have ProBuilder-built stand-ins in `Assets/Game Objects/Buildings/StandInMeshes/` (#6).
 - Firebase was removed. `FirebaseManager` is now a local PlayerPrefs leaderboard.
 - `docs/` is the GitHub Pages site, not developer docs.
