@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -104,6 +104,9 @@ public class PathRequest {
         pathEndGoalMineral = null;
     }
 
+    // Set once the request's callback has been delivered (or skipped because cancelled). Guards against double completion.
+    public bool isCompleted = false;
+
     public void Cancel() {
         isCancelled = true;
     }
@@ -118,11 +121,25 @@ public class PathRequestManager : MonoBehaviour {
     PathFinding pathFinding;
 
     bool isProcessingPath;
+    bool isDraining;
+    float processingStartedAt;
 
     // One-line state dump for watchdog logs and debugging
     public static string DiagnosticSummary() {
         if (instance == null) { return "[PathRequests: no instance]"; }
-        return $"[PathRequests busy: {instance.isProcessingPath}, queued: {instance.pathRequestQueue.Count}]";
+        string busyFor = instance.isProcessingPath ? $" for {Time.realtimeSinceStartup - instance.processingStartedAt:F1}s" : "";
+        return $"[PathRequests busy: {instance.isProcessingPath}{busyFor}, queued: {instance.pathRequestQueue.Count}]";
+    }
+
+    // Safety net: searches complete synchronously, so being busy for long means a search never called back.
+    // Fails the stuck request and resumes the queue. Returns true if a reset happened.
+    public static bool ResetIfStuck(float maxSeconds) {
+        if (instance == null || !instance.isProcessingPath) { return false; }
+        if (Time.realtimeSinceStartup - instance.processingStartedAt < maxSeconds) { return false; }
+
+        Debug.LogError($"Path request stuck for >{maxSeconds}s (target type {instance.currentPathRequest?.targetType}); failing it and resuming. {DiagnosticSummary()}");
+        instance.Complete(instance.currentPathRequest, null, null, false, 0);
+        return true;
     }
 
     private void Awake() {
@@ -180,74 +197,91 @@ public class PathRequestManager : MonoBehaviour {
         instance.TryProcessNext();
     }
 
+    // Processes queued requests one at a time. Searches usually complete synchronously, so this drains in a loop
+    // instead of recursing through each completion callback.
     void TryProcessNext() {
-        if (!isProcessingPath && pathRequestQueue.Count > 0) {
-            currentPathRequest = pathRequestQueue.Dequeue();
+        if (isDraining) { return; }
+        isDraining = true;
 
-            if (currentPathRequest.isCancelled == true) {
-                TryProcessNext();
-                return;
+        try {
+            while (!isProcessingPath && pathRequestQueue.Count > 0) {
+                PathRequest request = pathRequestQueue.Dequeue();
+                if (request.isCancelled) {
+                    request.isCompleted = true;
+                    continue;
+                }
+
+                currentPathRequest = request;
+                isProcessingPath = true;
+                processingStartedAt = Time.realtimeSinceStartup;
+
+                try {
+                    StartSearch(request);
+                } catch (Exception ex) {
+                    // e.g. a destroyed target object; treat as "no path" so the caller still hears back
+                    Debug.LogException(ex);
+                    Complete(request, null, null, false, 0);
+                }
             }
+        } finally {
+            isDraining = false;
+        }
+    }
 
-            isProcessingPath = true;
+    // Delivers a result exactly once, and always frees the queue, even if the caller's callback throws.
+    void Complete(PathRequest request, LookPoint[] path, ActionableItem item, bool success, int distance) {
+        if (request == null || request.isCompleted) { return; }
+        request.isCompleted = true;
 
-            switch(currentPathRequest.targetType) {
-                case PathRequestTargetType.Unknown:
-                    if (currentPathRequest.pathEndGoalMineral != null) {
-                        pathFinding.FindSimplifiedPathToClosestOre(currentPathRequest.pathStart, currentPathRequest.movementPenaltyMultiplier, currentPathRequest.pathEndGoalMineral.Value, (path, actionableItem, success, distance) => {
-                            if(!currentPathRequest.isCancelled) currentPathRequest.callback(path, actionableItem, success, distance);                                                        
-                            isProcessingPath = false;
-
-                            TryProcessNext();
-                        });
-                    } else if (currentPathRequest.pathEndGoalFaction != null) {
-                        pathFinding.FindSimplifiedPathToClosestUnit(currentPathRequest.pathStart, currentPathRequest.movementPenaltyMultiplier, currentPathRequest.pathEndGoalFaction.Value, (path, actionableItem, success, distance) => {
-                            if(!currentPathRequest.isCancelled)  currentPathRequest.callback(path, actionableItem, success, distance);
-                            isProcessingPath = false;
-
-                            TryProcessNext();
-                        });
-                    }
-
-                    break;
-                case PathRequestTargetType.World:
-                    pathFinding.FindSimplifiedPath(currentPathRequest.pathStart, currentPathRequest.pathEndWorld.Value, currentPathRequest.movementPenaltyMultiplier,(path, success, distance) => {
-                        if(!currentPathRequest.isCancelled) currentPathRequest.callback(path, null, success, distance);
-                        isProcessingPath = false;
-
-                        TryProcessNext();
-                    });
-
-
-                    break;
-                case PathRequestTargetType.Layout:
-                    pathFinding.FindSimplifiedPathForLayout(currentPathRequest.pathStart, currentPathRequest.pathEndLayout.Value, currentPathRequest.movementPenaltyMultiplier, (path, success, distance) => {
-                        if(!currentPathRequest.isCancelled) currentPathRequest.callback(path, null, success, distance);
-                        isProcessingPath = false;
-
-                        TryProcessNext();
-                    });
-                    break;
-                case PathRequestTargetType.PathGrid:
-
-                    if (currentPathRequest.pathToObjectAtDistance == true) {
-                        pathFinding.FindSimplifiedPathForPathGridAtDistanceOne(currentPathRequest.pathStart, currentPathRequest.pathEndGrid.Value, currentPathRequest.movementPenaltyMultiplier, (path, success, distance) => {
-                            if(!currentPathRequest.isCancelled) currentPathRequest.callback(path, null, success, distance);
-                            isProcessingPath = false;
-
-                            TryProcessNext();
-                        });
-                    } else {
-                        pathFinding.FindSimplifiedPathForPathGrid(currentPathRequest.pathStart, currentPathRequest.pathEndGrid.Value, currentPathRequest.movementPenaltyMultiplier, (path, success, distance) => {
-                            if(!currentPathRequest.isCancelled) currentPathRequest.callback(path, null, success, distance);
-                            isProcessingPath = false;
-
-                            TryProcessNext();
-                        });
-                    }
-                    
-                    break;
+        try {
+            if (!request.isCancelled) {
+                request.callback(path, item, success, distance);
             }
+        } catch (Exception ex) {
+            Debug.LogException(ex);
+        } finally {
+            if (request == currentPathRequest) {
+                currentPathRequest = null;
+                isProcessingPath = false;
+            }
+        }
+
+        TryProcessNext();
+    }
+
+    void StartSearch(PathRequest request) {
+        switch(request.targetType) {
+            case PathRequestTargetType.Unknown:
+                if (request.pathEndGoalMineral != null) {
+                    pathFinding.FindSimplifiedPathToClosestOre(request.pathStart, request.movementPenaltyMultiplier, request.pathEndGoalMineral.Value,
+                        (path, actionableItem, success, distance) => Complete(request, path, actionableItem, success, distance));
+                } else if (request.pathEndGoalFaction != null) {
+                    pathFinding.FindSimplifiedPathToClosestUnit(request.pathStart, request.movementPenaltyMultiplier, request.pathEndGoalFaction.Value,
+                        (path, actionableItem, success, distance) => Complete(request, path, actionableItem, success, distance));
+                } else {
+                    Complete(request, null, null, false, 0);
+                }
+                break;
+            case PathRequestTargetType.World:
+                pathFinding.FindSimplifiedPath(request.pathStart, request.pathEndWorld.Value, request.movementPenaltyMultiplier,
+                    (path, success, distance) => Complete(request, path, null, success, distance));
+                break;
+            case PathRequestTargetType.Layout:
+                pathFinding.FindSimplifiedPathForLayout(request.pathStart, request.pathEndLayout.Value, request.movementPenaltyMultiplier,
+                    (path, success, distance) => Complete(request, path, null, success, distance));
+                break;
+            case PathRequestTargetType.PathGrid:
+                if (request.pathToObjectAtDistance) {
+                    pathFinding.FindSimplifiedPathForPathGridAtDistanceOne(request.pathStart, request.pathEndGrid.Value, request.movementPenaltyMultiplier,
+                        (path, success, distance) => Complete(request, path, null, success, distance));
+                } else {
+                    pathFinding.FindSimplifiedPathForPathGrid(request.pathStart, request.pathEndGrid.Value, request.movementPenaltyMultiplier,
+                        (path, success, distance) => Complete(request, path, null, success, distance));
+                }
+                break;
+            default:
+                Complete(request, null, null, false, 0);
+                break;
         }
     }
 }

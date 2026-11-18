@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -319,6 +319,9 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
         return taskDistances;
     }
 
+    // Longest the steal step waits for its path requests before moving on (searches normally finish synchronously)
+    private const float maxStealPathWaitSeconds = 2f;
+
     IEnumerator DishOutTasks() {
         UnitManager unitManager = Script.Get<UnitManager>();
 
@@ -335,172 +338,231 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
                 continue;
             }
 
-            yield return new WaitForSeconds(0.5f);            
-
-            //float shortestDistance = float.MaxValue;
-            //UnitAndRefused shortestUnitAndRefused = null;
+            yield return new WaitForSeconds(0.5f);
 
             exhaustedTaskNumbers.Clear();
             unitDistanceListMap.Clear();
+
+            // Units destroyed while waiting (Unity null) can't take work
+            unitsRequestingTasks.RemoveAll(r => r.unit == null);
 
             List<DistanceAndTask> takeTaskAttemptList = new List<DistanceAndTask>();
 
             foreach(UnitAndRefused unitAndRefused in unitsRequestingTasks.ToArray()) {
 
-                Unit localRequestingUnit = unitAndRefused.unit;
-
                 /*
                  * First check if we can take a task from a unit
                  * */
 
-                Unit[] allUnits = unitManager.GetAllPlayerUnits();
-
-                Unit[] unitsWithAccessableTasks = allUnits.Where(u => u.canTakeTaskFromUnit &&
-
-                // Check all units who have tasks of our type, or tasks where the type is unlocked
-                ((u.currentMasterTask.actionType == localRequestingUnit.primaryActionType) || (u.currentMasterTask != null && taskListLockMap[u.currentMasterTask.actionType] == false))).ToArray();
-
                 int waitForRequests = 0;
 
-                // Check each unit to see if we should take their task; we will get to it faster
-                foreach(Unit unit in unitsWithAccessableTasks) {
-                    Unit localPerformingUnit = unit;
-                    float unitDistanceLeft = unit.remainingMovementCostOnTask;
-
-                    if(unitDistanceLeft < 100 || float.IsNaN(unitDistanceLeft)) {
-                        continue;
-                    }
-
-                    if( unitAndRefused.refuseStealTaskList.Contains(localPerformingUnit.currentMasterTask.taskNumber)) {
-                        continue;
-                    }
-
-                    if (localPerformingUnit.takeableTask.pathRequestTargetType == PathRequestTargetType.Unknown) {
-                        print("should never happen");
-                    }
-
-                    waitForRequests++;
-                    PathRequestManager.RequestPathForTask(localRequestingUnit.transform.position, localRequestingUnit.movementPenaltyMultiplier, localPerformingUnit.takeableTask, (LookPoint[] lookPoints, ActionableItem item, bool success, int distance) => {
-                        float distanceForUnit = distance * localRequestingUnit.unitSpeed;
-
-                        //print("Distance For Searching Unit " + distanceForUnit);
-                        //print("Distance For Performing Unit " + unitDistanceLeft);
-
-                        if (distanceForUnit / unitDistanceLeft < 0.75f) {
-                            takeTaskAttemptList.Add(new DistanceAndTask(localPerformingUnit.currentMasterTask, distanceForUnit, unitAndRefused, localPerformingUnit));
-                        } else {
-                            unitAndRefused.refuseStealTaskList.Add(localPerformingUnit.currentMasterTask.taskNumber);
-                        }
-
-                        waitForRequests--;
-                    });
+                try {
+                    waitForRequests = RequestStealCandidates(unitAndRefused, unitManager, takeTaskAttemptList, () => waitForRequests--);
+                } catch(Exception ex) {
+                    Debug.LogException(ex);
                 }
 
+                float waitStarted = Time.realtimeSinceStartup;
                 yield return new WaitUntil(() => {
-                    return waitForRequests == 0;
+                    return waitForRequests <= 0 || Time.realtimeSinceStartup - waitStarted > maxStealPathWaitSeconds;
                 });
+
+                lastDished = DateTime.Now;
 
                 /*
                  * Look for tasks within our queue
                  * */
 
-                List <DistanceAndTask> taskDistances = tasksAndDistancesForUnit(unitAndRefused, false);
+                try {
+                    List<DistanceAndTask> taskDistances = tasksAndDistancesForUnit(unitAndRefused, false);
 
-                // If we can't find any tasks to do, check the low priority tasks from all Action Types
-                if (taskDistances.Count == 0) {
-                    taskDistances = tasksAndDistancesForUnit(unitAndRefused, true);
+                    // If we can't find any tasks to do, check the low priority tasks from all Action Types
+                    if(taskDistances.Count == 0) {
+                        taskDistances = tasksAndDistancesForUnit(unitAndRefused, true);
+                    }
+
+                    // Don't even bother if this unit can't do anything
+                    if(taskDistances.Count > 0 && unitAndRefused.unit != null) {
+                        unitDistanceListMap[unitAndRefused.unit] = new UnitsDistanceList(unitAndRefused, taskDistances, taskDistances[0].distance);
+                    }
+                } catch(Exception ex) {
+                    Debug.LogException(ex);
                 }
-
-                // Don't even bother if this unit can't do anything
-                if (taskDistances.Count > 0) {
-                    unitDistanceListMap[unitAndRefused.unit] = new UnitsDistanceList(unitAndRefused, taskDistances, taskDistances[0].distance);
-                }               
             }
 
-            /*
-             * Give out tasks that should be taken from other units
-             * */
+            try {
+                GiveOutStolenTasks(takeTaskAttemptList, unitDistanceListMap);
+                GiveOutQueuedTasks(unitDistanceListMap, exhaustedTaskNumbers);
+            } catch(Exception ex) {
+                // Never let one bad hand-out kill the assignment loop
+                Debug.LogException(ex);
+            }
+        }
+    }
 
-            List<DistanceAndTask> sortedDistances = takeTaskAttemptList.OrderBy(dt => dt.distance).ToList();
-            HashSet<Unit> unitsWhoHaveHadTaskTaken = new HashSet<Unit>();
+    // Requests paths to tasks other units are doing, to see if this unit would reach them much sooner.
+    // Returns how many requests were made; onRequestDone runs once per request (from its callback, or immediately if no request was made).
+    private int RequestStealCandidates(UnitAndRefused unitAndRefused, UnitManager unitManager, List<DistanceAndTask> takeTaskAttemptList, Action onRequestDone) {
+        Unit localRequestingUnit = unitAndRefused.unit;
+        if(localRequestingUnit == null) { return 0; }
 
-            for(int i = 0; i < sortedDistances.Count; i++) {
-                DistanceAndTask distanceAndTask = sortedDistances[i];
+        Unit[] allUnits = unitManager.GetAllPlayerUnits();
 
-                // Unit has already had their task taken, cannot happen twice
-                if(unitsWhoHaveHadTaskTaken.Contains(distanceAndTask.performingUnit)) {
-                    continue;
-                }
+        // Units whose task is of our type, or whose task list is unlocked (canTakeTaskFromUnit implies currentMasterTask != null)
+        Unit[] unitsWithAccessableTasks = allUnits.Where(u => u != null && u.canTakeTaskFromUnit &&
+            (u.currentMasterTask.actionType == localRequestingUnit.primaryActionType || taskListLockMap[u.currentMasterTask.actionType] == false)).ToArray();
 
-                distanceAndTask.performingUnit.CancelTask();
-                distanceAndTask.requestingUnit.callback(distanceAndTask.masterTask);
+        int pending = 0;
 
-                unitsWhoHaveHadTaskTaken.Add(distanceAndTask.performingUnit);
+        // Check each unit to see if we should take their task; we will get to it faster
+        foreach(Unit unit in unitsWithAccessableTasks) {
+            Unit localPerformingUnit = unit;
+            MasterGameTask stealTarget = unit.currentMasterTask;
+            float unitDistanceLeft = unit.remainingMovementCostOnTask;
 
-                unitDistanceListMap.Remove(distanceAndTask.requestingUnit.unit);
-                unitsRequestingTasks.Remove(distanceAndTask.requestingUnit);
+            if(unitDistanceLeft < 100 || float.IsNaN(unitDistanceLeft)) {
+                continue;
             }
 
-            /*
-             * Give out tasks within our queue, for units that were not already assigned during task taking
-             * */
+            if(unitAndRefused.refuseStealTaskList.Contains(stealTarget.taskNumber)) {
+                continue;
+            }
 
-            // Give the unit with the closest viable task its task, remove that task from any others down the list, and do it all again
-            while (unitDistanceListMap.Count > 0) {
-                List<UnitsDistanceList> unitDistanceListList = unitDistanceListMap.Values.ToList();
+            pending++;
+            bool done = false;
 
-                unitDistanceListList.Sort(delegate (UnitsDistanceList t1, UnitsDistanceList t2) {
-                    return t1.shortestTaskDistance.CompareTo(t2.shortestTaskDistance);
-                });
+            PathRequest request = PathRequestManager.RequestPathForTask(localRequestingUnit.transform.position, localRequestingUnit.movementPenaltyMultiplier, localPerformingUnit.takeableTask, (LookPoint[] lookPoints, ActionableItem item, bool success, int distance) => {
+                done = true;
+                onRequestDone();
 
-                UnitsDistanceList unitsDistanceList = unitDistanceListList[0];
+                // Either unit may be gone, or the task finished, by the time the path comes back
+                if(localRequestingUnit == null || localPerformingUnit == null || localPerformingUnit.currentMasterTask != stealTarget) {
+                    return;
+                }
 
-                // Lets assume that the first item of a units list is always available
-                MasterGameTask givingTask = unitsDistanceList.distanceAndTasksList[0].masterTask;
+                float distanceForUnit = distance * localRequestingUnit.unitSpeed;
 
-                bool doExhaust = false;
-                if(givingTask.repeatCount == 0) {
-                    doExhaust = true;
-                    exhaustedTaskNumbers.Add(givingTask.taskNumber);
-                    taskListMap[givingTask.actionType].Remove(givingTask);
+                if(success && distanceForUnit / unitDistanceLeft < 0.75f) {
+                    takeTaskAttemptList.Add(new DistanceAndTask(stealTarget, distanceForUnit, unitAndRefused, localPerformingUnit));
                 } else {
-                    MasterGameTask masterTask = givingTask;
-                    givingTask = givingTask.CloneTask();
-
-                    if(masterTask.repeatCount == 0) {
-                        // Exhaust
-                        doExhaust = true;
-                        exhaustedTaskNumbers.Add(masterTask.taskNumber);
-                        taskListMap[masterTask.actionType].Remove(masterTask);
-                    }
+                    unitAndRefused.refuseStealTaskList.Add(stealTarget.taskNumber);
                 }
+            });
 
-                if (doExhaust) {
-                    // Exhaust tasks from the top of all other lists until a nonexhausted task is found
-                    UnitsDistanceList[] unitDistanceListListCopy = unitDistanceListList.ToArray();
-                    for(int i = 1; i < unitDistanceListListCopy.Length; i++) {
-                        UnitsDistanceList otherUnitDistanceList = unitDistanceListListCopy[i];
-
-                        while(otherUnitDistanceList.distanceAndTasksList.Count > 0 && exhaustedTaskNumbers.Contains(otherUnitDistanceList.distanceAndTasksList[0].masterTask.taskNumber)) {
-                            // If the other list contains an exhausted task number, remove it and continue
-                            otherUnitDistanceList.distanceAndTasksList.RemoveAt(0);
-                        }
-
-                        // If we have removed all viable tasks from this units list, he cannot be completed
-                        if(otherUnitDistanceList.distanceAndTasksList.Count == 0) {
-                            unitDistanceListMap.Remove(otherUnitDistanceList.unitAndRefused.unit);
-                        }
-                    }
-                }
-
-                // Give the unit this task, then remove him from the list of people with viable tasks, AND from the list of requesters
-                unitsDistanceList.unitAndRefused.callback(givingTask);
-
-                unitDistanceListMap.Remove(unitsDistanceList.unitAndRefused.unit);
-                unitsRequestingTasks.Remove(unitsDistanceList.unitAndRefused);                
-
-                NotifyDelegates(givingTask.actionType);
+            // No request was made (unsupported target), so no callback will come
+            if(request == null && !done) {
+                onRequestDone();
             }
+        }
+
+        return pending;
+    }
+
+    // Give out tasks that should be taken from other units, closest first
+    private void GiveOutStolenTasks(List<DistanceAndTask> takeTaskAttemptList, Dictionary<Unit, UnitsDistanceList> unitDistanceListMap) {
+        List<DistanceAndTask> sortedDistances = takeTaskAttemptList.OrderBy(dt => dt.distance).ToList();
+        HashSet<Unit> unitsWhoHaveHadTaskTaken = new HashSet<Unit>();
+        HashSet<UnitAndRefused> unitsWhoHaveTakenTask = new HashSet<UnitAndRefused>();
+
+        foreach(DistanceAndTask distanceAndTask in sortedDistances) {
+            Unit performingUnit = distanceAndTask.performingUnit;
+            UnitAndRefused requester = distanceAndTask.requestingUnit;
+
+            // A unit can only lose one task, and a requester can only take one
+            if(unitsWhoHaveHadTaskTaken.Contains(performingUnit) || unitsWhoHaveTakenTask.Contains(requester)) {
+                continue;
+            }
+
+            // Re-validate: units can die and tasks can finish between the path request and now
+            if(performingUnit == null || requester.unit == null || performingUnit.currentMasterTask != distanceAndTask.masterTask) {
+                continue;
+            }
+
+            try {
+                performingUnit.CancelTask();
+                requester.callback(distanceAndTask.masterTask);
+            } catch(Exception ex) {
+                Debug.LogException(ex);
+                ReturnUnassignedTask(distanceAndTask.masterTask);
+            }
+
+            unitsWhoHaveHadTaskTaken.Add(performingUnit);
+            unitsWhoHaveTakenTask.Add(requester);
+
+            unitDistanceListMap.Remove(requester.unit);
+            unitsRequestingTasks.Remove(requester);
+        }
+    }
+
+    // Give the unit with the closest viable task its task, remove that task from any others down the list, and do it all again
+    private void GiveOutQueuedTasks(Dictionary<Unit, UnitsDistanceList> unitDistanceListMap, HashSet<int> exhaustedTaskNumbers) {
+        while (unitDistanceListMap.Count > 0) {
+            List<UnitsDistanceList> unitDistanceListList = unitDistanceListMap.Values.ToList();
+
+            unitDistanceListList.Sort(delegate (UnitsDistanceList t1, UnitsDistanceList t2) {
+                return t1.shortestTaskDistance.CompareTo(t2.shortestTaskDistance);
+            });
+
+            UnitsDistanceList unitsDistanceList = unitDistanceListList[0];
+            UnitAndRefused receiver = unitsDistanceList.unitAndRefused;
+
+            // Lets assume that the first item of a units list is always available
+            MasterGameTask givingTask = unitsDistanceList.distanceAndTasksList[0].masterTask;
+
+            bool doExhaust = false;
+            if(givingTask.repeatCount == 0) {
+                doExhaust = true;
+                exhaustedTaskNumbers.Add(givingTask.taskNumber);
+                taskListMap[givingTask.actionType].Remove(givingTask);
+            } else {
+                MasterGameTask masterTask = givingTask;
+                givingTask = givingTask.CloneTask();
+
+                if(masterTask.repeatCount == 0) {
+                    // Exhaust
+                    doExhaust = true;
+                    exhaustedTaskNumbers.Add(masterTask.taskNumber);
+                    taskListMap[masterTask.actionType].Remove(masterTask);
+                }
+            }
+
+            if (doExhaust) {
+                // Exhaust tasks from the top of all other lists until a nonexhausted task is found
+                UnitsDistanceList[] unitDistanceListListCopy = unitDistanceListList.ToArray();
+                for(int i = 1; i < unitDistanceListListCopy.Length; i++) {
+                    UnitsDistanceList otherUnitDistanceList = unitDistanceListListCopy[i];
+
+                    while(otherUnitDistanceList.distanceAndTasksList.Count > 0 && exhaustedTaskNumbers.Contains(otherUnitDistanceList.distanceAndTasksList[0].masterTask.taskNumber)) {
+                        // If the other list contains an exhausted task number, remove it and continue
+                        otherUnitDistanceList.distanceAndTasksList.RemoveAt(0);
+                    }
+
+                    // If we have removed all viable tasks from this units list, he cannot be completed
+                    if(otherUnitDistanceList.distanceAndTasksList.Count == 0) {
+                        unitDistanceListMap.Remove(otherUnitDistanceList.unitAndRefused.unit);
+                    }
+                }
+            }
+
+            // Remove the unit from the list of people with viable tasks AND from the list of requesters, then give it the task
+            unitDistanceListMap.Remove(receiver.unit);
+            unitsRequestingTasks.Remove(receiver);
+
+            try {
+                receiver.callback(givingTask);
+            } catch(Exception ex) {
+                Debug.LogException(ex);
+                ReturnUnassignedTask(givingTask);
+            }
+
+            NotifyDelegates(givingTask.actionType);
+        }
+    }
+
+    // If handing a task to a unit failed before the unit took it, put it back so it is not lost
+    private void ReturnUnassignedTask(MasterGameTask task) {
+        if(task != null && task.assignedUnit == null && !taskListMap[task.actionType].Contains(task)) {
+            PutBackTask(task);
         }
     }
 

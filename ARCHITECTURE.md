@@ -146,7 +146,7 @@ Unit state for the UI: Idle / Efficient (doing its primary type) / Inefficient (
 
 `PathfindingGrid` holds the A* nodes, with movement penalties from terrain, buildings and paths. It also blurs the penalty map and updates on terrain changes.
 `PathFinding` runs A* as coroutines using `Math/Heap`, then simplifies the result into `LookPoint`s.
-`PathRequestManager` is a **single serialized queue**: one request is processed at a time, and the next starts only when the current callback returns.
+`PathRequestManager` is a **single serialized queue**: one request at a time, drained in a loop. Searches complete synchronously, every request calls back exactly once, and a throwing callback is logged instead of blocking the queue.
 It also handles "closest ore of type" and "closest unit of faction" searches. `Path` and `Unit.FollowPath` do smoothed turning along look points.
 `movementPenaltyMultiplier` is set per prefab: 0 (ignores terrain) for Advanced Mover, Defender and Golem, and 1 for the rest.
 
@@ -206,9 +206,9 @@ The full backlog is in [GitHub Issues](https://github.com/JustinLycklama/Escape-
 1. **Idle robots with full queues** ([#1](https://github.com/JustinLycklama/Escape-From-Io/issues/1)). `Unit.refuseTaskSet` never expires, so a single failed path means a robot ignores that task forever.
    The stress test reproduces idle robots with **unlocked** queues. (With locked queues, a robot ignoring other types' tasks is expected.)
    Some task targets also look wrong; that's under investigation in #1.
-2. **One exception freezes pathfinding** ([#2](https://github.com/JustinLycklama/Escape-From-Io/issues/2)). `PathRequestManager` is serial and only clears its busy flag after the callback returns.
-   A throwing callback, or a route that never calls back, stops all pathing. `DishOutTasks` can also hang on its steal wait or die on an exception;
-   the v0.2 watchdog restarts it, and logs queue and path-request state when it fires.
+2. **Pathfinding and assignment hardening** (fixed in #2). `PathRequestManager` delivers each result exactly once, logs callback exceptions without freezing, and fails stuck requests through `ResetIfStuck`, which the watchdog calls.
+   `DishOutTasks` bounds its steal wait, re-validates units and tasks before handing them out, and survives per-unit exceptions.
+   The v0.2 watchdog remains as a safety net and logs a warning if it ever fires. Regression check: `Tools/Stress/throwing-callback.cs`.
 3. Static state survives scene reloads ([#5](https://github.com/JustinLycklama/Escape-From-Io/issues/5)).
 4. Many `Resources.Load` calls by string path, and Unity tags. Renames break things at runtime, not compile time.
 5. Lots of commented-out code from earlier designs ([#10](https://github.com/JustinLycklama/Escape-From-Io/issues/10)).

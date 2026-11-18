@@ -1,6 +1,7 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 using System.Diagnostics;
@@ -39,8 +40,12 @@ public class PathFinding : MonoBehaviour {
 
         int completedCalls = 0;
 
+        // Skip destroyed objects (Unity null); touching their transform would throw before any callback fires
+        objectList = objectList.Where(o => o != null).ToArray();
+
         if(objectList.Length == 0) {
             callback(null, null, false, 0);
+            return;
         }
 
         foreach(ActionableItem obj in objectList) {
@@ -198,6 +203,12 @@ public class PathFinding : MonoBehaviour {
         Node[] foundPath = null;
 
         int completedCalls = 0;
+
+        // No candidate cells (e.g. clipped at a map corner): report failure instead of never calling back
+        if(pathGridCoordinates.Count == 0) {
+            callback(null, false, 0);
+            return;
+        }
 
         foreach(PathGridCoordinate gridCoordinate in pathGridCoordinates) {
             MapCoordinate mapCoordinate = MapCoordinate.FromGridCoordinate(gridCoordinate);
