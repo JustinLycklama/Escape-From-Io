@@ -10,6 +10,7 @@ PowerShell setup for every command:
 
 1. **Editor up?** `unity status` should list this project as `ready`. If not, run `unity open .` from the repo root and poll `unity status` (first open takes ~30s).
 2. **Compile:** `unity recompile`. An empty table means clean. Fix every error before continuing.
+   Then run the tests: `unity command test run --mode editor`. All must pass.
 3. **Play** (default scene `Scenes/GameScene`, or `Scenes/TitleScene` for menu/UI changes):
    ```
    unity command editor.playmode stop

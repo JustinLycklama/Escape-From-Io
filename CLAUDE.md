@@ -23,7 +23,9 @@ The editor must be open: run `unity open .` from the repo root, then `unity stat
 - `unity command scene open --path Scenes/GameScene`
 - `unity command editor.playmode start` / `stop` / `pause`
 - `unity command capture game_view --output-path Screenshots/x.png`: screenshot (Screenshots/ is gitignored)
-- `unity command scene get_hierarchy`, `unity command gameobject …`, `unity test`
+- `unity command test run --mode editor`: EditMode tests in the open editor (`unity test` runs batch mode and needs the editor closed).
+  Tests live in `Assets/Tests/Editor/`, without an asmdef, so they can see game code. Only pure logic is testable there; scene-dependent checks are eval scripts in `Tools/Stress/` (e.g. `coordinates.cs`).
+- `unity command scene get_hierarchy`, `unity command gameobject …`
 - `unity command` lists the command groups and `unity command <group>` lists a group's commands. Check these before guessing flags.
 
 To verify a change: recompile, clear the console, start play mode, wait, read the console at warn level, capture the game view, then stop play mode.
