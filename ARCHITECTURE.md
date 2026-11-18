@@ -241,6 +241,10 @@ Agreed visual direction: **HUD layout A** (#22). The map fills the screen and th
   Most UI art is authored far larger than it's drawn (icons 512–680px drawn at about 30px), and without mipmaps that aliases. `Tools/fix-ui-texture-imports.cs` applies it.
 - **9-slice frames drawn small:** raise `Image.pixelsPerUnitMultiplier` so each border stays under about a third of the panel height; otherwise the corners overlap.
   `Tools/Stress/sprite-audit.cs` reports source size versus drawn size and flags overlapping borders.
+- **Editing existing UI prefabs:** unpack an instance before re-parenting its children. Revert stale per-instance `RectTransform` overrides
+  when restyling (they beat prefab edits). Destroy unwanted `AspectRatioFitter`s rather than disabling them. Check the actual `rect` after
+  setting stretch anchors. Activate a hidden element before configuring it, so its `Awake` has run. Child `CanvasGroup`s with
+  `ignoreParentGroups` won't fade with their parent. Details in LEARNINGS.md.
 - **Review:** `powershell -File Tools/capture-ui-review.ps1 -Prefix <name> -Resolutions "1920x1080,1280x720"` captures the title screen, HUD and selection
   at true Game-view resolutions (into the gitignored `Screenshots/`).
 
