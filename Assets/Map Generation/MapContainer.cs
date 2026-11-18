@@ -636,6 +636,10 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
 
         mapMaterial.SetFloatArray("indexPriority", texGen.TexturePriorityList());
         mapMaterial.SetFloatArray("indexScale", texGen.TextureScaleList());
+
+        texGen.HeightBandLists(out float[] heightLow, out float[] heightHigh);
+        mapMaterial.SetFloatArray("heightLow", heightLow);
+        mapMaterial.SetFloatArray("heightHigh", heightHigh);
         
         for(int x = 0; x < mapWidthWithOverhang; x++) {
             for(int y = 0; y < mapHeightWithOverhang; y++) {

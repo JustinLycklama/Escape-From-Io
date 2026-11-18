@@ -78,6 +78,11 @@ doing something described here, that's a bug. Code is in `Assets/Map Generation/
   - The blend is continuous across edges and round at corners.
   - Higher regions reach a little past their edge, so cliff faces get rock rather than the ground's texture.
   - Albedo, the selection and action tints, and bump all blend together.
+- **Height bands (#31):** each texture is also faded outside its region's height band (`heightLow`/`heightHigh` per texture index,
+  from `TextureGenerator.HeightBandLists`). The band edge between two regions sits 0.01 (1 world unit) above the lower region's plateau.
+  **Expected:** water only below the water surface, ground on its plateau and on banks, rock only where a cliff rises above the ground.
+  Without this the purely horizontal blend put water up banks and rock out onto flat ground. Flat ground-to-ground edges are unaffected.
+  A tiny weight floor keeps a valid blend when every candidate is out of band (e.g. mid-terraform).
 - **Projection (#28):** triplanar weights come from the triangle's real facing (`ddx`/`ddy` of world position), not the creased vertex
   normal. Otherwise cliff faces get the top-down projection and the texture stretches.
 - **Bump (#27):** the blended bump normal is world space and is converted to tangent space with a frame passed from `vert`.

@@ -94,6 +94,48 @@ public class TextureGenerator : MonoBehaviour {
         return priorityList;
     }
 
+    // Height band per texture index for the terrain shader, in normalized height (#31). Regions stack Water < Land < Mountain;
+    // the boundary between a region and the one above sits just above the lower region's plateau, so water stops at the water
+    // surface, ground covers its plateau and banks, and rock starts where a cliff rises above the ground. Unknown has no band.
+    const float regionBoundaryMargin = 0.01f;   // normalized; 1 world unit at the (10, 100, 10) container scale
+
+    public void HeightBandLists(out float[] low, out float[] high) {
+        TerrainManager terrainManager = Script.Get<TerrainManager>();
+        MapGenerator mapGenerator = Script.Get<MapGenerator>();
+
+        List<RegionType> regions = terrainManager.regionTypeMap.Values
+            .Where(r => r.type != RegionType.Type.Unknown)
+            .OrderBy(r => r.noiseBase)
+            .ToList();
+
+        Dictionary<RegionType.Type, Vector2> bands = new Dictionary<RegionType.Type, Vector2>();
+        for(int i = 0; i < regions.Count; i++) {
+            float bandLow = -1f;
+            float bandHigh = 2f;
+
+            if(i > 0) {
+                RegionType below = regions[i - 1];
+                bandLow = mapGenerator.NormalizedHeight(below.plateauAtBase ? below.noiseBase : below.noiseMax) + regionBoundaryMargin;
+            }
+
+            if(i < regions.Count - 1) {
+                RegionType region = regions[i];
+                bandHigh = mapGenerator.NormalizedHeight(region.plateauAtBase ? region.noiseBase : region.noiseMax) + regionBoundaryMargin;
+            }
+
+            bands[regions[i].type] = new Vector2(bandLow, bandHigh);
+        }
+
+        low = new float[terrainManager.terrainTypes.Length];
+        high = new float[terrainManager.terrainTypes.Length];
+
+        for(int i = 0; i < terrainManager.terrainTypes.Length; i++) {
+            Vector2 band = bands.TryGetValue(terrainManager.terrainTypes[i].regionType, out Vector2 b) ? b : new Vector2(-1f, 2f);
+            low[i] = band.x;
+            high[i] = band.y;
+        }
+    }
+
     public float[] TextureScaleList() {
         TerrainManager terrainManager = Script.Get<TerrainManager>();
 
