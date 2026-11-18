@@ -119,6 +119,12 @@ public class PathRequestManager : MonoBehaviour {
 
     bool isProcessingPath;
 
+    // One-line state dump for watchdog logs and debugging
+    public static string DiagnosticSummary() {
+        if (instance == null) { return "[PathRequests: no instance]"; }
+        return $"[PathRequests busy: {instance.isProcessingPath}, queued: {instance.pathRequestQueue.Count}]";
+    }
+
     private void Awake() {
         instance = this;
         pathFinding = GetComponent<PathFinding>();

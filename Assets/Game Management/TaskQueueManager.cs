@@ -275,6 +275,12 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
 
     List<UnitAndRefused> unitsRequestingTasks = new List<UnitAndRefused>();
 
+    // One-line state dump for watchdog logs and debugging
+    public string DiagnosticSummary() {
+        string lists = string.Join(", ", taskListMap.Select(kv => $"{kv.Key}={kv.Value.Count}{(taskListLockMap[kv.Key] ? "" : "(unlocked)")}"));
+        return $"[TaskQueue lists: {lists}; units waiting: {unitsRequestingTasks.Count}]";
+    }
+
     public void RequestNextDoableTask(Unit unit, Action<MasterGameTask> callback, HashSet<int> refuseTaskList = null) {
         unitsRequestingTasks.Add(new UnitAndRefused(unit, refuseTaskList, callback));
     }

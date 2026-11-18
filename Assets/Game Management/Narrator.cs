@@ -321,6 +321,7 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
         mapsManager.mapBoundaryObject.gameObject.SetActive(true);
 
         playerBehaviour.SetInternalPause(false);
+        gameInitialized = true;
         StartCoroutine(StartMusic());
         gameOverRoutine = StartCoroutine(CheckForNoRobots());
         taskQueueManagerCheckRoutine = StartCoroutine(CheckForTaskQueueManager());
@@ -378,8 +379,9 @@ public class Narrator : MonoBehaviour, CanSceneChangeDelegate, SceneChangeListen
             yield return new WaitForSeconds(5);
 
             TaskQueueManager manager = Script.Get<TaskQueueManager>();
-            if ((DateTime.Now - manager.lastDished).Seconds > 4) {
-                print("------- Restarting Task Assigmment Routine -------");
+            double secondsSinceDished = (DateTime.Now - manager.lastDished).TotalSeconds;
+            if (secondsSinceDished > 4) {
+                Debug.LogWarning($"Task assignment stalled for {secondsSinceDished:F1}s; restarting. {manager.DiagnosticSummary()} {PathRequestManager.DiagnosticSummary()}");
                 manager.RestartDishOut();
             }
 

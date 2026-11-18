@@ -71,7 +71,10 @@ Examples: `TaskQueueDelegate`, `TaskLockUpdateDelegate`, `UnitManagerDelegate`, 
 
 Then two watchdog coroutines run:
 - `CheckForNoRobots`: game over when no Build/Mine/Move units remain.
-- `CheckForTaskQueueManager`: restarts the task-assignment coroutine if it hasn't ticked for >4s (see Known issues).
+- `CheckForTaskQueueManager`: restarts the task-assignment coroutine if it hasn't ticked for >4s, and logs a warning with
+  `TaskQueueManager.DiagnosticSummary()` and `PathRequestManager.DiagnosticSummary()` (see Known issues).
+
+`gameInitialized` becomes true once the intro hands control to the player.
 
 `EndGameSuccess` is called when the Escape Shuttle completes; time becomes the score.
 
@@ -205,8 +208,8 @@ The full backlog is in [GitHub Issues](https://github.com/JustinLycklama/Escape-
    Some task targets also look wrong; that's under investigation in #1.
 2. **One exception freezes pathfinding** ([#2](https://github.com/JustinLycklama/Escape-From-Io/issues/2)). `PathRequestManager` is serial and only clears its busy flag after the callback returns.
    A throwing callback, or a route that never calls back, stops all pathing. `DishOutTasks` can also hang on its steal wait or die on an exception;
-   the v0.2 watchdog restarts it, and the watchdog itself has a `TimeSpan.Seconds` bug ([#3](https://github.com/JustinLycklama/Escape-From-Io/issues/3)).
-3. Static state survives scene reloads ([#5](https://github.com/JustinLycklama/Escape-From-Io/issues/5)). `Narrator.gameInitialized` is never set ([#4](https://github.com/JustinLycklama/Escape-From-Io/issues/4)).
+   the v0.2 watchdog restarts it, and logs queue and path-request state when it fires.
+3. Static state survives scene reloads ([#5](https://github.com/JustinLycklama/Escape-From-Io/issues/5)).
 4. Many `Resources.Load` calls by string path, and Unity tags. Renames break things at runtime, not compile time.
 5. Lots of commented-out code from earlier designs ([#10](https://github.com/JustinLycklama/Escape-From-Io/issues/10)).
 

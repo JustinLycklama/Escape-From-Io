@@ -4,10 +4,9 @@
 using UnityEngine;
 using System.Linq;
 
-// Narrator.gameInitialized is never set, so wait for the intro to unpause the game with units registered.
-var player = UnityEngine.Object.FindAnyObjectByType<PlayerBehaviour>();
+var narrator = UnityEngine.Object.FindAnyObjectByType<Narrator>();
 var unitManager = UnityEngine.Object.FindAnyObjectByType<UnitManager>();
-if (player == null || unitManager == null || player.gamePaused || unitManager.GetAllPlayerUnits().Length == 0) { return "not initialized yet"; }
+if (narrator == null || unitManager == null || !narrator.gameInitialized) { return "not initialized yet"; }
 
 var constants = UnityEngine.Object.FindAnyObjectByType<Constants>();
 var mapGen = UnityEngine.Object.FindAnyObjectByType<MapGenerator>();
