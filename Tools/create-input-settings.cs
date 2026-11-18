@@ -18,5 +18,7 @@ AssetDatabase.SaveAssets();
 
 EditorBuildSettings.AddConfigObject("com.unity.input.settings", settings, true);
 InputSystem.settings = settings;
+// The config-object registration only reaches ProjectSettings/EditorBuildSettings.asset on a project save
+EditorApplication.ExecuteMenuItem("File/Save Project");
 
 return $"settings at {PATH}: editorInput={InputSystem.settings.editorInputBehaviorInPlayMode} background={InputSystem.settings.backgroundBehavior}";
