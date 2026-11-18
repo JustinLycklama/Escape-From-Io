@@ -189,6 +189,11 @@ between 0.2 and 4 per minute. `evolution` ramps 0→1 over 25 minutes and scales
 ## Time, input, UI
 
 - `TimeManager`: game clock, pausable (`PlayerBehaviour.gamePaused` / internal pause), and timers via `AddNewTimer(seconds, update, complete)`.
+- **Command card** (#17): selecting a tile pushes `CurrentSelectionPanel` (prefab in `Resources/UI`) as a 640×150 card at bottom centre.
+  It shows the tile title, a task line (only when the tile has a task), and one row of action buttons (only real actions; `ActionsList` hides empty slots).
+  The back button is the close button in the top-right corner; Q also closes it. Sub-panels pushed from it (`BlueprintPanel`, the build lists) open
+  at bottom centre too. The robot detail panel (`TaskAndUnitDetailPanel`, opened by clicking a card) opens beside the cards.
+  Positions live in each panel prefab (`NavigationPanel` pushes into the root panel's `positionParent`). Built by `Tools/build-command-card.cs`.
 - **Robot cards** (#16, `GUI Overlay Panel/RobotCards`): three `TaskAndUnitCell` cards (300×72) stacked on the left under the top bar.
   Each shows the type icon, title, robot count in a state ring (idle / inefficient / efficient), the battery bars of the robots closest to
   shutting down, the queued-task count, and the queue lock. A padlock means own type only; arrows mean any robot may take the tasks.

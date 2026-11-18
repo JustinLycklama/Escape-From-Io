@@ -29,7 +29,18 @@ public class ActionsList : MonoBehaviour {
                 action = actions[i];
             }
 
-            cell.SetAction(action);
+            // Only show slots that have an action (the command card lays them out in a row).
+            // Activate before SetAction: a slot hidden early may not have run its cell's Awake yet.
+            GameObject slot = cell.transform.parent.gameObject;
+            if (action != null) {
+                if (!slot.activeSelf) {
+                    slot.SetActive(true);
+                }
+                cell.SetAction(action);
+            } else if (slot.activeSelf) {
+                cell.SetAction(null);
+                slot.SetActive(false);
+            }
         }
     }
 }
