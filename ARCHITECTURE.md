@@ -107,6 +107,8 @@ Each queues a `MasterGameTask` whose target is the `Map` (an `ActionableItem`). 
 **Terrain mesh**: one grid mesh per `MapContainer` (one vertex per height sample, plus a 1-vertex overhang ring), scaled (10, 100, 10).
 Tile edges are shaped in `MapGenerator.MapAtXYWithFeatures`: a higher-region tile ramps its outer 3 samples down toward its region base
 (mountain beside land, land beside water). Only the left/top overhang copies the neighbour's heights; right/bottom is a hidden skirt at 0.
+Unexplored tiles already have their real heights (#28): the final height map is built from `originalLayoutTerrainMap`, not the all-Unknown
+`terrainMap`. They still render with the Unknown (black) texture until revealed, and revealed edges meet real ground instead of a cliff to 0.
 Normals come from `MeshGenerator.CalculateNormals` (#25), not `RecalculateNormals`. They're computed from the global final height map, so they agree
 across containers, and in world proportions. At a cliff base the flatter side wins, so flat ground isn't shaded like a groove. A terraform at a
 container edge redraws the neighbours whose edge normals depend on it. `Tools/Stress/terrain-seams.cs` / `terrain-dips.cs` inspect seam heights.
@@ -120,11 +122,13 @@ Tuning constants are at the top of the shader. Keep the bump scale at 1 (see the
 The bump blend is a world-space normal; `o.Normal` must be tangent space, so `vert` passes the world tangent frame and `surf` converts it (#27).
 The terrain mesh needs tangents for this (`MeshData.FinalizeMesh`). Don't read `IN.internalSurfaceTtoW*` in `surf`: it doesn't compile here,
 and a failed compile silently falls back to white `Mobile/Diffuse`.
+Triplanar projection weights use the triangle's own facing (`ddx`/`ddy` of world position), not the vertex normal (#28). The creased vertex normals
+point up at cliff feet, which picked the top-down projection and stretched textures down cliff faces.
 
 Other systems: `FogOfWar` + `Math/Vision Casting` (tower vision radius), `MiniMap`, `IntervalActionPipeline` (spreads per-map work across frames).
 
 **Scene backdrop and lighting**: GameScene uses the MilkyWay skybox (`Tools/set-game-skybox.cs`). Lighting comes from `Tools/set-game-lighting.cs` (#27):
-a Realtime sun (60° pitch, warm, no shadows) and a cool `Fill Light` from the opposite side (vertex/SH, no shadows).
+a Realtime sun (60° pitch, warm, 0.8, no shadows) and a cool `Fill Light` (0.45) from the opposite side (vertex/SH, no shadows).
 Ambient is Trilight (sky/equator/ground), so it doesn't depend on the skybox. Most of the black around the playfield is the fog of war over unexplored maps, not empty space;
 styling it is #24.
 

@@ -319,7 +319,9 @@ public class MapGenerator : MonoBehaviour {
         groundFeaturesNoiseMap = GenerateGroundFeaturesMap(totalFullWidth, totalFullHeight);
         mountainFeaturesNoiseMap = GenerateMountainFeaturesMap(totalFullWidth, totalFullHeight);
 
-        finalNoiseMap = CreateMapWithFeatures(terrainMap);
+        // Heights come from the terrain each tile will be once revealed, not from Unknown (height 0). Unexplored tiles still
+        // render with the Unknown texture, but revealed edges now meet the real neighbouring height instead of a cliff to 0 (#28)
+        finalNoiseMap = CreateMapWithFeatures(originalLayoutTerrainMap);
 
         minMaxOfFinalMap = NoiseGenerator.MinMaxForMap(originalLayoutNoiseMap);
 

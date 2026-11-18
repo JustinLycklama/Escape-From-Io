@@ -121,7 +121,11 @@ Shader "Custom/TerrainSelectionMobile" {
 		void surf(Input IN, inout SurfaceOutput o) {
 			float3 worldNormal = WorldNormalVector(IN, o.Normal);
 
-			float3 blendAxes = abs(worldNormal);
+			// Triplanar projection weights come from the triangle's real facing (#28), not the interpolated vertex normal:
+			// terrain normals are creased flat at cliff feet (MeshGenerator.CalculateNormals), which picked the top-down
+			// projection for cliff faces and stretched the texture down them. Lighting still uses the smooth normals.
+			float3 faceNormal = normalize(cross(ddy(IN.worldPos), ddx(IN.worldPos)));
+			float3 blendAxes = pow(abs(faceNormal), 3);
 			blendAxes /= blendAxes.x + blendAxes.y + blendAxes.z;
 
 			float2 p = IN.layoutCoordinate;
