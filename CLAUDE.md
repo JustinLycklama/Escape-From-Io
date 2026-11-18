@@ -1,7 +1,7 @@
 # Escape From Io
 
-Indirect-control RTS in Unity. **Target is PC only (Windows, mouse + keyboard).** The game was originally mobile-first.
-Ignore the touch/joystick/mobile code: don't extend it, don't design around it, and don't spend effort on Android/iOS. The player queues tasks (mine, build, haul) and robots with limited battery pull work from per-type queues.
+Indirect-control RTS in Unity. **Target is PC only (Windows, mouse + keyboard).** The game was originally mobile-first; the mobile code was removed in #9.
+Don't add touch or joystick support, and don't spend effort on Android/iOS. The player queues tasks (mine, build, haul) and robots with limited battery pull work from per-type queues.
 The goal is to build an escape shuttle before you run out of robots. The repo folder is named "Pathfinding" for historical reasons.
 
 **Read `ARCHITECTURE.md` before non-trivial changes.** It covers systems, coordinate spaces, the task pipeline and known issues.
