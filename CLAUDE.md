@@ -29,7 +29,7 @@ The editor must be open: run `unity open .` from the repo root, then `unity stat
 To verify a change: recompile, clear the console, start play mode, wait, read the console at warn level, capture the game view, then stop play mode.
 
 - **`script eval` gotcha**: eval wraps code in a class named `Script`, which shadows the game's `Script` service locator. Use `FindAnyObjectByType<T>()` in eval code.
-  Reusable eval scripts live in `Tools/Stress/`. `Narrator.gameInitialized` is never set, so wait for `!PlayerBehaviour.gamePaused` instead.
+  Reusable eval scripts live in `Tools/Stress/`. Wait for `Narrator.gameInitialized` before driving gameplay.
 - **Don't edit `Assets/` scripts during a play session**: the recompile reloads the domain and breaks the run. Stop play mode first.
 - Real scenes: `Assets/Scenes/TitleScene.unity` (index 0) and `Assets/Scenes/GameScene.unity` (index 1). Others are sandboxes or vendor demos.
 

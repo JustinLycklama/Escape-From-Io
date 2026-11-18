@@ -17,8 +17,8 @@ PowerShell setup for every command:
    unity command console clear
    unity command editor.playmode start
    ```
-   GameScene generates the world for ~20–40s. The game is ready when `PlayerBehaviour.gamePaused` is false
-   (`Narrator.gameInitialized` is never set, so don't wait on it). `Tools/Stress/setup.cs` returns "not initialized yet" until then.
+   GameScene generates the world for ~20–40s. The game is ready when `Narrator.gameInitialized` is true.
+   `Tools/Stress/setup.cs` returns "not initialized yet" until then.
 4. **Exercise the change.** Use `unity command script eval --file <file.cs>` for game state. Eval wraps code in a class named `Script`, so
    use `UnityEngine.Object.FindAnyObjectByType<T>()`, not `Script.Get<T>()`. Put reusable eval scripts in `Tools/`, and dry-run them first with `--dry-run true`.
    For task-system changes, run `powershell -File Tools/Stress/run-stress.ps1 -Ticks 30` (it handles steps 3–6 itself).
