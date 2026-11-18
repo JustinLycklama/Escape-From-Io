@@ -45,7 +45,12 @@ public class CurrentSelectionPanel : NavigationPanel, SelectionManagerDelegate, 
 
     private void UpdateTaskDisplay() {
 
-        infoAreaCanvas.alpha = (currentMasterTask == null) ? 0.65f : 1.0f;
+        // Show the task line only when the selection has a task (the old panel showed a dimmed "No Task" box)
+        bool hasTask = currentMasterTask != null;
+        if (infoAreaCanvas.gameObject.activeSelf != hasTask) {
+            infoAreaCanvas.gameObject.SetActive(hasTask);
+        }
+        infoAreaCanvas.alpha = 1.0f;
 
         var displayUnitIcon = currentMasterTask != null && currentMasterTask.assignedUnit != null;
         if(iconHolder.activeSelf != displayUnitIcon) {
@@ -90,6 +95,7 @@ public class CurrentSelectionPanel : NavigationPanel, SelectionManagerDelegate, 
         }
 
         currentSelection = nextSelection;
+        UpdateTaskDisplay();
     }
 
     /*

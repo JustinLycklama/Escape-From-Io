@@ -95,6 +95,11 @@ public class ActionItemCell : Clickable, HotkeyDelegate {
 
     public void SetHotKey(KeyCode hotkey) {
 
+        // The slot may be hidden (no action) before this cell's Awake has run
+        if (playerBehaviour == null) {
+            playerBehaviour = Script.Get<PlayerBehaviour>();
+        }
+
         if(this.hotkey != null) {
             playerBehaviour.RemoveHotKeyDelegate(this);
         }
