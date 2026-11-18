@@ -189,6 +189,9 @@ between 0.2 and 4 per minute. `evolution` ramps 0→1 over 25 minutes and scales
 ## Time, input, UI
 
 - `TimeManager`: game clock, pausable (`PlayerBehaviour.gamePaused` / internal pause), and timers via `AddNewTimer(seconds, update, complete)`.
+- **Top bar** (#15, `GUI Overlay Panel/TopBar` in GameScene): resources on the left; play, pause, speed and the clock in the centre; threat and settings on the right.
+  `GameSpeedControl` sets `Time.timeScale` to 1, 2 or 3 (click to cycle, or keys 1–3). It's disabled in the tutorial, and timeScale is reset to 1 when the scene unloads.
+  Pause is separate (`gamePaused`), so the two combine. Built by `Tools/build-top-bar.cs`, which unpacked the `TaskAndUnitPanel` and `OverviewPanel` prefab instances in the scene.
 - `PlayerBehaviour`: camera and hotkeys on the **Input System** (#8). The project uses input handling "Both", because vendor scripts still call legacy `Input`;
   first-party code uses only the Input System. Controls: WASD/arrows pan, middle-drag pans (grab the ground), the wheel zooms, left-click selects,
   Space pauses, Q/E/Escape are hotkeys (Escape also works in the tutorial). Camera motion uses unscaled time.
