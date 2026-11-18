@@ -247,6 +247,7 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
 
         unitStatusTooltip.followPosition = statusLocation;
         unitStatusTooltip.followingObject = transform;
+        unitStatusTooltip.owner = this;
 
         unitStatusTooltip.SetPrimaryActionAndFaction(primaryActionType, factionType);
         unitStatusTooltip.DisplayPercentageBar(false);
@@ -840,6 +841,8 @@ public abstract class Unit : ActionableItem, Selectable, TerrainUpdateDelegate, 
         if(selected) {
             color = ColorSingleton.sharedInstance.highlightColor;
         }
+
+        unitStatusTooltip?.SetSelected(selected);
 
         if (buildableComponent != null) {
             foreach(Building.MeshBuildingTier meshTier in buildableComponent.meshTiers) {

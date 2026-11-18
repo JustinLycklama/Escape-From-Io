@@ -13,7 +13,8 @@ public static class TrackingUIInterfaceExtension {
     private static float outerCircleRadius = 100;
     private static float innerCircleRadius = 50;
 
-    public static void UpdateTrackingPosition(this TrackingUIInterface trackingInterface) {
+    // minimumAlpha keeps the interface visible away from the cursor (e.g. a selected robot's marker, #21)
+    public static void UpdateTrackingPosition(this TrackingUIInterface trackingInterface, float minimumAlpha = 0f) {
         if(trackingInterface.followPosition == null) {
             return;
         }
@@ -67,12 +68,15 @@ public static class TrackingUIInterfaceExtension {
 
         float distanceFromCenter = Vector2.Distance(viewPoint, interfacePoint);
 
+        float hoverAlpha;
         if(distanceFromCenter > outerCircleRadius) {
-            trackingInterface.canvasGroup.alpha = 0;
+            hoverAlpha = 0;
         } else if (distanceFromCenter > innerCircleRadius) {
-            trackingInterface.canvasGroup.alpha = 1.0f - Mathf.InverseLerp(innerCircleRadius, outerCircleRadius, distanceFromCenter);
+            hoverAlpha = 1.0f - Mathf.InverseLerp(innerCircleRadius, outerCircleRadius, distanceFromCenter);
         } else {
-            trackingInterface.canvasGroup.alpha = 1;
-        }        
+            hoverAlpha = 1;
+        }
+
+        trackingInterface.canvasGroup.alpha = Mathf.Max(hoverAlpha, minimumAlpha);
     }
 }

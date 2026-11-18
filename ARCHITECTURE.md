@@ -196,6 +196,9 @@ between 0.2 and 4 per minute. `evolution` ramps 0→1 over 25 minutes and scales
 - **Minimap** (#18, `GUI Overlay Panel/MinimapDock`): 220×220 at bottom right. `MiniMap` is schematic: icons for the camera, miners, ore and
   towers, placed as a percentage of `MapsManager.mapsBoundaries` (no terrain image). `MiniMapNavigation` inverts that mapping, so click or drag pans
   the camera. The old bottom-left slide-out (`OverviewPanel`) is retired, inactive in the scene.
+- **Robot overhead markers** (#21, `UnitStatusTooltip`, prefab `Resources/UI/UnitStatusPanel`): hidden by default. A root CanvasGroup fades the
+  whole marker in when the cursor is near the robot (`TrackingUIInterface`), and pins it at full alpha while the robot is selected or needs attention:
+  battery at or below `NotificationPanel.unitDurationWarning`, or idle for 3s while its own queue has tasks. Enemies show on hover only.
 - **Command card** (#17): selecting a tile pushes `CurrentSelectionPanel` (prefab in `Resources/UI`) as a 640×150 card at bottom centre.
   It shows the tile title, a task line (only when the tile has a task), and one row of action buttons (only real actions; `ActionsList` hides empty slots).
   The back button is the close button in the top-right corner; Q also closes it. Sub-panels pushed from it (`BlueprintPanel`, the build lists) open
