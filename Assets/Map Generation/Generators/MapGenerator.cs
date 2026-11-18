@@ -33,9 +33,7 @@ public class MapGenerator : MonoBehaviour {
     public NoiseData mountainFeaturesMapNoiseData;
 
     const int seedCap = 1000;
-    // Read through each time: NoiseGenerator.ResetRandom (MapGenerator.Awake) replaces the instance, and a field captured at
-    // construction kept the previous stream, so the logged seed did not reproduce the layout (#32)
-    System.Random rnd => NoiseGenerator.random;
+    System.Random rnd = NoiseGenerator.random;
 
     private void RandomizeSeed() {      
         layoutMapNoiseData.seed = rnd.Next(1, seedCap);
@@ -280,8 +278,6 @@ public class MapGenerator : MonoBehaviour {
         }
 
         print("Found Suitable Map");
-
-        edgeNoiseOffset = rnd.Next(0, 10000) * 0.37f;
 
         float[,] groundMutatorMap = premadeLayoutMap?.GroundMutatorNoiseData ?? GenerateGroundMutatorMap(totalLayoutWidth, totalLayoutHeight);
         float[,] mountainMutatorMap = premadeLayoutMap?.MountainMutatorNoiseData ?? GenerateMountainMutatorMap(totalLayoutWidth, totalLayoutHeight);
@@ -559,15 +555,7 @@ public class MapGenerator : MonoBehaviour {
     // neighbour). When a tile changes terrain, its 4 neighbours' facing edges must be re-shaped too, or e.g. mining out a
     // mountain leaves the mountains beside it as sheer walls. Records the edge-band samples whose height changes once
     // the target tile has its new terrain type (#29). Global layout coordinates.
-    const int edgeBand = 3;   // samples MapAtXYWithFeatures may re-shape from an edge (ramp width + jitter fit inside it)
-
-    // Edge transition shape (#32), in height samples: a smoothstep edgeRampWidth wide, centred on the tile boundary and shifted
-    // by up to ±edgeJitter by noise. Width/2 + jitter must stay <= edgeBand.
-    const float edgeRampWidth = 3f;
-    const float edgeJitter = 1.0f;
-    const float oneSidedRampWidth = 2.5f;   // mountain over ground / world border: slope starts at the edge, spans this (+ jitter <= edgeBand + 0.5)
-    const float edgeNoiseScale = 0.15f;   // noise frequency along an edge (~7 samples per bump)
-    float edgeNoiseOffset;                // per game, from the seeded random
+    const int edgeBand = 3;   // matches dipRadius in MapAtXYWithFeatures
 
     private void CalculateNeighbourEdgeTargets(TerraformTarget terraformTarget, int tileX, int tileY) {
         int f = Script.Get<Constants>().featuresPerLayoutPerAxis;
@@ -581,14 +569,9 @@ public class MapGenerator : MonoBehaviour {
         TerrainType savedTerrain = terrainMap[tileX, tileY];
         terrainMap[tileX, tileY] = terraformTarget.terrainTypeTarget;
 
-        // All 8 neighbours: edge shaping also looks at diagonal tiles, which shapes corners (#32)
-        for(int directionY = -1; directionY <= 1; directionY++) for(int directionX = -1; directionX <= 1; directionX++) {
-            if(directionX == 0 && directionY == 0) {
-                continue;
-            }
-
-            int neighbourX = tileX + directionX;
-            int neighbourY = tileY + directionY;
+        foreach(Vector2Int direction in new Vector2Int[] { Vector2Int.left, Vector2Int.right, Vector2Int.down, Vector2Int.up }) {
+            int neighbourX = tileX + direction.x;
+            int neighbourY = tileY + direction.y;
 
             if(neighbourX < 0 || neighbourY < 0 || neighbourX >= terrainMap.GetLength(0) || neighbourY >= terrainMap.GetLength(1)) {
                 continue;
@@ -596,17 +579,14 @@ public class MapGenerator : MonoBehaviour {
 
             bool changedTile = false;
 
-            for(int localX = 0; localX < f; localX++) {
-                for(int localY = 0; localY < f; localY++) {
+            for(int i = 0; i < f; i++) {
+                for(int band = 0; band < edgeBand; band++) {
+                    // Distance `band` in from the edge that faces the terraformed tile
+                    int localX = direction.x == 0 ? i : (direction.x > 0 ? band : f - 1 - band);
+                    int localY = direction.y == 0 ? i : (direction.y > 0 ? band : f - 1 - band);
+
                     int x = neighbourX * f + localX;
                     int y = neighbourY * f + localY;
-
-                    // Only samples within edgeBand of the terraformed tile can change
-                    int samplesAwayX = x < tileX * f ? tileX * f - x : (x >= (tileX + 1) * f ? x - (tileX + 1) * f + 1 : 0);
-                    int samplesAwayY = y < tileY * f ? tileY * f - y : (y >= (tileY + 1) * f ? y - (tileY + 1) * f + 1 : 0);
-                    if(samplesAwayX > edgeBand || samplesAwayY > edgeBand) {
-                        continue;
-                    }
 
                     float current = finalNoiseMap[x, y];
                     float target = Mathf.InverseLerp(minMaxOfFinalMap.min, minMaxOfFinalMap.max, MapAtXYWithFeatures(x, y, terrainMap));
@@ -741,6 +721,7 @@ public class MapGenerator : MonoBehaviour {
 
         int featuresPerLayoutPerAxis = constants.featuresPerLayoutPerAxis;
 
+        int dipRadius = 3;
 
         int sampleX = x / featuresPerLayoutPerAxis;
         int sampleY = y / featuresPerLayoutPerAxis;
@@ -754,91 +735,48 @@ public class MapGenerator : MonoBehaviour {
 
         float mapAtXY = SampleAtXY(x, y, thisTerrainType, withAlternateLayoutValue);
 
-        // Edge shaping (#32). Where two regions meet (mountain/ground, ground/water) or at the world border, heights ease
-        // from one level to the other along a smoothstep centred on the tile boundary. Noise along the boundary shifts the
-        // centre back and forth, so shorelines and mountain feet wander instead of running straight along tile edges.
-        // Diagonal neighbours count too, which rounds corners.
-        // - The higher tile eases down toward the lower region's plateau.
-        // - A lower tile next to *ground* rises toward the ground plateau (beaches, rounded pools). Next to mountains it
-        //   stays flat: mountains keep their slope on their own side.
-        // Everything stays within edgeBand samples of the boundary (CalculateNeighbourEdgeTargets relies on that).
-        TerrainManager terrainManager = Script.Get<TerrainManager>();
-        int f = featuresPerLayoutPerAxis;
-        float centreX = x % f + 0.5f;   // this sample's centre inside its tile, in samples
-        float centreY = y % f + 0.5f;
-        int tilesX = usingTerrainMap.GetLength(0);
-        int tilesY = usingTerrainMap.GetLength(1);
-        float ownBase = terrainManager.regionTypeMap[thisTerrainType.regionType].noiseBase;
-        bool outsideMap(int tileX, int tileY) => tileX < 0 || tileY < 0 || tileX >= tilesX || tileY >= tilesY;
+        float distanceToEdgeX = x % featuresPerLayoutPerAxis;
+        float distanceToEdgeY = y % featuresPerLayoutPerAxis;
 
-        float shaped = mapAtXY;
+        for(int i = 0; i < dipRadius; i++) {
 
-        for(int dy = -1; dy <= 1; dy++) {
-            for(int dx = -1; dx <= 1; dx++) {
-                if(dx == 0 && dy == 0) {
+            float baseline = Script.Get<TerrainManager>().regionTypeMap[thisTerrainType.regionType].noiseBase * (dipRadius - (i + 1)) / dipRadius;
+
+            // Left
+            if((sampleX == 0) || (sampleX - 1 >= 0 && thisTerrainType.priority > TerrainAtLocation(sampleX - 1, sampleY).priority)) {
+                if(distanceToEdgeX == i) {
+                    mapAtXY = baseline + (mapAtXY * ((i + 1)) / dipRadius);
                     continue;
                 }
+            }
 
-                int neighbourX = sampleX + dx;
-                int neighbourY = sampleY + dy;
-
-                float neighbourLevel;
-                bool neighbourIsLower;
-
-                if(outsideMap(neighbourX, neighbourY)) {
-                    if(dx != 0 && dy != 0) {
-                        continue;
-                    }
-
-                    // World border: ease down to this region's base
-                    neighbourLevel = ownBase;
-                    neighbourIsLower = true;
-                } else {
-                    TerrainType neighbour = TerrainAtLocation(neighbourX, neighbourY);
-                    if(neighbour.priority == thisTerrainType.priority) {
-                        continue;
-                    }
-
-                    neighbourIsLower = neighbour.priority < thisTerrainType.priority;
-                    if(!neighbourIsLower && neighbour.regionType != RegionType.Type.Land) {
-                        continue;
-                    }
-
-                    neighbourLevel = HeightAtRegion(terrainManager.regionTypeMap[neighbour.regionType]);
+            // Top
+            if((sampleY == 0) || (sampleY - 1 >= 0 && thisTerrainType.priority > TerrainAtLocation(sampleX, sampleY - 1).priority)) {
+                if(distanceToEdgeY == i) {
+                    mapAtXY = baseline + (mapAtXY * ((i + 1)) / dipRadius);
+                    continue;
                 }
+            }
 
-                // Nearest point of the neighbour's square, in this tile's sample space; distance to it in samples
-                float nearestX = Mathf.Clamp(centreX, dx * f, dx * f + f);
-                float nearestY = Mathf.Clamp(centreY, dy * f, dy * f + f);
-                float distance = Mathf.Sqrt((centreX - nearestX) * (centreX - nearestX) + (centreY - nearestY) * (centreY - nearestY));
-
-                // Same boundary point from either side, so both tiles see the same shift
-                float noise = Mathf.PerlinNoise((sampleX * f + nearestX) * edgeNoiseScale + edgeNoiseOffset, (sampleY * f + nearestY) * edgeNoiseScale + edgeNoiseOffset);
-                float shift = (noise * 2f - 1f) * edgeJitter;
-
-                float t;
-                bool twoSided = neighbourIsLower ? thisTerrainType.regionType == RegionType.Type.Land && !outsideMap(neighbourX, neighbourY)
-                                                 : true;
-                if(twoSided) {
-                    // Ground over water: the transition straddles the boundary, centred at the noise shift
-                    float across = neighbourIsLower ? distance : -distance;   // positive into the higher side
-                    t = Mathf.Clamp01((across - shift) / edgeRampWidth + 0.5f);
-                } else {
-                    // Mountain over ground, or the world border: the lower side stays flat, so the whole slope is on this
-                    // side, starting at the edge (pushed in by up to edgeJitter) so there's no step at the seam
-                    t = Mathf.Clamp01((distance - noise * edgeJitter) / oneSidedRampWidth);
+            // Right
+            if((sampleX + 1 == usingTerrainMap.GetLength(0)) || (sampleX + 1 < usingTerrainMap.GetLength(0) && thisTerrainType.priority > TerrainAtLocation(sampleX + 1, sampleY).priority)) {
+                if((featuresPerLayoutPerAxis - distanceToEdgeX - 1) == i) {
+                    mapAtXY = baseline + (mapAtXY * ((i + 1)) / dipRadius);
+                    continue;
                 }
-                t = t * t * (3f - 2f * t);
+            }
 
-                if(neighbourIsLower) {
-                    shaped = Mathf.Min(shaped, Mathf.Lerp(neighbourLevel, mapAtXY, t));
-                } else {
-                    shaped = Mathf.Max(shaped, Mathf.Lerp(mapAtXY, neighbourLevel, t));
+            //// Bottom
+            if((sampleY + 1 == usingTerrainMap.GetLength(1)) || (sampleY + 1 < usingTerrainMap.GetLength(1) && thisTerrainType.priority > TerrainAtLocation(sampleX, sampleY + 1).priority)) {
+                if(featuresPerLayoutPerAxis - distanceToEdgeY - 1 == i) {
+                    mapAtXY = baseline + (mapAtXY * ((i + 1)) / dipRadius);
+                    continue;
                 }
             }
         }
 
-        return shaped;
+
+        return mapAtXY;
 
     }
 

@@ -18,18 +18,11 @@ doing something described here, that's a bug. Code is in `Assets/Map Generation/
    The layout is re-rolled until spawn has walkable land next to it.
 2. **Plateau**: `PlateauLayoutMap` flattens each tile's layout value to its region height (`HeightAtRegion`), so a region is one plateau.
 3. **Features**: per-sample ground and mountain noise add detail: ± for land, up for mountains, none for water.
-4. **Edge shaping** (`MapAtXYWithFeatures`, #32). Where regions of different priority meet (Mountain 2 > Land 1 > Water 0), or at the world
-   border, heights ease between the two plateaus with a smoothstep. Perlin noise along the boundary (`edgeJitter`, `edgeNoiseScale`, a per-game
-   offset) shifts where the slope sits, so **expected:** shorelines and mountain feet wander, and are never ruler-straight along tile edges.
-   All 8 neighbours count, so corners are rounded.
-   - **Ground over water** is two-sided: the transition straddles the boundary (`edgeRampWidth` 3 samples, ±1 jitter). The water tile's rim
-     rises into a beach and the ground's rim dips, so pools aren't rectangles.
-   - **Mountain over ground**, and the world border, are one-sided: the ground stays flat, and the mountain's outer samples ease up from ground
-     level (`oneSidedRampWidth` 2.5, pushed in by up to 1 sample). That leaves no step at the seam.
-   - Tiles of equal priority meet without shaping. All shaping stays within `edgeBand` (3) samples of the boundary.
+4. **Edge shaping** (`MapAtXYWithFeatures`): wherever a tile borders a **lower-priority region** (Mountain 2 > Land 1 > Water 0), its outer
+   3 samples (`dipRadius`) ramp down toward its region base. Mountains slope down to the ground beside them, and land slopes down into water.
+   Tiles of equal priority meet without a ramp.
 5. Everything is normalized (`minMaxOfFinalMap`) into `finalNoiseMap`, the one global height map that every mesh, normal and unit height reads.
-6. One seeded `NoiseGenerator.random` drives all of it. `MapGenerator.Awake` reseeds it and logs `Seed: N`. `MapGenerator.rnd` must read
-   `NoiseGenerator.random` each time: a field captured at construction kept the pre-reseed stream, so the logged seed didn't reproduce the map (fixed in #32).
+6. One seeded `NoiseGenerator.random` drives all of it. `MapGenerator.Awake` reseeds it and logs `Seed: N`.
 
 ### Unexplored tiles
 
@@ -54,8 +47,7 @@ doing something described here, that's a bug. Code is in `Assets/Map Generation/
   - Mining out a mountain must make the **adjacent mountains round down** into the new hole, instead of standing as sheer walls.
   - Filling water must lift the adjacent land's shoreline ramp.
 
-  `MapGenerator.CalculateNeighbourEdgeTargets` recomputes every sample within `edgeBand` (3) of the changed tile, in all 8 neighbouring tiles
-  (diagonals shape corners), as if the terraform were complete.
+  `MapGenerator.CalculateNeighbourEdgeTargets` recomputes the 3-sample edge band of the 4 neighbouring tiles as if the terraform were complete.
   Those samples animate with the same percentage, and `Map.UpdateNeighbourTileMeshes` re-meshes them, including in other containers.
   Before #29 only the target tile was recomputed, so mined holes had vertical walls.
   `Tools/Stress/mine-tile.cs` mines a tile in steps and prints the neighbour's edge profile.
