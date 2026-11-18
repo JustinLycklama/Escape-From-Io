@@ -1,6 +1,7 @@
 // Editor eval (#19): space skybox behind the map instead of a solid black clear, without changing how the terrain is lit.
 // Ambient light used to come from the default procedural sky; pin it to that sky's current ambient colour so terrain
 // brightness stays the same when the (much darker) space skybox goes in. Edit SKYBOX to try another. Safe to re-run.
+// The ambient is now set by Tools/set-game-lighting.cs (#27); this only converts it if the scene is still on Skybox ambient.
 using UnityEditor;
 using UnityEditor.SceneManagement;
 using UnityEngine;
