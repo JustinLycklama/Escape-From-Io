@@ -36,6 +36,14 @@ To verify a change: recompile, clear the console, start play mode, wait, read th
 - **`script eval` gotcha**: eval wraps code in a class named `Script`, which shadows the game's `Script` service locator. Use `FindAnyObjectByType<T>()` in eval code.
   Reusable eval scripts live in `Tools/Stress/`. Wait for `Narrator.gameInitialized` before driving gameplay.
 - **Don't edit `Assets/` scripts during a play session**: the recompile reloads the domain and breaks the run. Stop play mode first.
+  Shader edits are fine during play: reimport with `AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate)`, then re-push the
+  material data (`MapContainer.SetupMaterialShader()` + `UpdateMapOverhang()` for terrain).
+- **Shader errors don't show in `unity recompile`.** A broken shader silently falls back to white or pink and logs "Shader error in …".
+  Read the console after any shader change.
+- More eval tips: qualify `Object.FindAnyObjectByType<T>()`, don't use `??`/`?.` on Unity objects (fake null), and env vars don't reach eval
+  (put constants in the file). Use `--code` for one-liners.
+- **Visual A/B within one play session** (maps are random per run): toggle the change at runtime, capture both, then compare or pixel-sample
+  them. See the play-test skill and LEARNINGS.md.
 - Real scenes: `Assets/Scenes/TitleScene.unity` (index 0) and `Assets/Scenes/GameScene.unity` (index 1). Others are sandboxes or vendor demos.
 
 ## Workflow
@@ -85,4 +93,9 @@ Everything else in `Assets/` is asset-store/vendor content: **don't modify it, a
 - No `.obj` models were ever committed: a past global gitignore excluded them. Unity deletes their orphaned `.meta` files on open. **Don't commit those deletions**,
   because the metas preserve GUIDs for when the asset packs are reimported. The two models used in-game have ProBuilder-built stand-ins in `Assets/Game Objects/Buildings/StandInMeshes/` (#6).
 - Firebase was removed. `FirebaseManager` is now a local PlayerPrefs leaderboard.
-- `docs/` is the GitHub Pages site, not developer docs.
+- `docs/` is the GitHub Pages site, not developer docs. Developer docs are ARCHITECTURE.md, TERRAIN.md and LEARNINGS.md
+  (what we found and how, with dated notes).
+- Shells: git only works in the Bash tool, not PowerShell. In Bash, never run `python3` (the Windows Store stub hangs) or `cat > file`
+  without a heredoc (it waits on stdin). `powershell -File` is blocked by the execution policy, so use `-Command` or `-ExecutionPolicy Bypass`.
+- Before "restoring" behaviour someone remembers, check history (`git log -S`, `git diff legacy-mobile-wip master`). It may never have existed (#29).
+- Terrain containers are scaled (10, 100, 10), so anything in mesh space (normals, slopes) is distorted. Reason in world proportions. See TERRAIN.md.

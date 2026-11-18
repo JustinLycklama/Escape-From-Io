@@ -28,4 +28,17 @@ PowerShell setup for every command:
 6. **Look:** `unity command capture game_view --output-path Screenshots/<name>.png`, then Read the PNG.
 7. **Stop:** `unity command editor.playmode stop`.
 
+## Visual changes (rendering, lighting, shaders, UI look)
+
+Maps are generated fresh each run, so compare before and after **in one play session**:
+- Toggle the change at runtime and capture each state at the same camera. For example: swap the material's shader to a temporary copy of
+  the old one, rebuild meshes with old vs new normals, or enable/disable a light. Delete any temporary copies under `Assets/` afterwards.
+- Frame a spot: `PlayerBehaviour.PanCameraToPosition(worldPoint, 0.1–0.25, false)`. Find terrain by raycasting a viewport point.
+- Compare with numbers, not just eyes. Stitch or crop captures and read pixels with `System.Drawing` through
+  `powershell -NoProfile -Command`. A uniform brightness shift means a global cause, not the edge logic.
+- Isolate suspects one at a time: hide fog objects or renderers, set an extreme ambient (red) or zero a light, or force a neutral output in
+  the shader. Shader edits can be reimported during play (CLAUDE.md); after a reimport, re-push the material data.
+- After any shader change, read the console for "Shader error". A failed compile shows as flat white or pink, not as a recompile error.
+- For terrain, check the data before the pixels: `Tools/Stress/terrain-seams.cs`, `terrain-dips.cs`, `mine-tile.cs` (see TERRAIN.md).
+
 Never edit scripts under `Assets/` while in play mode; stop first. Report what was verified and what wasn't (e.g. "visuals not checked").
