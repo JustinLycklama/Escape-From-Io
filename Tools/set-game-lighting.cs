@@ -11,7 +11,7 @@ var scene = EditorSceneManager.OpenScene("Assets/Scenes/GameScene.unity", OpenSc
 var sun = GameObject.Find("Directional Light").GetComponent<Light>();
 sun.lightmapBakeType = LightmapBakeType.Realtime;   // was Baked, with no baked lighting in the project
 sun.transform.rotation = Quaternion.Euler(60, 330, 0);
-sun.intensity = 1.0f;
+sun.intensity = 0.8f;
 sun.color = new Color(1f, 0.96f, 0.9f);
 EditorUtility.SetDirty(sun); EditorUtility.SetDirty(sun.transform);
 
@@ -27,14 +27,14 @@ fill.lightmapBakeType = LightmapBakeType.Realtime;
 fill.renderMode = LightRenderMode.ForceVertex;
 fill.shadows = LightShadows.None;
 fill.transform.rotation = Quaternion.Euler(30, 150, 0);
-fill.intensity = 0.75f;
+fill.intensity = 0.45f;
 fill.color = new Color(0.72f, 0.8f, 1f);
 EditorUtility.SetDirty(fill); EditorUtility.SetDirty(fillGo.transform);
 
 RenderSettings.ambientMode = AmbientMode.Trilight;
-RenderSettings.ambientSkyColor = new Color(0.70f, 0.74f, 0.84f);
-RenderSettings.ambientEquatorColor = new Color(0.50f, 0.52f, 0.58f);
-RenderSettings.ambientGroundColor = new Color(0.30f, 0.29f, 0.31f);
+RenderSettings.ambientSkyColor = new Color(0.56f, 0.60f, 0.70f);
+RenderSettings.ambientEquatorColor = new Color(0.42f, 0.44f, 0.50f);
+RenderSettings.ambientGroundColor = new Color(0.26f, 0.25f, 0.27f);
 
 EditorSceneManager.MarkSceneDirty(scene);
 EditorSceneManager.SaveScene(scene);
