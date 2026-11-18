@@ -95,7 +95,7 @@ Conversions live on the structs and on `MapsManager`. Grid↔map conversion need
 
 **Generation** (`MapGenerator`): noise is generated twice, once for the layout (terrain region per tile) and once for features (height detail),
 plus mutator maps for ground and mountains. The lowest N mountain values become Azure ("Alunar") rock, so the Azure count is controlled, not random.
-The spawn area is plateaued. One seeded `NoiseGenerator.random` drives everything, so a seed reproduces a map.
+The spawn area is plateaued. One seeded `NoiseGenerator.random` drives everything, so a seed reproduces a map. `MapGenerator.Awake` reseeds it for each game and logs `Seed: N`; call `NoiseGenerator.ResetRandom(N)` before generation to replay a map.
 
 **Terrain** (`TerrainManager`, `TerrainType`): Water, Empty, Grass, Mud, Path, ScorchedEarth, LooseRock, Rock, HardRock, SolidRock, AlunarRock, Sand.
 Each has walkable, buildable, walk-speed and modification-speed multipliers, textures and mineral drop chances. Region types: Water, Land, Mountain.
@@ -209,7 +209,9 @@ The full backlog is in [GitHub Issues](https://github.com/JustinLycklama/Escape-
 2. **Pathfinding and assignment hardening** (fixed in #2). `PathRequestManager` delivers each result exactly once, logs callback exceptions without freezing, and fails stuck requests through `ResetIfStuck`, which the watchdog calls.
    `DishOutTasks` bounds its steal wait, re-validates units and tasks before handing them out, and survives per-unit exceptions.
    The v0.2 watchdog remains as a safety net and logs a warning if it ever fires. Regression check: `Tools/Stress/throwing-callback.cs`.
-3. Static state survives scene reloads ([#5](https://github.com/JustinLycklama/Escape-From-Io/issues/5)).
+3. Per-game statics are reset on GameScene load (#5): `UnitManager.unitCount` in `UnitManager.Awake`, the random seed in `MapGenerator.Awake`,
+   `EnemyManager` in `Start`, and `ResearchSingleton`/`TutorialManager` on scene change. `MasterGameTask` ids are deliberately session-unique.
+   Check with `Tools/Stress/game-state.cs` across a scene reload.
 4. Many `Resources.Load` calls by string path, and Unity tags. Renames break things at runtime, not compile time.
 5. Lots of commented-out code from earlier designs ([#10](https://github.com/JustinLycklama/Escape-From-Io/issues/10)).
 

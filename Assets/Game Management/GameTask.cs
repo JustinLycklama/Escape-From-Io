@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -101,6 +101,7 @@ public interface MasterTaskUpdateDelegate {
 
 public class MasterGameTask {
 
+    // Session-wide unique task ids; intentionally never reset (ids only need to be unique, e.g. for refusal sets)
     private static int gameTaskCounter = 0;
 
     public Unit assignedUnit { get; private set; }

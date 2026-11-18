@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -16,7 +16,6 @@ public abstract class Building : ActionableItem, Selectable {
 
     public Transform statusLocation;
 
-    public static int buildingCount = 0;
 
     public override string description => title;
 
@@ -44,8 +43,6 @@ public abstract class Building : ActionableItem, Selectable {
     BuildingManager buildingManager;
 
     protected virtual void Awake() {
-        //title = "Building #" + buildingCount;
-        buildingCount++;
 
         percentPerTask = new Dictionary<GameTask, float>();
 

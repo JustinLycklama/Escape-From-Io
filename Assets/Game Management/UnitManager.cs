@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -46,6 +46,8 @@ public class UnitManager : MonoBehaviour, TaskStatusUpdateDelegate {
     }
 
     void Awake() {
+        // Per-game unit counters (incremented in Unit.Awake); reset here so they never carry over from a previous game
+        backingUnitCount = null;
 
         unitListMap = new Dictionary<MasterGameTask.ActionType, List<Unit>>();
         delegateListMap = new Dictionary<MasterGameTask.ActionType, List<UnitManagerDelegate>>();
@@ -60,14 +62,6 @@ public class UnitManager : MonoBehaviour, TaskStatusUpdateDelegate {
         }
     }
 
-    private void Start() {
-        SceneManagement.sharedInstance.sceneUnloadEvent += () => {
-            unitCount[MasterGameTask.ActionType.Build] = 0;
-            unitCount[MasterGameTask.ActionType.Mine] = 0;
-            unitCount[MasterGameTask.ActionType.Move] = 0;
-            unitCount[MasterGameTask.ActionType.Attack] = 0;
-        };
-    }
 
     public Sprite UnitIconForActionType(MasterGameTask.ActionType actionType) {
         return actionIconObjList.Where(obj => obj.actionType == actionType).First().sprite;

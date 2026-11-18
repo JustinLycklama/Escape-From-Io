@@ -69,7 +69,7 @@ Everything else in `Assets/` is asset-store/vendor content: **don't modify it, a
 
 ## Gotchas
 
-- Static state persists across scene loads (task counter, `UnitManager.unitCount`, singletons). Reset it explicitly if you add more.
+- Static state persists across scene loads. Any new per-game static must be reset on GameScene load (see ARCHITECTURE.md → Known issues #3).
 - `Resources.Load` paths and Unity tags are stringly-typed. Renaming a prefab or tag breaks things at runtime, not at compile time.
 - Task assignment was reported to stall in v0.2. A watchdog in `Narrator.CheckForTaskQueueManager` restarts it. See ARCHITECTURE.md → Known issues and the GitHub issue before touching `TaskQueueManager`.
 - No `.obj` models were ever committed: a past global gitignore excluded them. Unity deletes their orphaned `.meta` files on open. **Don't commit those deletions**,
