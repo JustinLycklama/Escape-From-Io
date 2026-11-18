@@ -201,6 +201,19 @@ between 0.2 and 4 per minute. `evolution` ramps 0→1 over 25 minutes and scales
 - `FirebaseManager`: high scores. Originally Firebase anonymous auth + Realtime Database. Now a local store in PlayerPrefs
   (on the `unity6-upgrade` branch). The name is kept so `HighscoreController` didn't need to change.
 
+## UI style guide
+
+Agreed visual direction: **HUD layout A** (#22). The map fills the screen and the UI sits at the edges: a top bar, robot cards on the left, a command card at bottom centre (only while something is selected), and the minimap bottom-right.
+
+- **Scaling:** every screen-space canvas uses a `CanvasScaler` in Scale With Screen Size mode, with a **1600×900 reference** and match 0.5.
+  That's 1.2× at 1080p and 0.8× at 720p. Author sizes in reference units. `Tools/set-canvas-scaling.cs` applies it.
+- **Spacing:** 20-unit screen margins, and gaps in multiples of 8.
+- **Fonts:** **Agency FB** (regular and bold) for all text, and **DS-DIGI** for numeric readouts only (counts, clock, resources). No other faces.
+- **Text sizes (reference units):** 14 caption, 18 body and buttons, 25 heading, 40 title. Don't go below 14.
+- **Best Fit:** avoid it in new UI. If you use it, cap the maximum at 48: large Best Fit sizes can overflow the dynamic font atlas and render boxes.
+- **Review:** `powershell -File Tools/capture-ui-review.ps1 -Prefix <name> -Resolutions "1920x1080,1280x720"` captures the title screen, HUD and selection
+  at true Game-view resolutions (into the gitignored `Screenshots/`).
+
 ## Known issues and hazards
 
 The full backlog is in [GitHub Issues](https://github.com/JustinLycklama/Escape-From-Io/issues). This section lists the ones that affect how you read the code.
