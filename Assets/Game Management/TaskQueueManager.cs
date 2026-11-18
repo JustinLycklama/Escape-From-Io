@@ -259,7 +259,7 @@ public class TaskQueueManager : MonoBehaviour, UnitManagerDelegate {
     }
 
     public int QueuedTaskCount(MasterGameTask.ActionType actionType) {
-        return taskListMap.TryGetValue(actionType, out List<MasterGameTask> list) ? list.Count : 0;
+        return taskListMap != null && taskListMap.TryGetValue(actionType, out List<MasterGameTask> list) ? list.Count : 0;
     }
 
     public void RequestNextDoableTask(Unit unit, Action<MasterGameTask> callback, HashSet<int> refuseTaskList = null) {

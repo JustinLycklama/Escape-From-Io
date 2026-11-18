@@ -111,6 +111,13 @@ Normals come from `MeshGenerator.CalculateNormals` (#25), not `RecalculateNormal
 across containers, and in world proportions. At a cliff base the flatter side wins, so flat ground isn't shaded like a groove. A terraform at a
 container edge redraws the neighbours whose edge normals depend on it. `Tools/Stress/terrain-seams.cs` / `terrain-dips.cs` inspect seam heights.
 
+**Terrain shader** (`Custom/TerrainSelectionMobile`, assigned in `MapsManager`; `TerrainSelection*.shader` are unused older variants):
+triplanar texture-array sampling. Per-container material data comes from `MapContainer.SetupMaterialShader` / `UpdateMaterialOverhangTextures`:
+`layoutTextures` (7×7, the 5×5 tiles plus an overhang ring holding neighbours' edge tiles, -1 = none), `indexPriority`, `indexScale`,
+`selection` and `actionAtIndex`. Each pixel blends the 3×3 surrounding tiles (#26). The weight is `exp(-(distance to tile square − priority × reach) / falloff)`,
+which is continuous across edges and rounded at corners. Higher-priority regions reach past their edge to cover the cliff quad. Albedo, tints and bump blend together.
+Tuning constants are at the top of the shader. Keep the bump scale at 1 (see the comment by `#pragma target`).
+
 Other systems: `FogOfWar` + `Math/Vision Casting` (tower vision radius), `MiniMap`, `IntervalActionPipeline` (spreads per-map work across frames).
 
 **Scene backdrop**: GameScene uses the MilkyWay skybox (`Tools/set-game-skybox.cs`) with ambient pinned to Flat, at the colour the old procedural sky gave,
