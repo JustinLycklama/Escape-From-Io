@@ -91,7 +91,7 @@ most likely source of bugs:
 | `PathGridCoordinate` | A* node (`nodesPerLayoutPerAxis` per layout tile) | Pathfinding |
 | `WorldPosition` | Unity world space | Transforms, task targets |
 
-Conversions live on the structs and on `MapsManager`. Grid↔map conversion needs padding (fixed in 2019-06-24).
+Conversions live on the structs and on `MapsManager`. Grid↔map conversion needs padding (fixed in 2019-06-24). `Tools/Stress/coordinates.cs` round-trips every tile through all spaces in a running game.
 
 **Generation** (`MapGenerator`): noise is generated twice, once for the layout (terrain region per tile) and once for features (height detail),
 plus mutator maps for ground and mountains. The lowest N mountain values become Azure ("Alunar") rock, so the Azure count is controlled, not random.
