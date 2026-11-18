@@ -14,9 +14,11 @@ Repo: `JustinLycklama/Escape-From-Io`. Labels: a type (`bug`, `feature`, `tech-d
 ## Start a ticket `<n>`
 1. `gh issue view <n> --comments`. Read the whole thread; earlier sessions leave findings there.
 2. Read the relevant ARCHITECTURE.md section.
-3. `git switch master && git pull`, then `git switch -c <n>-short-name`.
+3. From an up-to-date `master` (if a pull may change scenes, first run `Tools/open-empty-scene.cs` via `unity command script eval`), run `git switch -c <n>-short-name`.
 4. Do the work, verify with the `play-test` skill, and commit with `Fixes #<n>` (or `Refs #<n>` if partial).
-5. Comment on the issue with what changed, how it was verified, and anything left over. Then merge to `master` or open a PR, as the user prefers.
+5. Comment on the issue with what changed, how it was verified, and anything left over. Then merge with
+   `bash Tools/merge-ticket.sh "Merge #<n>: ..."` (or open a PR if the user asks). Never `git switch master && git merge` while
+   the Unity editor is open: rewriting an open scene file blocks the editor and the CLI on a "reload scene?" prompt.
 
 ## File a new ticket
 Use the template fields as headings (`.github/ISSUE_TEMPLATE/bug.yml` / `feature.yml`):

@@ -43,7 +43,11 @@ To verify a change: recompile, clear the console, start play mode, wait, read th
   plus an `area:*` label (`tasks`, `pathfinding`, `map`, `units-buildings`, `ui`, `art-assets`) and `needs-repro` for unconfirmed bugs.
   Templates are in `.github/ISSUE_TEMPLATE/`.
 - **Starting a session**: `git status` / `git log -5`, then `gh issue list` to see what's open. For a specific ticket, `gh issue view <n> --comments`.
-- **Doing a ticket**: branch `<n>-short-name` off `master`, commit with `Fixes #<n>`, verify in the editor (above), then merge or open a PR into `master`.
+- **Doing a ticket**: branch `<n>-short-name` off `master`, commit with `Fixes #<n>`, verify in the editor (above), then merge with
+  `bash Tools/merge-ticket.sh "Merge #<n>: ..."`. It builds the merge commit without touching files on disk.
+- **Never let git rewrite an open scene while the editor runs.** `git switch master` + `git merge`, checkout, pull or stash can rewrite `*.unity` files,
+  and Unity then blocks on a modal "reload scene?" prompt, which also hangs the CLI. Use `Tools/merge-ticket.sh` for merges. Before any other git
+  operation that may change scenes, run `unity command script eval --file Tools/open-empty-scene.cs` so no scene is open.
   Record findings as issue comments, so the next session doesn't repeat the investigation.
 - **New ideas or bugs found mid-task**: open an issue rather than fixing them in passing, unless they're tiny and directly related.
 - `master` is the only long-lived branch. `legacy-mobile-wip` is the pre-revival tip, kept for reference.
