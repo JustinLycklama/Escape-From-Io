@@ -189,6 +189,12 @@ between 0.2 and 4 per minute. `evolution` ramps 0→1 over 25 minutes and scales
 ## Time, input, UI
 
 - `TimeManager`: game clock, pausable (`PlayerBehaviour.gamePaused` / internal pause), and timers via `AddNewTimer(seconds, update, complete)`.
+- **Robot cards** (#16, `GUI Overlay Panel/RobotCards`): three `TaskAndUnitCell` cards (300×72) stacked on the left under the top bar.
+  Each shows the type icon, title, robot count in a state ring (idle / inefficient / efficient), the battery bars of the robots closest to
+  shutting down, the queued-task count, and the queue lock. A padlock means own type only; arrows mean any robot may take the tasks.
+  A caption repeats the state. Clicking a card still opens the task-and-unit detail panel. The prefab's elements sit on a flat `Card`
+  with explicit rects; the old nested row layout is kept inactive because the script still references it.
+  Built by `Tools/build-robot-cards.cs`.
 - **Top bar** (#15, `GUI Overlay Panel/TopBar` in GameScene): resources on the left; play, pause, speed and the clock in the centre; threat and settings on the right.
   `GameSpeedControl` sets `Time.timeScale` to 1, 2 or 3 (click to cycle, or keys 1–3). It's disabled in the tutorial, and timeScale is reset to 1 when the scene unloads.
   Pause is separate (`gamePaused`), so the two combine. Built by `Tools/build-top-bar.cs`, which unpacked the `TaskAndUnitPanel` and `OverviewPanel` prefab instances in the scene.

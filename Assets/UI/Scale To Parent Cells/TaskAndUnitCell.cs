@@ -60,6 +60,10 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
     [SerializeField]
     private Image taskListLockBackground = null;
 
+    // Optional caption under the lock toggle explaining the lock state
+    [SerializeField]
+    private Text lockStateLabel = null;
+
     [SerializeField]
     private Color defaultColor = Color.white;
     [SerializeField]
@@ -145,6 +149,11 @@ public class TaskAndUnitCell : MonoBehaviour, IPointerClickHandler, TaskQueueDel
 
         taskListLockBackground.color = state ? defaultColor : disabledColor;
         taskListLockToggle.SetState(state);
+
+        if (lockStateLabel != null) {
+            // Locked: only this robot type takes these tasks. Unlocked: any idle robot may.
+            lockStateLabel.text = state ? "Own type only" : "Any robot";
+        }
 
         UpdateLockAndCountUI();
     }
