@@ -1,6 +1,6 @@
 # Task-queue stress test. Requires the Unity editor open on this project with com.unity.pipeline (see CLAUDE.md).
 # Usage (from repo root):  powershell -File Tools/Stress/run-stress.ps1 [-Ticks 36] [-TimeScale 4]
-param([int]$Ticks = 36, [float]$TimeScale = 4, [int]$TickSeconds = 5)
+param([int]$Ticks = 36, [float]$TimeScale = 4, [int]$TickSeconds = 5, [switch]$KeepPlaying)
 
 $env:Path = [Environment]::GetEnvironmentVariable('Path','Machine') + ';' + [Environment]::GetEnvironmentVariable('Path','User')
 $env:UNITY_NO_BANNER = 1; $env:UNITY_NO_PAGER = 1
@@ -37,4 +37,4 @@ for ($t = 1; $t -le $Ticks; $t++) {
 U command runtime set_time_scale --scale 1 | Out-Null
 "--- final console status"
 U command console status
-U command editor.playmode stop | Out-Null
+if (-not $KeepPlaying) { U command editor.playmode stop | Out-Null }
