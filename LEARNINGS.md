@@ -111,3 +111,12 @@ CLAUDE.md, and the system detail is in ARCHITECTURE.md and TERRAIN.md. This file
   layout, lighting and material change can be reproduced or tweaked by editing constants and re-running.
 - Ask for a mock-up or a choice before big visual work (HUD layout A was picked from mock-ups). Show before/after captures for every
   visual change.
+
+## Later additions
+
+- **Seed replay was silently broken** (#32). `MapGenerator` captured `NoiseGenerator.random` in a field initializer, which runs at construction,
+  before `Awake` calls `ResetRandom`, and that replaces the instance. The layout used the old stream, so the logged seed didn't reproduce the map.
+  Watch for this pattern with any static that gets replaced rather than reseeded.
+- **Natural terrain transitions** (#32). Straight banks came from the slope always sitting at the same sample column. The fix was a smoothstep
+  whose position is shifted by Perlin noise sampled *on the boundary line*, so both sides agree. It's two-sided only where both plateaus are flat
+  (ground/water). One-sided transitions (mountain/ground) must start at the lower level, or a centred slope leaves a step at the seam.
