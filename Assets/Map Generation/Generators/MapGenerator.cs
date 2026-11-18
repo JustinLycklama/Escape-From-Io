@@ -405,6 +405,11 @@ public class MapGenerator : MonoBehaviour {
         return RangeSubset(terrainMap, startXLayout, startYLayout, mapLayoutWidth, mapLayoutHeight);
     }
 
+    // A raw noise height (e.g. a region's noiseBase) in the normalized space of finalNoiseMap and the mesh
+    public float NormalizedHeight(float rawHeight) {
+        return Mathf.InverseLerp(minMaxOfFinalMap.min, minMaxOfFinalMap.max, rawHeight);
+    }
+
     public float[,] GetFinalNoiseMap() {
         return finalNoiseMap;
     }

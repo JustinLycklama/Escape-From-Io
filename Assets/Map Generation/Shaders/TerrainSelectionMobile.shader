@@ -35,6 +35,11 @@ Shader "Custom/TerrainSelectionMobile" {
 		float indexPriority[20];
 		float indexScale[20];
 
+		// Height band per texture index, in mesh-local height (normalized 0..1), set by MapContainer.SetupMaterialShader (#31).
+		// A texture only shows between its low and high edge: water below the water line, ground on its plateau, rock above it.
+		float heightLow[20];
+		float heightHigh[20];
+
 		// Max width / height per map is 10x10
 		float actionAtIndex[10*10];
 
@@ -47,6 +52,7 @@ Shader "Custom/TerrainSelectionMobile" {
 		static const float blendFalloff = 0.045;    // exponential falloff distance of a neighbour's influence
 		static const float priorityReach = 0.07;     // how far each priority step pushes a texture past its tile edge
 		static const float minimumWeight = 0.004;    // skip sampling tiles below this (normalized) weight
+		static const float heightSoftness = 0.006;   // half-width of the fade at a height band edge (0.006 = 0.6 world units)
 
 		struct Input
 		{
@@ -56,6 +62,7 @@ Shader "Custom/TerrainSelectionMobile" {
 
 			// Custom
 			float2 layoutCoordinate;
+			float localHeight;   // mesh-local y = normalized terrain height
 
 			// World-space tangent frame, built the same way Unity's surface shader does, so surf can convert
 			// its world-space bump normal into the tangent space o.Normal expects (#27)
@@ -77,6 +84,7 @@ Shader "Custom/TerrainSelectionMobile" {
 			float layoutCoordinateY = ((-vertex.z - mapOffset.b) / (tileSize));
 
 			o.layoutCoordinate = float2(layoutCoordinateX + 1, layoutCoordinateY + 1);
+			o.localHeight = vertex.y;
 		}
 
 		/* Surface Helpers */
@@ -148,6 +156,14 @@ Shader "Custom/TerrainSelectionMobile" {
 				if (textureIndex >= 0) {
 					float reach = indexPriority[textureIndex] * priorityReach;
 					weight = exp(-(distanceToTile(p, tile) - reach) / blendFalloff);
+
+					// Height band (#31): the distance blend is purely horizontal, so near a bank or cliff foot it put water up the
+					// bank and rock out onto flat ground. Fade each texture outside its region's heights. The small floor keeps a
+					// valid blend if every candidate is out of band (e.g. a tile mid-terraform).
+					float h = IN.localHeight;
+					float inBand = smoothstep(heightLow[textureIndex] - heightSoftness, heightLow[textureIndex] + heightSoftness, h)
+						* (1 - smoothstep(heightHigh[textureIndex] - heightSoftness, heightHigh[textureIndex] + heightSoftness, h));
+					weight *= inBand + 0.001;
 				}
 
 				weights[i] = weight;

@@ -81,6 +81,10 @@ CLAUDE.md, and the system detail is in ARCHITECTURE.md and TERRAIN.md. This file
   (`cross(ddy(worldPos), ddx(worldPos))`) for projection weights and keep smooth normals for lighting.
 - **Blending by "pick a neighbour" branches gives seams.** A continuous weight function over the 3×3 neighbourhood
   (exp falloff by distance to each tile's square) is smooth everywhere, including corners, with no special cases.
+- **A blend that only knows horizontal distance ignores the geometry.** Banks and cliff feet sit inside the blend band, so water crept up
+  banks and rock spilled onto flat ground (#31). The coordinates were correct (verified: sample s → layout (s + 0.5)/10, and the selection
+  tint lands on the right tile). Masking each texture by a height band fixed it and left flat ground-to-ground edges pixel-identical.
+  Ask "misaligned or too strong?" with numbers: check the mapping, then compare pixel profiles.
 - A light in **Baked** mode with no baked lighting data behaves inconsistently. Use Realtime explicitly.
 - A non-important directional fill light (`ForceVertex`) is folded into SH for objects, so it lifts shadow sides at almost no cost.
   Trilight ambient gives a top/side/bottom gradient that a flat ambient can't.
