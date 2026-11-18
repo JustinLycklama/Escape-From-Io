@@ -117,11 +117,15 @@ triplanar texture-array sampling. Per-container material data comes from `MapCon
 `selection` and `actionAtIndex`. Each pixel blends the 3×3 surrounding tiles (#26). The weight is `exp(-(distance to tile square − priority × reach) / falloff)`,
 which is continuous across edges and rounded at corners. Higher-priority regions reach past their edge to cover the cliff quad. Albedo, tints and bump blend together.
 Tuning constants are at the top of the shader. Keep the bump scale at 1 (see the comment by `#pragma target`).
+The bump blend is a world-space normal; `o.Normal` must be tangent space, so `vert` passes the world tangent frame and `surf` converts it (#27).
+The terrain mesh needs tangents for this (`MeshData.FinalizeMesh`). Don't read `IN.internalSurfaceTtoW*` in `surf`: it doesn't compile here,
+and a failed compile silently falls back to white `Mobile/Diffuse`.
 
 Other systems: `FogOfWar` + `Math/Vision Casting` (tower vision radius), `MiniMap`, `IntervalActionPipeline` (spreads per-map work across frames).
 
-**Scene backdrop**: GameScene uses the MilkyWay skybox (`Tools/set-game-skybox.cs`) with ambient pinned to Flat, at the colour the old procedural sky gave,
-so terrain lighting doesn't depend on the skybox. Most of the black around the playfield is the fog of war over unexplored maps, not empty space;
+**Scene backdrop and lighting**: GameScene uses the MilkyWay skybox (`Tools/set-game-skybox.cs`). Lighting comes from `Tools/set-game-lighting.cs` (#27):
+a Realtime sun (60° pitch, warm, no shadows) and a cool `Fill Light` from the opposite side (vertex/SH, no shadows).
+Ambient is Trilight (sky/equator/ground), so it doesn't depend on the skybox. Most of the black around the playfield is the fog of war over unexplored maps, not empty space;
 styling it is #24.
 
 ## Task system (the heart of the game)

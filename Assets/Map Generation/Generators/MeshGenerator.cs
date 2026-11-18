@@ -339,6 +339,9 @@ public class MeshData {
             mesh.RecalculateNormals();
         }
 
+        // The terrain shader converts its bump normal into tangent space, which needs real tangents (#27)
+        mesh.RecalculateTangents();
+
         return mesh;
     }
 }

@@ -56,10 +56,20 @@ Shader "Custom/TerrainSelectionMobile" {
 
 			// Custom
 			float2 layoutCoordinate;
+
+			// World-space tangent frame, built the same way Unity's surface shader does, so surf can convert
+			// its world-space bump normal into the tangent space o.Normal expects (#27)
+			float3 frameTangent;
+			float3 frameBinormal;
+			float3 frameNormal;
 		};
 
 		void vert(inout appdata_full v, out Input o) {
 			UNITY_INITIALIZE_OUTPUT(Input, o);
+
+			o.frameNormal = UnityObjectToWorldNormal(v.normal);
+			o.frameTangent = UnityObjectToWorldDir(v.tangent.xyz);
+			o.frameBinormal = cross(o.frameNormal, o.frameTangent) * v.tangent.w * unity_WorldTransformParams.w;
 
 			float4 vertex = v.vertex;
 
@@ -179,7 +189,14 @@ Shader "Custom/TerrainSelectionMobile" {
 
 			usedWeight = max(usedWeight, 1e-5);
 			o.Albedo = albedo / usedWeight;
-			o.Normal = normalize(normal / usedWeight);
+			// The bump blend is a world-space normal, but surface shaders expect o.Normal in tangent space (#27).
+			// Writing the world normal directly scrambled the lighting (flat ground lit like a wall, slopes lit from
+			// the wrong side). The terrain mesh has tangents for this (MeshData.FinalizeMesh).
+			float3 bumpedWorldNormal = normalize(normal / usedWeight);
+			o.Normal = normalize(float3(
+				dot(bumpedWorldNormal, IN.frameTangent),
+				dot(bumpedWorldNormal, IN.frameBinormal),
+				dot(bumpedWorldNormal, IN.frameNormal)));
 		}
 		ENDCG
 	}
