@@ -225,6 +225,10 @@ Agreed visual direction: **HUD layout A** (#22). The map fills the screen and th
 - **Fonts:** **Agency FB** (regular and bold) for all text, and **DS-DIGI** for numeric readouts only (counts, clock, resources). No other faces.
 - **Text sizes (reference units):** 14 caption, 18 body and buttons, 25 heading, 40 title. Don't go below 14.
 - **Best Fit:** avoid it in new UI. If you use it, cap the maximum at 48: large Best Fit sizes can overflow the dynamic font atlas and render boxes.
+- **Sprite imports:** UI sprite textures (`Assets/UI/Assets`, `Assets/Resources/UI`) use mipmaps, trilinear filtering and no compression.
+  Most UI art is authored far larger than it's drawn (icons 512–680px drawn at about 30px), and without mipmaps that aliases. `Tools/fix-ui-texture-imports.cs` applies it.
+- **9-slice frames drawn small:** raise `Image.pixelsPerUnitMultiplier` so each border stays under about a third of the panel height; otherwise the corners overlap.
+  `Tools/Stress/sprite-audit.cs` reports source size versus drawn size and flags overlapping borders.
 - **Review:** `powershell -File Tools/capture-ui-review.ps1 -Prefix <name> -Resolutions "1920x1080,1280x720"` captures the title screen, HUD and selection
   at true Game-view resolutions (into the gitignored `Screenshots/`).
 
