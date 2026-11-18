@@ -98,7 +98,11 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         int mapWidthWithOverhang = constants.layoutMapWidth + 2;
         int mapHeightWithOverhang = constants.layoutMapHeight + 2;
 
+        // -1 = no tile (overhang at the world edge); the terrain shader skips it when blending
         textureIndexList = new float[mapWidthWithOverhang * mapHeightWithOverhang];
+        for(int i = 0; i < textureIndexList.Length; i++) {
+            textureIndexList[i] = -1;
+        }
 
         gameObject.isStatic = true;
     }
@@ -552,7 +556,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                 LayoutCoordinate coordinate = new LayoutCoordinate(0, constants.layoutMapHeight - 1, neighbours.topRightMap);
 
                 TerrainType terrain = neighbours.topRightMap.map.GetTerrainAt(coordinate);
-                textureIndexList[y + mapWidthWithOverhang + x] = texGen.RegionTypeTextureIndex(terrain);
+                textureIndexList[y * mapWidthWithOverhang + x] = texGen.RegionTypeTextureIndex(terrain);
             }
 
             if(y > 0 && y < constants.layoutMapHeight + 1 && neighbours.rightMap != null) {
@@ -700,13 +704,22 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
             neighbours.bottomMap.UpdateMapOverhang();
         }
 
-        // Left/top neighbours have no overhang from us, but their edge normals are computed from our heights (#25)
-        if(coordinate.x == 0 && neighbours.leftMap != null) {
-            neighbours.leftMap.DrawMesh();
+        // Left/top neighbours: their right/bottom overhang textures show our edge tiles (#26),
+        // and their edge normals are computed from our heights (#25)
+        if(coordinate.x == 0) {
+            if(coordinate.y == 0 && neighbours.topLeftMap != null) {
+                neighbours.topLeftMap.UpdateMapOverhang();
+            } else if(coordinate.y == layoutHeight - 1 && neighbours.bottomLeftMap != null) {
+                neighbours.bottomLeftMap.UpdateMapOverhang();
+            }
+
+            if(neighbours.leftMap != null) {
+                neighbours.leftMap.UpdateMapOverhang();
+            }
         }
 
         if(coordinate.y == 0 && neighbours.topMap != null) {
-            neighbours.topMap.DrawMesh();
+            neighbours.topMap.UpdateMapOverhang();
         }
     }
 
