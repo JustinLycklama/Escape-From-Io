@@ -122,6 +122,72 @@ public static class MeshGenerator {
         meshData.EditHeight(finalSampledHeight, finalMeshPositionX, lastMeshPositionY);
     }
 
+    // #25: vertex normals from the global height map, so they agree across map containers (the right/bottom overhang vertices
+    // are only a hidden skirt at height 0), computed in world proportions (the container is scaled non-uniformly, e.g. 10/100/10)
+    // and creased at cliff bases. RecalculateNormals averaged the cliff into the last row of flat ground, which then
+    // lit like it was sloping away: the "dip" at seams.
+    // startSampleX/Y: global MapCoordinate sample of this mesh's first non-overhang vertex. scale: the mesh's world scale.
+    public static Vector3[] CalculateNormals(MeshData meshData, float[,] globalHeightMap, int startSampleX, int startSampleY, Vector3 scale) {
+        int width = meshData.meshWidth;
+        int height = meshData.meshHeight;
+        int globalWidth = globalHeightMap.GetLength(0);
+        int globalHeight = globalHeightMap.GetLength(1);
+
+        float slopeScaleX = scale.y / scale.x;
+        float slopeScaleZ = scale.y / scale.z;
+
+        Vector3[] normals = new Vector3[width * height];
+
+        for(int y = 0; y < height; y++) {
+            for(int x = 0; x < width; x++) {
+                int globalX = startSampleX + x - 1;
+                int globalY = startSampleY + y - 1;
+
+                Vector3 worldNormal = Vector3.up;
+
+                if(globalX >= 0 && globalX < globalWidth && globalY >= 0 && globalY < globalHeight) {
+                    // World slope along +x, and along +y (which is -z in the mesh)
+                    float slopeX = CreasedSlope(globalHeightMap, globalX, globalY, 1, 0, globalWidth, globalHeight, slopeScaleX);
+                    float slopeY = CreasedSlope(globalHeightMap, globalX, globalY, 0, 1, globalWidth, globalHeight, slopeScaleZ);
+
+                    worldNormal = new Vector3(-slopeX, 1, slopeY).normalized;
+                }
+
+                // Unity renders normals with the inverse transpose of the scale, so pre-multiply by the scale to get this world normal back
+                normals[y * width + x] = Vector3.Scale(worldNormal, scale).normalized;
+            }
+        }
+
+        return normals;
+    }
+
+    // World slope (rise over run) at (x, y) along (dx, dy). Averages the two sides, unless they differ by more than creaseAngle
+    // (the foot or lip of a cliff), in which case the flatter side wins so flat ground stays flat-lit up to the edge.
+    const float creaseAngle = 25f;
+
+    private static float CreasedSlope(float[,] heightMap, int x, int y, int dx, int dy, int mapWidth, int mapHeight, float slopeScale) {
+        float here = heightMap[x, y];
+
+        bool hasBack = x - dx >= 0 && y - dy >= 0;
+        bool hasForward = x + dx < mapWidth && y + dy < mapHeight;
+
+        float back = hasBack ? here - heightMap[x - dx, y - dy] : 0;
+        float forward = hasForward ? heightMap[x + dx, y + dy] - here : 0;
+
+        if(!hasBack) { return forward * slopeScale; }
+        if(!hasForward) { return back * slopeScale; }
+
+        back *= slopeScale;
+        forward *= slopeScale;
+
+        float angleBetween = Mathf.Abs(Mathf.Atan(back) - Mathf.Atan(forward)) * Mathf.Rad2Deg;
+        if(angleBetween > creaseAngle) {
+            return Mathf.Abs(back) < Mathf.Abs(forward) ? back : forward;
+        }
+
+        return (back + forward) / 2f;
+    }
+
     public static void UpdateMeshOverhang(MeshData meshData, MapContainerNeighbours neibours) {
         int width = meshData.meshWidth;
         int height = meshData.meshHeight;
@@ -261,11 +327,17 @@ public class MeshData {
         triangleIndex += 3;
     }
 
-    public Mesh FinalizeMesh() {
+    // normals: optional precomputed normals (terrain uses MeshGenerator.CalculateNormals); otherwise Unity recalculates them
+    public Mesh FinalizeMesh(Vector3[] normals = null) {
         mesh.vertices = verticies;
         mesh.triangles = triangles;
         mesh.uv = uvs;
-        mesh.RecalculateNormals();
+
+        if(normals != null) {
+            mesh.normals = normals;
+        } else {
+            mesh.RecalculateNormals();
+        }
 
         return mesh;
     }
