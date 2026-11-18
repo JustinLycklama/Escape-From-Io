@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -23,11 +23,9 @@ public class OverviewPanel : MonoBehaviour, GameButtonDelegate
 
     private bool minimized = true;
 
-    PlayerBehaviour playerBehaviour;
 
     void Start()
     {
-        playerBehaviour = Script.Get<PlayerBehaviour>();
         transitionButton.buttonDelegate = this;
     }
 
@@ -39,11 +37,9 @@ public class OverviewPanel : MonoBehaviour, GameButtonDelegate
         if (minimized) {
             anim.Play(SLIDE_OUT);
             transitionButtonIcon.sprite = closeIcon;
-            playerBehaviour.SetPanJoystickEnabled(false);
         } else {
             anim.Play(SLIDE_IN);
             transitionButtonIcon.sprite = openIcon;
-            playerBehaviour.SetPanJoystickEnabled(true);
         }
 
         minimized = !minimized;

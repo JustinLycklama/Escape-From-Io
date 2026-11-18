@@ -49,27 +49,14 @@ public class PlayerBehaviour : MonoBehaviour {
     List<PlayerBehaviourUpdateDelegate> delegateList = new List<PlayerBehaviourUpdateDelegate>();
 
     // Pan and Input Control
-    private Vector2? previousTouch = null;
-    private Vector2? residualDirection = null;
-
-    private float minJoystickThreshold = 0.35f;
-
     [SerializeField]
     private PanControlsPanel panContolPanel = null;
-
-    [SerializeField]
-    private Image crosshairImage = null;
-
-    private bool isJoystickPanning = false;
 
     // Object selection
     private Ray lastRay;
     private RaycastHit? lastHit;
 
     bool mouseIsDownOverUI = false;
-
-    private bool hotkeysEnabled;
-    private bool joystickEnabled;
 
     private Vector3 cameraForward;
     private Vector3 cameraRight;
@@ -114,10 +101,7 @@ public class PlayerBehaviour : MonoBehaviour {
         UI_Layer = LayerMask.NameToLayer("UI");
         terrainLayer = ~LayerMask.NameToLayer("TerrainBoxCollider");
 
-        hotkeysEnabled = !Application.isMobilePlatform;
-        joystickEnabled = Application.isMobilePlatform;
-
-        panContolPanel.SetJoystickEnabled(joystickEnabled);
+        panContolPanel.UpdateHintVisibility();
 
         cameraForward = Camera.main.transform.forward;
         cameraForward.y = 0f;
@@ -126,40 +110,8 @@ public class PlayerBehaviour : MonoBehaviour {
         cameraRight = Camera.main.transform.right;
         cameraRight.y = 0f;
         cameraRight.Normalize();
-
-        if (joystickEnabled) {
-            StartCoroutine(AutoClickWhileJoystick());
-        } else {
-            crosshairImage.gameObject.SetActive(false);
-        }
     }
 
-    public void SetPanJoystickEnabled(bool enabled) {
-        panContolPanel.SetJoystickEnabled(joystickEnabled && enabled);
-    }
-
-    private IEnumerator AutoClickWhileJoystick() {
-
-        Color fullColor = crosshairImage.color;
-
-        Color fadedColor = fullColor;
-        fadedColor.a = 0.25f;
-
-        while(true) {
-            if (!isJoystickPanning) {
-                crosshairImage.color = fadedColor;
-            }
-
-            yield return new WaitUntil(() => { return isJoystickPanning; });
-
-            crosshairImage.color = fullColor;
-
-            Ray ray = Camera.main.ViewportPointToRay(new Vector3(0.5f, 0.5f, 0f));
-            SelectGameObject(ray);
-
-            yield return new WaitForSeconds(0.15f);
-        }
-    }
 
     void Update() {
 
@@ -213,11 +165,6 @@ public class PlayerBehaviour : MonoBehaviour {
     }
 
     private void HotkeyInput() {
-        if(!hotkeysEnabled /*|| !Input.anyKey*/) {
-            print("SkipHotkeys");
-            return;            
-        }
-
         if(Input.GetKeyUp(KeyCode.Escape)) {
             settingsPanel = Script.Get<SettingsPanel>();
         }
@@ -245,42 +192,17 @@ public class PlayerBehaviour : MonoBehaviour {
 
         panVectors.Clear();
 
-        if (joystickEnabled) {
-
-            float vertical = panContolPanel.joystick.Vertical;
-            if(Mathf.Abs(vertical) > minJoystickThreshold) {
-                vertical = Mathf.InverseLerp(minJoystickThreshold, 1, vertical);
-
-                int sign = vertical > 0 ? 1 : -1;
-                float verticalMovement = Mathf.Lerp(minCameraMovementSpeed, maxCameraMovementSpeed, Mathf.Abs(vertical));
-                panVectors.Add(sign * cameraForward * verticalMovement);
-            }
-
-            float horizontal = panContolPanel.joystick.Horizontal;
-            if(Mathf.Abs(horizontal) > minJoystickThreshold) {
-                horizontal = Mathf.InverseLerp(minJoystickThreshold, 1, horizontal);
-
-
-                int sign = horizontal > 0 ? 1 : -1;
-                float horizontalMovement = Mathf.Lerp(minCameraMovementSpeed, maxCameraMovementSpeed, Mathf.Abs(horizontal));
-                panVectors.Add(sign * cameraRight * horizontalMovement);
-            }
-
-            isJoystickPanning = panVectors.Count > 0;
-
-        } else {            
-            if(Input.GetKey(KeyCode.D)) {
-                panVectors.Add(cameraRight * maxCameraMovementSpeed);
-            }
-            if(Input.GetKey(KeyCode.A)) {
-                panVectors.Add(-cameraRight * maxCameraMovementSpeed);
-            }
-            if(Input.GetKey(KeyCode.S)) {
-                panVectors.Add(-cameraForward * maxCameraMovementSpeed);
-            }
-            if(Input.GetKey(KeyCode.W)) {
-                panVectors.Add(cameraForward * maxCameraMovementSpeed);
-            }
+        if(Input.GetKey(KeyCode.D)) {
+            panVectors.Add(cameraRight * maxCameraMovementSpeed);
+        }
+        if(Input.GetKey(KeyCode.A)) {
+            panVectors.Add(-cameraRight * maxCameraMovementSpeed);
+        }
+        if(Input.GetKey(KeyCode.S)) {
+            panVectors.Add(-cameraForward * maxCameraMovementSpeed);
+        }
+        if(Input.GetKey(KeyCode.W)) {
+            panVectors.Add(cameraForward * maxCameraMovementSpeed);
         }
 
         // If we are manually panning while auto pan is on, stop auto pan
@@ -296,90 +218,14 @@ public class PlayerBehaviour : MonoBehaviour {
 
     }
 
-    private bool CameraTouchPanInput() {
 
-        if(Input.GetMouseButtonUp(0)) {
-            previousTouch = null;
-        }
-
-        if(Input.GetMouseButton(0) || Input.touchCount == 1) {
-
-            Vector2 touch = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
-
-            if (previousTouch.HasValue) {
-                Vector2 direction = (touch - previousTouch.Value) * 0.25f;
-
-                if (residualDirection.HasValue) {
-                    direction = (direction + residualDirection.Value) / 2.0f;
-                }
-
-                residualDirection = direction;
-            }
-
-            previousTouch = touch;
-        }
-
-        if(residualDirection == null) {
-            return false;
-        }
-
-        var right = cameraRight;
-        right.x *= residualDirection.Value.x;
-
-        var forward = cameraForward;
-        forward.z *= residualDirection.Value.y;
-
-        var finalDirection = forward + right;
-
-        PanByVector(-finalDirection * maxCameraMovementSpeed);
-
-        // Apply pan friction
-        Vector2 friction = residualDirection.Value * 0.05f;
-
-        if (Mathf.Abs(friction.x) > Mathf.Abs(residualDirection.Value.x)) {
-            friction.x = residualDirection.Value.x;
-        }
-        if(Mathf.Abs(friction.y) > Mathf.Abs(residualDirection.Value.y)) {
-            friction.y = residualDirection.Value.y;
-        }
-
-        residualDirection -= friction;
-
-        if(Mathf.Abs(residualDirection.Value.x) < 0.001 && Mathf.Abs(residualDirection.Value.y) < 0.001) {
-            residualDirection = null;
-        }
-
-        return true;
-    }
-
+    // Returns true if zooming should interrupt an automatic camera pan. The mouse wheel never interferes with clicks.
     private bool CameraZoom() {
-        bool wasZooming = false;
-
-        // Mouse Zoom
-        // Don't care about wasZooming with mouse wheel, it will not interfere with object clicks
         if (!IsOverUI(Input.mousePosition)) {
             Zoom(Input.GetAxis("Mouse ScrollWheel") * 100f);
-        }        
-
-        // Finger Pinch Zoom
-        if(Input.touchCount == 2) {
-            wasZooming = true;
-
-            Touch touchZero = Input.GetTouch(0);
-            Touch touchOne = Input.GetTouch(1);
-
-            Vector2 touchZeroPrevPos = touchZero.position - touchZero.deltaPosition;
-            Vector2 touchOnePrevPos = touchOne.position - touchOne.deltaPosition;
-
-            float prevMagnitude = (touchZeroPrevPos - touchOnePrevPos).magnitude;
-            float currentMagnitude = (touchZero.position - touchOne.position).magnitude;
-
-            float difference = currentMagnitude - prevMagnitude;
-
-            Zoom(difference * 0.1f);
         }
 
-        return wasZooming;
+        return false;
     }
 
     // Enact motion on camera

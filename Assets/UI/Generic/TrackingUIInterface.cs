@@ -52,17 +52,10 @@ public static class TrackingUIInterfaceExtension {
         behaviour.transform.position = screenPoint;
 
         // Fade with distance to center
-        Vector2 viewPoint;
-
-
         Vector3 followObjectPoint = Camera.main.WorldToScreenPoint(trackingInterface.followingObject.position);
         Vector2 interfacePoint = new Vector2(followObjectPoint.x, followObjectPoint.y);
 
-        if(Application.isMobilePlatform) {
-            viewPoint = new Vector2(Screen.width / 2.0f, Screen.height / 2.0f);
-        } else {
-            viewPoint = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
-        }
+        Vector2 viewPoint = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
             
         if (forceHideInterface) {
             if(trackingInterface.canvasGroup.alpha > 0) {

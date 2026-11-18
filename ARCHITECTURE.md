@@ -6,7 +6,7 @@ Written from a read of the source in Nov 2026; items marked **(unverified)** are
 ## The game
 
 Indirect-control RTS / colony builder. **Current target: PC only (Windows, mouse + keyboard).** It was originally built mobile-first
-(Android/iOS builds, a Joystick Pack, touch input). That code still exists but is out of scope for now. Don't extend it, and don't design around touch. You are stranded on Io with a handful of
+(Android/iOS builds, a Joystick Pack, touch input). The mobile code was removed in #9; `legacy-mobile-wip` keeps the old line. You are stranded on Io with a handful of
 robots. You never steer robots directly: you place **tasks** (mine this rock, build that, clean this terrain) and robots pull work
 from per-type queues. Robots have a battery **duration** and shut down when it runs out, so you must keep building new ones.
 Rock Golems spawn over time and attack. **Win:** build the Escape Shuttle. **Lose:** no Miners, Movers or Builders left.
@@ -29,7 +29,7 @@ Only these folders are first-party (~18k lines). Everything else under `Assets/`
 | `Assets/Resources/` | Prefabs loaded by name at runtime (units, buildings, UI). Blueprint `fileName`s must match paths here |
 | `GridIdentifiers/` (repo root) | Stray `GridAxis.cs`, outside `Assets/`, not compiled |
 
-Vendor (don't edit, don't document): Voxel Robots, Voxel Ships/Turrets, Mech Robots/Spiders, L3D_Assets, SF_Fighter, Joystick Pack,
+Vendor (don't edit, don't document): Voxel Robots, Voxel Ships/Turrets, Mech Robots/Spiders, L3D_Assets, SF_Fighter,
 LowPolyWater, PeterLu_HologramShader, Standard Assets, Stylized texture packs, Firebase, Parse.
 Exception: `Game Objects/Voxel Ships/RandomShipGenerator.cs`, `StationShip.cs` and `L3D_Assets/EarthElementalController.cs` are yours.
 
@@ -189,9 +189,7 @@ between 0.2 and 4 per minute. `evolution` ramps 0→1 over 25 minutes and scales
 ## Time, input, UI
 
 - `TimeManager`: game clock, pausable (`PlayerBehaviour.gamePaused` / internal pause), and timers via `AddNewTimer(seconds, update, complete)`.
-- `PlayerBehaviour`: camera pan/zoom and hotkeys. Mouse/touch pan was removed in v0.2. `master` has an extra WIP commit "WIP Mobile Touch Camera".
-  It's mobile-only work and probably not worth merging under the PC-only target.
-- Mobile leftovers: `TouchManager`, `Joystick Pack`, `DpCanvasScaler`, `PanControlsPanel`, and the Android/iOS build settings. Leave them alone for now. Remove them only as a deliberate cleanup.
+- `PlayerBehaviour`: camera pan/zoom and hotkeys. WASD pans, the mouse wheel zooms, and left-click selects. `PanControlsPanel` only shows the WASD hint during the tutorial.
 - `SelectionManager`: selects terrain or a `Selectable` (unit or building) and drives the detail panels and available `UserAction`s.
 - `UIManager` + `UI/Modular Panels`, `Navigation Panels` (Blueprint picker, task and unit overview), `TableViews + Cells`, `Tooltips`, `Windows` (title, menu, help, leaderboard).
 - `TutorialManager` + `TutorialBasic/Defense/Escape`: trigger-driven (`TutorialManager.Fire(TutorialTrigger.X)` is sprinkled through gameplay code), and can isolate a single allowed user action.
