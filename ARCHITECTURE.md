@@ -231,6 +231,7 @@ Agreed visual direction: **HUD layout A** (#22). The map fills the screen and th
 - **Spacing:** 20-unit screen margins, and gaps in multiples of 8.
 - **Fonts:** **Agency FB** (regular and bold) for all text, and **DS-DIGI** for numeric readouts only (counts, clock, resources). No other faces.
 - **Text sizes (reference units):** 14 caption, 18 body and buttons, 25 heading, 40 title. Don't go below 14.
+  Title screen exception (`Tools/build-title-screen.cs`): the logo is 64 (Agency FB Bold) and main-menu buttons are 300×54 with 25 labels, left-aligned at x=120.
 - **Best Fit:** avoid it in new UI. If you use it, cap the maximum at 48: large Best Fit sizes can overflow the dynamic font atlas and render boxes.
 - **Sprite imports:** UI sprite textures (`Assets/UI/Assets`, `Assets/Resources/UI`) use mipmaps, trilinear filtering and no compression.
   Most UI art is authored far larger than it's drawn (icons 512–680px drawn at about 30px), and without mipmaps that aliases. `Tools/fix-ui-texture-imports.cs` applies it.
