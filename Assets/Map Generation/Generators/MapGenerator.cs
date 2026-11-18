@@ -1,10 +1,15 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 using System;
 
 public class MapGenerator : MonoBehaviour {
+
+    // Awake runs before any Start, so every system that caches NoiseGenerator.random (e.g. EnemyManager) gets this game's seeded instance
+    void Awake() {
+        NoiseGenerator.ResetRandom();
+    }
 
     public enum DrawMode { NoiseMap, ColorMap, Mesh }
     public DrawMode drawMode;

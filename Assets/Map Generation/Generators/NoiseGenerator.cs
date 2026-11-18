@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -20,19 +20,26 @@ public static class NoiseGenerator {
 
 
     private static System.Random _random = null;
+
+    // The single game-wide random source. Created lazily with a fresh seed; ResetRandom starts a new game's stream.
     public static System.Random random {
         get {
             if(_random == null) {
-                int seed = System.Guid.NewGuid().GetHashCode();
-                //seed = 1904886234;
-
-                MonoBehaviour.print("Seed: " + seed);
-
-                _random = new System.Random(seed);
+                ResetRandom();
             }
 
             return _random;
         }
+    }
+
+    public static int seed { get; private set; }
+
+    // Called at the start of each game. Pass a seed to reproduce a map.
+    public static void ResetRandom(int? withSeed = null) {
+        seed = withSeed ?? System.Guid.NewGuid().GetHashCode();
+        MonoBehaviour.print("Seed: " + seed);
+
+        _random = new System.Random(seed);
     }
 
     public static float[,] GenerateRandomNoiseMap(int mapWidth, int mapHeight) {
