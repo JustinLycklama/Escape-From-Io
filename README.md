@@ -26,6 +26,8 @@ Built 2019–2020 (v0.2, mobile). Revived in 2026 as a **PC-only** project on **
    The first import takes a while.
 3. Play: open `Assets/Scenes/TitleScene.unity` and press Play. You can also open `GameScene` directly to skip the menu.
 
+**Controls:** WASD/arrows or middle-drag to pan, mouse wheel to zoom, left-click to select, Space to pause, Escape for settings.
+
 ## Where things are
 
 | | |

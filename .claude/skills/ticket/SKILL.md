@@ -6,7 +6,7 @@ description: Work with the Escape From Io backlog in GitHub Issues. Use it to st
 # Tickets (GitHub Issues via `gh`)
 
 Repo: `JustinLycklama/Escape-From-Io`. Labels: a type (`bug`, `feature`, `tech-debt`, `tooling`, `docs`), one or more `area:*`
-(`tasks`, `pathfinding`, `map`, `units-buildings`, `ui`, `art-assets`), and `needs-repro` for unconfirmed bugs.
+(`tasks`, `pathfinding`, `map`, `units-buildings`, `ui`, `art-assets`), `needs-repro` for unconfirmed bugs, and `backlog` for parked, unscheduled work. Skip `backlog` issues when suggesting what to do next unless asked.
 
 ## What's open
 `gh issue list --limit 50`. Group by type/area and suggest what to pick next (bugs blocking play first, then the feature the user is excited about).
