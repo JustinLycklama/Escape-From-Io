@@ -1,0 +1,25 @@
+name: Bug
+description: Something in the game or tooling behaves wrong
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happens
+      description: Observed behaviour, and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: How to reproduce
+      description: Steps, or the stress/eval script that shows it. Say if it hasn't been reproduced yet (and add `needs-repro`).
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Console output (`unity command console get --level warn`), screenshots, relevant code (`path/File.cs:line`).
+  - type: textarea
+    id: notes
+    attributes:
+      label: Suspected cause / notes

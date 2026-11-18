@@ -1,0 +1,26 @@
+name: Feature
+description: New gameplay, content, or tooling
+labels: [feature]
+body:
+  - type: textarea
+    id: goal
+    attributes:
+      label: Goal
+      description: What the player (or developer) can do once this exists, and why it matters.
+    validations:
+      required: true
+  - type: textarea
+    id: design
+    attributes:
+      label: Design notes
+      description: Rules, numbers, UI, open questions. Rough is fine; this is where the feature gets discussed.
+  - type: textarea
+    id: done
+    attributes:
+      label: Done when
+      description: Checkable acceptance criteria, ideally things that can be verified through the Unity CLI (play mode, console, screenshot).
+  - type: textarea
+    id: systems
+    attributes:
+      label: Systems touched
+      description: See ARCHITECTURE.md, e.g. task queue, blueprints, map generation, UI panels.
