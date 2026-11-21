@@ -33,7 +33,9 @@ public class MapGenerator : MonoBehaviour {
     public NoiseData mountainFeaturesMapNoiseData;
 
     const int seedCap = 1000;
-    System.Random rnd = NoiseGenerator.random;
+    // Read through each time: NoiseGenerator.ResetRandom (MapGenerator.Awake) replaces the instance, and a field captured at
+    // construction kept the previous stream, so the logged seed did not reproduce the layout (#33)
+    System.Random rnd => NoiseGenerator.random;
 
     private void RandomizeSeed() {      
         layoutMapNoiseData.seed = rnd.Next(1, seedCap);

@@ -22,7 +22,8 @@ doing something described here, that's a bug. Code is in `Assets/Map Generation/
    3 samples (`dipRadius`) ramp down toward its region base. Mountains slope down to the ground beside them, and land slopes down into water.
    Tiles of equal priority meet without a ramp.
 5. Everything is normalized (`minMaxOfFinalMap`) into `finalNoiseMap`, the one global height map that every mesh, normal and unit height reads.
-6. One seeded `NoiseGenerator.random` drives all of it. `MapGenerator.Awake` reseeds it and logs `Seed: N`.
+6. One seeded `NoiseGenerator.random` drives all of it. `MapGenerator.Awake` reseeds it and logs `Seed: N`. `MapGenerator.rnd` reads
+   `NoiseGenerator.random` each time: a field captured at construction kept the pre-reseed stream, so the seed didn't reproduce the map (#33).
 
 ### Unexplored tiles
 
