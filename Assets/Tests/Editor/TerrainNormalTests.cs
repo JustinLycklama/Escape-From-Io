@@ -28,7 +28,7 @@ public class TerrainNormalTests {
         float[,] map = CliffMap();
         MeshData meshData = new MeshData(10, 5, 10);   // +2 overhang each axis
 
-        Vector3[] normals = MeshGenerator.CalculateNormals(meshData, map, 0, 0, scale);
+        Vector3[] normals = MeshGenerator.CalculateNormals(meshData, map, 0, 0, scale, 10);
 
         // Sample x=3 is the last flat sample; its mesh vertex is x+1
         Vector3 edge = WorldNormal(normals, meshData, 4, 2);
@@ -39,14 +39,14 @@ public class TerrainNormalTests {
     public void GentleSlopesStillAverage() {
         float[,] map = new float[5, 1];
         for(int x = 0; x < 5; x++) {
-            map[x, 0] = x * 0.01f;   // constant 0.1 world slope (~6 degrees)
+            map[x, 0] = x * 0.01f;   // 1 height-unit per sample over 10/9 sample spacing (#35) = 0.09 world slope
         }
         MeshData meshData = new MeshData(7, 3, 10);
 
-        Vector3[] normals = MeshGenerator.CalculateNormals(meshData, map, 0, 0, scale);
+        Vector3[] normals = MeshGenerator.CalculateNormals(meshData, map, 0, 0, scale, 10);
 
         Vector3 mid = WorldNormal(normals, meshData, 3, 1);
-        Assert.AreEqual(Mathf.Atan(0.1f) * Mathf.Rad2Deg, Vector3.Angle(mid, Vector3.up), 0.1f);
+        Assert.AreEqual(Mathf.Atan(0.09f) * Mathf.Rad2Deg, Vector3.Angle(mid, Vector3.up), 0.1f);
         Assert.Less(mid.x, 0, "normal should lean away from the uphill (+x) side");
     }
 
@@ -58,10 +58,38 @@ public class TerrainNormalTests {
         MeshData a = new MeshData(6, 5, 10);
         MeshData b = new MeshData(6, 5, 10);
 
-        Vector3[] na = MeshGenerator.CalculateNormals(a, map, 0, 0, scale);
-        Vector3[] nb = MeshGenerator.CalculateNormals(b, map, 4, 0, scale);
+        Vector3[] na = MeshGenerator.CalculateNormals(a, map, 0, 0, scale, 10);
+        Vector3[] nb = MeshGenerator.CalculateNormals(b, map, 4, 0, scale, 10);
 
         Assert.AreEqual(na[2 * a.meshWidth + 4], nb[2 * b.meshWidth + 0]);
         Assert.AreEqual(na[2 * a.meshWidth + 5], nb[2 * b.meshWidth + 1]);
+    }
+
+    // #35: tile-aligned samples. A tile's first and last samples sit on its boundaries, so neighbouring tiles' edge samples
+    // share a position and no geometry straddles a boundary.
+    [Test]
+    public void EdgeSamplesSitOnTileBoundaries() {
+        Assert.AreEqual(0f, MapGenerator.SamplePosition(0, 10), 1e-5f);
+        Assert.AreEqual(10f, MapGenerator.SamplePosition(9, 10), 1e-5f);
+        Assert.AreEqual(10f, MapGenerator.SamplePosition(10, 10), 1e-5f);
+        Assert.AreEqual(20f, MapGenerator.SamplePosition(19, 10), 1e-5f);
+        Assert.AreEqual(0f, MapGenerator.SamplePosition(-1, 10), 1e-5f, "the overhang before sample 0 is the previous tile's last sample");
+    }
+
+    [Test]
+    public void SlopeSkipsTheSharedBoundaryPosition() {
+        // Flat at 0 for tile 0, then rising 0.01 per sample in tile 1: the shared boundary samples (9 and 10) both sit at
+        // position 10, so the slope at sample 10 must come from sample 11, not from the zero-width step to sample 9.
+        float[,] map = new float[20, 1];
+        for(int x = 10; x < 20; x++) {
+            map[x, 0] = (x - 10) * 0.01f;
+        }
+        MeshData meshData = new MeshData(22, 3, 10);
+
+        Vector3[] normals = MeshGenerator.CalculateNormals(meshData, map, 0, 0, scale, 10);
+
+        Vector3 inside = WorldNormal(normals, meshData, 15, 1);   // sample 14, mid-slope
+        Assert.AreEqual(Mathf.Atan(0.09f) * Mathf.Rad2Deg, Vector3.Angle(inside, Vector3.up), 0.1f);
+        Assert.IsFalse(float.IsNaN(WorldNormal(normals, meshData, 11, 1).x), "boundary sample normal must be finite");
     }
 }

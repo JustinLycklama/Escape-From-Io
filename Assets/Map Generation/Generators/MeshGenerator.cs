@@ -4,59 +4,44 @@ using UnityEngine;
 
 public static class MeshGenerator {   
 
-    public static MeshData GenerateTerrainMesh(float[,] heightMap) {
+    // tileAligned (#35, the terrain): each tile's samples span the tile edge to edge (MapGenerator.SamplePosition), so a
+    // tile's geometry ends exactly on its boundary. Otherwise (fog meshes) samples are spaced uniformly.
+    public static MeshData GenerateTerrainMesh(float[,] heightMap, bool tileAligned = false) {
         Constants constants = Script.Get<Constants>();
+        int f = constants.featuresPerLayoutPerAxis;
 
-        int width = heightMap.GetLength(0) + 2;
-        int height = heightMap.GetLength(1) + 2;
+        int samplesX = heightMap.GetLength(0);
+        int samplesY = heightMap.GetLength(1);
+        int width = samplesX + 2;
+        int height = samplesY + 2;
 
-        float topLeftX = (width - 1) / -2f;
-        float topLeftZ = (height - 1) / 2f;
-
-        MeshData meshData = new MeshData(width, height, constants.featuresPerLayoutPerAxis);
+        MeshData meshData = new MeshData(width, height, f);
 
         for (int y = 0; y < height; y++) {
+            for(int x = 0; x < width; x++) {
+                bool inside = x > 0 && x < width - 1 && y > 0 && y < height - 1;
+                float heightAtIndex = inside ? heightMap[x - 1, y - 1] : 0f;
 
-            DoAllXFor(y, topLeftX, topLeftZ, width, height, heightMap, meshData, constants.featuresPerLayoutPerAxis, true);
+                float positionX;
+                float positionY;
+                if(tileAligned) {
+                    // The overhang ring sits on the outer boundary, at the same position as the edge samples
+                    positionX = Mathf.Clamp(MapGenerator.SamplePosition(x - 1, f), 0, samplesX);
+                    positionY = Mathf.Clamp(MapGenerator.SamplePosition(y - 1, f), 0, samplesY);
+                } else {
+                    positionX = x - 0.5f;
+                    positionY = y - 0.5f;
+                }
+
+                Vector3 vertex = new Vector3(positionX - samplesX / 2f, heightAtIndex, samplesY / 2f - positionY);
+                Vector2 uv = new Vector2(x / (float)width, y / (float)height);
+
+                // No triangles start on the last column or row
+                meshData.addVertex(vertex, uv, x < width - 1 && y < height - 1);
+            }
         }
 
         return meshData;
-    }
-
-    private static void DoAllXFor(int y, float topLeftX, float topLeftZ, int width, int height, float[,] heightMap, MeshData meshData, int featuresPerLayoutPerAxis, bool hasTriangles) {
-        for(int x = 0; x < width; x++) {
-
-            int boundedX = x - 1;
-            int boundedY = y - 1;
-
-            int clampedX = Mathf.Clamp(x - 1, 0, width - 3);
-            int clampedY = Mathf.Clamp(y - 1, 0, height - 3);
-
-            float heightAtIndex = 0f;
-            if(!(boundedX < 0 || boundedX > width - 3 || boundedY < 0 || boundedY > height - 3)) {
-                heightAtIndex = heightMap[clampedX, clampedY];
-            }
-
-            Vector3 vertex = new Vector3(topLeftX + x, heightAtIndex, topLeftZ - y);
-            Vector2 uv = new Vector2(x / (float)width, y / (float)height);
-            bool hasTriangleAssociatedToVertex = false;
-
-            // hasTriangles means that this vertex should even consider triangles (we do not consider triangles for the duplicate x or y verticies)
-            if(hasTriangles) {
-                // There are no triangles associated with the right and bottom edge of the map as a whole, since there is no corresponding verticies next 
-                hasTriangleAssociatedToVertex = x < width - 1 && y < height - 1;
-            }
-
-            // We are on tile edge
-            if((x + 1) % featuresPerLayoutPerAxis == 0) {
-                // On the tile edge, create two sets of verticies in the same spot
-
-                // Add a closing set of verticies to finish off the tile. 
-                //meshData.addVertex(vertex, uv, false);
-            }
-
-            meshData.addVertex(vertex, uv, hasTriangleAssociatedToVertex);
-        }
     }
 
     public static void UpdateTerrainMesh(MeshData meshData, float[,] heightMap, int featuresPerLayoutPerAxis, LayoutCoordinate layoutCoordinate) {
@@ -76,58 +61,12 @@ public static class MeshGenerator {
         } 
     }
 
-    public static void UpdateTerrainMeshExtraVerticies(MeshData meshData, float[,] heightMap, int featuresPerLayoutPerAxis, LayoutCoordinate layoutCoordinate) {
-        // TODO: Optimize Terraform
-        for(int y = 0; y < featuresPerLayoutPerAxis; y++) {
-            int sampleY = layoutCoordinate.y * featuresPerLayoutPerAxis + y;
-            int meshPositionY = layoutCoordinate.y * (featuresPerLayoutPerAxis + 1) + y + 1;
-
-            for(int x = 0; x < featuresPerLayoutPerAxis; x++) {
-                int sampleX = layoutCoordinate.x * featuresPerLayoutPerAxis + x;
-                int meshPositionX = layoutCoordinate.x * (featuresPerLayoutPerAxis + 1) + x + 1;
-
-                float sampledHeight = heightMap[sampleX, sampleY];
-
-                meshData.EditHeight(sampledHeight, meshPositionX, meshPositionY);
-            }
-
-            // We need to do the extra vertex at the end of the row, remember it has the same height as the one previous
-            int lastSampleX = layoutCoordinate.x * featuresPerLayoutPerAxis + featuresPerLayoutPerAxis - 1;
-            int lastMeshPositionX = layoutCoordinate.x * (featuresPerLayoutPerAxis + 1) + featuresPerLayoutPerAxis + 1;
-
-            float lastSampledHeight = heightMap[lastSampleX, sampleY];
-
-            meshData.EditHeight(lastSampledHeight, lastMeshPositionX, meshPositionY);
-        }
-
-        // Now do the last row of the Y
-        int lastSampleY = layoutCoordinate.y * featuresPerLayoutPerAxis + featuresPerLayoutPerAxis - 1;
-        int lastMeshPositionY = layoutCoordinate.y * (featuresPerLayoutPerAxis + 1) + featuresPerLayoutPerAxis + 1;
-
-        for(int x = 0; x < featuresPerLayoutPerAxis; x++) {
-            int sampleX = layoutCoordinate.x * featuresPerLayoutPerAxis + x;
-            int meshPositionX = layoutCoordinate.x * (featuresPerLayoutPerAxis + 1) + x;
-
-            float sampledHeight = heightMap[sampleX, lastSampleY];
-
-            meshData.EditHeight(sampledHeight, meshPositionX, lastMeshPositionY);
-        }
-
-        // We need to do the extra vertex at the end of the row, remember it has the same height as the one previous
-        int finalSampleX = layoutCoordinate.x * featuresPerLayoutPerAxis + featuresPerLayoutPerAxis - 1;
-        int finalMeshPositionX = layoutCoordinate.x * (featuresPerLayoutPerAxis + 1) + featuresPerLayoutPerAxis + 1;
-
-        float finalSampledHeight = heightMap[finalSampleX, lastSampleY];
-
-        meshData.EditHeight(finalSampledHeight, finalMeshPositionX, lastMeshPositionY);
-    }
-
-    // #25: vertex normals from the global height map, so they agree across map containers (the right/bottom overhang vertices
-    // are only a hidden skirt at height 0), computed in world proportions (the container is scaled non-uniformly, e.g. 10/100/10)
-    // and creased at cliff bases. RecalculateNormals averaged the cliff into the last row of flat ground, which then
-    // lit like it was sloping away: the "dip" at seams.
-    // startSampleX/Y: global MapCoordinate sample of this mesh's first non-overhang vertex. scale: the mesh's world scale.
-    public static Vector3[] CalculateNormals(MeshData meshData, float[,] globalHeightMap, int startSampleX, int startSampleY, Vector3 scale) {
+    // #25: vertex normals from the global height map, so they agree across map containers, computed in world proportions
+    // (the container is scaled non-uniformly, e.g. 10/100/10) and creased at cliff feet and lips (the flatter side wins).
+    // #35: samples are tile-aligned (MapGenerator.SamplePosition), so slopes use real sample spacing, and a tile's edge
+    // sample is skipped over when it shares its position with the neighbouring tile's edge sample.
+    // startSampleX/Y: global sample of this mesh's first non-overhang vertex. scale: the mesh's world scale.
+    public static Vector3[] CalculateNormals(MeshData meshData, float[,] globalHeightMap, int startSampleX, int startSampleY, Vector3 scale, int samplesPerTile) {
         int width = meshData.meshWidth;
         int height = meshData.meshHeight;
         int globalWidth = globalHeightMap.GetLength(0);
@@ -147,8 +86,8 @@ public static class MeshGenerator {
 
                 if(globalX >= 0 && globalX < globalWidth && globalY >= 0 && globalY < globalHeight) {
                     // World slope along +x, and along +y (which is -z in the mesh)
-                    float slopeX = CreasedSlope(globalHeightMap, globalX, globalY, 1, 0, globalWidth, globalHeight, slopeScaleX);
-                    float slopeY = CreasedSlope(globalHeightMap, globalX, globalY, 0, 1, globalWidth, globalHeight, slopeScaleZ);
+                    float slopeX = CreasedSlope(globalHeightMap, globalX, globalY, true, samplesPerTile, slopeScaleX);
+                    float slopeY = CreasedSlope(globalHeightMap, globalX, globalY, false, samplesPerTile, slopeScaleZ);
 
                     worldNormal = new Vector3(-slopeX, 1, slopeY).normalized;
                 }
@@ -161,115 +100,71 @@ public static class MeshGenerator {
         return normals;
     }
 
-    // World slope (rise over run) at (x, y) along (dx, dy). Averages the two sides, unless they differ by more than creaseAngle
-    // (the foot or lip of a cliff), in which case the flatter side wins so flat ground stays flat-lit up to the edge.
+    // World slope (rise over run) at a sample along x (alongX) or y. Averages the two sides, unless they differ by more than
+    // creaseAngle (the foot or lip of a cliff), in which case the flatter side wins so flat ground stays flat-lit up to the edge.
     const float creaseAngle = 25f;
 
-    private static float CreasedSlope(float[,] heightMap, int x, int y, int dx, int dy, int mapWidth, int mapHeight, float slopeScale) {
-        float here = heightMap[x, y];
+    private static float CreasedSlope(float[,] heightMap, int x, int y, bool alongX, int samplesPerTile, float slopeScale) {
+        int here = alongX ? x : y;
+        int limit = heightMap.GetLength(alongX ? 0 : 1);
+        float position = MapGenerator.SamplePosition(here, samplesPerTile);
 
-        bool hasBack = x - dx >= 0 && y - dy >= 0;
-        bool hasForward = x + dx < mapWidth && y + dy < mapHeight;
+        float HeightAt(int index) => alongX ? heightMap[index, y] : heightMap[x, index];
 
-        float back = hasBack ? here - heightMap[x - dx, y - dy] : 0;
-        float forward = hasForward ? heightMap[x + dx, y + dy] - here : 0;
+        // Nearest sample on each side at a different position (a tile's edge sample shares its spot with the next tile's)
+        int back = here - 1;
+        if(back >= 0 && MapGenerator.SamplePosition(back, samplesPerTile) >= position - 0.001f) { back--; }
+        int forward = here + 1;
+        if(forward < limit && MapGenerator.SamplePosition(forward, samplesPerTile) <= position + 0.001f) { forward++; }
 
-        if(!hasBack) { return forward * slopeScale; }
-        if(!hasForward) { return back * slopeScale; }
+        bool hasBack = back >= 0;
+        bool hasForward = forward < limit;
 
-        back *= slopeScale;
-        forward *= slopeScale;
+        float backSlope = hasBack ? (HeightAt(here) - HeightAt(back)) / (position - MapGenerator.SamplePosition(back, samplesPerTile)) * slopeScale : 0;
+        float forwardSlope = hasForward ? (HeightAt(forward) - HeightAt(here)) / (MapGenerator.SamplePosition(forward, samplesPerTile) - position) * slopeScale : 0;
 
-        float angleBetween = Mathf.Abs(Mathf.Atan(back) - Mathf.Atan(forward)) * Mathf.Rad2Deg;
+        if(!hasBack) { return forwardSlope; }
+        if(!hasForward) { return backSlope; }
+
+        float angleBetween = Mathf.Abs(Mathf.Atan(backSlope) - Mathf.Atan(forwardSlope)) * Mathf.Rad2Deg;
         if(angleBetween > creaseAngle) {
-            return Mathf.Abs(back) < Mathf.Abs(forward) ? back : forward;
+            return Mathf.Abs(backSlope) < Mathf.Abs(forwardSlope) ? backSlope : forwardSlope;
         }
 
-        return (back + forward) / 2f;
+        return (backSlope + forwardSlope) / 2f;
     }
 
-    public static void UpdateMeshOverhang(MeshData meshData, MapContainerNeighbours neibours) {
+    // The 1-vertex ring around a container mesh (#35). With tile-aligned samples the ring sits on the container boundary,
+    // at the same position as the edge samples:
+    // - left/top: the neighbouring container's edge samples, which normally equal ours, so the joining strip has zero size
+    //   (it only shows as a wall if heights differ, e.g. mid-terraform)
+    // - right/bottom: our own edge heights when a neighbour exists (zero-size strip; the neighbour draws the join), or 0 at
+    //   the world border, which drops a skirt down the outside edge of the world
+    public static void UpdateMeshOverhang(MeshData meshData, float[,] globalHeightMap, int startSampleX, int startSampleY) {
         int width = meshData.meshWidth;
         int height = meshData.meshHeight;
+        int globalWidth = globalHeightMap.GetLength(0);
+        int globalHeight = globalHeightMap.GetLength(1);
+        int lastOwnX = startSampleX + width - 3;
+        int lastOwnY = startSampleY + height - 3;
 
-        // Left edge
-        int x = 0;
-        int y = 0;
+        for(int y = 0; y < height; y++) {
+            for(int x = 0; x < width; x++) {
+                if(x > 0 && x < width - 1 && y > 0 && y < height - 1) {
+                    continue;
+                }
 
-        for(y = 0; y < height; y++) {
-            float finalSampleHeight = 0;
+                int globalX = startSampleX + x - 1;
+                int globalY = startSampleY + y - 1;
 
-            if(y == 0 && neibours.topLeftMap != null) {
-                MapCoordinate coordinate = new MapCoordinate(neibours.topLeftMap.map.mapWidth - 1, neibours.topLeftMap.map.mapHeight - 1, neibours.topLeftMap);
-                finalSampleHeight = neibours.topLeftMap.map.getHeightAt(coordinate);
+                float overhangHeight = 0;
+                if(globalX >= 0 && globalY >= 0 && globalX < globalWidth && globalY < globalHeight) {
+                    overhangHeight = globalHeightMap[Mathf.Min(globalX, lastOwnX), Mathf.Min(globalY, lastOwnY)];
+                }
+
+                meshData.EditHeight(overhangHeight, x, y);
             }
-
-            if(y > 0 && y < height - 1 && neibours.leftMap != null) {
-                MapCoordinate coordinate = new MapCoordinate(neibours.leftMap.map.mapWidth - 1, (y - 1), neibours.leftMap);
-                finalSampleHeight = neibours.leftMap.map.getHeightAt(coordinate);
-            }
-
-            if(y == height && neibours.bottomLeftMap != null) {
-                MapCoordinate coordinate = new MapCoordinate(neibours.bottomLeftMap.map.mapWidth - 1, 0, neibours.bottomLeftMap);
-                finalSampleHeight = neibours.bottomLeftMap.map.getHeightAt(coordinate);
-            }
-       
-            meshData.EditHeight(finalSampleHeight, x, y);
         }
-
-        // Right edge
-        /*x = width - 1;
-
-         for(y = 0; y < height; y++) {
-             float finalSampleHeight = 0;
-
-             if(y == 0 && neibours.topRightMap != null) {
-                 MapCoordinate coordinate = new MapCoordinate(0, neibours.topRightMap.map.mapHeight - 1, neibours.topRightMap);
-                 finalSampleHeight = neibours.topRightMap.map.getHeightAt(coordinate);
-             }
-
-             if(y > 0 && y < height - 1 && neibours.rightMap != null) {
-                 MapCoordinate coordinate = new MapCoordinate(0, y - 1, neibours.rightMap);
-                 finalSampleHeight = neibours.rightMap.map.getHeightAt(coordinate);
-             }
-
-             if(y == height && neibours.bottomRightMap != null) {
-                 MapCoordinate coordinate = new MapCoordinate(0, 0, neibours.bottomRightMap);
-                 finalSampleHeight = neibours.bottomRightMap.map.getHeightAt(coordinate);
-             }
-
-             meshData.EditHeight(finalSampleHeight, x, y);
-         }*/
-         
-        // Top 
-
-        y = 0;
-
-        for(x = 1; x < width - 1; x++) {
-            float finalSampleHeight = 0;
-
-            if(neibours.topMap != null) {
-                MapCoordinate coordinate = new MapCoordinate(x - 1, neibours.topMap.map.mapHeight - 1, neibours.topMap);
-                finalSampleHeight = neibours.topMap.map.getHeightAt(coordinate);
-            }
-
-            meshData.EditHeight(finalSampleHeight, x, y);
-        }
-
-        // Bottom
-
-        /*y = height - 1;
-
-        for(x = 1; x < width - 1; x++) {
-            float finalSampleHeight = 0;
-
-            if(neibours.bottomMap != null) {
-                MapCoordinate coordinate = new MapCoordinate(x - 1, 0, neibours.bottomMap);
-                finalSampleHeight = neibours.bottomMap.map.getHeightAt(coordinate);
-            }
-
-            meshData.EditHeight(finalSampleHeight, x, y);
-        }*/
     }
 }
 

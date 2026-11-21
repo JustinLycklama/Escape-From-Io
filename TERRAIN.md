@@ -8,7 +8,14 @@ doing something described here, that's a bug. Code is in `Assets/Map Generation/
 - The world is `mapCountX × mapCountY` **map containers** (`MapContainer`, 5×5 at the time of writing). Each has its own mesh, material and `Map`.
 - A container is `layoutMapWidth × layoutMapHeight` **tiles** (layout coordinates, 5×5).
 - A tile is `featuresPerLayoutPerAxis` **height samples** per axis (map coordinates, 10×10).
-- Containers are scaled (10, 100, 10). One sample is 10 world units wide, and a height of 1.0 is 100 world units.
+- Containers are scaled (10, 100, 10). A tile is 100 world units wide, and a height of 1.0 is 100 world units.
+- **Tile-aligned samples (#35).** A tile's samples span it edge to edge: sample k sits at `k × f / (f − 1)` sample-widths from the tile's
+  start (`MapGenerator.SamplePosition`). The first and last samples are **on** the tile boundaries, and neighbouring tiles' edge samples share a
+  position. **Expected:** every slope lies inside one tile, so the grid line, the selection highlight and the texture blend all match the geometry.
+  (Before #35 samples sat at tile centres, and the quad joining two tiles straddled the boundary: half of every cliff lay on the neighbouring tile.)
+- Logic positions (`MapCoordinate` x/y) stay uniform: tile t spans `[t·f, (t+1)·f)`. `MapGenerator.GetHeightAt` samples the surface at a
+  position (bilinear within the tile), so robots, ore and buildings sit on the mesh. Code holding sample *indices* uses
+  `HeightAtSample` or `finalNoiseMap` directly.
 
 ## Generation (`MapGenerator`)
 
@@ -17,10 +24,16 @@ doing something described here, that's a bug. Code is in `Assets/Map Generation/
    The lowest N mountain mutator values become Alunar (azure) rock, so the azure count is controlled rather than random.
    The layout is re-rolled until spawn has walkable land next to it.
 2. **Plateau**: `PlateauLayoutMap` flattens each tile's layout value to its region height (`HeightAtRegion`), so a region is one plateau.
-3. **Features**: per-sample ground and mountain noise add detail: ± for land, up for mountains, none for water.
-4. **Edge shaping** (`MapAtXYWithFeatures`): wherever a tile borders a **lower-priority region** (Mountain 2 > Land 1 > Water 0), its outer
-   3 samples (`dipRadius`) ramp down toward its region base. Mountains slope down to the ground beside them, and land slopes down into water.
-   Tiles of equal priority meet without a ramp.
+3. **Features**: ground and mountain noise add detail: ± for land, up for mountains, none for water. It's read at each sample's tile-aligned
+   position (`FeatureAtSample`), so two tiles of the same region get identical heights on their shared edge (no step between two mountains).
+4. **Edge shaping** (`MapAtXYWithFeatures`, #35): wherever a tile borders a **lower-priority region** (Mountain 2 > Land 1 > Water 0), or
+   the world border, it eases down (smoothstep over `edgeRampWidth` = 0.3 tile, samples 0–2) to that region's plateau, **reaching it exactly
+   on the shared boundary**. **Expected:**
+   - Mountains slope down to the ground beside them, and ground slopes down to the water, entirely inside the higher tile.
+   - The lower tile stays flat, so the water level and its edges are straight.
+   - The surfaces meet with no step.
+   - All 8 neighbours count (Euclidean distance to each neighbour's square), so corners close cleanly.
+   - Tiles of equal priority meet without shaping.
 5. Everything is normalized (`minMaxOfFinalMap`) into `finalNoiseMap`, the one global height map that every mesh, normal and unit height reads.
 6. One seeded `NoiseGenerator.random` drives all of it. `MapGenerator.Awake` reseeds it and logs `Seed: N`. `MapGenerator.rnd` reads
    `NoiseGenerator.random` each time: a field captured at construction kept the pre-reseed stream, so the seed didn't reproduce the map (#33).
@@ -48,7 +61,8 @@ doing something described here, that's a bug. Code is in `Assets/Map Generation/
   - Mining out a mountain must make the **adjacent mountains round down** into the new hole, instead of standing as sheer walls.
   - Filling water must lift the adjacent land's shoreline ramp.
 
-  `MapGenerator.CalculateNeighbourEdgeTargets` recomputes the 3-sample edge band of the 4 neighbouring tiles as if the terraform were complete.
+  `MapGenerator.CalculateNeighbourEdgeTargets` recomputes every sample within `edgeBand` (3) of the changed tile, in all 8 neighbouring tiles
+  (diagonals shape corners, #35), as if the terraform were complete. Shared boundary samples stay equal throughout the animation.
   Those samples animate with the same percentage, and `Map.UpdateNeighbourTileMeshes` re-meshes them, including in other containers.
   Before #29 only the target tile was recomputed, so mined holes had vertical walls.
   `Tools/Stress/mine-tile.cs` mines a tile in steps and prints the neighbour's edge profile.
@@ -58,12 +72,16 @@ doing something described here, that's a bug. Code is in `Assets/Map Generation/
 ## Mesh (`MeshGenerator`, `MeshData`)
 
 - One grid mesh per container: one vertex per sample, plus a 1-vertex **overhang** ring.
-  - The left/top overhang copies the neighbouring container's edge heights, which makes the seam.
-  - The right/bottom overhang is a hidden skirt at 0. Each container renders the seam strip on its own left/top side.
+  - With tile-aligned samples the ring sits on the container boundary, at the same position as the edge samples (#35).
+  - Left/top: the neighbouring container's edge heights. These normally equal ours, so the joining strip has zero size.
+  - Right/bottom: our own edge heights when a neighbour exists (zero-size strip), or 0 at the world border, which drops a skirt down the
+    world's outer edge. Terraform redraws call `UpdateMapOverhang` so the ring follows edge changes.
+  - Fog-of-war meshes use the old uniform spacing (`GenerateTerrainMesh(heights, tileAligned: false)`).
 - **Normals** come from `MeshGenerator.CalculateNormals` (#25), not `RecalculateNormals`:
   - They're computed from the global height map, so neighbouring containers agree at the seam.
   - They're in world proportions (the 10/100 scale matters).
   - They're creased: at the foot or lip of a cliff the flatter side wins, so flat ground doesn't shade like a groove.
+  - Slopes use the real tile-aligned spacing, skipping the neighbouring tile's edge sample that shares a position (#35).
 - Meshes have **tangents** (`RecalculateTangents`), because the shader needs them (below).
 - A terraform at a container edge also redraws the neighbouring containers whose overhang heights, overhang textures or edge normals
   depend on it (`MapContainer.UpdateNeibourOverhangsForCoordinate`).
