@@ -53,10 +53,10 @@ Shader "Custom/TerrainSelectionMobile" {
 		float gridLineWidth;
 
 		// Blend tuning, in layout-tile units (one tile is tileSize height samples, so 0.1 = one sample)
-		static const float blendFalloff = 0.045;    // exponential falloff distance of a neighbour's influence
-		static const float priorityReach = 0.07;     // how far each priority step pushes a texture past its tile edge
+		static const float blendFalloff = 0.07;     // exponential falloff distance of a neighbour's influence (#36: wider cross-fade)
+		static const float priorityReach = 0.0;      // push higher regions past their edge; 0 since #35 keeps slopes inside their own tile
 		static const float minimumWeight = 0.004;    // skip sampling tiles below this (normalized) weight
-		static const float heightSoftness = 0.006;   // half-width of the fade at a height band edge (0.006 = 0.6 world units)
+		static const float heightSoftness = 0.025;   // half-width of the fade at a height band edge (0.025 = 2.5 world units, #36)
 
 		struct Input
 		{

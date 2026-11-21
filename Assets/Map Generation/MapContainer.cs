@@ -610,7 +610,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
     }
 
     // Tile grid lines on the terrain (#34). Alpha is the strength (0 = off); use white (1, 1, 1, a) for light lines. Width in pixels.
-    static readonly Color tileGridLineColor = new Color(0f, 0f, 0f, 0.45f);
+    static readonly Color tileGridLineColor = new Color(0f, 0f, 0f, 0f);   // off (#36); 0.45 alpha gave visible dark lines
     const float tileGridLineWidth = 1.25f;
 
     private float[] isActionAtIndex = new float[10 * 10];

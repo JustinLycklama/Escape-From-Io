@@ -95,20 +95,22 @@ doing something described here, that's a bug. Code is in `Assets/Map Generation/
 - **Blending (#26):** each pixel blends the 3×3 surrounding tiles.
   - The weight is `exp(-(distance to the tile's square − priority × priorityReach) / blendFalloff)`.
   - The blend is continuous across edges and round at corners.
-  - Higher regions reach a little past their edge, so cliff faces get rock rather than the ground's texture.
+  - **Tuning (#36):** `blendFalloff` 0.07 tile gives a soft cross-fade of about 1–2 samples between neighbouring textures. `priorityReach` is 0:
+    before #35 it pushed higher regions past their edge to cover the straddling cliff quad; now slopes sit inside their own tile.
   - Albedo, the selection and action tints, and bump all blend together.
 - **Height bands (#31):** each texture is also faded outside its region's height band (`heightLow`/`heightHigh` per texture index,
   from `TextureGenerator.HeightBandLists`). The band edge between two regions sits 0.01 (1 world unit) above the lower region's plateau.
   **Expected:** water only below the water surface, ground on its plateau and on banks, rock only where a cliff rises above the ground.
   Without this the purely horizontal blend put water up banks and rock out onto flat ground. Flat ground-to-ground edges are unaffected.
-  A tiny weight floor keeps a valid blend when every candidate is out of band (e.g. mid-terraform).
+  A tiny weight floor keeps a valid blend when every candidate is out of band (e.g. mid-terraform). `heightSoftness` 0.025 (2.5 world units)
+  fades ground into rock up a mountain's lower slope, and water into the bank, instead of a hard line (#36).
 - **Projection (#28):** triplanar weights come from the triangle's real facing (`ddx`/`ddy` of world position), not the creased vertex
   normal. Otherwise cliff faces get the top-down projection and the texture stretches.
 - **Bump (#27):** the blended bump normal is world space and is converted to tangent space with a frame passed from `vert`.
   Don't write a world normal to `o.Normal`, and don't read `IN.internalSurfaceTtoW*` in `surf`: it doesn't compile here, and a failed
   compile silently falls back to white `Mobile/Diffuse`. Keep the bump scale at 1. At target ≥ 3.0, `UnpackScaleNormal` applies it, and
   the legacy value of 1000 was only ever ignored.
-- **Tile grid lines (#34):** a thin line on every tile boundary, sized in screen pixels (`fwidth` of the layout coordinate), so each clickable
+- **Tile grid lines (#34, off since #36):** a thin line on every tile boundary, sized in screen pixels (`fwidth` of the layout coordinate), so each clickable
   tile is clear. Faded on steep faces. Colour, strength and width are set in `MapContainer` (`tileGridLineColor`, `tileGridLineWidth`).
   **Expected:** tile edges stay straight. Noisy, wandering transitions were tried and shelved (#32, branch `32-natural-edges`): the water level got
   too variable, and textures and shading didn't line up where edges overlapped. A straight, flat water level plus grid lines reads better.
