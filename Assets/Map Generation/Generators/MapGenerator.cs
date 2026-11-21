@@ -364,7 +364,7 @@ public class MapGenerator : MonoBehaviour {
         GameObject mapOject = new GameObject("Map of " + container.name);
         Map map = mapOject.AddComponent<Map>();
 
-        map.InitMap(noiseSubset.terrainMap, MeshGenerator.GenerateTerrainMesh(noiseSubset.finalNoiseMap));
+        map.InitMap(noiseSubset.terrainMap, MeshGenerator.GenerateTerrainMesh(noiseSubset.finalNoiseMap, true));
         ResetResourcePool();
 
         container.setMap(map);
@@ -416,20 +416,63 @@ public class MapGenerator : MonoBehaviour {
         return finalNoiseMap;
     }
 
-    // Returns the height in MAP COORDINATE position
-    private KeyValuePair<MapContainer, float[,]> cachedMapContainer = new KeyValuePair<MapContainer, float[,]>();
-    public float GetHeightAt(MapCoordinate mapCoordinate) {
-        
-        // We often request heights for the same mapContainer over and over.
-        if (mapCoordinate.mapContainer != cachedMapContainer.Key) {
-            NoiseSubset noiseSubset = GetNoiseSubsetForMap(mapCoordinate.mapContainer);
-            cachedMapContainer = new KeyValuePair<MapContainer, float[,]>(mapCoordinate.mapContainer, noiseSubset.finalNoiseMap);
+    /*
+     * Tile-aligned sample layout (#35)
+     *
+     * Each tile's f samples span the tile edge to edge: sample k of a tile sits at k * f / (f - 1) sample-widths from the
+     * tile's start, so the first and last samples are ON the tile boundaries. Neighbouring tiles' edge samples share a
+     * position, so every slope lies inside one tile (previously samples sat at centres and the joining quad straddled
+     * the boundary). Logic positions (MapCoordinate x/y) stay uniform: tile t spans [t*f, (t+1)*f).
+     */
 
-            ResetResourcePool();
-        }
-
-        return cachedMapContainer.Value[mapCoordinate.xAverageSample, mapCoordinate.yAverageSample];
+    // Floor division that works for negative samples (the overhang at -1 is the previous tile's last sample)
+    private static int FloorDiv(int value, int divisor) {
+        return value >= 0 ? value / divisor : -((-value + divisor - 1) / divisor);
     }
+
+    // Position of a sample along one axis, in sample-widths from the map's origin
+    public static float SamplePosition(int sample, int samplesPerTile) {
+        int tile = FloorDiv(sample, samplesPerTile);
+        int inTile = sample - tile * samplesPerTile;
+        return tile * samplesPerTile + inTile * samplesPerTile / (float)(samplesPerTile - 1);
+    }
+
+    // Continuous sample index (tile * f + fractional in-tile index) for a position; inverse of SamplePosition within a tile
+    private float SampleAtPosition(float position, int samplesPerTile, int totalSamples) {
+        int tiles = totalSamples / samplesPerTile;
+        int tile = Mathf.Clamp(Mathf.FloorToInt(position / samplesPerTile), 0, tiles - 1);
+        float inTile = Mathf.Clamp01((position - tile * samplesPerTile) / samplesPerTile) * (samplesPerTile - 1);
+        return tile * samplesPerTile + inTile;
+    }
+
+    // Height of the terrain surface at a MapCoordinate position (continuous), matching the mesh (#35)
+    public float GetHeightAt(MapCoordinate mapCoordinate) {
+        int f = Script.Get<Constants>().featuresPerLayoutPerAxis;
+        int totalX = finalNoiseMap.GetLength(0);
+        int totalY = finalNoiseMap.GetLength(1);
+
+        float sampleX = SampleAtPosition(mapCoordinate.mapContainer.mapX * mapFullWidth + mapCoordinate.x, f, totalX);
+        float sampleY = SampleAtPosition(mapCoordinate.mapContainer.mapY * mapFullHeight + mapCoordinate.y, f, totalY);
+
+        // Bilinear between the 4 samples around the point, staying inside the tile
+        int x0 = Mathf.FloorToInt(sampleX);
+        int y0 = Mathf.FloorToInt(sampleY);
+        int x1 = Mathf.Min(x0 + 1, (x0 / f) * f + f - 1);
+        int y1 = Mathf.Min(y0 + 1, (y0 / f) * f + f - 1);
+        float tx = sampleX - x0;
+        float ty = sampleY - y0;
+
+        float top = Mathf.Lerp(finalNoiseMap[x0, y0], finalNoiseMap[x1, y0], tx);
+        float bottom = Mathf.Lerp(finalNoiseMap[x0, y1], finalNoiseMap[x1, y1], tx);
+        return Mathf.Lerp(top, bottom, ty);
+    }
+
+    // Height of a sample by global index
+    public float HeightAtSample(int globalX, int globalY) {
+        return finalNoiseMap[globalX, globalY];
+    }
+
+    private KeyValuePair<MapContainer, float[,]> cachedMapContainer = new KeyValuePair<MapContainer, float[,]>();
 
     private void ResetCachedMap() {
         cachedMapContainer = new KeyValuePair<MapContainer, float[,]>();        
@@ -504,10 +547,11 @@ public class MapGenerator : MonoBehaviour {
                 for(int height = 0; height < coordinates.GetLength(1); height++) {
                     MapCoordinate mapCoordinate = coordinates[width, height];
 
-                    terraformTarget.initialHeight[width, height] = GetHeightAt(mapCoordinate);
-
                     int x = startXMapCoordinate + mapCoordinate.xLowSample;
                     int y = startYMapCoordinate + mapCoordinate.yLowSample;
+
+                    // These coordinates are sample indices, so read the sample directly (GetHeightAt takes positions, #35)
+                    terraformTarget.initialHeight[width, height] = finalNoiseMap[x, y];
 
                     float finalValue = MapAtXYWithFeatures(x, y, terrainMap, terraformTarget.terrainTypeTarget, heightAtNewRegion);
 
@@ -557,7 +601,10 @@ public class MapGenerator : MonoBehaviour {
     // neighbour). When a tile changes terrain, its 4 neighbours' facing edges must be re-shaped too, or e.g. mining out a
     // mountain leaves the mountains beside it as sheer walls. Records the edge-band samples whose height changes once
     // the target tile has its new terrain type (#29). Global layout coordinates.
-    const int edgeBand = 3;   // matches dipRadius in MapAtXYWithFeatures
+    const int edgeBand = 3;   // samples from a boundary that edge shaping can change (MapAtXYWithFeatures)
+
+    // Width of an edge slope, in tile units (#35). 0.3 covers samples 0-2 of 10 (positions 0, 1/9, 2/9); keep it <= edgeBand / (f - 1).
+    const float edgeRampWidth = 0.3f;
 
     private void CalculateNeighbourEdgeTargets(TerraformTarget terraformTarget, int tileX, int tileY) {
         int f = Script.Get<Constants>().featuresPerLayoutPerAxis;
@@ -571,9 +618,14 @@ public class MapGenerator : MonoBehaviour {
         TerrainType savedTerrain = terrainMap[tileX, tileY];
         terrainMap[tileX, tileY] = terraformTarget.terrainTypeTarget;
 
-        foreach(Vector2Int direction in new Vector2Int[] { Vector2Int.left, Vector2Int.right, Vector2Int.down, Vector2Int.up }) {
-            int neighbourX = tileX + direction.x;
-            int neighbourY = tileY + direction.y;
+        // All 8 neighbours: edge shaping also looks at diagonal tiles, which shapes corners (#35)
+        for(int directionY = -1; directionY <= 1; directionY++) for(int directionX = -1; directionX <= 1; directionX++) {
+            if(directionX == 0 && directionY == 0) {
+                continue;
+            }
+
+            int neighbourX = tileX + directionX;
+            int neighbourY = tileY + directionY;
 
             if(neighbourX < 0 || neighbourY < 0 || neighbourX >= terrainMap.GetLength(0) || neighbourY >= terrainMap.GetLength(1)) {
                 continue;
@@ -581,14 +633,17 @@ public class MapGenerator : MonoBehaviour {
 
             bool changedTile = false;
 
-            for(int i = 0; i < f; i++) {
-                for(int band = 0; band < edgeBand; band++) {
-                    // Distance `band` in from the edge that faces the terraformed tile
-                    int localX = direction.x == 0 ? i : (direction.x > 0 ? band : f - 1 - band);
-                    int localY = direction.y == 0 ? i : (direction.y > 0 ? band : f - 1 - band);
-
+            for(int localX = 0; localX < f; localX++) {
+                for(int localY = 0; localY < f; localY++) {
                     int x = neighbourX * f + localX;
                     int y = neighbourY * f + localY;
+
+                    // Only samples within edgeBand of the terraformed tile can change
+                    int samplesAwayX = x < tileX * f ? tileX * f - x : (x >= (tileX + 1) * f ? x - (tileX + 1) * f + 1 : 0);
+                    int samplesAwayY = y < tileY * f ? tileY * f - y : (y >= (tileY + 1) * f ? y - (tileY + 1) * f + 1 : 0);
+                    if(samplesAwayX > edgeBand || samplesAwayY > edgeBand) {
+                        continue;
+                    }
 
                     float current = finalNoiseMap[x, y];
                     float target = Mathf.InverseLerp(minMaxOfFinalMap.min, minMaxOfFinalMap.max, MapAtXYWithFeatures(x, y, terrainMap));
@@ -723,7 +778,6 @@ public class MapGenerator : MonoBehaviour {
 
         int featuresPerLayoutPerAxis = constants.featuresPerLayoutPerAxis;
 
-        int dipRadius = 3;
 
         int sampleX = x / featuresPerLayoutPerAxis;
         int sampleY = y / featuresPerLayoutPerAxis;
@@ -737,52 +791,83 @@ public class MapGenerator : MonoBehaviour {
 
         float mapAtXY = SampleAtXY(x, y, thisTerrainType, withAlternateLayoutValue);
 
-        float distanceToEdgeX = x % featuresPerLayoutPerAxis;
-        float distanceToEdgeY = y % featuresPerLayoutPerAxis;
+        // Edge shaping (#35). Where this tile borders a lower region (mountain beside ground, ground beside water) or the
+        // world border, it eases down to that region's plateau, reaching it exactly on the shared boundary. With
+        // tile-aligned samples the boundary samples of both tiles sit at the same position, so the surface meets with no
+        // step and the whole slope belongs to the higher tile. Lower tiles stay flat (water level stays straight).
+        // All 8 neighbours count (Euclidean distance), so corners close cleanly. Stays within edgeBand samples.
+        TerrainManager terrainManager = Script.Get<TerrainManager>();
+        int f = featuresPerLayoutPerAxis;
+        float positionX = (x % f) / (float)(f - 1);   // this sample's position in its tile, 0..1 (tile units)
+        float positionY = (y % f) / (float)(f - 1);
+        int tilesX = usingTerrainMap.GetLength(0);
+        int tilesY = usingTerrainMap.GetLength(1);
+        float ownBase = terrainManager.regionTypeMap[thisTerrainType.regionType].noiseBase;
 
-        for(int i = 0; i < dipRadius; i++) {
+        float shaped = mapAtXY;
 
-            float baseline = Script.Get<TerrainManager>().regionTypeMap[thisTerrainType.regionType].noiseBase * (dipRadius - (i + 1)) / dipRadius;
-
-            // Left
-            if((sampleX == 0) || (sampleX - 1 >= 0 && thisTerrainType.priority > TerrainAtLocation(sampleX - 1, sampleY).priority)) {
-                if(distanceToEdgeX == i) {
-                    mapAtXY = baseline + (mapAtXY * ((i + 1)) / dipRadius);
+        for(int dy = -1; dy <= 1; dy++) {
+            for(int dx = -1; dx <= 1; dx++) {
+                if(dx == 0 && dy == 0) {
                     continue;
                 }
-            }
 
-            // Top
-            if((sampleY == 0) || (sampleY - 1 >= 0 && thisTerrainType.priority > TerrainAtLocation(sampleX, sampleY - 1).priority)) {
-                if(distanceToEdgeY == i) {
-                    mapAtXY = baseline + (mapAtXY * ((i + 1)) / dipRadius);
-                    continue;
-                }
-            }
+                int neighbourX = sampleX + dx;
+                int neighbourY = sampleY + dy;
+                float neighbourLevel;
 
-            // Right
-            if((sampleX + 1 == usingTerrainMap.GetLength(0)) || (sampleX + 1 < usingTerrainMap.GetLength(0) && thisTerrainType.priority > TerrainAtLocation(sampleX + 1, sampleY).priority)) {
-                if((featuresPerLayoutPerAxis - distanceToEdgeX - 1) == i) {
-                    mapAtXY = baseline + (mapAtXY * ((i + 1)) / dipRadius);
-                    continue;
-                }
-            }
+                if(neighbourX < 0 || neighbourY < 0 || neighbourX >= tilesX || neighbourY >= tilesY) {
+                    if(dx != 0 && dy != 0) {
+                        continue;
+                    }
 
-            //// Bottom
-            if((sampleY + 1 == usingTerrainMap.GetLength(1)) || (sampleY + 1 < usingTerrainMap.GetLength(1) && thisTerrainType.priority > TerrainAtLocation(sampleX, sampleY + 1).priority)) {
-                if(featuresPerLayoutPerAxis - distanceToEdgeY - 1 == i) {
-                    mapAtXY = baseline + (mapAtXY * ((i + 1)) / dipRadius);
-                    continue;
+                    neighbourLevel = ownBase;   // world border
+                } else {
+                    TerrainType neighbour = TerrainAtLocation(neighbourX, neighbourY);
+                    if(neighbour.priority >= thisTerrainType.priority) {
+                        continue;
+                    }
+
+                    neighbourLevel = HeightAtRegion(terrainManager.regionTypeMap[neighbour.regionType]);
                 }
+
+                // Distance (tile units) from this sample to the neighbour's square
+                float nearestX = Mathf.Clamp(positionX, dx, dx + 1);
+                float nearestY = Mathf.Clamp(positionY, dy, dy + 1);
+                float distance = Mathf.Sqrt((positionX - nearestX) * (positionX - nearestX) + (positionY - nearestY) * (positionY - nearestY));
+
+                float t = Mathf.Clamp01(distance / edgeRampWidth);
+                t = t * t * (3f - 2f * t);
+
+                shaped = Mathf.Min(shaped, Mathf.Lerp(neighbourLevel, mapAtXY, t));
             }
         }
 
-
-        return mapAtXY;
+        return shaped;
 
     }
 
     // Sampling at an index for CreateMapWithFeatures
+    // Feature noise at a sample, read at the sample's tile-aligned position (#35). Neighbouring tiles' edge samples share a
+    // position, so tiles of the same region get identical heights on their shared edge (no step between two mountains).
+    private float FeatureAtSample(float[,] featureMap, int x, int y) {
+        int f = Script.Get<Constants>().featuresPerLayoutPerAxis;
+        int width = featureMap.GetLength(0);
+        int height = featureMap.GetLength(1);
+
+        float positionX = Mathf.Clamp(SamplePosition(x, f), 0, width - 1);
+        float positionY = Mathf.Clamp(SamplePosition(y, f), 0, height - 1);
+
+        int x0 = Mathf.FloorToInt(positionX);
+        int y0 = Mathf.FloorToInt(positionY);
+        int x1 = Mathf.Min(x0 + 1, width - 1);
+        int y1 = Mathf.Min(y0 + 1, height - 1);
+        float tx = positionX - x0;
+        float ty = positionY - y0;
+
+        return Mathf.Lerp(Mathf.Lerp(featureMap[x0, y0], featureMap[x1, y0], tx), Mathf.Lerp(featureMap[x0, y1], featureMap[x1, y1], tx), ty);
+    }
+
     private float SampleAtXY(int x, int y, TerrainType? withAlternateTerrain = null, float ? withAlternateLayoutValue = null) {
         Constants constants = Script.Get<Constants>();
         int featuresPerLayoutPerAxis = constants.featuresPerLayoutPerAxis;
@@ -806,9 +891,9 @@ public class MapGenerator : MonoBehaviour {
             case RegionType.Type.Water:
                 return sampleValue;
             case RegionType.Type.Land:
-                return (sampleValue) + ((groundFeaturesNoiseMap[x, y] * groundFeaturesImpactOnLayout * 2) - (groundFeaturesImpactOnLayout));
+                return (sampleValue) + ((FeatureAtSample(groundFeaturesNoiseMap, x, y) * groundFeaturesImpactOnLayout * 2) - (groundFeaturesImpactOnLayout));
             case RegionType.Type.Mountain:
-                return sampleValue + (mountainFeaturesNoiseMap[x, y] * mountainFeaturesImpactOnLayout);
+                return sampleValue + (FeatureAtSample(mountainFeaturesNoiseMap, x, y) * mountainFeaturesImpactOnLayout);
         }
 
         return 0;

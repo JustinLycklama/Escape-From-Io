@@ -183,14 +183,17 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         int f = constants.featuresPerLayoutPerAxis;
 
         Vector3[] normals = MeshGenerator.CalculateNormals(map.meshData, Script.Get<MapGenerator>().GetFinalNoiseMap(),
-            mapX * constants.layoutMapWidth * f, mapY * constants.layoutMapHeight * f, transform.lossyScale);
+            mapX * constants.layoutMapWidth * f, mapY * constants.layoutMapHeight * f, transform.lossyScale, f);
 
         meshFilter.sharedMesh = map.meshData.FinalizeMesh(normals);
         meshRenderer.sharedMaterial.mainTexture = map.meshTexture;
     }
 
     public void UpdateMapOverhang() {
-        MeshGenerator.UpdateMeshOverhang(map.meshData, neighbours);
+        Constants constants = Script.Get<Constants>();
+        int f = constants.featuresPerLayoutPerAxis;
+        MeshGenerator.UpdateMeshOverhang(map.meshData, Script.Get<MapGenerator>().GetFinalNoiseMap(),
+            mapX * constants.layoutMapWidth * f, mapY * constants.layoutMapHeight * f);
 
         UpdateMaterialOverhangTextures();
         DrawMesh();
@@ -820,7 +823,7 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
                 StartCoroutine(AnimateIntoFog(fogInfoList, () => {
 
                     // Update our terrain mesh and textures as a second step from first loop                    
-                    DrawMesh();
+                    UpdateMapOverhang();   // redraws; refreshes the overhang ring too (#35)
                     foreach(KeyValuePair<LayoutCoordinate, TerrainType> coordinate in fogInfoList) {
                         map.UpdateTerrainAtLocation(coordinate.Key, coordinate.Value);
                         UpdateNeibourOverhangsForCoordinate(coordinate.Key);

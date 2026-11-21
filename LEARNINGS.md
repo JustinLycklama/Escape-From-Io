@@ -121,3 +121,9 @@ CLAUDE.md, and the system detail is in ARCHITECTURE.md and TERRAIN.md. This file
 - **Seed replay was silently broken** (#33). `MapGenerator` captured `NoiseGenerator.random` in a field initializer, which runs before `Awake`
   calls `ResetRandom` (that replaces the instance). The layout used the old stream, so the logged seed didn't reproduce the map. Watch for this
   pattern with any static that gets replaced rather than reseeded.
+- **Samples at tile centres meant every slope straddled two tiles** (#35). With 10 samples per tile at sample centres, the quad joining the
+  last sample of one tile and the first of the next always crossed the tile boundary. Wherever heights changed, that quad was the cliff, so
+  half of each cliff sat on the neighbouring tile. The #34 grid lines made it obvious, with lines cutting across mountain feet. The fix was to
+  position samples edge to edge (`k × f / (f − 1)`) so tiles share boundary vertices, and to ease slopes *to* the neighbour's level on the
+  boundary. Watch for `MapCoordinate` being used both as a continuous position (`GetHeightAt`, `WorldPosition`) and as a sample index
+  (terraform, overhang): those need different lookups.

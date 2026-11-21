@@ -258,7 +258,7 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
         MeshGenerator.UpdateTerrainMesh(meshData, finalHeightMap, featuresPerLayoutPerAxis, terraformTarget.coordinate);
 
         if (!delayMeshUpdate) {
-            mapContainer.DrawMesh();
+            mapContainer.UpdateMapOverhang();   // redraws; the right/bottom ring copies our own edge (#35)
             mapContainer.UpdateNeibourOverhangsForCoordinate(terraformTarget.coordinate);
             UpdateNeighbourTileMeshes(terraformTarget);
         }
@@ -286,7 +286,7 @@ public class Map : ActionableItem, MasterTaskUpdateDelegate {
             float[,] containerHeights = mapGenerator.FinalHeightSubsetFor(container);
             MeshGenerator.UpdateTerrainMesh(container.map.meshData, containerHeights, featuresPerLayoutPerAxis, local);
 
-            container.DrawMesh();
+            container.UpdateMapOverhang();   // redraws; the right/bottom ring copies the container's own edge (#35)
             container.UpdateNeibourOverhangsForCoordinate(local);
         }
     }
