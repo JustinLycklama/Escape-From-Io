@@ -111,3 +111,13 @@ CLAUDE.md, and the system detail is in ARCHITECTURE.md and TERRAIN.md. This file
   layout, lighting and material change can be reproduced or tweaked by editing constants and re-running.
 - Ask for a mock-up or a choice before big visual work (HUD layout A was picked from mock-ups). Show before/after captures for every
   visual change.
+
+## Later additions
+
+- **Shelved: noisy terrain transitions** (#32, branch `32-natural-edges`). Smoothstep slopes shifted by Perlin noise along tile boundaries
+  (two-sided beaches, rounded pool corners) looked natural in stills, but in play the water level read as too variable, and textures and shading
+  didn't line up where neighbouring tiles' edges overlapped. For a tile-based game, legible tiles beat organic edges: we kept straight transitions
+  and added thin grid lines (#34). If it's revisited, keep the water level flat and only vary the land side.
+- **Seed replay was silently broken** (#33). `MapGenerator` captured `NoiseGenerator.random` in a field initializer, which runs before `Awake`
+  calls `ResetRandom` (that replaces the instance). The layout used the old stream, so the logged seed didn't reproduce the map. Watch for this
+  pattern with any static that gets replaced rather than reseeded.

@@ -48,6 +48,10 @@ Shader "Custom/TerrainSelectionMobile" {
 		// Used as a bool. 0 is skip selection calculations
 		float hasSelection;
 
+		// Tile grid lines (#34), set by MapContainer.SetupMaterialShader. rgb = colour, a = strength (0 = off). Width in screen pixels.
+		float4 gridLineColor;
+		float gridLineWidth;
+
 		// Blend tuning, in layout-tile units (one tile is tileSize height samples, so 0.1 = one sample)
 		static const float blendFalloff = 0.045;    // exponential falloff distance of a neighbour's influence
 		static const float priorityReach = 0.07;     // how far each priority step pushes a texture past its tile edge
@@ -209,6 +213,15 @@ Shader "Custom/TerrainSelectionMobile" {
 
 			usedWeight = max(usedWeight, 1e-5);
 			o.Albedo = albedo / usedWeight;
+
+			// Tile grid lines (#34): a thin line where the layout coordinate crosses a whole number (a tile boundary), sized in
+			// screen pixels so it stays crisp at any zoom. Faded on steep faces, where a boundary would paint a stripe down a cliff.
+			float2 toBoundary = 0.5 - abs(frac(p) - 0.5);                  // tile units to the nearest boundary, per axis
+			float2 pixelsToBoundary = toBoundary / max(fwidth(p), 1e-5);
+			float halfWidth = gridLineWidth * 0.5;
+			float onLine = 1 - smoothstep(halfWidth, halfWidth + 1, min(pixelsToBoundary.x, pixelsToBoundary.y));
+			float flatness = smoothstep(0.35, 0.7, abs(faceNormal.y));
+			o.Albedo = lerp(o.Albedo, gridLineColor.rgb, onLine * flatness * gridLineColor.a);
 			// The bump blend is a world-space normal, but surface shaders expect o.Normal in tangent space (#27).
 			// Writing the world normal directly scrambled the lighting (flat ground lit like a wall, slopes lit from
 			// the wrong side). The terrain mesh has tangents for this (MeshData.FinalizeMesh).

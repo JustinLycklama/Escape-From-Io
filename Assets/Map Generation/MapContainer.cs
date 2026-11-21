@@ -606,6 +606,10 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         mapMaterial.SetFloatArray("layoutTextures", textureIndexList);    
     }
 
+    // Tile grid lines on the terrain (#34). Alpha is the strength (0 = off); use white (1, 1, 1, a) for light lines. Width in pixels.
+    static readonly Color tileGridLineColor = new Color(0f, 0f, 0f, 0.45f);
+    const float tileGridLineWidth = 1.25f;
+
     private float[] isActionAtIndex = new float[10 * 10];
     public void SetupMaterialShader() {
         Constants constants = Script.Get<Constants>();
@@ -640,6 +644,9 @@ public class MapContainer : MonoBehaviour, SelectionManagerDelegate, StatusEffec
         texGen.HeightBandLists(out float[] heightLow, out float[] heightHigh);
         mapMaterial.SetFloatArray("heightLow", heightLow);
         mapMaterial.SetFloatArray("heightHigh", heightHigh);
+
+        mapMaterial.SetColor("gridLineColor", tileGridLineColor);
+        mapMaterial.SetFloat("gridLineWidth", tileGridLineWidth);
         
         for(int x = 0; x < mapWidthWithOverhang; x++) {
             for(int y = 0; y < mapHeightWithOverhang; y++) {

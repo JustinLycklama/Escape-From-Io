@@ -90,6 +90,10 @@ doing something described here, that's a bug. Code is in `Assets/Map Generation/
   Don't write a world normal to `o.Normal`, and don't read `IN.internalSurfaceTtoW*` in `surf`: it doesn't compile here, and a failed
   compile silently falls back to white `Mobile/Diffuse`. Keep the bump scale at 1. At target ≥ 3.0, `UnpackScaleNormal` applies it, and
   the legacy value of 1000 was only ever ignored.
+- **Tile grid lines (#34):** a thin line on every tile boundary, sized in screen pixels (`fwidth` of the layout coordinate), so each clickable
+  tile is clear. Faded on steep faces. Colour, strength and width are set in `MapContainer` (`tileGridLineColor`, `tileGridLineWidth`).
+  **Expected:** tile edges stay straight. Noisy, wandering transitions were tried and shelved (#32, branch `32-natural-edges`): the water level got
+  too variable, and textures and shading didn't line up where edges overlapped. A straight, flat water level plus grid lines reads better.
 - **Lighting:** `Tools/set-game-lighting.cs`: a Realtime warm sun (60°, 0.8), a cool opposing fill light (vertex/SH, 0.45) and Trilight ambient.
 
 ## Tools
